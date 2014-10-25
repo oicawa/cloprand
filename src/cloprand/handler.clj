@@ -39,6 +39,12 @@
        :identifiers clojure.string/lower-case
        :as-arrays? true)))
 
+(defn get_tabcontents
+  "Get selected tab contents by tab ID."
+  [tab_id]
+  (if (= tab_id "management")
+      { :label "管理" }
+      { :label (format "'%s'はまだ用意されていません <(_ _)>", tab_id) }))
 
 (defroutes app-routes
   (POST "/create_table" [table_name]
@@ -49,6 +55,8 @@
     (response {:value table_name}))
   (POST "/get_tables" []
     (response {:value (get_tables)}))
+  (POST "/get_tabcontents" [tab_id]
+    (response (get_tabcontents tab_id)))
   (route/files "/")
   (route/resources "/")
   (route/not-found "Not Found"))
