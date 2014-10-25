@@ -1,0 +1,38 @@
+*{
+  margin:0;
+  padding:0;
+}
+html{
+  height:100%;
+}
+body{
+  height:100%;
+  width:100%;
+  margin:0px auto;
+}
+
+div#tabs{
+  position:absolute;
+  top:5px;
+  left:5px;
+  bottom:5px;
+  right:5px;
+}
+body > #tabs {
+  height: auto;
+}
+
+div#tabs li .ui-icon-close {
+  float: left;
+  margin: 0.4em 0.2em 0 0;
+  cursor: pointer;
+}
+
+div.menu_button {
+  border: 1px solid red;
+  color: blue;
+  height: 100px;
+  width: 100px;
+  padding: 10px;
+  margin: 10px;
+}

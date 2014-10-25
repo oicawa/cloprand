@@ -18,10 +18,9 @@ var cloprand = {
     $("#home").append("<div class='menu_button'>ダミー</div>");
     $("#table_manager_button").click(function() {
       var tabs = cloprand.widgets.tabs('tabs');
-      //if (tabs.exists('table_manager')) {
-      //  tabs.add('table_manager', 'テーブル管理', { contents : 'テーブル管理画面です。' });
-      //}
-      tabs.add('table_manager', 'テーブル管理', { contents : 'テーブル管理画面です。' });
+      if (!tabs.exists('table_manager')) {
+        tabs.add('table_manager', 'テーブル管理', { contents : 'テーブル管理画面です。' });
+       }
       tabs.select('table_manager');
     });
   },
