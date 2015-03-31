@@ -1,0 +1,26 @@
+dl > dt {
+    float:left;
+    width:140px;
+}
+
+dl > dd {
+    padding-bottom:10px;
+    margin-left:140px;
+}
+
+.detail_form > fieldset > p.detail_section {
+    font-size: 20pt;
+    text-decoration: underline;
+}
+
+p.detail_title,
+div.detail_panel > p.title {
+    font-size: 16pt;
+}
+
+#field_detail,
+div.detail_panel {
+    border: 1px solid lightgrey;
+    margin: 10px 0px 0px 0px;
+    padding: 10px;
+}

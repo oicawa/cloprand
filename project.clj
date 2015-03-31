@@ -7,9 +7,11 @@
                  [ring/ring-core "1.2.0"]
                  [ring/ring-json "0.2.0"]
                  [com.h2database/h2 "1.4.180"]]
+  
   :plugins [[lein-ring "0.8.11"]]
-  :ring {:handler cloprand.handler/app}
+  :ring {:handler cloprand.handler/app :main cloprand.handler}
   :profiles
-  {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
+  {:uberjar {:aot :all}
+   :dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring-mock "0.1.5"]]}}
   :web-content "public")

@@ -1,0 +1,24 @@
+table.list > thead > tr > th {
+    border-right: 1px solid lightgrey;
+    border-bottom: 1px solid lightgrey;
+}
+table.list > thead > tr > th:last-child {
+    border-right: 0px solid lightgrey;
+    border-bottom: 1px solid lightgrey;
+}
+
+table.list > tbody > tr > td {
+    border-right: 1px solid lightgrey;
+    border-bottom: 1px solid lightgrey;
+}
+table.list > tbody > tr > td:last-child {
+    border-right: 0px solid lightgrey;
+    border-bottom: 1px solid lightgrey;
+}
+table.list > tbody > tr:hover {
+    background-color: lightgreen;
+    cursor: pointer;
+}
+table.list > tbody > tr.selected {
+    background-color: lightblue;
+}

@@ -1,0 +1,12 @@
+{
+  "uuid": "0000-0000-0000-0002",
+  "name": "class",
+  "label": "Class",
+  "description": "Class Definition",
+  "object_fields": [
+    { "name": "name", "label": "Name", "datatype": "Text" },
+    { "name": "label", "label": "Label", "datatype": "Text" },
+    { "name": "description", "label": "Description", "datatype": "TextLines" },
+    { "name": "object_fields", "label": "Object Fields", "datatype": "0000-0000-0000-0001", "list": true }
+  ]
+}

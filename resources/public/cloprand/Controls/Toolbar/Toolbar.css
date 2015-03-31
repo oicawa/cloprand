@@ -1,0 +1,6 @@
+ul.toolbar { margin: 0; padding: 0; }
+ul.toolbar > li { margin: 2px; position: relative; padding: 4px 0; cursor: pointer; float: left; list-style: none; }
+ul.toolbar > li > span { height: 13pt; }
+ul.toolbar > li > span.caption { font-size: 9pt; font-weight: normal; }
+ul.toolbar > li > span.space { padding-right: 8px; }
+ul.toolbar > li > span.ui-icon { float: left; margin: 0 4px; }
