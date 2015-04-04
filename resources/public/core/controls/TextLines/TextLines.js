@@ -1,7 +1,7 @@
 define(function (require) { 
   require("jquery");
   require("jsrender");
-  var Utils = require("Utils");
+  var Utils = require("core/Utils");
   return function () {
   	var _root = null;
     var _template = null;
@@ -17,8 +17,8 @@ define(function (require) {
       _root = $(selector);
 
       // Load template data & Create form tags
-      Utils.add_css("Controls/TextLines/TextLines.css");
-      Utils.get_data("Controls/TextLines/TextLines.html", function(response) { _template = $.templates(response); })
+      Utils.add_css("/core/controls/TextLines/TextLines.css");
+      Utils.get_data("/core/controls/TextLines/TextLines.html", function(response) { _template = $.templates(response); })
       .then(function() {
         create_control(field);
       });

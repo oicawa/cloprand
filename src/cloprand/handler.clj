@@ -4,7 +4,7 @@
   (:require [compojure.core :refer :all]
             [compojure.handler :as handler]
             [compojure.route :as route]
-            [ring.util.response :refer [resource-response response]]
+            [ring.util.response :as response]
             [ring.middleware.json :as middleware])
   (:import (java.util Properties)
            (java.io File)))
@@ -25,6 +25,15 @@
 
 (defroutes app-routes
   (GET "/get_data" [type ids] (response (get-files type ids)))
+  ;(GET "/:system-name/:application-name/index.html" [system-name application-name]
+  (GET "/:system-name/:application-name/index.html" [system-name application-name]
+    (println (format "System Name     : %s\nApplication Name: %s\n" system-name application-name))
+    (response/resource-response "index.html" {:root "public/core"}))
+  ;(GET "/get_config/:system-name/:application-name" [system-name application-name]
+  ;  (let [base-path   (format"./resources/public/systems/%s" system-name)
+  ;        system-path (. (File. base-path getAbsolutePath))
+  ;        system-config 
+  ;  (response/resource-response "index.html" {:root "public/cloprand"}))
   ;(POST "/create_table" [table_name]
   ;  (create_table table_name)
   ;  (response {:value table_name}))

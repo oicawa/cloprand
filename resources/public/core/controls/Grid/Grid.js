@@ -1,8 +1,8 @@
 define(function (require) {
   require("jquery");
   require("jsrender");
-  var Utils = require("Utils");
-  var Toolbar = require("Controls/Toolbar/Toolbar");
+  var Utils = require("core/Utils");
+  var Toolbar = require("core/controls/Toolbar/Toolbar");
   return function () {
     var _root = null;
     var _assist = null;
@@ -39,7 +39,7 @@ define(function (require) {
     }
 
     this.init = function(selector, field, assist) {
-      Utils.add_css("Controls/Grid/Grid.css");
+      Utils.add_css("/core/controls/Grid/Grid.css");
       
       // Set member fields
       _root = $(selector);
@@ -48,7 +48,7 @@ define(function (require) {
 
       // Load template data & Create form tags
       $.when(
-        Utils.get_data("Controls/Grid/Grid.html", function(response) { _template = $.templates(response); }),
+        Utils.get_data("/core/controls/Grid/Grid.html", function(response) { _template = $.templates(response); }),
         Utils.get_data(_assist.data, function(response) { _data = response; })
       ).always(function() {
         create_control(selector, field);

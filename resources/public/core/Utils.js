@@ -35,6 +35,16 @@ define([
         return;
       }
       head.append("<link rel='stylesheet' type='text/css' href='" + path + "'></link>");
+    },
+    get_system_name : function() {
+      var path = location.pathname;
+      var fields = path.split("/");
+      return fields.length <= 1 ? null : fields[1];
+    },
+    get_application_name : function() {
+      var path = location.pathname;
+      var fields = path.split("/");
+      return fields.length <= 2 ? null : fields[2];
     }
   };
 });

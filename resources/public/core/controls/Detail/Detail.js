@@ -1,8 +1,8 @@
 define(function (require) { 
   require("jquery");
   require("jsrender");
-  var Utils = require("Utils");
-  var Toolbar = require("Controls/Toolbar/Toolbar");
+  var Utils = require("core/Utils");
+  var Toolbar = require("core/controls/Toolbar/Toolbar");
   return function () {
   	var _root = null;
     var _type = null;
@@ -51,7 +51,7 @@ define(function (require) {
         each_field_funcs[i] = function(field) {
           var assist = get_control_assist(field);
           var control_name = get_control_name(field, assist);
-          require(["Controls/" + control_name + "/" + control_name], function(Control) {
+          require(["core/controls/" + control_name + "/" + control_name], function(Control) {
             var control = new Control();
             control.init(selector + " > dl > dd > div." + field.name, field, assist);
           });
@@ -62,11 +62,7 @@ define(function (require) {
 
     function create_toolbar(selector) {
       _toolbar = new Toolbar();
-      _toolbar.init(selector + " > div.detail-operations", [
-        { "name": "edit", "caption": "Edit", "description": "Edit this object.", "func": function() { alert("edit"); } },
-        { "name": "save", "caption": "Save", "description": "Save current editting.", "func": function() { alert("save"); } },
-        { "name": "cancel", "caption": "Cancel", "description": "Cancel current editting.", "func": function() { alert("cancel"); } },
-      ]);
+      _toolbar.init(selector + " > div.detail-operations", _assist.toolbar);
     }
 
     function bind_buttons() {
@@ -107,9 +103,9 @@ define(function (require) {
       _assist = typeof assist == "undefined" ? null : assist;
 
       // Load template data & Create form tags
-      Utils.add_css("Controls/Detail/Detail.css");
+      Utils.add_css("/core/controls/Detail/Detail.css");
       $.when(
-      	Utils.get_data("Controls/Detail/Detail.html", function(response) { _root_template = $.templates(response); })
+      	Utils.get_data("/core/controls/Detail/Detail.html", function(response) { _root_template = $.templates(response); })
       ).always(function() {
       	create_toolbar(selector);
       	create_form(selector);
