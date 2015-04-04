@@ -24,7 +24,7 @@
     (println absolute_path)))
 
 (defroutes app-routes
-  (GET "/get_data" [type ids] (response (get-files type ids)))
+  (GET "/get_data" [type ids] (response/response (get-files type ids)))
   ;(GET "/:system-name/:application-name/index.html" [system-name application-name]
   (GET "/:system-name/:application-name/index.html" [system-name application-name]
     (println (format "System Name     : %s\nApplication Name: %s\n" system-name application-name))
