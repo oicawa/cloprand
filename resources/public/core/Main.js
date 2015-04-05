@@ -54,7 +54,6 @@ define(function (require) {
           js_require_path += system_name + "/";
         }
         js_require_path += "operations";
-        alert(js_require_path);
         require([js_require_path], function(operations) {
           operations["init"]();
         });

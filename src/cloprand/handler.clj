@@ -32,30 +32,39 @@
               system_path
               (format "%s/applications/%s" system_path system_name))))))
 
+(defn response-with-content-type
+  [resp content-type]
+  (-> resp
+      (response/header "Contents-Type" content-type)))
+  
+(defn get-file
+  [system-name application-name file-name content-type]
+  (let [path (get_target_path system-name application-name)
+        res  (response/response (slurp (str path "/" file-name)))]
+    (response-with-content-type res content-type)
+    ;(-> (response/response (slurp (str path "/" file-name)))
+    ;    (response/header "Contents-Type" content-type))
+    ))
+  
 (defroutes app-routes
   (GET "/" []
     (response/redirect "/index.html"))
   (GET "/index.html" []
     (response/resource-response "index.html" {:root "public/core"}))
   (GET "/:js-name.js" [js-name]
-    (let [path (get_target_path "" "")]
-      (-> (response/response (slurp (str path "/" js-name ".js")))
-          (response/header "Contents-Type" "text/javascript; charset=utf-8"))))
+    (get-file "" "" (format "%s.js" js-name) "text/javascript; charset=utf-8"))
   (GET "/api/template" [system_name application_name]
-    ;(println (format "[WebAPI 'template' called] System Name: '%s', Application Name: '%s'" system_name application_name))
-    ;(response/resource-response "template.html" {:root "public/core/site"}))
-    (let [path (get_target_path system_name application_name)]
-      (-> (response/response (slurp (format "%s/%s" path "template.html")))
-          (response/header "Contents-Type" "text/html; charset=utf-8"))))
+    (get-file system_name application_name "template.html" "text/html; charset=utf-8"))
   (GET "/api/config" [system_name application_name]
-    (let [path (get_target_path system_name application_name)]
-      (response/response (slurp (format "%s/%s" path "config.json")))))
+    (get-file system_name application_name "config.json" "text/json; charset=utf-8"))
   (GET "/api/systems" []
     (let [path        (get_target_path "" "")
           systems-dir (File. path)
           files       (. systems-dir listFiles)
-          system-dirs (filter #(. %1 isDirectory) files)]
-      (response/response (slurp (format "%s/%s" path "config.json")))))
+          system-dirs (filter #(. %1 isDirectory) files)
+          systems     (map #(. %1 getName) system-dirs)
+          json-str    (json/write-str systems)]
+      (response-with-content-type (response/response json-str) "text/json; charset=utf-8")))
   ;(GET "/api/get_data" [type ids]
   ;  (response/response (get-files type ids)))
   (GET "/:system-name" [system-name]
