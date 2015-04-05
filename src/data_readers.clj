@@ -1,0 +1,3 @@
+{
+  ?= clominal.debug/print
+ }

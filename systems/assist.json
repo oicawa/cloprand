@@ -1,0 +1,17 @@
+{
+  "applications": {
+    "control": "Grid",
+    "settings": {
+      "toolbar": [
+        { "name": "add",    "caption": "Add",    "description": "Add new class", "func": "function() { alert('[Add] assigned by assist_class.json'); }" },
+        { "name": "delete", "caption": "Delete", "description": "Delete new class", "func": "function() { alert('[Delete] assigned by assist_class.json'); }" }
+      ],
+      "columns": [
+        {"name":"name", "label": "Name", "renderer": null},
+        {"name":"label", "label": "Label", "renderer": null},
+        {"name":"description", "label": "Description", "renderer": null}
+      ]
+    },
+    "data": "def_class.json"
+  }
+}

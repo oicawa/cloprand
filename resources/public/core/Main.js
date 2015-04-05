@@ -19,36 +19,43 @@ define(function (require) {
     var _def_field = null;
     var _def_class = null;
 
-    function show_detail(is_object) {
-      $("#object_detail").css("display", is_object ? "block" : "none");
-      $("#class_detail").css("display", is_object ? "none" : "block");
-    }
+    //function show_detail(is_object) {
+    //  $("#object_detail").css("display", is_object ? "block" : "none");
+    //  $("#class_detail").css("display", is_object ? "none" : "block");
+    //}
 
-    function show_field_editor(visible) {
-      var editor = $("#field_editor");
-      editor.css("display", visible ? "block" : "none");
-      editor.find("textarea, :text, select").val("").end().find(":checked").prop("checked", false);
-      $("#field_description").val("Object UUID. This is generated automaticaly.");
-    }
+    //function show_field_editor(visible) {
+    //  var editor = $("#field_editor");
+    //  editor.css("display", visible ? "block" : "none");
+    //  editor.find("textarea, :text, select").val("").end().find(":checked").prop("checked", false);
+    //  $("#field_description").val("Object UUID. This is generated automaticaly.");
+    //}
 
-    function refresh_fields_table() {
-    	
-    }
+    //function refresh_fields_table() {
+    //	
+    //}
 
     this.init = function() {
       var system_name = Utils.get_system_name();
+      system_name = system_name ? system_name : "";
       var template = null;
       var config = null;
-      var buf = [];
-      buf.push("systems", system_name);
-      var system_path = buf.join("/");
       $.when(
-        Utils.get_data("/" + system_path + "/template.html", function (data) { template = $.templates(data); }),
-        Utils.get_data("/" + system_path + "/config.json", function (data) { config = data; })
+        //Utils.get_data("/" + system_path + "/template.html", function (data) { template = $.templates(data); }),
+        //Utils.get_data("/" + system_path + "/config.json", function (data) { config = data; })
+        Utils.get_template(system_name, "", function (data) { template = $.templates(data); }),
+        Utils.get_json("config", system_name, "", function (data) { config = data; })
       ).always(function() {
         var root_html = template.render(config);
         $("body").append(root_html);
-        require([system_path + "/operations"], function(operations) {
+        
+        var js_require_path = "";
+        if (0 < system_name.length) {
+          js_require_path += system_name + "/";
+        }
+        js_require_path += "operations";
+        alert(js_require_path);
+        require([js_require_path], function(operations) {
           operations["init"]();
         });
       });
