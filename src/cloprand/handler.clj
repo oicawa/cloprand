@@ -4,6 +4,7 @@
   (:require [compojure.core :refer :all]
             [compojure.handler :as handler]
             [compojure.route :as route]
+            ;[ring.adapter.jetty :as jetty]
             [ring.util.response :as response]
             [ring.middleware.json :as middleware]
             [clojure.data.json :as json])
@@ -105,6 +106,8 @@
 ;      (middleware/wrap-json-response)))
 
 (defn -main []
-  (let [port (Integer/parseInt (get (System/getenv) "PORT" "8080"))]
+  (let [port (Integer/parseInt (get (System/getenv) "PORT" "3000"))]
+    (println "Start jetty...")
+    ;(jetty/run-jetty app-routes {:port port})))
     (run-jetty app-routes {:port port})))
 
