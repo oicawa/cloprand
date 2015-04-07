@@ -30,8 +30,8 @@ define([
     return dfd.promise();
   }
   return {
-    get_template: function(system_name, application_name, func_success, func_error) {
-      var url = "/api/template?system_name=" + system_name + "&application_name=" + application_name;
+    get_template: function(system_name, application_name, template_name, func_success, func_error) {
+      var url = "/api/template?system_name=" + system_name + "&application_name=" + application_name + "&template_name=" + template_name;
       return get_function(url, "html", func_success, func_error);
     },
     get_json: function(api_name, system_name, application_name, func_success, func_error) {

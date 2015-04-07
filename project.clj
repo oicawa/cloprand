@@ -10,7 +10,9 @@
                  [com.h2database/h2 "1.4.180"]
                  [org.clojure/data.json "0.2.3"]]
   :plugins [[lein-ring "0.8.11"]]
-  :ring {:handler cloprand.handler/app :main cloprand.handler}
+  :ring {:handler cloprand.handler/app
+         :main cloprand.handler
+         :init cloprand.handler/init}
   :profiles
   {:uberjar {:aot :all}
    :dev {:dependencies [[javax.servlet/servlet-api "2.5"]

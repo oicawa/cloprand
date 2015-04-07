@@ -1,37 +1,70 @@
 (ns cloprand.handler
   (:gen-class)
   (:use ring.adapter.jetty)
-  (:require [compojure.core :refer :all]
+  (:require [clojure.java.io :as io]
+            [compojure.core :refer :all]
             [compojure.handler :as handler]
             [compojure.route :as route]
             ;[ring.adapter.jetty :as jetty]
             [ring.util.response :as response]
             [ring.middleware.json :as middleware]
-            [clojure.data.json :as json])
+            [clojure.data.json :as json]
+            [clojure.string :as stri])
   (:import (java.util Properties)
-           (java.io File)
-           (java.nio.file Paths Path)))
+           (java.io File InputStream)
+           (java.nio.file Paths Path Files)))
 
-(defn get-base-path
+(defn get-systems-path
   []
-  (let [absolute_path (. (File. "") getAbsolutePath)]
-    absolute_path))
+  (let [systems-dir   (File. "systems")
+        absolute-path (. systems-dir getAbsolutePath)]
+    absolute-path))
+
+(defn get-resource
+  [relative-path]
+  (if-let [resource (io/resource relative-path)]
+      (if (= "file" (. resource getProtocol))
+          (let [file (io/as-file resource)]
+            (if (not (. file isDirectory))
+                file))
+          (io/input-stream resource))))
+
+(defn ensure-systems-dir
+  []
+  (let [files       ["config.json" "template.html" "application.html" "operations.js" "assist.json" "style.css"]
+        src-path    "public/default/systems"
+        dst-path    (get-systems-path)
+        systems-dir (File. dst-path)]
+    (if (not (. systems-dir exists))
+        (. systems-dir mkdirs))
+    (doseq [file files]
+      (let [src-file (get-resource (str src-path "/" file))
+            dst-file (File. (str dst-path "/" file))]
+        (if (not (. dst-file exists))
+            (io/copy src-file dst-file))))))
+
+(defn init
+  []
+  (println "init method called.")
+  (ensure-systems-dir)
+  
+  )
 
 (defn system-exists?
   [system-name]
-  (let [system-path (format "%s/systems/%s" (get-base-path) system-name)
+  (let [system-path (format "%s/%s" (get-systems-path) system-name)
         system-dir  (File. system-path)]
     (and (. system-dir exists) (. system-dir isDirectory))))
 
-(defn get_target_path
-  [system_name application_name]
-  (let [systems-path (format "%s/systems" (get-base-path))]
-    (if (empty? system_name)
+(defn get-target-path
+  [system-name application-name]
+  (let [systems-path (get-systems-path)]
+    (if (empty? system-name)
         systems-path
-        (let [system_path (format "%s/%s" systems-path system_name)]
-          (if (empty? application_name)
-              system_path
-              (format "%s/applications/%s" system_path system_name))))))
+        (let [system-path (format "%s/%s" systems-path system-name)]
+          (if (empty? application-name)
+              system-path
+              (format "%s/applications/%s" system-path system-name))))))
 
 (defn response-with-content-type
   [resp content-type]
@@ -40,26 +73,26 @@
   
 (defn get-file
   [system-name application-name file-name content-type]
-  (let [path (get_target_path system-name application-name)
+  (let [path (get-target-path system-name application-name)
         res  (response/response (slurp (str path "/" file-name)))]
-    (response-with-content-type res content-type)
-    ;(-> (response/response (slurp (str path "/" file-name)))
-    ;    (response/header "Contents-Type" content-type))
-    ))
+    (response-with-content-type res content-type)))
   
 (defroutes app-routes
   (GET "/" []
     (response/redirect "/index.html"))
   (GET "/index.html" []
     (response/resource-response "index.html" {:root "public/core"}))
+  (GET "/:css-name.css" [css-name]
+    (get-file "" "" (format "%s.css" css-name) "text/css; charset=utf-8"))
   (GET "/:js-name.js" [js-name]
     (get-file "" "" (format "%s.js" js-name) "text/javascript; charset=utf-8"))
-  (GET "/api/template" [system_name application_name]
-    (get-file system_name application_name "template.html" "text/html; charset=utf-8"))
+  (GET "/api/template" [system_name application_name template_name]
+    (println "template_name:" template_name)
+    (get-file system_name application_name (str template_name ".html") "text/html; charset=utf-8"))
   (GET "/api/config" [system_name application_name]
     (get-file system_name application_name "config.json" "text/json; charset=utf-8"))
   (GET "/api/systems" []
-    (let [path        (get_target_path "" "")
+    (let [path        (get-target-path "" "")
           systems-dir (File. path)
           files       (. systems-dir listFiles)
           system-dirs (filter #(. %1 isDirectory) files)
@@ -107,7 +140,7 @@
 
 (defn -main []
   (let [port (Integer/parseInt (get (System/getenv) "PORT" "3000"))]
-    (println "Start jetty...")
-    ;(jetty/run-jetty app-routes {:port port})))
+    ;(println "Start jetty...")
+    (init)
     (run-jetty app-routes {:port port})))
 

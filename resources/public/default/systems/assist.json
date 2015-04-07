@@ -12,6 +12,7 @@
         {"name":"description", "label": "Description", "renderer": null}
       ]
     },
+    "sample": "save as check??"
     "data": "def_class.json"
   }
 }
