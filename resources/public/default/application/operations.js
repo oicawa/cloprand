@@ -23,9 +23,9 @@ define(function (require) {
       var def_class = null;
       var assist_class = null;
       $.when(
-        Utils.get_data("/core/classes/Class/class_Class.json", function (data) { def_class = data; }),
-        Utils.get_data("/core/classes/Class/assist_Class.json", function (data) { assist_class = data; }),
-        Utils.get_data("/core/classes/Field/class_Field.json", function (data) { def_field = data; })
+        Utils.get_file("", "", "/core/classes/Class/class_Class.json", "json", function (data) { def_class = data; }),
+        Utils.get_file("", "", "/core/classes/Class/assist_Class.json", "json", function (data) { assist_class = data; }),
+        Utils.get_file("", "", "/core/classes/Field/class_Field.json", "json", function (data) { def_field = data; })
       ).always(function() {
         var detail = new Detail();
         detail.init("#" + id + " > div.tab-contents-panel > div.object_detail", def_class, assist_class);

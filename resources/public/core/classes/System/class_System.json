@@ -1,0 +1,13 @@
+{
+  "uuid": "0000-0000-0000-0002",
+  "name": "system",
+  "label": "System",
+  "description": "System Definition",
+  "object_fields": [
+    { "name": "name", "label": "Name", "datatype": "Text" },
+    { "name": "label", "label": "Label", "datatype": "Text" },
+    { "name": "description", "label": "Description", "datatype": "TextLines" },
+    { "name": "applications", "label": "Applications", "datatype": "0000-0000-0000-0004", "list": true },
+    { "name": "storages", "label": "Storages", "datatype": "0000-0000-0000-0005", "list": true }
+  ]
+}

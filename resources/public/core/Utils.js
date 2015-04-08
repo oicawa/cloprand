@@ -1,6 +1,19 @@
 define([
   'jquery'
 ], function (_) {
+  function get_target_path(system_name, application_name, file_name) {
+    var buf = [];
+    if (system_name && 0 < system_name.length) {
+      buf.push(system_name);
+    }
+    if (application_name && 0 < application_name.length) {
+      buf.push(application_name);
+    }
+    if (file_name && 0 < file_name.length) {
+      buf.push(file_name);
+    }
+    return buf.join("/");
+  }
   function get_function(url, dataType, func_success, func_error) {
     var dfd = new $.Deferred;
     $.ajax({
@@ -30,38 +43,17 @@ define([
     return dfd.promise();
   }
   return {
-    get_template: function(system_name, application_name, template_name, func_success, func_error) {
-      var url = "/api/template?system_name=" + system_name + "&application_name=" + application_name + "&template_name=" + template_name;
+    get_file: function(system_name, application_name, file_name, data_type, func_success, func_error) {
+      var url = get_target_path(system_name, application_name, file_name);
+      return get_function(url, data_type, func_success, func_error);
+    },
+    get_control_template: function(control_name, func_success, func_error) {
+      var url = "/core/controls/" + control_name + "/" + control_name + ".html";
       return get_function(url, "html", func_success, func_error);
     },
-    get_json: function(api_name, system_name, application_name, func_success, func_error) {
-      var url = "/api/" + api_name + "?system_name=" + system_name + "&application_name=" + application_name;
+    get_data: function(system_name, application_name, api_name, func_success, func_error) {
+      var url = "/api/" + get_target_path(system_name, application_name, api_name);
       return get_function(url, "json", func_success, func_error);
-    },
-    get_data: function(url, func_success, func_error) {
-      var dfd = new $.Deferred;
-      $.ajax({
-        url: url,
-        cache: false,
-        success: function (response, status) {
-          if (typeof func_success == "function") {
-            func_success(response);
-            dfd.resolve();
-          } else {
-            alert("The success function is not assigned.\n(" + url + ")");
-            dfd.reject();
-          }
-        },
-        error: function (response, status) {
-          if (typeof func_error == "function") {
-            func_error(response, status);
-          } else {
-            alert("The error function is not assigned.\n(" + url + ")");
-          }
-          dfd.reject();
-        }
-      });
-      return dfd.promise();
     },
     add_css: function(path) {
       var head = $("head");
@@ -70,7 +62,7 @@ define([
         //console.log("[" +path + "]: already included (count=" + css.length + ")");
         return;
       }
-      head.append("<link rel='stylesheet' type='text/css' href='" + path + "'></link>");
+      head.append("<link rel='stylesheet' type='text/css' href='" + path + "?_=" + (new Date()).getTime() + "'></link>");
     },
     get_system_name : function() {
       var path = location.pathname;

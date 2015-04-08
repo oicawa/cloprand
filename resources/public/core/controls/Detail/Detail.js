@@ -105,7 +105,7 @@ define(function (require) {
       // Load template data & Create form tags
       Utils.add_css("/core/controls/Detail/Detail.css");
       $.when(
-      	Utils.get_data("/core/controls/Detail/Detail.html", function(response) { _root_template = $.templates(response); })
+      	Utils.get_control_template("Detail", function(response) { _root_template = $.templates(response); })
       ).always(function() {
       	create_toolbar(selector);
       	create_form(selector);

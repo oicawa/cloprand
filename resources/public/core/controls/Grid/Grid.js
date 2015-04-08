@@ -48,8 +48,8 @@ define(function (require) {
 
       // Load template data & Create form tags
       $.when(
-        Utils.get_data("/core/controls/Grid/Grid.html", function(response) { _template = $.templates(response); }),
-        Utils.get_data(_assist.data, function(response) { _data = response; })
+        Utils.get_control_template("Grid", function(response) { _template = $.templates(response); }),
+        Utils.get_file("", "", _assist.data, "json", function(response) { _data = response; })
       ).always(function() {
         create_control(selector, field);
       });
