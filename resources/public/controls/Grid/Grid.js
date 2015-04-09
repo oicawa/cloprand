@@ -2,7 +2,7 @@ define(function (require) {
   require("jquery");
   require("jsrender");
   var Utils = require("core/Utils");
-  var Toolbar = require("core/controls/Toolbar/Toolbar");
+  var Toolbar = require("controls/Toolbar/Toolbar");
   return function () {
     var _root = null;
     var _assist = null;
@@ -39,7 +39,7 @@ define(function (require) {
     }
 
     this.init = function(selector, field, assist) {
-      Utils.add_css("/core/controls/Grid/Grid.css");
+      Utils.add_css("/controls/Grid/Grid.css");
       
       // Set member fields
       _root = $(selector);

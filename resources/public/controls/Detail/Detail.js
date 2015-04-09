@@ -2,7 +2,7 @@ define(function (require) {
   require("jquery");
   require("jsrender");
   var Utils = require("core/Utils");
-  var Toolbar = require("core/controls/Toolbar/Toolbar");
+  var Toolbar = require("controls/Toolbar/Toolbar");
   return function () {
   	var _root = null;
     var _type = null;
@@ -51,7 +51,7 @@ define(function (require) {
         each_field_funcs[i] = function(field) {
           var assist = get_control_assist(field);
           var control_name = get_control_name(field, assist);
-          require(["core/controls/" + control_name + "/" + control_name], function(Control) {
+          require(["controls/" + control_name + "/" + control_name], function(Control) {
             var control = new Control();
             control.init(selector + " > dl > dd > div." + field.name, field, assist);
           });
@@ -103,7 +103,7 @@ define(function (require) {
       _assist = typeof assist == "undefined" ? null : assist;
 
       // Load template data & Create form tags
-      Utils.add_css("/core/controls/Detail/Detail.css");
+      Utils.add_css("/controls/Detail/Detail.css");
       $.when(
       	Utils.get_control_template("Detail", function(response) { _root_template = $.templates(response); })
       ).always(function() {

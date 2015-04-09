@@ -5,9 +5,9 @@ define(function (require) {
   require("jquery_splitter");
   require("jsrender");
   var Utils = require("core/Utils");
-  var Toolbar = require("core/controls/Toolbar/Toolbar");
-  var Grid = require("core/controls/Grid/Grid");
-  var Detail = require("core/controls/Detail/Detail");
+  var Toolbar = require("controls/Toolbar/Toolbar");
+  var Grid = require("controls/Grid/Grid");
+  var Detail = require("controls/Detail/Detail");
   return function () {
     //var _baseUrl = Utils.getBaseUrl();
     var _tabs = null;

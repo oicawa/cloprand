@@ -49,7 +49,7 @@ define(function (require) {
       }
 
       // Load template data & Create form tags
-      Utils.add_css("/core/controls/Toolbar/Toolbar.css");
+      Utils.add_css("/controls/Toolbar/Toolbar.css");
       $.when(
       	Utils.get_control_template("Toolbar", function(response) { _template = $.templates(response); })
       ).always(function() {

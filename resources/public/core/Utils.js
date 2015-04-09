@@ -48,7 +48,7 @@ define([
       return get_function(url, data_type, func_success, func_error);
     },
     get_control_template: function(control_name, func_success, func_error) {
-      var url = "/core/controls/" + control_name + "/" + control_name + ".html";
+      var url = "/controls/" + control_name + "/" + control_name + ".html";
       return get_function(url, "html", func_success, func_error);
     },
     get_data: function(system_name, application_name, api_name, func_success, func_error) {
@@ -62,7 +62,8 @@ define([
         //console.log("[" +path + "]: already included (count=" + css.length + ")");
         return;
       }
-      head.append("<link rel='stylesheet' type='text/css' href='" + path + "?_=" + (new Date()).getTime() + "'></link>");
+      //head.append("<link rel='stylesheet' type='text/css' href='" + path + "?_=" + (new Date()).getTime() + "'></link>");
+      head.append("<link rel='stylesheet' type='text/css' href='" + path + "'></link>");
     },
     get_system_name : function() {
       var path = location.pathname;

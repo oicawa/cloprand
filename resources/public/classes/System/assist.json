@@ -1,6 +1,6 @@
 {
   "toolbar": {
-    "operations" : "core/classes/Class/operations",
+    "operations" : "classes/Class/operations",
     "items" : [
       { "name": "add",    "caption": "Add",    "description": "Add new class", "operation": "add_new_class" },
       { "name": "delete", "caption": "Delete", "description": "Delete new class", "operation": "delete_class" }
@@ -10,7 +10,7 @@
     "control": "Grid",
     "settings": {
       "toolbar": {
-        "operations" : "core/classes/Field/operations",
+        "operations" : "classes/Field/operations",
         "items" : [
           { "name": "add",    "caption": "Add",    "description": "Add new application", "operation": "add_new_field" },
           { "name": "delete", "caption": "Delete", "description": "Delete application", "operation": "delete_field" }
@@ -28,7 +28,7 @@
     "control": "Grid",
     "settings": {
       "toolbar": {
-        "operations" : "core/classes/Field/operations",
+        "operations" : "classes/Field/operations",
         "items" : [
           { "name": "add",    "caption": "Add",    "description": "Add new application", "operation": "add_new_field" },
           { "name": "delete", "caption": "Delete", "description": "Delete application", "operation": "delete_field" }

@@ -3,8 +3,8 @@ define(function (require) {
   require("jquery_splitter");
   require("jsrender");
   var Utils = require("core/Utils");
-  var Toolbar = require("core/controls/Toolbar/Toolbar");
-  var Detail = require("core/controls/Detail/Detail");
+  var Toolbar = require("controls/Toolbar/Toolbar");
+  var Detail = require("controls/Detail/Detail");
   return {
   	"add_new_system" : function () {
       var tabTemplate = "<li class='tab-label'><a href='#{href}'>#{label}</a><span class='ui-icon ui-icon-close'>Remove Tab</span></li>"
@@ -20,9 +20,9 @@ define(function (require) {
       var def_class = null;
       var assist_class = null;
       $.when(
-        Utils.get_file("", "", "/core/classes/System/class_System.json", "json", function (data) { def_class = data; }),
-        Utils.get_file("", "", "/core/classes/System/assist_System.json", "json", function (data) { assist_class = data; }),
-        Utils.get_file("", "", "/core/classes/Field/class_Field.json", "json", function (data) { def_field = data; })
+        Utils.get_file("", "", "/classes/System/class.json", "json", function (data) { def_class = data; }),
+        Utils.get_file("", "", "/classes/System/assist.json", "json", function (data) { assist_class = data; }),
+        Utils.get_file("", "", "/classes/Field/class.json", "json", function (data) { def_field = data; })
       ).always(function() {
         var detail = new Detail();
         detail.init("#" + id + " > div.tab-contents-panel > div.object_detail", def_class, assist_class);
@@ -36,7 +36,18 @@ define(function (require) {
       });
   	},
   	"delete_system" : function () {
-  	  alert("called [delete_system]");
+  	  var resources_list = null;
+      $.when(
+        Utils.get_data("", "", "resources_list", function (data) { resources_list = data; })
+      ).always(function() {
+      	var buf = [];
+        for (var i = 0; i < resources_list.length; i++) {
+          buf.push(resources_list[i]);
+        }
+        var ul = $("#object-list > ul");
+        ul.empty();
+        ul.append("<li>" + buf.join("</li><li>") + "</li>");
+      });
   	},
     "init" : function() {
       $('#root-panel').css({width: '100%', height: '100%'}).split({orientation: 'horizontal', limit: 20, position: '45px', invisible: true, fixed: true});

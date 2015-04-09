@@ -1,6 +1,6 @@
-(ns cloprand.test.handler
+(ns cloprand.test.core
   (:require [clojure.test :refer :all]
-            [cloprand.handler :refer :all]
+            [cloprand.core :refer :all]
             [ring.mock.request :as mock]))
 
 (deftest test-app
