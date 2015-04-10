@@ -63,7 +63,7 @@ define([
         return;
       }
       //head.append("<link rel='stylesheet' type='text/css' href='" + path + "?_=" + (new Date()).getTime() + "'></link>");
-      head.append("<link rel='stylesheet' type='text/css' href='" + path + "'></link>");
+      head.append("<link rel='stylesheet' type='text/css' href='" + path + "' />");
     },
     get_system_name : function() {
       var path = location.pathname;
