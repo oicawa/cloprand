@@ -1,9 +1,10 @@
 {
   "toolbar": {
-    "operations" : "classes/Class/operations",
+    "operations" : "classes/System/operations",
     "items" : [
-      { "name": "add",    "caption": "Add",    "description": "Add new class", "operation": "add_new_class" },
-      { "name": "delete", "caption": "Delete", "description": "Delete new class", "operation": "delete_class" }
+      { "name": "edit",    "caption": "Edit",    "description": "Edit item data.", "operation": "edit_system" },
+      { "name": "save",    "caption": "Save",    "description": "Save item data.", "operation": "save_system" },
+      { "name": "cancel", "caption": "Cancel", "description": "Cancel item data.", "operation": "cancel_system" }
     ]
   },
   "applications": {

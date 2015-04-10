@@ -41,7 +41,7 @@ define(function (require) {
       var template = null;
       var config = null;
       $.when(
-        Utils.get_file(system_name, "", "template.html", "html", function (data) { template = $.templates(data); }),
+        Utils.get_file(system_name, "", "system.html", "html", function (data) { template = $.templates(data); }),
         Utils.get_file(system_name, "", "config.json", "json", function (data) { config = data; })
       ).always(function() {
         var root_html = template.render(config);

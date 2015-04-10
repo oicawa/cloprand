@@ -36,21 +36,22 @@
 
 (defn get-jar-resource-children
   [jar-path relative-path dir? file?]
-  (let [jar-file (JarFile. (File. jar-path))
-        entries  (. jar-file entries)]
+  (let [jar-file   (JarFile. (File. jar-path))
+        entries    (. jar-file entries)
+        base-path  (. (File. relative-path) toPath)
+        base-count (. base-path getNameCount)]
     (loop [paths '()]
       (if (. entries hasMoreElements)
-          (let [entry      (. entries nextElement)
-                path       (. entry getName)
-                entry-dir? (. entry isDirectory)]
-            (recur (cond (not (. path startsWith relative-path))
-                           paths
-                         (< 0 (.. path (substring (. relative-path length)) (indexOf "/")))
-                           paths
-                         (or (and dir? entry-dir?) (and file? (not entry-dir?)))
-                           (cons (. (File. path) getName) paths)
-                         :else
-                           paths)))
+          (let [entry          (. entries nextElement)
+                path           (. entry getName)
+                entry-path     (. (File. path) toPath)
+                entry-path-cnt (. entry-path getNameCount)
+                entry-dir?     (. entry isDirectory)]
+            (recur (if (and (. entry-path startsWith base-path)
+                            (= (+ base-count 1) entry-path-cnt)
+                            (or (and dir? entry-dir?) (and file? (not entry-dir?))))
+                       (cons (. (File. path) getName) paths)
+                       paths)))
           (do
             (. jar-file close)
             (vec paths))))))
@@ -104,6 +105,13 @@
               system-path
               (format "%s/applications/%s" system-path application-name))))))
 
+(defn get-default-file
+  [file-name]
+  (let [resource-path (get-resource-path (str "public/defaults/" file-name))]
+    ;(get-resource resource-path)
+    resource-path
+    ))
+
 (defn get-systems
   []
   (let [systems-path (get-absolute-path "systems")
@@ -118,17 +126,19 @@
   (let [classes-path    (format "%s/%s" (get-system-application-path system-name "") "classes")
         class-dir-names (get-absolute-children classes-path true false)
         class-jsons     (map #(let [absolute-path (format "%s/%s/class.json" classes-path %1)]
-                               (json/read (io/reader absolute-path)))
+                               (with-open [rdr (io/reader absolute-path)]
+                                 (json/read rdr)))
                              class-dir-names)]
     class-jsons))
 
 (defn get-resource-classes
   []
-  (let [classes-path    (get-resource-path "classes")
+  (let [classes-path    (get-resource-path "public/classes")
         class-dir-names (get-resource-children classes-path true false)
         class-jsons     (map #(let [relative-path (format "%s/%s/class.json" classes-path %1)
                                     resource      (io/resource relative-path)]
-                               (json/read (io/reader resource)))
+                               (with-open [stream (io/input-stream resource)]
+                                 (json/read-str (slurp stream))))
                              class-dir-names)]
     class-jsons))
 
@@ -140,7 +150,7 @@
   
 (defn get-resources-list
   []
-  (json/write-str (get-resource-children "public/default/systems" true false)))
+  (json/write-str (get-resource-children "public/defaults" true false)))
 
 (defn response-with-content-type
   [resp content-type]
@@ -152,11 +162,11 @@
   ;(let [path (get-target-path system-name application-name)
   ;      res  (response/file-response path)]
   ;  (response-with-content-type res content-type)))
-  (let [path (str (get-system-application-path system-name application-name) "/" file-name)
-        file (File. path)
+  (let [absolute-path (str (get-system-application-path system-name application-name) "/" file-name)
+        file (File. absolute-path)
         res  (if (. file exists)
-                 (response/file-response path)
-                 (response/resource-response path))]
+                 (response/file-response absolute-path)
+                 (response/resource-response (get-default-file file-name)))]
     (response-with-content-type res content-type)))
   
 (defn get-data

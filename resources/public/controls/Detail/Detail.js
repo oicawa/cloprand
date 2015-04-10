@@ -41,9 +41,6 @@ define(function (require) {
     }
 
     function create_form(selector) {
-      var root_html = _root_template.render(_type);
-      _root.append(root_html);
-
       // Declare 'each_field_funcs' array to closing each require 'Controls' & callback process
       var each_field_funcs = [];
       for (var i = 0; i < _type.object_fields.length; i++) {
@@ -107,6 +104,8 @@ define(function (require) {
       $.when(
       	Utils.get_control_template("Detail", function(response) { _root_template = $.templates(response); })
       ).always(function() {
+        var root_html = _root_template.render(_type);
+        _root.append(root_html);
       	create_toolbar(selector);
       	create_form(selector);
       });
