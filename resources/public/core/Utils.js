@@ -1,6 +1,6 @@
-define([
-  'jquery'
-], function (_) {
+define(function (require) {
+  require('jquery');
+  require('json2');
   function get_target_path(system_name, application_name, file_name) {
     var buf = [];
     if (system_name && 0 < system_name.length) {
@@ -14,14 +14,14 @@ define([
     }
     return buf.join("/");
   }
-  function get_function(url, dataType, func_success, func_error) {
+  function send_function(method, url, dataType, data, func_success, func_error) {
     var dfd = new $.Deferred;
     $.ajax({
-      type: "GET",
+      type: method,
       url: url,
       dataType: dataType,
       cache: false,
-      //contentType: "application/json",
+      data: JSON.stringify(data),
       success: function (response, status) {
         if (typeof func_success == "function") {
           func_success(response);
@@ -42,10 +42,16 @@ define([
     });
     return dfd.promise();
   }
+  function get_function(url, dataType, func_success, func_error) {
+    return send_function("GET", url, dataType, null, func_success, func_error);
+  }
+  function post_function(url, dataType, data, func_success, func_error) {
+    return send_function("POST", url, dataType, data, func_success, func_error);
+  }
   return {
-    get_file: function(system_name, application_name, file_name, data_type, func_success, func_error) {
+    get_file: function(system_name, application_name, file_name, data_type, data, func_success, func_error) {
       var url = get_target_path(system_name, application_name, file_name);
-      return get_function(url, data_type, func_success, func_error);
+      return get_function(url, data_type, data, func_success, func_error);
     },
     get_control_template: function(control_name, func_success, func_error) {
       var url = "/controls/" + control_name + "/" + control_name + ".html";
@@ -54,6 +60,10 @@ define([
     get_data: function(system_name, application_name, api_name, func_success, func_error) {
       var url = "/api/" + get_target_path(system_name, application_name, api_name);
       return get_function(url, "json", func_success, func_error);
+    },
+    post_data: function(system_name, application_name, api_name, data, func_success, func_error) {
+      var url = "/api/" + get_target_path(system_name, application_name, api_name);
+      return post_function(url, "json", data, func_success, func_error);
     },
     add_css: function(path) {
       var head = $("head");
@@ -88,6 +98,7 @@ define([
         return null;
       }
       return fields[2];
-    }
+    },
+    UUID : /^[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}$/
   };
 });

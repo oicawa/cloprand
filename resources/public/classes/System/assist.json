@@ -22,8 +22,7 @@
         {"name":"label", "label": "Label", "renderer": null},
         {"name":"description", "label": "Description", "renderer": null}
       ]
-    },
-    "data": "/api/classes"
+    }
   },
   "storages": {
     "control": "Grid",
@@ -40,7 +39,6 @@
         {"name":"label", "label": "Label", "renderer": null},
         {"name":"description", "label": "Description", "renderer": null}
       ]
-    },
-    "data": "/api/classes"
+    }
   }
 }

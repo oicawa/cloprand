@@ -18,7 +18,7 @@ define(function (require) {
     function create_control(selector, field) {
       var html = _template.render(_assist.settings);
       _root.append(html);
-      _toolbar = new Toolbar();
+      _toolbar = new Toolbar(_instance);
       _toolbar.init(selector + " > div.grid > div.toolbar", _assist.settings.toolbar);
 
       _table = $(selector + " > div.grid > table.grid");
@@ -48,8 +48,8 @@ define(function (require) {
 
       // Load template data & Create form tags
       $.when(
-        Utils.get_control_template("Grid", function(response) { _template = $.templates(response); }),
-        Utils.get_file("", "", _assist.data, "json", function(response) { _data = response; })
+        Utils.get_control_template("Grid", function(response) { _template = $.templates(response); })//,
+        //Utils.get_file("", "", _assist.data, "json", function(response) { _data = response; })
       ).always(function() {
         create_control(selector, field);
       });
@@ -68,17 +68,17 @@ define(function (require) {
     //  _columns = columns;
     //};
 
-    //this.refresh = function() {
-    //  var tr = _table.find("thead > tr");
-    //  tr.empty();
-    //  for (var i = 0; i < _assist.settings.columns.length; i++) {
-    //    var column = _assist.settings.columns[i];
-    //    var buf = [];
-    //    //buf.push("<th class='", column.name, "'>", column.label, "</th>");
-    //    buf.push("<th>", column.label, "</th>");
-    //    $(buf.join("")).appendTo(tr);
-    //  }
-    //};
+    function refresh () {
+      var tr = _table.find("thead > tr");
+      tr.empty();
+      for (var i = 0; i < _assist.settings.columns.length; i++) {
+        var column = _assist.settings.columns[i];
+        var buf = [];
+        //buf.push("<th class='", column.name, "'>", column.label, "</th>");
+        buf.push("<th>", column.label, "</th>");
+        $(buf.join("")).appendTo(tr);
+      }
+    }
 
     function add_row() {
       var buf = [];
@@ -119,6 +119,15 @@ define(function (require) {
       }
       _items.splice(index, 1, item);
       assign_item(selected_tr, item);
+    };
+
+    this.data = function(value) {
+      if (arguments.length == 0) {
+        return _data
+      } else {
+        _data = value;
+        refresh();
+      }
     };
   };
 });

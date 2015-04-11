@@ -23,5 +23,13 @@ define(function (require) {
         create_control(field);
       });
     };
+
+    this.data = function(value) {
+      if (arguments.length == 0) {
+        return _root.find("textarea").val();
+      } else {
+        _root.find("textarea").val(value);
+      }
+    };
   }; 
 }); 

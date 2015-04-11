@@ -13,6 +13,7 @@ define(function (require) {
     var _assist_template = null;
     var _fields_template = null;
     var _toolbar = null;
+    var _controls = {};
     var _instance = this;
 
     function get_control_assist(field) {
@@ -33,8 +34,8 @@ define(function (require) {
       if (is_list) {
         return "List";
       }
-      var value = parseInt(field.datatype.substring(0, 1), 10);
-      if (!isNaN(value)) {
+      var match = Utils.UUID.test(field.datatype);
+      if (match) {
         return "DropDownList";
       }
       return field.datatype;
@@ -51,6 +52,7 @@ define(function (require) {
           require(["controls/" + control_name + "/" + control_name], function(Control) {
             var control = new Control();
             control.init(selector + " > dl > dd > div." + field.name, field, assist);
+            _controls[field.name] = control;
           });
         };
         each_field_funcs[i](object_field);
@@ -58,29 +60,13 @@ define(function (require) {
     }
 
     function create_toolbar(selector) {
-      _toolbar = new Toolbar();
+      _toolbar = new Toolbar(_instance);
       _toolbar.init(selector + " > div.detail-operations", _assist.toolbar);
-    }
-
-    function bind_buttons() {
-      // Bind 'OK' button event
-      $("button.ok_button").on("click", function() {
-        var data = _instance.data();
-        _func_ok(data);
-        _instance.data(null);
-        return false;
-      });
-      
-      // Bind 'Cancel' button event
-      $("button.cancel_button").on("click", function() {
-      	_instance.data(null);
-        _instance.visible(false);
-        return false;
-      });
     }
 
     function get_value(control) {
       var type = control.prop("type");
+      alert(control.prop("name"));
       return type == "checkbox" ? control.prop("checked") : control.val();
     }
 
@@ -96,6 +82,9 @@ define(function (require) {
     this.init = function(selector, type, assist) {
       // Set member fields
       _root = $(selector);
+      if (0 < _root.children()) {
+        return;
+      }
       _type = type;
       _assist = typeof assist == "undefined" ? null : assist;
 
@@ -121,17 +110,21 @@ define(function (require) {
       }
       _root.css("display", visible ? "block" : "none");
     }
+
+    this.edit = function(on) {
+      
+    }
     
     this.data = function(value) {
       var data = {};
       for (var i = 0; i < _type.object_fields.length; i++) {
         var object_field = _type.object_fields[i];
         var name = object_field.name;
-        var control = _root.find("dl > dd > div." + name).children();
+        var control = _controls[name];
         if (arguments.length == 0) {
-          data[name] = get_value(control);
+          data[name] = control.data();
         } else {
-          set_value(control, value ? value[name] : null);
+          controls.data(value ? value[name] : null);
         }
       }
       if (arguments.length == 0) {

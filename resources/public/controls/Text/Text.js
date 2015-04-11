@@ -15,6 +15,9 @@ define(function (require) {
     this.init = function(selector, field) {
       // Set member fields
       _root = $(selector);
+      if (0 < _root.children()) {
+        return;
+      }
 
       // Load template data & Create form tags
       Utils.add_css("/controls/Text/Text.css");
@@ -22,6 +25,14 @@ define(function (require) {
       .then(function() {
         create_control(field);
       });
+    };
+
+    this.data = function(value) {
+      if (arguments.length == 0) {
+        return _root.find("input").val();
+      } else {
+        _root.find("input").val(value);
+      }
     };
   }; 
 }); 

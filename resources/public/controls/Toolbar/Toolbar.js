@@ -2,7 +2,7 @@ define(function (require) {
   require("jquery");
   require("jsrender");
   var Utils = require("core/Utils");
-  return function () {
+  return function (parent) {
     var icon_names = {
       "add": "ui-icon-plus",
       "delete": "ui-icon-minus",
@@ -10,16 +10,25 @@ define(function (require) {
       "save": "ui-icon-disk",
       "cancel": "ui-icon-trash"
     };
+    var _parent = parent;
   	var _root = null;
     var _settings = null;
     var _template = null;
     var _css = null;
     var _instance = this;
+    var _operations = null;
+
+    function operation_generator(operation_name) {
+      return function(event) {
+        _operations[operation_name](event, _parent);
+      };
+    }
 
     function create_toolbar() {
       var root_html = _template.render(_settings);
       _root.append(root_html);
       require([ _settings.operations ], function(operations) {
+        _operations = operations;
         for (var i = 0; i < _settings.items.length; i++) {
           var item = _settings.items[i];
           var icon = _root.find("ul > li > span." + item.icon_name);
@@ -28,7 +37,8 @@ define(function (require) {
             var caption = li.find("span.caption");
             caption.addClass("space");
           }
-          li.on("click", operations[item.operation]);
+          _operations[item.operation] = operations[item.operation];
+          li.on("click", operation_generator(item.operation));
         }
       });
 

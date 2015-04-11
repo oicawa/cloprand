@@ -147,7 +147,7 @@
   (let [resource-class-jsons    (get-resource-classes)
         absolute-class-jsons    (get-absolute-classes system-name)]
     (json/write-str (concat resource-class-jsons absolute-class-jsons))))
-  
+
 (defn get-resources-list
   []
   (json/write-str (get-resource-children "public/defaults" true false)))
@@ -168,7 +168,7 @@
                  (response/file-response absolute-path)
                  (response/resource-response (get-default-file file-name)))]
     (response-with-content-type res content-type)))
-  
+
 (defn get-data
   [system-name application-name api-name content-type]
   (response-with-content-type
@@ -177,8 +177,19 @@
               (get-systems)
             (= api-name "classes")
               (get-classes system-name)
-            (= api-name "resources_list")
-              (get-resources-list)
+            :else
+              nil))
+    "text/json; charset=utf-8"))
+
+(defn post-data
+  [system-name application-name api-name content-type]
+  (println "Posted OK.")
+  (response-with-content-type
+    (response/response
+      (cond (= api-name "systems")
+              (get-systems)
+            (= api-name "classes")
+              (get-classes system-name)
             :else
               nil))
     "text/json; charset=utf-8"))
