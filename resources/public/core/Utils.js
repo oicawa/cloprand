@@ -21,7 +21,7 @@ define(function (require) {
       url: url,
       dataType: dataType,
       cache: false,
-      data: JSON.stringify(data),
+      data: data,
       success: function (response, status) {
         if (typeof func_success == "function") {
           func_success(response);

@@ -83,9 +83,11 @@
           :else               nil)))
 
 (defn ensure-directory
-  []
-  (let [systems-path (get-absolute-path "systems")
+  [relative-dir-path]
+  (let [systems-path (get-absolute-path relative-dir-path)
         systems-dir  (File. systems-path)]
+    (if (and (. systems-dir exists) (not (. systems-dir isDirectory)))
+        (. systems-dir delete))
     (if (not (. systems-dir exists))
         (. systems-dir mkdirs))))
 
@@ -181,15 +183,23 @@
               nil))
     "text/json; charset=utf-8"))
 
+(defn create-system
+  [params]
+  (println "Called create-system function.")
+  (let [dir-name    (params :name)
+        config-path (get-absolute-path (str "systems/" dir-name "/config.json"))]
+    (ensure-directory (str "systems/" dir-name))
+    (with-open [w (io/writer config-path)]
+      (json/write params w))))
+
 (defn post-data
-  [system-name application-name api-name content-type]
+  [system-name application-name api-name params]
+  (println "Called post-data function.")
+  (cond (= api-name "systems")
+          (create-system params)
+        :else
+          nil)
   (println "Posted OK.")
   (response-with-content-type
-    (response/response
-      (cond (= api-name "systems")
-              (get-systems)
-            (= api-name "classes")
-              (get-classes system-name)
-            :else
-              nil))
+    (response/response (get-systems))
     "text/json; charset=utf-8"))

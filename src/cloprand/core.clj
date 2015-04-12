@@ -9,7 +9,7 @@
 (defn init
   []
   (println "init method called.")
-  (systems/ensure-directory))
+  (systems/ensure-directory "systems"))
 
 (def app
   (compojure.handler/site handler/app-routes))
