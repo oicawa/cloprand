@@ -8,20 +8,18 @@
   },
   "object_fields": {
     "control": "Grid",
-    "settings": {
-      "toolbar": {
-        "operations" : "classes/Field/operations",
-        "items" : [
-          { "name": "add",    "caption": "Add",    "description": "Add new class", "operation": "add_new_field" },
-          { "name": "delete", "caption": "Delete", "description": "Delete new class", "operation": "delete_field" }
-        ]
-      },
-      "columns": [
-        {"name":"name", "label": "Name", "renderer": null},
-        {"name":"label", "label": "Label", "renderer": null},
-        {"name":"description", "label": "Description", "renderer": null}
+    "toolbar": {
+      "operations" : "classes/Field/operations",
+      "items" : [
+        { "name": "add",    "caption": "Add",    "description": "Add new class", "operation": "add_new_field" },
+        { "name": "delete", "caption": "Delete", "description": "Delete new class", "operation": "delete_field" }
       ]
     },
+    "columns": [
+      {"name":"name", "label": "Name", "renderer": null},
+      {"name":"label", "label": "Label", "renderer": null},
+      {"name":"description", "label": "Description", "renderer": null}
+    ],
     "data": "/classes/Class/class.json"
   }
 }

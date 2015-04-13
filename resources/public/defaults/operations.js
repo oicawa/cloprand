@@ -5,6 +5,7 @@ define(function (require) {
   var Utils = require("core/Utils");
   var Toolbar = require("controls/Toolbar/Toolbar");
   var Detail = require("controls/Detail/Detail");
+  var Grid = require("controls/Grid/Grid");
   return {
   	"add_new_system" : function () {
       var tabTemplate = "<li class='tab-label'><a href='#{href}'>#{label}</a><span class='ui-icon ui-icon-close'>Remove Tab</span></li>"
@@ -35,6 +36,12 @@ define(function (require) {
         tabs.tabs({ active : index});
       });
   	},
+  	"show_detail" : function () {
+  	  alert("Called show_detail function.");
+  	},
+  	"show_detail_tab" : function () {
+  	  alert("Called show_detail_tab function.");
+  	},
   	"delete_system" : function () {
   	  var resources_list = null;
       $.when(
@@ -64,13 +71,40 @@ define(function (require) {
         $("#contents-panel").append(application_html);
         var application = $("#application-panel");
         application.split({orientation: 'vertical', limit: 20, position: '300px'});
-        var list = $("#object-list");
-        list.empty();
-        var ul = $("<ul></ul>");
-        list.append(ul);
-        for (var i = 0; i < systems.length; i++) {
-          ul.append("<li>" + systems[i] + "</li>");
-        }
+        
+        //var list = $("#object-list");
+        //list.empty();
+        //var ul = $("<ul></ul>");
+        //list.append(ul);
+        //for (var i = 0; i < systems.length; i++) {
+        //  ul.append("<li title='" + systems[i].description + "'>" + systems[i].label + "</li>");
+        //}
+        var grid = new Grid();
+        grid.init("#object-list", null, {
+          "toolbar": {
+            "operations" : "operations",
+            "items" : [
+              { "name": "add",    "caption": "Add",    "description": "Add new system", "operation": "add_new_system" }
+            ]
+          },
+          "columns": [
+            {"name":"label", "label": "Label", "renderer": null},
+            {"name":"description", "label": "Description", "renderer": null}
+          ],
+          "header": {
+            "visible": false
+          },
+          "row": {
+            "operations" : "operations",
+            "events": {
+              "click": "show_detail",
+              "dblclick": "show_detail_tab"
+            }
+          }
+        })
+        .then(function () {
+          grid.data(systems);
+        });
         
         var tabs = $("#object-detail-tabs");
         tabs.tabs({active: 1});
@@ -80,14 +114,14 @@ define(function (require) {
           tabs.tabs("refresh");
         });
         
-        var toolbar = new Toolbar();
-        toolbar.init("#object-operations", {
-          "operations" : "operations",
-          "items" : [
-            { "name": "add",    "caption": "Add",    "description": "Add new class", "operation": "add_new_system" },
-            { "name": "delete", "caption": "Delete", "description": "Delete new class", "operation": "delete_system" },
-          ]
-        });
+        //var toolbar = new Toolbar();
+        //toolbar.init("#object-operations", {
+        //  "operations" : "operations",
+        //  "items" : [
+        //    { "name": "add",    "caption": "Add",    "description": "Add new class", "operation": "add_new_system" },
+        //    { "name": "delete", "caption": "Delete", "description": "Delete new class", "operation": "delete_system" },
+        //  ]
+        //});
       });
     }
   };

@@ -15,16 +15,25 @@ define(function (require) {
     var _items = [];
     var _instance = this;
     
-    function create_control(selector, field) {
-      var html = _template.render(_assist.settings);
+    function create_control(selector /*, field*/) {
+      var html = _template.render(_assist);
       _root.append(html);
       _toolbar = new Toolbar(_instance);
-      _toolbar.init(selector + " > div.grid > div.toolbar", _assist.settings.toolbar);
+      _toolbar.init(selector + " > div.grid > div.toolbar", _assist.toolbar);
 
       _table = $(selector + " > div.grid > table.grid");
-      _table.on("click", "tbody > tr", function(event) {
-        _table.find("tr.selected").removeClass("selected");
-        $(this).addClass("selected");
+      require([_assist.row.operations], function(operations) {
+        _table.on("click", "tbody > tr", function(event) {
+          _table.find("tr.selected").removeClass("selected");
+          $(this).addClass("selected");
+          var event_name = _assist.row.events["click"];
+          operations[event_name](event, this);
+        });
+
+        _table.on("dblclick", "tbody > tr", function(event) {
+          var event_name = _assist.row.events["dblclick"];
+          operations[event_name](event, this);
+        });
       });
 
       //_instance.act("delete", function() {
@@ -38,12 +47,13 @@ define(function (require) {
       //});
     }
 
-    this.init = function(selector, field, assist) {
+    this.init = function(selector, type, assist) {
+      var dfd = new $.Deferred;
       Utils.add_css("/controls/Grid/Grid.css");
       
       // Set member fields
       _root = $(selector);
-      _type = field.datatype;
+      _type = type;
       _assist = assist;
 
       // Load template data & Create form tags
@@ -51,8 +61,10 @@ define(function (require) {
         Utils.get_control_template("Grid", function(response) { _template = $.templates(response); })//,
         //Utils.get_file("", "", _assist.data, "json", function(response) { _data = response; })
       ).always(function() {
-        create_control(selector, field);
+        create_control(selector);
+        dfd.resolve();
       });
+      return dfd.promise();
     };
 
     //this.act = function(action, func) {
@@ -69,22 +81,42 @@ define(function (require) {
     //};
 
     function refresh () {
-      var tr = _table.find("thead > tr");
-      tr.empty();
-      for (var i = 0; i < _assist.settings.columns.length; i++) {
-        var column = _assist.settings.columns[i];
+      var thead = _table.find("thead");
+      thead.empty();
+      var thead_buf = [];
+      thead_buf.push("<tr>");
+      for (var i = 0; i < _assist.columns.length; i++) {
+        var column = _assist.columns[i];
+        thead_buf.push("<th>", column.label, "</th>");
+      }
+      thead_buf.push("</tr>");
+      $(thead_buf.join("")).appendTo(thead);
+      if (_assist.header.visible) {
+        thead.show();
+      } else {
+        thead.hide();
+      }
+      
+      var tbody = _table.find("tbody");
+      tbody.empty();
+      for (var i = 0; i < _data.length; i++) {
+        var item = _data[i];
         var buf = [];
-        //buf.push("<th class='", column.name, "'>", column.label, "</th>");
-        buf.push("<th>", column.label, "</th>");
-        $(buf.join("")).appendTo(tr);
+        buf.push("<tr>");
+        for (var j = 0; j < _assist.columns.length; j++) {
+          var column = _assist.columns[j];
+          buf.push("<td>", item[column.name], "</td>");
+        }
+        buf.push("</tr>");
+        $(buf.join("")).appendTo(tbody);
       }
     }
 
     function add_row() {
       var buf = [];
       buf.push("<tr>");
-      for (var i = 0; i < _assist.settings.columns.length; i++) {
-        var column = _assist.settings.columns[i];
+      for (var i = 0; i < _assist.columns.length; i++) {
+        var column = _assist.columns[i];
         buf.push("<td class='", column.name, "'></td>");
       }
       buf.push("</tr>");
@@ -95,8 +127,8 @@ define(function (require) {
     }
 
     function assign_item(tr, item) {
-      for (var i = 0; i < _assist.settings.columns.length; i++) {
-        var column = _assist.settings.columns[i];
+      for (var i = 0; i < _assist.columns.length; i++) {
+        var column = _assist.columns[i];
         var value = column.renderer ? column.renderer(item) : item[column.name];
         tr.children("td." + column.name).text(value);
       }

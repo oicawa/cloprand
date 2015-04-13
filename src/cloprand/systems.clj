@@ -120,7 +120,10 @@
         systems-dir  (File. systems-path)
         files        (. systems-dir listFiles)
         system-dirs  (filter #(. %1 isDirectory) files)
-        systems      (map #(. %1 getName) system-dirs)]
+        systems      (map #(let [config-path (str (. %1 getAbsolutePath) "/config.json")]
+                             (with-open [rdr (io/reader config-path)]
+                               (json/read rdr)))
+                          system-dirs)]
     (json/write-str systems)))
 
 (defn get-absolute-classes
