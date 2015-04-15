@@ -63,6 +63,7 @@ define(function (require) {
     },
     post_data: function(system_name, application_name, api_name, data, func_success, func_error) {
       var url = "/api/" + get_target_path(system_name, application_name, api_name);
+      alert(JSON.stringify(data));
       return post_function(url, "json", data, func_success, func_error);
     },
     add_css: function(path) {

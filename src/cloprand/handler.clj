@@ -16,6 +16,7 @@
     (println "api-name:" api-name)
     (systems/get-data "" "" api-name "text/json"))
   (POST "/api/:api-name" [api-name & params]	;;; https://github.com/weavejester/compojure/wiki/Destructuring-Syntax
+    (println "POST api-name:" api-name)
     (println "params:" params)
     (systems/post-data "" "" api-name params))
   (GET "/:css-name.css" [css-name]

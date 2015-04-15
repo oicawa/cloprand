@@ -20,7 +20,15 @@
       {"name":"name", "label": "Name", "renderer": null},
       {"name":"label", "label": "Label", "renderer": null},
       {"name":"description", "label": "Description", "renderer": null}
-    ]
+    ],
+    "header": {
+      "visible": true
+    },
+    "row": {
+      "operations" : "operations",
+      "events": {
+      }
+    }
   },
   "storages": {
     "control": "Grid",
@@ -35,6 +43,14 @@
       {"name":"name", "label": "Name", "renderer": null},
       {"name":"label", "label": "Label", "renderer": null},
       {"name":"description", "label": "Description", "renderer": null}
-    ]
+    ],
+    "header": {
+      "visible": true
+    },
+    "row": {
+      "operations" : "operations",
+      "events": {
+      }
+    }
   }
 }

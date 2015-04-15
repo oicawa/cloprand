@@ -17,5 +17,5 @@
 (defn -main []
   (let [port (Integer/parseInt (get (System/getenv) "PORT" "3000"))]
     (init)
-    (run-jetty handler/app-routes {:port port})))
+    (run-jetty app {:port port})))
 
