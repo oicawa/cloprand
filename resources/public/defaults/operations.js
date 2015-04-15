@@ -26,8 +26,11 @@ define(function (require) {
         Utils.get_file("", "", "/classes/Field/class.json", "json", function (data) { def_field = data; })
       ).always(function() {
         var detail = new Detail();
-        detail.init("#" + id + " > div.tab-contents-panel > div.object_detail", def_class, assist_class);
-        detail.visible(true);
+        detail.init("#" + id + " > div.tab-contents-panel > div.object_detail", def_class, assist_class)
+        .then(function() {
+          detail.visible(true);
+          detail.edit(true);
+        });
 
         tabs.tabs("refresh");
 
@@ -84,7 +87,7 @@ define(function (require) {
           "toolbar": {
             "operations" : "operations",
             "items" : [
-              { "name": "add",    "caption": "Add",    "description": "Add new system", "operation": "add_new_system" }
+              { "name": "add", "caption": "Add", "description": "Add new system", "operation": "add_new_system" }
             ]
           },
           "columns": [

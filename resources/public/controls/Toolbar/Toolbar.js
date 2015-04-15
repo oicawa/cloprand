@@ -66,5 +66,9 @@ define(function (require) {
         create_toolbar();
       });
     };
+
+    this.button = function(button_name) {
+      return _root.find("li." + button_name);
+    };
   }; 
 }); 

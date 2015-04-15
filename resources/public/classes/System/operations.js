@@ -12,10 +12,16 @@ define(function (require) {
     "edit_system" : function(event, parent) {
       parent.edit(true);
     },
+    "delete_system" : function(event, parent) {
+      var res = confirm("Delete this system?");
+      alert(res);
+    },
     "save_system" : function(event, parent) {
-      Utils.post_data("", "", "systems", parent.data(), function(response) { alert(response); })
+      var systems = null;
+      Utils.post_data("", "", "systems", parent.data(), function(response) { systems = response; })
       .then(function() {
         alert("Saved");
+        parent.edit(false);
       });
     },
     "cancel_system" : function(event, parent) {

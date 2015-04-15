@@ -80,10 +80,12 @@ define(function (require) {
     }
 
     this.init = function(selector, type, assist) {
+      var dfd = new $.Deferred;
       // Set member fields
       _root = $(selector);
       if (0 < _root.children()) {
-        return;
+        dfd.resolve();
+        return dfd.promise();
       }
       _type = type;
       _assist = typeof assist == "undefined" ? null : assist;
@@ -97,7 +99,9 @@ define(function (require) {
         _root.append(root_html);
       	create_toolbar(selector);
       	create_form(selector);
+        dfd.resolve();
       });
+      return dfd.promise();
     };
 
     this.ok_func = function(func_ok) {
@@ -112,7 +116,17 @@ define(function (require) {
     }
 
     this.edit = function(on) {
-      
+      if (on) {
+        _toolbar.button("edit").hide();
+        _toolbar.button("delete").hide();
+        _toolbar.button("save").show();
+        _toolbar.button("cancel").show();
+      } else {
+        _toolbar.button("edit").show();
+        _toolbar.button("delete").show();
+        _toolbar.button("save").hide();
+        _toolbar.button("cancel").hide();
+      }
     }
     
     this.data = function(value) {
