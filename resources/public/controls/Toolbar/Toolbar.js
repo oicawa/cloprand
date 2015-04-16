@@ -25,6 +25,7 @@ define(function (require) {
     }
 
     function create_toolbar() {
+      var dfd = new $.Deferred;
       var root_html = _template.render(_settings);
       _root.append(root_html);
       require([ _settings.operations ], function(operations) {
@@ -40,6 +41,7 @@ define(function (require) {
           _operations[item.operation] = operations[item.operation];
           li.on("click", operation_generator(item.operation));
         }
+        dfd.resolve();
       });
 
       // Hover states on the static widgets
@@ -47,9 +49,11 @@ define(function (require) {
         function() { $(this).addClass("ui-state-hover"); },
         function() { $(this).removeClass("ui-state-hover"); }
       );
+      return dfd.promise();
     }
 
     this.init = function(selector, settings) {
+      var dfd = new $.Deferred;
       // Set member fields
       _root = $(selector);
       _settings = settings;
@@ -60,11 +64,21 @@ define(function (require) {
 
       // Load template data & Create form tags
       Utils.add_css("/controls/Toolbar/Toolbar.css");
-      $.when(
-      	Utils.get_control_template("Toolbar", function(response) { _template = $.templates(response); })
-      ).always(function() {
-        create_toolbar();
+      Utils.get_control_template("Toolbar", function(response) { _template = $.templates(response); })
+      .then(function() {
+        return create_toolbar();
+      }).then(function() {
+        dfd.resolve();
       });
+      return dfd.promise();
+    };
+
+    this.visible = function(on) {
+      if (on) {
+        _root.show();
+      } else {
+        _root.hide();
+      }
     };
 
     this.button = function(button_name) {

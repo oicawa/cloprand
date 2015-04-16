@@ -24,11 +24,27 @@ define(function (require) {
       });
     };
 
+    this.edit = function(on) {
+      if (on) {
+        _root.find("textarea").show();
+        _root.find("div").hide();
+      } else {
+        _root.find("textarea").hide();
+        _root.find("div").show();
+      }
+    };
+
+    this.commit = function() {
+      var value = _root.find("textarea").val();
+      _root.find("div").text(value);
+    };
+
     this.data = function(value) {
       if (arguments.length == 0) {
         return _root.find("textarea").val();
       } else {
         _root.find("textarea").val(value);
+        _root.find("div").text(value);
       }
     };
   }; 

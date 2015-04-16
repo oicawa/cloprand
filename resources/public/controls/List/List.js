@@ -1,7 +1,7 @@
 define(function (require) { 
   require("jquery");
   require("jsrender");
-  var Utils = require("Utils");
+  var Utils = require("core/Utils");
   return function () {
   	var _root = null;
     var _template = null;

@@ -21,6 +21,7 @@ define(function (require) {
       Utils.post_data("", "", "systems", parent.data(), function(response) { systems = response; })
       .then(function() {
         alert("Saved");
+        parent.commit();
         parent.edit(false);
       });
     },

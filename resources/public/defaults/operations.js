@@ -15,28 +15,32 @@ define(function (require) {
       var tabs = $("#object-detail-tabs");
       tabs.find(".ui-tabs-nav").append(li);
       tabs.append("<div id='" + id + "' class='tab-panel'><div class='tab-contents-panel'><div class='object_detail'></div></div></div>");
-      //_tabs.tabs("refresh");
+      tabs.tabs("refresh");
+
+      // Activate the created new tab
+      var index = tabs.find("ul > li[aria-controls='" + id + "']").index();
+      tabs.tabs({ active : index});
 
       var def_field = null;
       var def_class = null;
       var assist_class = null;
+      var detail = new Detail();
       $.when(
         Utils.get_file("", "", "/classes/System/class.json", "json", function (data) { def_class = data; }),
         Utils.get_file("", "", "/classes/System/assist.json", "json", function (data) { assist_class = data; }),
         Utils.get_file("", "", "/classes/Field/class.json", "json", function (data) { def_field = data; })
       ).always(function() {
-        var detail = new Detail();
         detail.init("#" + id + " > div.tab-contents-panel > div.object_detail", def_class, assist_class)
         .then(function() {
           detail.visible(true);
           detail.edit(true);
+        
+          //tabs.tabs("refresh");
+
+          // Activate the created new tab
+          //var index = tabs.find("ul > li[aria-controls='" + id + "']").index();
+          //tabs.tabs({ active : index});
         });
-
-        tabs.tabs("refresh");
-
-        // Activate the created new tab
-        var index = tabs.find("ul > li[aria-controls='" + id + "']").index();
-        tabs.tabs({ active : index});
       });
   	},
   	"show_detail" : function () {

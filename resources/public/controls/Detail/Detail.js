@@ -60,8 +60,13 @@ define(function (require) {
     }
 
     function create_toolbar(selector) {
+      var dfd = new $.Deferred;
       _toolbar = new Toolbar(_instance);
-      _toolbar.init(selector + " > div.detail-operations", _assist.toolbar);
+      _toolbar.init(selector + " > div.detail-operations", _assist.toolbar)
+      .then(function() {
+        dfd.resolve();
+      });
+      return dfd.promise();
     }
 
     function get_value(control) {
@@ -92,13 +97,13 @@ define(function (require) {
 
       // Load template data & Create form tags
       Utils.add_css("/controls/Detail/Detail.css");
-      $.when(
-      	Utils.get_control_template("Detail", function(response) { _root_template = $.templates(response); })
-      ).always(function() {
+      Utils.get_control_template("Detail", function(response) { _root_template = $.templates(response); })
+      .then(function() {
         var root_html = _root_template.render(_type);
         _root.append(root_html);
-      	create_toolbar(selector);
       	create_form(selector);
+      	return create_toolbar(selector);
+      }).then(function() {
         dfd.resolve();
       });
       return dfd.promise();
@@ -126,6 +131,19 @@ define(function (require) {
         _toolbar.button("delete").show();
         _toolbar.button("save").hide();
         _toolbar.button("cancel").hide();
+      }
+      for (var i = 0; i < _type.object_fields.length; i++) {
+        var object_field = _type.object_fields[i];
+        var name = object_field.name;
+        _controls[name].edit(on);
+      }
+    };
+
+    this.commit = function() {
+      for (var i = 0; i < _type.object_fields.length; i++) {
+        var object_field = _type.object_fields[i];
+        var name = object_field.name;
+        _controls[name].commit();
       }
     }
     

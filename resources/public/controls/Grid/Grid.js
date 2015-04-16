@@ -153,6 +153,13 @@ define(function (require) {
       assign_item(selected_tr, item);
     };
 
+    this.edit = function(on) {
+      _toolbar.visible(on);
+    };
+
+    this.commit = function() {
+    };
+
     this.data = function(value) {
       if (arguments.length == 0) {
         return _data

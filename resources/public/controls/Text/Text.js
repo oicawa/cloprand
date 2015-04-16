@@ -27,11 +27,27 @@ define(function (require) {
       });
     };
 
+    this.edit = function(on) {
+      if (on) {
+        _root.find("input").show();
+        _root.find("div").hide();
+      } else {
+        _root.find("input").hide();
+        _root.find("div").show();
+      }
+    };
+
+    this.commit = function() {
+      var value = _root.find("input").val();
+      _root.find("div").text(value);
+    };
+
     this.data = function(value) {
       if (arguments.length == 0) {
         return _root.find("input").val();
       } else {
         _root.find("input").val(value);
+        _root.find("div").text(value);
       }
     };
   }; 
