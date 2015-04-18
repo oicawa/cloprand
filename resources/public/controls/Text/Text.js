@@ -13,10 +13,12 @@ define(function (require) {
     }
 
     this.init = function(selector, field) {
+      var dfd = new $.Deferred;
       // Set member fields
       _root = $(selector);
       if (0 < _root.children()) {
-        return;
+        dfd.resolve();
+        return dfd.resolve();
       }
 
       // Load template data & Create form tags
@@ -24,7 +26,9 @@ define(function (require) {
       Utils.get_control_template("Text", function(response) { _template = $.templates(response); })
       .then(function() {
         create_control(field);
+        dfd.resolve();
       });
+      return dfd.resolve();
     };
 
     this.edit = function(on) {
@@ -37,9 +41,18 @@ define(function (require) {
       }
     };
 
+    this.backuped = function() {
+      return _root.find("div").text();
+    };
+
     this.commit = function() {
       var value = _root.find("input").val();
       _root.find("div").text(value);
+    };
+
+    this.restore = function() {
+      var value = _root.find("div").text();
+      _root.find("input").val(value);
     };
 
     this.data = function(value) {

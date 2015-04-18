@@ -3,7 +3,8 @@ define(function (require) {
   require("jsrender");
   var Utils = require("core/Utils");
   var Toolbar = require("controls/Toolbar/Toolbar");
-  return function () {
+  return function (parent) {
+  	var _parent = parent;
   	var _root = null;
     var _type = null;
     var _assist = null;
@@ -14,6 +15,7 @@ define(function (require) {
     var _fields_template = null;
     var _toolbar = null;
     var _controls = {};
+    var _is_new = true;
     var _instance = this;
 
     function get_control_assist(field) {
@@ -41,22 +43,38 @@ define(function (require) {
       return field.datatype;
     }
 
+    function field_func(selector, field) {
+      var dfd = new $.Deferred;
+      var assist = get_control_assist(field);
+      var control_name = get_control_name(field, assist);
+      require(["controls/" + control_name + "/" + control_name], function(Control) {
+        var control = new Control();
+        _controls[field.name] = control;
+        try {
+        control.init(selector + " > table.detail-fields > tbody > tr > td.value > div." + field.name, field, assist)
+        .then(function() {
+          dfd.resolve();
+        });
+        } catch (e) {
+        console.log("e=" + e + ", field.name=" + field.name);
+        }
+      });
+      return dfd.promise();
+    }
+
     function create_form(selector) {
+      var dfd = new $.Deferred;
       // Declare 'each_field_funcs' array to closing each require 'Controls' & callback process
-      var each_field_funcs = [];
+      var field_funcs = [];
       for (var i = 0; i < _type.object_fields.length; i++) {
         var object_field = _type.object_fields[i];
-        each_field_funcs[i] = function(field) {
-          var assist = get_control_assist(field);
-          var control_name = get_control_name(field, assist);
-          require(["controls/" + control_name + "/" + control_name], function(Control) {
-            var control = new Control();
-            control.init(selector + " > dl > dd > div." + field.name, field, assist);
-            _controls[field.name] = control;
-          });
-        };
-        each_field_funcs[i](object_field);
+        field_funcs[i] = field_func(selector, object_field);
       }
+      $.when.apply(null,field_funcs)
+      .then(function() {
+        dfd.resolve();
+      });
+      return dfd.promise();
     }
 
     function create_toolbar(selector) {
@@ -87,7 +105,7 @@ define(function (require) {
     this.init = function(selector, type, assist) {
       var dfd = new $.Deferred;
       // Set member fields
-      _root = $(selector);
+      _root = $(selector)
       if (0 < _root.children()) {
         dfd.resolve();
         return dfd.promise();
@@ -101,10 +119,12 @@ define(function (require) {
       .then(function() {
         var root_html = _root_template.render(_type);
         _root.append(root_html);
-      	create_form(selector);
-      	return create_toolbar(selector);
-      }).then(function() {
-        dfd.resolve();
+      	$.when(
+      	  create_form(selector),
+      	  create_toolbar(selector)
+        ).always(function() {
+          dfd.resolve();
+        });
       });
       return dfd.promise();
     };
@@ -146,6 +166,24 @@ define(function (require) {
         _controls[name].commit();
       }
     }
+
+    this.restore = function() {
+      for (var i = 0; i < _type.object_fields.length; i++) {
+        var object_field = _type.object_fields[i];
+        var name = object_field.name;
+        _controls[name].restore();
+      }
+    }
+
+    this.is_new = function() {
+      return _is_new;
+    };
+
+    this.key = function() {
+      var key_name = _assist.key;
+      var control = _controls[key_name];
+      return control.backuped();
+    };
     
     this.data = function(value) {
       var data = {};
@@ -156,11 +194,13 @@ define(function (require) {
         if (arguments.length == 0) {
           data[name] = control.data();
         } else {
-          controls.data(value ? value[name] : null);
+          control.data(value ? value[name] : null);
         }
       }
       if (arguments.length == 0) {
         return data;
+      } else {
+        _is_new = false;
       }
     };
   };

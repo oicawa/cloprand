@@ -19,6 +19,13 @@
     (println "POST api-name:" api-name)
     (println "params:" params)
     (systems/post-data "" "" api-name params))
+  (PUT "/api/:api-name/:id" [api-name id & params]
+    (println "PUT api-name:" api-name)
+    (println "params:" params)
+    (systems/put-data "" "" api-name id params))
+  (DELETE "/api/:api-name/:id" [api-name id]
+    (println "DELETE api-name:" api-name)
+    (systems/delete-data "" "" api-name id))
   (GET "/:css-name.css" [css-name]
     (println "css-name:" css-name)
     (systems/get-file "" "" (format "%s.css" css-name) "text/css"))

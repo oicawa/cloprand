@@ -1,11 +1,5 @@
-dl > dt {
-    float:left;
-    width:140px;
-}
-
-dl > dd {
-    padding-bottom:10px;
-    margin-left:140px;
+table.detail-fields > tbody > tr > td.caption {
+  vertical-align: top;
 }
 
 .detail_form > fieldset > p.detail_section {

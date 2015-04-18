@@ -195,6 +195,29 @@
     (with-open [w (io/writer config-path)]
       (json/write params w))))
 
+(defn update-system
+  [id params]
+  (println "Called update-system function.")
+  (let [src-dir     (File. (get-absolute-path (str "systems/" id)))
+        dst-dir     (File. (get-absolute-path (str "systems/" (params :name))))
+        config-path (str (. dst-dir getAbsolutePath) "/config.json")]
+    (. src-dir renameTo dst-dir)
+    (with-open [w (io/writer config-path)]
+      (json/write params w))))
+
+(defn remove-file
+  [file]
+  (if (. file isDirectory)
+      (doseq [child (. file listFiles)]
+        (remove-file child)))
+  (. file delete))
+  
+(defn delete-system
+  [id]
+  (println "Called delete-system function.")
+  (let [file (File. (get-absolute-path (str "systems/" id)))]
+    (remove-file file)))
+
 (defn post-data
   [system-name application-name api-name params]
   (println "Called post-data function.")
@@ -203,6 +226,30 @@
         :else
           nil)
   (println "Posted OK.")
+  (response-with-content-type
+    (response/response (get-systems))
+    "text/json; charset=utf-8"))
+
+(defn put-data
+  [system-name application-name api-name id params]
+  (println "Called put-data function.")
+  (cond (= api-name "systems")
+          (update-system id params)
+        :else
+          nil)
+  (println "Put OK.")
+  (response-with-content-type
+    (response/response (get-systems))
+    "text/json; charset=utf-8"))
+
+(defn delete-data
+  [system-name application-name api-name id]
+  (println "Called delete-data function.")
+  (cond (= api-name "systems")
+          (delete-system id)
+        :else
+          nil)
+  (println "Delete OK.")
   (response-with-content-type
     (response/response (get-systems))
     "text/json; charset=utf-8"))

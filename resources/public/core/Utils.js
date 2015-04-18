@@ -48,6 +48,12 @@ define(function (require) {
   function post_function(url, dataType, data, func_success, func_error) {
     return send_function("POST", url, dataType, data, func_success, func_error);
   }
+  function put_function(url, dataType, data, func_success, func_error) {
+    return send_function("PUT", url, dataType, data, func_success, func_error);
+  }
+  function delete_function(url, dataType, data, func_success, func_error) {
+    return send_function("DELETE", url, dataType, func_success, func_error);
+  }
   return {
     get_file: function(system_name, application_name, file_name, data_type, data, func_success, func_error) {
       var url = get_target_path(system_name, application_name, file_name);
@@ -64,6 +70,14 @@ define(function (require) {
     post_data: function(system_name, application_name, api_name, data, func_success, func_error) {
       var url = "/api/" + get_target_path(system_name, application_name, api_name);
       return post_function(url, "json", data, func_success, func_error);
+    },
+    put_data: function(system_name, application_name, api_name, key, data, func_success, func_error) {
+      var url = "/api/" + get_target_path(system_name, application_name, api_name) + "/" + key;
+      return put_function(url, "json", data, func_success, func_error);
+    },
+    delete_data: function(system_name, application_name, api_name, key, func_success, func_error) {
+      var url = "/api/" + get_target_path(system_name, application_name, api_name) + "/" + key;
+      return delete_function(url, "json", func_success, func_error);
     },
     add_css: function(path) {
       var head = $("head");

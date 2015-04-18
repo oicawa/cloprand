@@ -16,6 +16,7 @@ define(function (require) {
     var _instance = this;
     
     function create_control(selector /*, field*/) {
+      var dfd = new $.Deferred;
       var html = _template.render(_assist);
       _root.append(html);
       _toolbar = new Toolbar(_instance);
@@ -34,17 +35,10 @@ define(function (require) {
           var event_name = _assist.row.events["dblclick"];
           operations[event_name](event, this);
         });
+        dfd.resolve();
       });
-
-      //_instance.act("delete", function() {
-      //  var selected_tr = _table.find("tbody > tr.selected");
-      //  var index = selected_tr.index();
-      //  if (index < 0) {
-      //    return;
-      //  }
-      //  selected_tr.remove();
-      //  _items.splice(index, 1);
-      //});
+      
+      return dfd.promise();
     }
 
     this.init = function(selector, type, assist) {
@@ -56,29 +50,17 @@ define(function (require) {
       _type = type;
       _assist = assist;
 
+      _root.datatype = type;
+
       // Load template data & Create form tags
-      $.when(
-        Utils.get_control_template("Grid", function(response) { _template = $.templates(response); })//,
-        //Utils.get_file("", "", _assist.data, "json", function(response) { _data = response; })
-      ).always(function() {
-        create_control(selector);
+      Utils.get_control_template("Grid", function(response) { _template = $.templates(response); })
+      .then(function() {
+        return create_control(selector);
+      }).then(function() {
         dfd.resolve();
       });
       return dfd.promise();
     };
-
-    //this.act = function(action, func) {
-    //  var actions = { "add": "ui-icon-plus", "delete": "ui-icon-minus", "edit": "ui-icon-pencil" };
-    //  var li = _toolbar.find("li[title='." + actions[action] + "']");
-    //  li.on("click", function (event) {
-    //    event.preventDefault();
-    //    func(event)
-    //  });
-    //};
-
-    //this.columns = function(columns) {
-    //  _columns = columns;
-    //};
 
     function refresh () {
       var thead = _table.find("thead");
@@ -157,7 +139,13 @@ define(function (require) {
       _toolbar.visible(on);
     };
 
+    this.backuped = function() {
+    };
+
     this.commit = function() {
+    };
+
+    this.restore = function() {
     };
 
     this.data = function(value) {

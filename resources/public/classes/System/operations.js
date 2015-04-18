@@ -14,19 +14,39 @@ define(function (require) {
     },
     "delete_system" : function(event, parent) {
       var res = confirm("Delete this system?");
-      alert(res);
-    },
-    "save_system" : function(event, parent) {
-      var systems = null;
-      Utils.post_data("", "", "systems", parent.data(), function(response) { systems = response; })
+      if (!res) {
+        return;
+      }
+      Utils.delete_data("", "", "systems", parent.key(), function(response) { systems = response; })
       .then(function() {
-        alert("Saved");
+        alert("Deleted");
         parent.commit();
         parent.edit(false);
       });
     },
+    "save_system" : function(event, parent) {
+      var systems = null;
+      if (parent.is_new()) {
+        Utils.post_data("", "", "systems", parent.data(), function(response) { systems = response; })
+        .then(function() {
+          alert("Saved");
+          parent.commit();
+          parent.edit(false);
+        });
+      } else {
+        Utils.put_data("", "", "systems", parent.key(), parent.data(), function(response) { systems = response; })
+        .then(function() {
+          alert("Saved");
+          parent.commit();
+          parent.edit(false);
+        });
+      }
+    },
     "cancel_system" : function(event, parent) {
-      alert("Canceled.");
+      if (!confirm("Canceled?")) {
+        return;
+      }
+      parent.restore();
       parent.edit(false);
     }
   };

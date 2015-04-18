@@ -1,9 +1,16 @@
 <p>{{:label}}</p>
 <div class="detail-operations"></div>
 <br/>
-<dl>
-{{for object_fields}}
-  <dt>{{:label}}</dt>
-  <dd><div class="{{:name}}"></div></dd>
-{{/for}}
-</dl>
+<table class="detail-fields">
+  <thead>
+    <tr><th></th><th></th></tr>
+  </thead>
+  <tbody>
+    {{for object_fields}}
+    <tr>
+      <td class="caption">{{:label}}</td>
+      <td class="value"><div class="{{:name}}"></div></td>
+    </tr>
+    {{/for}}
+  </tbody>
+</table>

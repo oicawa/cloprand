@@ -11,7 +11,7 @@ define(function (require) {
       "cancel": "ui-icon-trash"
     };
     var _parent = parent;
-  	var _root = null;
+  	var _root = null;;
     var _settings = null;
     var _template = null;
     var _css = null;
