@@ -5,6 +5,7 @@ define(function (require) {
   require("jquery_splitter");
   require("jsrender");
   var Utils = require("core/Utils");
+  var application = require("application");
   //var Toolbar = require("core/controls/Toolbar/Toolbar");
   //var Grid = require("core/controls/Grid/Grid");
   //var Detail = require("core/controls/Detail/Detail");
@@ -17,11 +18,14 @@ define(function (require) {
       if (!res) {
         return;
       }
+      var systems = null;
       Utils.delete_data("", "", "systems", parent.key(), function(response) { systems = response; })
       .then(function() {
         alert("Deleted");
         parent.commit();
         parent.edit(false);
+        application.delete_detail_tab("system" + parent.key());
+        application.refresh_systems(systems);
       });
     },
     "save_system" : function(event, parent) {
@@ -32,6 +36,7 @@ define(function (require) {
           alert("Saved");
           parent.commit();
           parent.edit(false);
+          application.refresh_systems(systems);
         });
       } else {
         Utils.put_data("", "", "systems", parent.key(), parent.data(), function(response) { systems = response; })
@@ -39,6 +44,7 @@ define(function (require) {
           alert("Saved");
           parent.commit();
           parent.edit(false);
+          application.refresh_systems(systems);
         });
       }
     },

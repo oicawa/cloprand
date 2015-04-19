@@ -105,7 +105,8 @@ define(function (require) {
     this.init = function(selector, type, assist) {
       var dfd = new $.Deferred;
       // Set member fields
-      _root = $(selector)
+      _root = $(selector);
+      _root.hide();
       if (0 < _root.children()) {
         dfd.resolve();
         return dfd.promise();

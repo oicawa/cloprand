@@ -51,8 +51,8 @@ define(function (require) {
   function put_function(url, dataType, data, func_success, func_error) {
     return send_function("PUT", url, dataType, data, func_success, func_error);
   }
-  function delete_function(url, dataType, data, func_success, func_error) {
-    return send_function("DELETE", url, dataType, func_success, func_error);
+  function delete_function(url, dataType, func_success, func_error) {
+    return send_function("DELETE", url, dataType, null, func_success, func_error);
   }
   return {
     get_file: function(system_name, application_name, file_name, data_type, data, func_success, func_error) {

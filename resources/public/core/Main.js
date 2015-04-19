@@ -19,22 +19,6 @@ define(function (require) {
     var _def_field = null;
     var _def_class = null;
 
-    //function show_detail(is_object) {
-    //  $("#object_detail").css("display", is_object ? "block" : "none");
-    //  $("#class_detail").css("display", is_object ? "none" : "block");
-    //}
-
-    //function show_field_editor(visible) {
-    //  var editor = $("#field_editor");
-    //  editor.css("display", visible ? "block" : "none");
-    //  editor.find("textarea, :text, select").val("").end().find(":checked").prop("checked", false);
-    //  $("#field_description").val("Object UUID. This is generated automaticaly.");
-    //}
-
-    //function refresh_fields_table() {
-    //	
-    //}
-
     this.init = function() {
       var system_name = Utils.get_system_name();
       system_name = system_name ? system_name : "";
@@ -51,9 +35,9 @@ define(function (require) {
         if (0 < system_name.length) {
           js_require_path += system_name + "/";
         }
-        js_require_path += "operations";
-        require([js_require_path], function(operations) {
-          operations["init"]();
+        js_require_path += "application";
+        require([js_require_path], function(application) {
+          application["init"]();
         });
       });
     };

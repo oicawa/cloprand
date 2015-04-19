@@ -1,6 +1,6 @@
 {
   "toolbar": {
-    "operations": "operations",
+    "operations": "application",
     "items": [
       { "name": "add", "caption": "Add", "description": "Add new system", "operation": "add_new_system" }
     ]
@@ -13,7 +13,7 @@
     "visible": false
   },
   "row": {
-    "operations" : "operations",
+    "operations" : "application",
     "events": {
       "click": "show_detail",
       "dblclick": "show_detail_tab"

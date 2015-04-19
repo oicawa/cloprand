@@ -24,7 +24,7 @@ define(function (require) {
         create_control(field);
         dfd.resolve();
       });
-      return dfd.resolve();
+      return dfd.promise();
     };
 
     this.edit = function(on) {
@@ -48,7 +48,7 @@ define(function (require) {
 
     this.restore = function() {
       var value = _root.find("div").text();
-      _root.find("input").val(value);
+      _root.find("textarea").val(value);
     };
 
     this.data = function(value) {

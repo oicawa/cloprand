@@ -37,6 +37,17 @@ define(function (require) {
       return true;
     };
 
+    this.remove = function(tab_id) {
+      var i = index(tab_id);
+      if (i < 0) {
+        return false;
+      }
+      var panelId = $("#" + tab_id).remove().attr("aria-controls");
+      $("#" + panelId ).remove();
+      _tabs.tabs("refresh");
+      return true;
+    };
+
     this.change = function(old_id, new_id, label) {
       var li = _tabs.find("ul > li[aria-controls='" + old_id + "']");
       var a = li.find("a");

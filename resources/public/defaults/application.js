@@ -34,8 +34,8 @@ define(function (require) {
       var detail = new Detail();
       detail.init("#" + tab_id + " > div.tab-contents-panel > div.object_detail", def_class, assist_class, "name")
       .then(function() {
-        detail.visible(true);
         detail.edit(true);
+        detail.visible(true);
       });
   	},
   	"show_detail" : function (event, row) {
@@ -50,15 +50,19 @@ define(function (require) {
       var detail = new Detail();
       detail.init("#" + tab_id + " > div.tab-contents-panel > div.object_detail", def_class, assist_class, "name")
       .then(function() {
-        detail.visible(true);
-        detail.edit(false);
         detail.data(system);
+        detail.edit(false);
+        detail.visible(true);
       });
   	},
   	"show_detail_tab" : function () {
   	  alert("Called show_detail_tab function.");
   	},
-  	"delete_system" : function () {
+  	"refresh_systems" : function (systems) {
+  	  _grid.data(systems);
+  	},
+  	"delete_detail_tab" : function (tab_id, systems) {
+  	  _tabs.remove(tab_id);
   	},
     "init" : function() {
       $('#root-panel').css({width: '100%', height: '100%'}).split({orientation: 'horizontal', limit: 20, position: '45px', invisible: true, fixed: true});

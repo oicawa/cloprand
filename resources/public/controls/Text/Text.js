@@ -18,7 +18,7 @@ define(function (require) {
       _root = $(selector);
       if (0 < _root.children()) {
         dfd.resolve();
-        return dfd.resolve();
+        return dfd.promise();
       }
 
       // Load template data & Create form tags
@@ -28,7 +28,7 @@ define(function (require) {
         create_control(field);
         dfd.resolve();
       });
-      return dfd.resolve();
+      return dfd.promise();
     };
 
     this.edit = function(on) {
