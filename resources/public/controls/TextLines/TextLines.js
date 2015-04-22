@@ -30,24 +30,24 @@ define(function (require) {
     this.edit = function(on) {
       if (on) {
         _root.find("textarea").show();
-        _root.find("div").hide();
+        _root.find("pre").hide();
       } else {
         _root.find("textarea").hide();
-        _root.find("div").show();
+        _root.find("pre").show();
       }
     };
 
     this.backuped = function() {
-      return _root.find("div").text();
+      return _root.find("pre").text();
     };
 
     this.commit = function() {
       var value = _root.find("textarea").val();
-      _root.find("div").text(value);
+      _root.find("pre").text(value);
     };
 
     this.restore = function() {
-      var value = _root.find("div").text();
+      var value = _root.find("pre").text();
       _root.find("textarea").val(value);
     };
 
@@ -56,7 +56,7 @@ define(function (require) {
         return _root.find("textarea").val();
       } else {
         _root.find("textarea").val(value);
-        _root.find("div").text(value);
+        _root.find("pre").text(value);
       }
     };
   }; 

@@ -3,6 +3,7 @@ define(function (require) {
   var Utils = require("core/Utils");
   return function (selector) {
     var _tabs = $(selector);
+    var _contents = {};
     var _instance = this;
 
     function index(tab_id) {
@@ -28,6 +29,14 @@ define(function (require) {
       active(i);
     };
 
+    this.content = function(tab_id, content) {
+      if (arguments.length < 2) {
+        return _contents[tab_id];
+      } else {
+        _contents[tab_id] = content;
+      }
+    };
+
     this.show = function(tab_id) {
       var i = index(tab_id);
       if (i < 0) {
@@ -42,8 +51,10 @@ define(function (require) {
       if (i < 0) {
         return false;
       }
-      var panelId = $("#" + tab_id).remove().attr("aria-controls");
-      $("#" + panelId ).remove();
+
+      _tabs.find("li[tabIndex=" + i + "]").remove();
+      _tabs.find("div#" + tab_id).remove();
+      delete _contents[tab_id];
       _tabs.tabs("refresh");
       return true;
     };
@@ -56,6 +67,9 @@ define(function (require) {
       li.attr("aria-controls", new_id);
       var div = _tabs.find("div#" + old_id);
       div.attr("id", new_id);
+      var content = _contents[old_id];
+      delete _contents[old_id];
+      _contents[new_id] = content;
     };
 
     this.init = function() {

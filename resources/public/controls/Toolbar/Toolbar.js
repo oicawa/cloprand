@@ -18,9 +18,9 @@ define(function (require) {
     var _instance = this;
     var _operations = null;
 
-    function operation_generator(operation_name) {
+    function operation_generator(operation_name, li) {
       return function(event) {
-        _operations[operation_name](event, _parent);
+        _operations[operation_name](event, li);
       };
     }
 
@@ -39,7 +39,7 @@ define(function (require) {
             caption.addClass("space");
           }
           _operations[item.operation] = operations[item.operation];
-          li.on("click", operation_generator(item.operation));
+          li.on("click", operation_generator(item.operation, li));
         }
         dfd.resolve();
       });
