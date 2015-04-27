@@ -1,3 +1,3 @@
 {
-  ?= clominal.debug/print
+  ?= tames.debug/print
  }
