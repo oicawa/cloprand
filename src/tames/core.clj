@@ -1,10 +1,10 @@
-(ns cloprand.core
+(ns tames.core
   (:gen-class)
   (:use ring.adapter.jetty)
   (:require [compojure.core :refer :all]
             [compojure.handler]
-            [cloprand.handler :as handler]
-            [cloprand.systems :as systems]))
+            [tames.handler :as handler]
+            [tames.systems :as systems]))
 
 (defn init
   []

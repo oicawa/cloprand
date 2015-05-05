@@ -1,4 +1,4 @@
-(ns cloprand.sqldb
+(ns tames.sqldb
   (:require ;[compojure.core :refer :all]
             ;[compojure.handler :as handler]
             ;[compojure.route :as route]
@@ -20,7 +20,7 @@
 
 (def db-spec {:classname   "org.h2.Driver" ; must be in classpath
               :subprotocol "h2"
-              :subname "tcp://localhost/~/cloprand.db"
+              :subname "tcp://localhost/~/tames.db"
               ; Any additional keys are passed to the driver
               ; as driver-specific properties.
               :user     ""

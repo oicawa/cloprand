@@ -1,10 +1,10 @@
-(ns cloprand.handler
+(ns tames.handler
   (:gen-class)
   (:use ring.adapter.jetty)
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
             [ring.util.response :as response]
-            [cloprand.systems :as systems]))
+            [tames.systems :as systems]))
 
 (defroutes app-routes
   ;; for 'systems'
@@ -57,7 +57,7 @@
 ;  ;  (let [base-path   (format"./resources/public/systems/%s" system-name)
 ;  ;        system-path (. (File. base-path getAbsolutePath))
 ;  ;        system-config 
-;  ;  (response/resource-response "index.html" {:root "public/cloprand"}))
+;  ;  (response/resource-response "index.html" {:root "public/tames"}))
 ;  ;(POST "/create_table" [table_name]
 ;  ;  (create_table table_name)
 ;  ;  (response {:value table_name}))
