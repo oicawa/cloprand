@@ -64,7 +64,7 @@ define(function (require) {
 
       // Load template data & Create form tags
       Utils.add_css("/controls/Toolbar/Toolbar.css");
-      Utils.get_control_template("Toolbar", function(response) { _template = $.templates(response); })
+      Utils.get_template("controls", "Toolbar", function(response) { _template = $.templates(response); })
       .then(function() {
         return create_toolbar();
       }).then(function() {

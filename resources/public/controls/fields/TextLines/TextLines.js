@@ -16,14 +16,10 @@ define(function (require) {
       var dfd = new $.Deferred;
       // Set member fields
       _root = $(selector);
-      if (0 < _root.children()) {
-        dfd.resolve();
-        return dfd.promise();
-      }
 
       // Load template data & Create form tags
-      Utils.add_css("/controls/Text/Text.css");
-      Utils.get_control_template("Text", function(response) { _template = $.templates(response); })
+      Utils.add_css("/controls/fields/TextLines/TextLines.css");
+      Utils.get_template("controls/fields", "TextLines", function(response) { _template = $.templates(response); })
       .then(function() {
         create_control(field);
         dfd.resolve();
@@ -33,34 +29,34 @@ define(function (require) {
 
     this.edit = function(on) {
       if (on) {
-        _root.find("input").show();
-        _root.find("div").hide();
+        _root.find("textarea").show();
+        _root.find("pre").hide();
       } else {
-        _root.find("input").hide();
-        _root.find("div").show();
+        _root.find("textarea").hide();
+        _root.find("pre").show();
       }
     };
 
     this.backuped = function() {
-      return _root.find("div").text();
+      return _root.find("pre").text();
     };
 
     this.commit = function() {
-      var value = _root.find("input").val();
-      _root.find("div").text(value);
+      var value = _root.find("textarea").val();
+      _root.find("pre").text(value);
     };
 
     this.restore = function() {
-      var value = _root.find("div").text();
-      _root.find("input").val(value);
+      var value = _root.find("pre").text();
+      _root.find("textarea").val(value);
     };
 
     this.data = function(value) {
       if (arguments.length == 0) {
-        return _root.find("input").val();
+        return _root.find("textarea").val();
       } else {
-        _root.find("input").val(value);
-        _root.find("div").text(value);
+        _root.find("textarea").val(value);
+        _root.find("pre").text(value);
       }
     };
   }; 

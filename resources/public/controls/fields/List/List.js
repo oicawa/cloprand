@@ -17,8 +17,8 @@ define(function (require) {
       _root = $(selector);
 
       // Load template data & Create form tags
-      Utils.add_css("controls/List/List.css");
-      Utils.get_control_template("List", function(response) { _template = $.templates(response); })
+      Utils.add_css("controls/fields/List/List.css");
+      Utils.get_template("control/fields", "List", function(response) { _template = $.templates(response); })
       .then(function() {
         create_control(field);
       });

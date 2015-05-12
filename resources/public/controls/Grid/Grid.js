@@ -8,7 +8,7 @@ define(function (require) {
     var _assist = null;
     var _type = null;
     var _template = null;
-    var _data = null;
+    var _data = [];
     var _toolbar = null;
     var _table = null;
     var _columns = [];
@@ -53,7 +53,7 @@ define(function (require) {
       _root.datatype = type;
 
       // Load template data & Create form tags
-      Utils.get_control_template("Grid", function(response) { _template = $.templates(response); })
+      Utils.get_template("controls", "Grid", function(response) { _template = $.templates(response); })
       .then(function() {
         return create_control(selector);
       }).then(function() {
@@ -69,7 +69,7 @@ define(function (require) {
       thead_buf.push("<tr>");
       for (var i = 0; i < _assist.columns.length; i++) {
         var column = _assist.columns[i];
-        thead_buf.push("<th>", column.label, "</th>");
+        thead_buf.push("<th>", "<div>", column.label, "</div>", "</th>");
       }
       thead_buf.push("</tr>");
       $(thead_buf.join("")).appendTo(thead);
@@ -81,31 +81,20 @@ define(function (require) {
       
       var tbody = _table.find("tbody");
       tbody.empty();
+      if (!_data) {
+        return;
+      }
       for (var i = 0; i < _data.length; i++) {
         var item = _data[i];
         var buf = [];
         buf.push("<tr>");
         for (var j = 0; j < _assist.columns.length; j++) {
           var column = _assist.columns[j];
-          buf.push("<td>", item[column.name], "</td>");
+          buf.push("<td>", "<div>", item[column.name], "</div>", "</td>");
         }
         buf.push("</tr>");
         $(buf.join("")).appendTo(tbody);
       }
-    }
-
-    function add_row() {
-      var buf = [];
-      buf.push("<tr>");
-      for (var i = 0; i < _assist.columns.length; i++) {
-        var column = _assist.columns[i];
-        buf.push("<td class='", column.name, "'></td>");
-      }
-      buf.push("</tr>");
-      var tbody = _table.find("tbody");
-      var tr = $(buf.join(""));
-      tr.appendTo(tbody);
-      return tr;
     }
 
     function assign_item(tr, item) {

@@ -26,9 +26,9 @@ define(function (require) {
   }
   
   return {
-  	"add_new_system" : function () {
-      var label = "New System";
-      var tab_id = "system-" + (new Date()).getTime();
+  	"add_new_class" : function () {
+      var label = "New Class";
+      var tab_id = "class-" + (new Date()).getTime();
   	  _tabs.add(tab_id, label, true);
 
       var detail = new Detail();
@@ -42,7 +42,7 @@ define(function (require) {
   	"show_detail" : function (event, row) {
   	  var selected_index = $(row).index();
   	  var system = _grid.data()[selected_index];
-  	  var tab_id = "system-" + system.name;
+  	  var tab_id = "class-" + system.name;
   	  var exists = _tabs.show(tab_id);
   	  if (exists) {
   	    return;
@@ -70,17 +70,17 @@ define(function (require) {
     "init" : function() {
       $('#root-panel').css({width: '100%', height: '100%'}).split({orientation: 'horizontal', limit: 20, position: '45px', invisible: true, fixed: true});
       
-      var systems = null;
+      var classes = null;
       var template = null;
       var assist = null;
       Utils.add_css("/style.css");
       $.when(
-        Utils.get_file("", "", "application.html", "html", function (data) { template = $.templates(data); }),
-        Utils.get_file("", "", "assist.json", "json", function (data) { assist = data; }),
-        Utils.get_data("", "", "systems", function (data) { systems = data; }),
-        Utils.get_file("", "", "/classes/System/class.json", "json", function (data) { def_class = data; }),
-        Utils.get_file("", "", "/classes/System/assist.json", "json", function (data) { assist_class = data; }),
-        Utils.get_file("", "", "/classes/Field/class.json", "json", function (data) { def_field = data; })
+        Utils.get_file("", "application.html", "html", function (data) { template = $.templates(data); }),
+        Utils.get_file("", "assist.json", "json", function (data) { assist = data; }),
+        Utils.get_data("class", function (data) { classes = data; }),
+        Utils.get_file("", "classes/Class/class.json", "json", function (data) { def_class = data; }),
+        Utils.get_file("", "classes/Class/assist.json", "json", function (data) { assist_class = data; }),
+        Utils.get_file("", "classes/Field/class.json", "json", function (data) { def_field = data; })
       ).always(function() {
         var application_html = template.render();
         $("#contents-panel").append(application_html);
@@ -91,7 +91,7 @@ define(function (require) {
         _grid = new Grid();
         _grid.init("#object-list", null, assist)
         .then(function () {
-          _grid.data(systems);
+          _grid.data(classes);
         });
 
         // Tabs

@@ -20,22 +20,19 @@ define(function (require) {
     var _def_class = null;
 
     this.init = function() {
-      var system_name = Utils.get_system_name();
-      system_name = system_name ? system_name : "";
+      // URL is assumed "/index.html".
+      // This Web page is provided as a management screen of the class definitions.
       var template = null;
       var config = null;
       $.when(
-        Utils.get_file(system_name, "", "system.html", "html", function (data) { template = $.templates(data); }),
-        Utils.get_file(system_name, "", "config.json", "json", function (data) { config = data; })
+        Utils.get_file("", "system.html", "html", function(data){ template = $.templates(data); }),
+        Utils.get_file("", "config.json", "json", function(data){ config = data; })
       ).always(function() {
         var root_html = template.render(config);
         $("body").append(root_html);
         
-        var js_require_path = "";
-        if (0 < system_name.length) {
-          js_require_path += system_name + "/";
-        }
-        js_require_path += "application";
+        var js_require_path = "application";
+        console.log("js_require_path: " + js_require_path);
         require([js_require_path], function(application) {
           application["init"]();
         });

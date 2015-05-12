@@ -28,26 +28,27 @@ define(function (require) {
       return _assist[field.name];
     }
     
-    function get_control_name(field, assist) {
+    function get_control_path(field, assist) {
       if (assist && assist["control"]) {
-        return _assist[field.name]["control"];
+        var control_name = _assist[field.name]["control"];
+        return "controls/" + control_name + "/" + control_name;
       }
       var is_list = field.list;
       if (is_list) {
-        return "List";
+        return "controls/fields/List/List";
       }
       var match = Utils.UUID.test(field.datatype);
       if (match) {
-        return "DropDownList";
+        return "controls/fields/DropDownList/DropDownList";
       }
-      return field.datatype;
+      return "controls/fields/" + field.datatype + "/" + field.datatype;
     }
 
     function field_func(selector, field) {
       var dfd = new $.Deferred;
       var assist = get_control_assist(field);
-      var control_name = get_control_name(field, assist);
-      require(["controls/" + control_name + "/" + control_name], function(Control) {
+      var control_path = get_control_path(field, assist);
+      require([control_path], function(Control) {
         var control = new Control();
         _controls[field.name] = control;
         try {
@@ -116,7 +117,7 @@ define(function (require) {
 
       // Load template data & Create form tags
       Utils.add_css("/controls/Detail/Detail.css");
-      Utils.get_control_template("Detail", function(response) { _root_template = $.templates(response); })
+      Utils.get_template("controls", "Detail", function(response) { _root_template = $.templates(response); })
       .then(function() {
         var root_html = _root_template.render(_type);
         _root.append(root_html);

@@ -5,7 +5,10 @@
             [ring.util.response :as response]
             [clojure.data.json :as json])
   (:import (java.io File InputStream)
-           (java.util.jar JarFile JarEntry)))
+           (java.util.jar JarFile JarEntry)
+           (java.util UUID)))
+
+(def OBJECT-FILE-NAME #"^[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}\.json$")
 
 (defn get-absolute-path
   [relative-path]
@@ -92,20 +95,20 @@
         (. systems-dir mkdirs))))
 
 (defn exists?
-  [system-name]
-  (let [system-path (format "%s/%s" (get-absolute-path "systems") system-name)
-        system-dir  (File. system-path)]
-    (and (. system-dir exists) (. system-dir isDirectory))))
+  [class-id]
+  (let [class-dir-path (get-absolute-path class-id)
+        class-dir      (File. class-dir-path)]
+    (and (. class-dir exists) (. class-dir isDirectory))))
 
-(defn get-system-application-path
-  [system-name application-name]
-  (let [systems-path (get-absolute-path "systems")]
-    (if (empty? system-name)
-        systems-path
-        (let [system-path (format "%s/%s" systems-path system-name)]
-          (if (empty? application-name)
-              system-path
-              (format "%s/applications/%s" system-path application-name))))))
+;(defn get-system-application-path
+;  [system-name application-name]
+;  (let [systems-path (get-absolute-path "systems")]
+;    (if (empty? system-name)
+;        systems-path
+;        (let [system-path (format "%s/%s" systems-path system-name)]
+;          (if (empty? application-name)
+;              system-path
+;              (format "%s/applications/%s" system-path application-name))))))
 
 (defn get-default-file
   [file-name]
@@ -114,27 +117,39 @@
     resource-path
     ))
 
-(defn get-systems
-  []
-  (let [systems-path (get-absolute-path "systems")
-        systems-dir  (File. systems-path)
-        files        (. systems-dir listFiles)
-        system-dirs  (filter #(. %1 isDirectory) files)
-        systems      (map #(let [config-path (str (. %1 getAbsolutePath) "/config.json")]
-                             (with-open [rdr (io/reader config-path)]
-                               (json/read rdr)))
-                          system-dirs)]
-    (json/write-str systems)))
+;(defn get-systems
+;  []
+;  (let [systems-path (get-absolute-path "systems")
+;        systems-dir  (File. systems-path)
+;        files        (. systems-dir listFiles)
+;        system-dirs  (filter #(. %1 isDirectory) files)
+;        systems      (map #(let [config-path (str (. %1 getAbsolutePath) "/config.json")]
+;                             (with-open [rdr (io/reader config-path)]
+;                               (json/read rdr)))
+;                          system-dirs)]
+;    (json/write-str systems)))
 
-(defn get-absolute-classes
-  [system-name]
-  (let [classes-path    (format "%s/%s" (get-system-application-path system-name "") "classes")
-        class-dir-names (get-absolute-children classes-path true false)
-        class-jsons     (map #(let [absolute-path (format "%s/%s/class.json" classes-path %1)]
-                               (with-open [rdr (io/reader absolute-path)]
-                                 (json/read rdr)))
-                             class-dir-names)]
-    class-jsons))
+(defn get-list
+  [class-id]
+  (let [class-dir-path (get-absolute-path class-id)
+        class-dir      (File. class-dir-path)
+        object-files   (filter #(and (not (. %1 isDirectory))
+                                     (re-find OBJECT-FILE-NAME (. %1 getName)))
+                               (. class-dir listFiles))
+        objects        (map #(with-open [rdr (io/reader (. %1 getAbsolutePath))]
+                              (json/read rdr))
+                            object-files)]
+    (json/write-str objects)))
+
+;(defn get-absolute-classes
+;  [system-name]
+;  (let [classes-path    (format "%s/%s" (get-system-application-path system-name "") "classes")
+;        class-dir-names (get-absolute-children classes-path true false)
+;        class-jsons     (map #(let [absolute-path (format "%s/%s/class.json" classes-path %1)]
+;                               (with-open [rdr (io/reader absolute-path)]
+;                                 (json/read rdr)))
+;                             class-dir-names)]
+;    class-jsons))
 
 (defn get-resource-classes
   []
@@ -147,11 +162,11 @@
                              class-dir-names)]
     class-jsons))
 
-(defn get-classes
-  [system-name]
-  (let [resource-class-jsons    (get-resource-classes)
-        absolute-class-jsons    (get-absolute-classes system-name)]
-    (json/write-str (concat resource-class-jsons absolute-class-jsons))))
+;(defn get-classes
+;  [system-name]
+;  (let [resource-class-jsons    (get-resource-classes)
+;        absolute-class-jsons    (get-absolute-classes system-name)]
+;    (json/write-str (concat resource-class-jsons absolute-class-jsons))))
 
 (defn get-resources-list
   []
@@ -163,46 +178,42 @@
       (response/header "Contents-Type" content-type)))
 
 (defn get-file
-  [system-name application-name file-name content-type]
+  [class-id file-name content-type]
   ;(let [path (get-target-path system-name application-name)
   ;      res  (response/file-response path)]
   ;  (response-with-content-type res content-type)))
-  (let [absolute-path (str (get-system-application-path system-name application-name) "/" file-name)
-        file (File. absolute-path)
-        res  (if (. file exists)
-                 (response/file-response absolute-path)
-                 (response/resource-response (get-default-file file-name)))]
+  (let [absolute-path (get-absolute-path (str class-id "/" file-name))
+        file          (File. absolute-path)
+        res           (if (. file exists)
+                          (response/file-response absolute-path)
+                          (response/resource-response (get-default-file file-name)))]
     (response-with-content-type res content-type)))
 
 (defn get-data
-  [system-name application-name api-name content-type]
+  [class-id]
   (response-with-content-type
-    (response/response
-      (cond (= api-name "systems")
-              (get-systems)
-            (= api-name "classes")
-              (get-classes system-name)
-            :else
-              nil))
+    (response/response (get-list class-id))
     "text/json; charset=utf-8"))
 
-(defn create-system
-  [params]
+(defn create-object
+  [class-id params]
   (println "Called create-system function.")
-  (let [dir-name    (params :name)
-        config-path (get-absolute-path (str "systems/" dir-name "/config.json"))]
-    (ensure-directory (str "systems/" dir-name))
-    (with-open [w (io/writer config-path)]
-      (json/write params w))))
+  (let [dir-name    class-id
+        object-id   (str (UUID/randomUUID))
+        object-file (get-absolute-path (str class-id "/" object-id ".json"))
+        object      (assoc params :uuid object-id)]
+    (println "***:" params)
+    (ensure-directory class-id)
+    (with-open [w (io/writer object-file)]
+      (json/write object w))))
 
-(defn update-system
-  [id params]
-  (println "Called update-system function.")
-  (let [src-dir     (File. (get-absolute-path (str "systems/" id)))
-        dst-dir     (File. (get-absolute-path (str "systems/" (params :name))))
-        config-path (str (. dst-dir getAbsolutePath) "/config.json")]
-    (. src-dir renameTo dst-dir)
-    (with-open [w (io/writer config-path)]
+(defn update-object
+  [class-id object-id params]
+  (println "Called update-object function.")
+  (let [object-file    (File. (get-absolute-path (str class-id "/" object-id ".json")))]
+    ;; !! CAUTION !!
+    ;; Implement 'param' data check logic!!
+    (with-open [w (io/writer object-file)]
       (json/write params w))))
 
 (defn remove-file
@@ -212,44 +223,35 @@
         (remove-file child)))
   (. file delete))
   
-(defn delete-system
-  [id]
-  (println "Called delete-system function.")
-  (let [file (File. (get-absolute-path (str "systems/" id)))]
+(defn delete-object
+  [class-id object-id]
+  (println "Called delete-object function.")
+  (let [file (File. (get-absolute-path (str class-id "/" object-id ".json")))]
     (remove-file file)))
 
 (defn post-data
-  [system-name application-name api-name params]
+  [class-id params]
   (println "Called post-data function.")
-  (cond (= api-name "systems")
-          (create-system params)
-        :else
-          nil)
+  (create-object class-id params)
   (println "Posted OK.")
   (response-with-content-type
-    (response/response (get-systems))
+    (response/response (get-list class-id))
     "text/json; charset=utf-8"))
 
 (defn put-data
-  [system-name application-name api-name id params]
+  [class-id object-id params]
   (println "Called put-data function.")
-  (cond (= api-name "systems")
-          (update-system id params)
-        :else
-          nil)
+  (update-object class-id object-id params)
   (println "Put OK.")
   (response-with-content-type
-    (response/response (get-systems))
+    (response/response (get-list class-id))
     "text/json; charset=utf-8"))
 
 (defn delete-data
-  [system-name application-name api-name id]
+  [class-id object-id]
   (println "Called delete-data function.")
-  (cond (= api-name "systems")
-          (delete-system id)
-        :else
-          nil)
+  (delete-object class-id object-id)
   (println "Delete OK.")
   (response-with-content-type
-    (response/response (get-systems))
+    (response/response (get-list class-id))
     "text/json; charset=utf-8"))

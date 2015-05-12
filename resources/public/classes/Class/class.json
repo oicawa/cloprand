@@ -1,12 +1,14 @@
 {
-  "uuid": "0000-0000-0000-0002",
+  "uuid": "ae727055-cb09-49ed-84af-6cbc8cd37ba8",
   "name": "class",
   "label": "Class",
   "description": "Class Definition",
   "object_fields": [
+    { "name": "uuid", "label": "Class ID", "datatype": "UUID" },
     { "name": "name", "label": "Name", "datatype": "Text" },
     { "name": "label", "label": "Label", "datatype": "Text" },
     { "name": "description", "label": "Description", "datatype": "TextLines" },
-    { "name": "object_fields", "label": "Object Fields", "datatype": "0000-0000-0000-0001", "list": true }
+    { "name": "fieldtype", "label": "Field Type", "datatype": "FieldType" },
+    { "name": "object_fields", "label": "Object Fields", "datatype": "6e851190-81e3-4b89-9304-a06c6282630c", "list": true, "embeded": true }
   ]
 }

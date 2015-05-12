@@ -1,12 +1,11 @@
 {
-  "uuid": "0000-0000-0000-0001",
+  "uuid": "6e851190-81e3-4b89-9304-a06c6282630c",
   "name": "field",
   "label": "Field",
   "object_fields": [
-    { "name": "name", "label": "Name", "datatype": ":text" },
-    { "name": "label", "label": "Label", "datatype": ":text" },
-    { "name": "description", "label": "Description", "datatype": ":text-lines" },
-    { "name": "datatype", "label": "Data Type", "datatype": "0123-4567-8901" },
-    { "name": "list", "label": "As List", "datatype": ":boolean" }
+    { "name": "name", "label": "Name", "datatype": "Text" },
+    { "name": "label", "label": "Label", "datatype": "Text" },
+    { "name": "description", "label": "Description", "datatype": "TextLines" },
+    { "name": "datatype", "label": "Data Type", "datatype": "FieldType" }
   ]
 }

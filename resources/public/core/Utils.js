@@ -1,18 +1,15 @@
 define(function (require) {
   require('jquery');
   require('json2');
-  function get_target_path(system_name, application_name, file_name) {
-    var buf = [];
-    if (system_name && 0 < system_name.length) {
-      buf.push(system_name);
-    }
-    if (application_name && 0 < application_name.length) {
-      buf.push(application_name);
-    }
-    if (file_name && 0 < file_name.length) {
-      buf.push(file_name);
-    }
-    return buf.join("/");
+  function create_path() {
+    var args = Array.prototype.slice.call(arguments);
+    var result = args.every(function(arg) { return typeof arg == "string"; });
+    console.assert(result, args);
+    var path = args.reduce(function (prev, current, index, array) {
+      var adding = current.length == 0 ? "" : "/" + current;
+      return prev + adding;
+    });
+    return path;
   }
   function send_function(method, url, dataType, data, func_success, func_error) {
     var dfd = new $.Deferred;
@@ -27,7 +24,7 @@ define(function (require) {
           func_success(response);
           dfd.resolve();
         } else {
-          alert("The success function is not assigned.\n(" + url + ")");
+          alert("The success function is not assigned.\n(" + url + ")\n\nresponse:" + JSON.stringify(response) + "\nstatus:" + status);
           dfd.reject();
         }
       },
@@ -35,7 +32,7 @@ define(function (require) {
         if (typeof func_error == "function") {
           func_error(response, status);
         } else {
-          alert("The error function is not assigned.\n(" + url + ")");
+          alert("The error function is not assigned.\n(" + url + ")\n\nresponse:" + JSON.stringify(response) + "\nstatus:" + status);
         }
         dfd.reject();
       }
@@ -55,28 +52,29 @@ define(function (require) {
     return send_function("DELETE", url, dataType, null, func_success, func_error);
   }
   return {
-    get_file: function(system_name, application_name, file_name, data_type, data, func_success, func_error) {
-      var url = get_target_path(system_name, application_name, file_name);
+    get_file: function(class_id, file_name, data_type, data, func_success, func_error) {
+      var url = create_path(class_id, file_name);
+      console.log(url);
       return get_function(url, data_type, data, func_success, func_error);
     },
-    get_control_template: function(control_name, func_success, func_error) {
-      var url = "/controls/" + control_name + "/" + control_name + ".html";
+    get_template: function(namespace, control_name, func_success, func_error) {
+      var url = create_path(namespace, control_name, control_name + ".html");
       return get_function(url, "html", func_success, func_error);
     },
-    get_data: function(system_name, application_name, api_name, func_success, func_error) {
-      var url = "/api/" + get_target_path(system_name, application_name, api_name);
+    get_data: function(class_id, func_success, func_error) {
+      var url = create_path("api", class_id);
       return get_function(url, "json", func_success, func_error);
     },
-    post_data: function(system_name, application_name, api_name, data, func_success, func_error) {
-      var url = "/api/" + get_target_path(system_name, application_name, api_name);
+    post_data: function(class_id, data, func_success, func_error) {
+      var url = create_path("api", class_id);
       return post_function(url, "json", data, func_success, func_error);
     },
-    put_data: function(system_name, application_name, api_name, key, data, func_success, func_error) {
-      var url = "/api/" + get_target_path(system_name, application_name, api_name) + "/" + key;
+    put_data: function(class_id, object_id, data, func_success, func_error) {
+      var url = create_path("api", class_id, object_id);
       return put_function(url, "json", data, func_success, func_error);
     },
-    delete_data: function(system_name, application_name, api_name, key, func_success, func_error) {
-      var url = "/api/" + get_target_path(system_name, application_name, api_name) + "/" + key;
+    delete_data: function(class_id, object_id, func_success, func_error) {
+      var url = create_path("api", class_id, object_id);
       return delete_function(url, "json", func_success, func_error);
     },
     add_css: function(path) {
@@ -86,8 +84,8 @@ define(function (require) {
         //console.log("[" +path + "]: already included (count=" + css.length + ")");
         return;
       }
-      //head.append("<link rel='stylesheet' type='text/css' href='" + path + "?_=" + (new Date()).getTime() + "'></link>");
-      head.append("<link rel='stylesheet' type='text/css' href='" + path + "' />");
+      head.append("<link rel='stylesheet' type='text/css' href='" + path + "?_=" + (new Date()).getTime() + "'></link>");
+      //head.append("<link rel='stylesheet' type='text/css' href='" + path + "' />");
     },
     get_system_name : function() {
       var path = location.pathname;

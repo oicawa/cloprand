@@ -2,8 +2,10 @@
   "toolbar": {
     "operations" : "classes/Class/operations",
     "items" : [
-      { "name": "add",    "caption": "Add",    "description": "Add new class", "operation": "add_new_class" },
-      { "name": "delete", "caption": "Delete", "description": "Delete new class", "operation": "delete_class" }
+      { "name": "edit",   "caption": "Edit",   "description": "Edit item data.", "operation": "edit_class" },
+      { "name": "delete", "caption": "Delete", "description": "Delete item data.", "operation": "delete_class" },
+      { "name": "save",   "caption": "Save",   "description": "Save item data.", "operation": "save_class" },
+      { "name": "cancel", "caption": "Cancel", "description": "Cancel item data.", "operation": "cancel_class" }
     ]
   },
   "object_fields": {
@@ -20,6 +22,15 @@
       {"name":"label", "label": "Label", "renderer": null},
       {"name":"description", "label": "Description", "renderer": null}
     ],
-    "data": "/classes/Class/class.json"
+    "header": {
+      "visible": true
+    },
+    "row": {
+      "operations" : "application",
+      "events": {
+        "click": "show_detail"
+      }
+    },
+    "data": "classes/Class/class.json"
   }
 }

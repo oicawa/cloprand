@@ -2,10 +2,11 @@
   "toolbar": {
     "operations": "application",
     "items": [
-      { "name": "add", "caption": "Add", "description": "Add new system", "operation": "add_new_system" }
+      { "name": "add", "caption": "Add", "description": "Add new class", "operation": "add_new_class" }
     ]
   },
   "columns": [
+    {"name":"name", "label": "Name", "renderer": null},
     {"name":"label", "label": "Label", "renderer": null},
     {"name":"description", "label": "Description", "renderer": null}
   ],
@@ -15,8 +16,7 @@
   "row": {
     "operations" : "application",
     "events": {
-      "click": "show_detail",
-      "dblclick": "show_detail_tab"
+      "click": "show_detail"
     }
   }
 }
