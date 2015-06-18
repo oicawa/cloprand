@@ -1,0 +1,21 @@
+{
+  "title": "Menu",
+  "toolbar": {
+    "operations": "MenuView",
+    "items": [
+    ]
+  },
+  "columns": [
+    {"name":"label", "label": "Label", "renderer": null},
+    {"name":"description", "label": "Description", "renderer": null}
+  ],
+  "header": {
+    "visible": false
+  },
+  "row": {
+    "operations" : "controls/views/MenuView/MenuView",
+    "events": {
+      "click": "show_gridview"
+    }
+  }
+}

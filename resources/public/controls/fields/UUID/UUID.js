@@ -2,66 +2,62 @@ define(function (require) {
   require("jquery");
   require("jsrender");
   var Utils = require("core/Utils");
-  return function () {
-  	var _root = null;
-    var _template = null;
-    var _instance = this;
+  function UUID() {
+  	this._editor = null;
+  	this._viewer = null;
+  }
 
-    function create_control(field) {
-      var html = _template.render(field);
-      _root.append(html);
+  UUID.prototype.init = function(selector, field) {
+    var dfd = new $.Deferred;
+    var root = $(selector);
+    var template = null;
+    var self = this;
+    
+    Utils.add_css("/controls/fields/UUID/UUID.css");
+    Utils.get_template("controls/fields", "UUID", function(response) { template = $.templates(response); })
+    .then(function() {
+      var html = template.render(field);
+      root.append(html);
+      self._editor = root.find("div.editor");
+      self._viewer = root.find("div.viewer");
+      dfd.resolve();
+    });
+    return dfd.promise();
+  };
+
+  UUID.prototype.edit = function(on) {
+    if (on) {
+      this._editor.show();
+      this._viewer.hide();
+    } else {
+      this._editor.hide();
+      this._viewer.show();
     }
+  };
 
-    this.init = function(selector, field) {
-      var dfd = new $.Deferred;
-      // Set member fields
-      _root = $(selector);
-      if (0 < _root.children()) {
-        dfd.resolve();
-        return dfd.promise();
-      }
+  UUID.prototype.backuped = function() {
+    return this._viewer.text();
+  };
 
-      // Load template data & Create form tags
-      Utils.add_css("/controls/fields/UUID/UUID.css");
-      Utils.get_template("controls/fields", "UUID", function(response) { _template = $.templates(response); })
-      .then(function() {
-        create_control(field);
-        dfd.resolve();
-      });
-      return dfd.promise();
-    };
+  UUID.prototype.commit = function() {
+    var value = this._editor.text();
+    this._viewer.text(value);
+  };
 
-    this.edit = function(on) {
-      if (on) {
-        _root.find("input").show();
-        _root.find("div").hide();
-      } else {
-        _root.find("input").hide();
-        _root.find("div").show();
-      }
-    };
+  UUID.prototype.restore = function() {
+    var value = this._viewer.text();
+    this._editor.text(value);
+  };
 
-    this.backuped = function() {
-      return _root.find("div").text();
-    };
-
-    this.commit = function() {
-      var value = _root.find("input").val();
-      _root.find("div").text(value);
-    };
-
-    this.restore = function() {
-      var value = _root.find("div").text();
-      _root.find("input").val(value);
-    };
-
-    this.data = function(value) {
-      if (arguments.length == 0) {
-        return _root.find("input").val();
-      } else {
-        _root.find("input").val(value);
-        _root.find("div").text(value);
-      }
-    };
-  }; 
+  UUID.prototype.data = function(value) {
+    if (arguments.length == 0) {
+      return this._editor.text();
+    } else {
+      this._editor.text(value);
+      this._viewer.text(value);
+      console.log("[UUID.data] done");
+    }
+  };
+  
+  return UUID;
 }); 

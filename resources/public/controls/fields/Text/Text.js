@@ -2,66 +2,68 @@ define(function (require) {
   require("jquery");
   require("jsrender");
   var Utils = require("core/Utils");
-  return function () {
-  	var _root = null;
-    var _template = null;
-    var _instance = this;
-
-    function create_control(field) {
-      var html = _template.render(field);
-      _root.append(html);
+  
+  function Text() {
+    this._editor = null;
+    this._viewer = null;
+  };
+  
+  Text.prototype.init = function(selector, field) {
+    var dfd = new $.Deferred;
+    var root = $(selector);
+    if (0 < root.children()) {
+      dfd.resolve();
+      return dfd.promise();
     }
 
-    this.init = function(selector, field) {
-      var dfd = new $.Deferred;
-      // Set member fields
-      _root = $(selector);
-      if (0 < _root.children()) {
-        dfd.resolve();
-        return dfd.promise();
-      }
+    // Load template data & Create form tags
+    var template = null;
+    var self = this;
+    Utils.add_css("/controls/fields/Text/Text.css");
+    Utils.get_template("controls/fields", "Text", function(response) { template = $.templates(response); })
+    .then(function() {
+      var html = template.render(field);
+      root.append(html);
+      self._editor = root.find("input");
+      self._viewer = root.find("div");
+      dfd.resolve();
+    });
+    return dfd.promise();
+  };
 
-      // Load template data & Create form tags
-      Utils.add_css("/controls/fields/Text/Text.css");
-      Utils.get_template("controls/fields", "Text", function(response) { _template = $.templates(response); })
-      .then(function() {
-        create_control(field);
-        dfd.resolve();
-      });
-      return dfd.promise();
-    };
+  Text.prototype.backuped = function() {
+    return this._viewer.text();
+  };
 
-    this.edit = function(on) {
-      if (on) {
-        _root.find("input").show();
-        _root.find("div").hide();
-      } else {
-        _root.find("input").hide();
-        _root.find("div").show();
-      }
-    };
+  Text.prototype.commit = function() {
+    var value = this._editor.val();
+    this._viewer.text(value);
+  };
 
-    this.backuped = function() {
-      return _root.find("div").text();
-    };
+  Text.prototype.restore = function() {
+    var value = this._viewer.text();
+    this._editor.val(value);
+  };
 
-    this.commit = function() {
-      var value = _root.find("input").val();
-      _root.find("div").text(value);
-    };
+  Text.prototype.edit = function(on) {
+    if (on) {
+      this._editor.show();
+      this._viewer.hide();
+    } else {
+      this._editor.hide();
+      this._viewer.show();
+    }
+  };
 
-    this.restore = function() {
-      var value = _root.find("div").text();
-      _root.find("input").val(value);
-    };
-
-    this.data = function(value) {
-      if (arguments.length == 0) {
-        return _root.find("input").val();
-      } else {
-        _root.find("input").val(value);
-        _root.find("div").text(value);
-      }
-    };
-  }; 
+  Text.prototype.data = function(value) {
+    if (arguments.length == 0) {
+      return this._editor.val();
+    } else {
+      this._editor.val(value);
+      this._viewer.text(value);
+      console.log("[Text.data] done");
+    }
+  };
+  
+  return Text;
 }); 

@@ -1,14 +1,18 @@
 (ns tames.systems
   (:gen-class)
   (:use ring.adapter.jetty)
-  (:require [clojure.java.io :as io]
+  (:require [clojure.pprint :as pprint]
+            [clojure.java.io :as io]
             [ring.util.response :as response]
             [clojure.data.json :as json])
   (:import (java.io File InputStream)
            (java.util.jar JarFile JarEntry)
            (java.util UUID)))
 
-(def OBJECT-FILE-NAME #"^[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}\.json$")
+;(def REGEXP_UUID #"^[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}$")
+(def REGEXP_UUID #"[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}")
+(def REGEXP_OBJECT_FILE_NAME #"^[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}\.json$")
+(def CLASS_UUID "ae727055-cb09-49ed-84af-6cbc8cd37ba8")
 
 (defn get-absolute-path
   [relative-path]
@@ -18,14 +22,14 @@
   [relative-path]
   (. (File. relative-path) getPath))
 
-(defn get-resource
-  [relative-path]
-  (if-let [resource (io/resource relative-path)]
-    (if (= "file" (. resource getProtocol))
-        (let [file (io/as-file resource)]
-          (if (not (. file isDirectory))
-              file))
-        (io/input-stream resource))))
+;(defn get-resource
+;  [relative-path]
+;  (if-let [resource (io/resource relative-path)]
+;    (if (= "file" (. resource getProtocol))
+;        (let [file (io/as-file resource)]
+;          (if (not (. file isDirectory))
+;              file))
+;        (io/input-stream resource))))
 
 (defn get-jar-path
   [resource]
@@ -68,6 +72,15 @@
                                     :else                  false)
                              (. absolute-dir listFiles))]
     (map #(. %1 getName) children)))
+
+
+(defn get-resource-type
+  [relative-dir-path dir? file?]
+  (let [resource (io/resource relative-dir-path)
+        protocol (if (nil? resource) nil (. resource getProtocol))]
+    (cond (= "file" protocol) :file
+          (= "jar" protocol)  :jar
+          :else               :none)))
 
 (defn get-resource-children
   [relative-dir-path dir? file?]
@@ -113,43 +126,26 @@
 (defn get-default-file
   [file-name]
   (let [resource-path (get-resource-path (str "public/defaults/" file-name))]
-    ;(get-resource resource-path)
-    resource-path
-    ))
+    resource-path))
 
-;(defn get-systems
-;  []
-;  (let [systems-path (get-absolute-path "systems")
-;        systems-dir  (File. systems-path)
-;        files        (. systems-dir listFiles)
-;        system-dirs  (filter #(. %1 isDirectory) files)
-;        systems      (map #(let [config-path (str (. %1 getAbsolutePath) "/config.json")]
-;                             (with-open [rdr (io/reader config-path)]
-;                               (json/read rdr)))
-;                          system-dirs)]
-;    (json/write-str systems)))
+(defn get-object
+  [class-id object-id]
+  (let [object-path (get-absolute-path (format "data/%s/%s.json" class-id object-id))
+        object      (with-open [rdr (io/reader object-path)]
+                      (json/read rdr))]
+    (json/write-str object)))
 
-(defn get-list
+(defn get-objects
   [class-id]
-  (let [class-dir-path (get-absolute-path class-id)
+  (let [class-dir-path (get-absolute-path (str "data/" class-id))
         class-dir      (File. class-dir-path)
         object-files   (filter #(and (not (. %1 isDirectory))
-                                     (re-find OBJECT-FILE-NAME (. %1 getName)))
+                                     (re-find REGEXP_OBJECT_FILE_NAME (. %1 getName)))
                                (. class-dir listFiles))
         objects        (map #(with-open [rdr (io/reader (. %1 getAbsolutePath))]
                               (json/read rdr))
                             object-files)]
     (json/write-str objects)))
-
-;(defn get-absolute-classes
-;  [system-name]
-;  (let [classes-path    (format "%s/%s" (get-system-application-path system-name "") "classes")
-;        class-dir-names (get-absolute-children classes-path true false)
-;        class-jsons     (map #(let [absolute-path (format "%s/%s/class.json" classes-path %1)]
-;                               (with-open [rdr (io/reader absolute-path)]
-;                                 (json/read rdr)))
-;                             class-dir-names)]
-;    class-jsons))
 
 (defn get-resource-classes
   []
@@ -162,12 +158,6 @@
                              class-dir-names)]
     class-jsons))
 
-;(defn get-classes
-;  [system-name]
-;  (let [resource-class-jsons    (get-resource-classes)
-;        absolute-class-jsons    (get-absolute-classes system-name)]
-;    (json/write-str (concat resource-class-jsons absolute-class-jsons))))
-
 (defn get-resources-list
   []
   (json/write-str (get-resource-children "public/defaults" true false)))
@@ -179,42 +169,50 @@
 
 (defn get-file
   [class-id file-name content-type]
-  ;(let [path (get-target-path system-name application-name)
-  ;      res  (response/file-response path)]
-  ;  (response-with-content-type res content-type)))
-  (let [absolute-path (get-absolute-path (str class-id "/" file-name))
+  (println "  [systems/get-file]")
+  (println "  class-id     :" class-id)
+  (println "  file-name    :" file-name)
+  (println "  content-type :" content-type)
+  (let [absolute-path (get-absolute-path (str "data/" class-id "/" file-name))
+        default-path  (get-default-file file-name)
         file          (File. absolute-path)
         res           (if (. file exists)
                           (response/file-response absolute-path)
-                          (response/resource-response (get-default-file file-name)))]
+                          (response/resource-response default-path))]
+    (println "  absolute-path:" absolute-path)
+    (println "  default-path :" default-path)
+    (println "  exists?      :" (. file exists))
     (response-with-content-type res content-type)))
 
 (defn get-data
-  [class-id]
+  [class-id object-id]
   (response-with-content-type
-    (response/response (get-list class-id))
+    (response/response (if (nil? object-id)
+                           (get-objects class-id)
+                           (get-object class-id object-id)))
     "text/json; charset=utf-8"))
 
 (defn create-object
-  [class-id params]
+  [class-id s-exp-data]
   (println "Called create-system function.")
   (let [dir-name    class-id
         object-id   (str (UUID/randomUUID))
-        object-file (get-absolute-path (str class-id "/" object-id ".json"))
-        object      (assoc params :uuid object-id)]
-    (println "***:" params)
-    (ensure-directory class-id)
+        object-file (get-absolute-path (str "data/" class-id "/" object-id ".json"))
+        object-data (assoc s-exp-data "uuid" object-id)]
+    (if (= CLASS_UUID class-id)
+        (ensure-directory (format "data/%s" object-id)))
     (with-open [w (io/writer object-file)]
-      (json/write object w))))
+      (json/write object-data w))
+    object-data))
 
 (defn update-object
-  [class-id object-id params]
+  [class-id object-id s-exp-data]
   (println "Called update-object function.")
-  (let [object-file    (File. (get-absolute-path (str class-id "/" object-id ".json")))]
+  (let [object-file (File. (get-absolute-path (str "data/" class-id "/" object-id ".json")))]
     ;; !! CAUTION !!
     ;; Implement 'param' data check logic!!
     (with-open [w (io/writer object-file)]
-      (json/write params w))))
+      (json/write s-exp-data w))))
 
 (defn remove-file
   [file]
@@ -226,25 +224,33 @@
 (defn delete-object
   [class-id object-id]
   (println "Called delete-object function.")
-  (let [file (File. (get-absolute-path (str class-id "/" object-id ".json")))]
-    (remove-file file)))
+  (let [file (File. (get-absolute-path (str "data/" class-id "/" object-id ".json")))]
+    (remove-file file)
+    (if (= CLASS_UUID class-id)
+        (remove-file (File. (format "data/%s" object-id))))))
 
 (defn post-data
-  [class-id params]
+  [class-id s-exp-data]
   (println "Called post-data function.")
-  (create-object class-id params)
-  (println "Posted OK.")
-  (response-with-content-type
-    (response/response (get-list class-id))
-    "text/json; charset=utf-8"))
+  (println "----------")
+  (pprint/pprint s-exp-data)
+  (println "----------")
+  (let [new-object (create-object class-id s-exp-data)]
+    (println "Posted OK.")
+    (response-with-content-type
+      (response/response (get-object class-id (new-object "uuid")))
+      "text/json; charset=utf-8")))
 
 (defn put-data
-  [class-id object-id params]
+  [class-id object-id s-exp-data]
   (println "Called put-data function.")
-  (update-object class-id object-id params)
+  (println "----------")
+  (pprint/pprint s-exp-data)
+  (println "----------")
+  (update-object class-id object-id s-exp-data)
   (println "Put OK.")
   (response-with-content-type
-    (response/response (get-list class-id))
+    (response/response (get-objects class-id))
     "text/json; charset=utf-8"))
 
 (defn delete-data
@@ -253,5 +259,31 @@
   (delete-object class-id object-id)
   (println "Delete OK.")
   (response-with-content-type
-    (response/response (get-list class-id))
+    (response/response (get-objects class-id))
     "text/json; charset=utf-8"))
+
+(defn copy-resource-file
+  [resource-path dest-path]
+  (with-open [src (io/input-stream (io/resource resource-path))]
+    (io/copy src (File. dest-path))))
+
+(defn ensure-init-files
+  [relative-path]
+  (let [dirs  (get-resource-children (str "public/" relative-path) true false)
+        files (get-resource-children (str "public/" relative-path) false true)]
+    (if (or (nil? dirs) (nil? files))
+        nil
+        (do
+          (ensure-directory relative-path)
+          (doseq [dir dirs]
+            (ensure-init-files (str relative-path "/" dir)))
+          (doseq [file files]
+            (let [src-path (str "public/" relative-path "/" file)
+                  dst-path (str relative-path "/" file)]
+              (if (not (. (File. (get-absolute-path dst-path)) exists))
+                  (copy-resource-file src-path dst-path))
+                  ))))))
+
+(defn init
+  []
+  (ensure-init-files "data"))

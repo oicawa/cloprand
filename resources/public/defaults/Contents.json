@@ -1,0 +1,5 @@
+{
+  "tabs": [
+    { "class_id" : "ae727055-cb09-49ed-84af-6cbc8cd37ba8", "object_id" : null, "name" : "menu", "label" : "Menu", "view" : "MenuView" }
+  ]
+}

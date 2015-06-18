@@ -1,8 +1,8 @@
-#application-panel {
+#contents-frame {
   position: static;
 }
 
-#object-detail-tabs {
+#contents-tabs {
     position: absolute;
     top: 0px;
     left: 0px;
@@ -19,7 +19,7 @@
     right: 0px;
 }
 
-.tab-contents-panel {
+.tab-content-frame {
     height: 100%;
     padding: 5px;
 }

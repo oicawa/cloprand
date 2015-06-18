@@ -2,62 +2,68 @@ define(function (require) {
   require("jquery");
   require("jsrender");
   var Utils = require("core/Utils");
-  return function () {
-  	var _root = null;
-    var _template = null;
-    var _instance = this;
 
-    function create_control(field) {
-      var html = _template.render(field);
-      _root.append(html);
+  function TextLines() {
+  	this._editor = null;
+    this._viewer = null;
+  }
+
+  TextLines.prototype.init = function(selector, field) {
+    var dfd = new $.Deferred;
+    
+    var root = $(selector);
+
+    // Load template data & Create form tags
+    var template = null;
+    var self = this;
+    Utils.add_css("/controls/fields/TextLines/TextLines.css");
+    Utils.get_template("controls/fields", "TextLines", function(response) { template = $.templates(response); })
+    .then(function() {
+      var html = template.render(field);
+      root.append(html);
+      
+      self._editor = root.children("textarea");
+      self._viewer = root.children("pre");
+      
+      dfd.resolve();
+    });
+    return dfd.promise();
+  };
+
+  TextLines.prototype.edit = function(on) {
+    if (on) {
+      this._editor.show();
+      this._viewer.hide();
+    } else {
+      this._editor.hide();
+      this._viewer.show();
     }
+  };
 
-    this.init = function(selector, field) {
-      var dfd = new $.Deferred;
-      // Set member fields
-      _root = $(selector);
+  TextLines.prototype.backuped = function() {
+    return this._viewer.text();
+  };
 
-      // Load template data & Create form tags
-      Utils.add_css("/controls/fields/TextLines/TextLines.css");
-      Utils.get_template("controls/fields", "TextLines", function(response) { _template = $.templates(response); })
-      .then(function() {
-        create_control(field);
-        dfd.resolve();
-      });
-      return dfd.promise();
-    };
+  TextLines.prototype.commit = function() {
+    var value = this._editor.val();
+    this._viewer.text(value);
+  };
 
-    this.edit = function(on) {
-      if (on) {
-        _root.find("textarea").show();
-        _root.find("pre").hide();
-      } else {
-        _root.find("textarea").hide();
-        _root.find("pre").show();
-      }
-    };
+  TextLines.prototype.restore = function() {
+    var value = this._viewer.text();
+    this._editor.val(value);
+  };
 
-    this.backuped = function() {
-      return _root.find("pre").text();
-    };
-
-    this.commit = function() {
-      var value = _root.find("textarea").val();
-      _root.find("pre").text(value);
-    };
-
-    this.restore = function() {
-      var value = _root.find("pre").text();
-      _root.find("textarea").val(value);
-    };
-
-    this.data = function(value) {
-      if (arguments.length == 0) {
-        return _root.find("textarea").val();
-      } else {
-        _root.find("textarea").val(value);
-        _root.find("pre").text(value);
-      }
-    };
-  }; 
+  TextLines.prototype.data = function(value) {
+    if (arguments.length == 0) {
+      return this._editor.val();
+    } else {
+      this._editor.val(value);
+      this._viewer.text(value);
+      console.log("this._editor.val() = " + this._editor.val() + ", value = " + value);
+      console.log("[Text.data] done");
+    }
+  };
+  
+  return TextLines;
 }); 

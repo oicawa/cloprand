@@ -1,5 +1,5 @@
 {
-  "name": "system_manager",
-  "label": "System Manager",
-  "description": "Administrate to manage systems in this site."
+  "name": "tames",
+  "label": "tames",
+  "description": "'tames' is the general-purpose CRUD web application."
 }

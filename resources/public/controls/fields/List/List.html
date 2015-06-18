@@ -1,5 +1,9 @@
-<select name="{{:name}}" datatype="{{:datatype}}" multiple>
-{{for items}}
-  <option value="{{:value}}">{{:label}}</option>
-{{/for}}
-</select>
+<div class="editor">
+  <select name="{{:name}}" multiple size="10">
+  {{for items}}
+    <option value="{{:uuid}}">{{:label}}</option>
+  {{/for}}
+  </select>
+</div>
+<div class="viewer">
+</div>

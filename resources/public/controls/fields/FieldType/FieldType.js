@@ -24,15 +24,15 @@ define(function (require) {
         return {
           "datatype": datatype.val(),
           "class_id": class_id.val(),
-          "list": list.val(),
-          "embeded": embeded.val()
+          "list": list.val() == "on" ? true : false,
+          "embeded": embeded.val() == "on" ? true : false
         };
       } else {
         // setter
         datatype.val(value.datatype);
         class_id.val(value.class_id);
-        list.val(value.list);
-        embeded.val(value.embeded);
+        list.val(value.list ? "on" : "off");
+        embeded.val(value.embeded ? "on" : "off");
       }
     }
 
@@ -48,15 +48,15 @@ define(function (require) {
         return {
           "datatype": datatype.text(),
           "class_id": class_id.text(),
-          "list": list.val(),
-          "embeded": embeded.val()
+          "list": list.val() == "on" ? true : false,
+          "embeded": embeded.val() == "on" ? true : false
         };
       } else {
         // setter
         datatype.text(value.datatype);
         class_id.text(value.class_id);
-        list.val(value.list);
-        embeded.val(value.embeded);
+        list.val(value.list ? "on" : "off");
+        embeded.val(value.embeded ? "on" : "off");
       }
     }
 
