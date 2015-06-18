@@ -1,0 +1,35 @@
+{
+  "toolbar": {
+    "operations" : "ae727055-cb09-49ed-84af-6cbc8cd37ba8/operations",
+    "items" : [
+      { "name": "edit",   "caption": "Edit",   "description": "Edit item data.", "operation": "edit" },
+      { "name": "delete", "caption": "Delete", "description": "Delete item data.", "operation": "delete" },
+      { "name": "save",   "caption": "Save",   "description": "Save item data.", "operation": "save" },
+      { "name": "cancel", "caption": "Cancel", "description": "Cancel item data.", "operation": "cancel" }
+    ]
+  },
+  "object_fields": {
+    "control": "Grid",
+    "toolbar": {
+      "operations" : "6e851190-81e3-4b89-9304-a06c6282630c/operations",
+      "items" : [
+        { "name": "add",    "caption": "Add",    "description": "Add new class", "operation": "add_new_field" },
+        { "name": "delete", "caption": "Delete", "description": "Delete new class", "operation": "delete_field" }
+      ]
+    },
+    "columns": [
+      {"name":"name", "label": "Name", "renderer": null},
+      {"name":"label", "label": "Label", "renderer": null},
+      {"name":"description", "label": "Description", "renderer": null}
+    ],
+    "header": {
+      "visible": true
+    },
+    "row": {
+      "operations" : "crud",
+      "events": {
+        "click": "show_detail"
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "object_fields": {
+    "toolbar": {
+      "operations" : "ae727055-cb09-49ed-84af-6cbc8cd37ba8/operations",
+      "items" : [
+        { "name": "add",    "caption": "Add",    "description": "Add new field",               "operation": "add" },
+        { "name": "edit",   "caption": "Edit",   "description": "Edit field",                  "operation": "edit" },
+        { "name": "delete", "caption": "Delete", "description": "Delete field",                "operation": "delete" },
+        { "name": "up",     "caption": "Up",     "description": "Move upward selected item",   "operation": "up" },
+        { "name": "down",   "caption": "Down",   "description": "Move downward selected item", "operation": "down" }
+      ]
+    },
+    "grid" : {
+      "columns": [
+        {"name":"name", "label": "Name", "renderer": null},
+        {"name":"label", "label": "Label", "renderer": null},
+        {"name":"description", "label": "Description", "renderer": null}
+      ],
+      "header": {
+        "visible": true
+      },
+      "row": {
+        "operations" : "ae727055-cb09-49ed-84af-6cbc8cd37ba8/operations",
+        "events": {
+          "dblclick": "show_detail"
+        }
+      }
+    }
+  }
+}

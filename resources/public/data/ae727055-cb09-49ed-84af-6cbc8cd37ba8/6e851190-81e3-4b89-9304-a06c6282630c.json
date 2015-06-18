@@ -1,0 +1,12 @@
+{
+  "uuid":"6e851190-81e3-4b89-9304-a06c6282630c",
+  "name":"field",
+  "label":"Field",
+  "description":"Field Definition.",
+  "object_fields":[
+    {"name":"name","label":"Name","datatype":{"primitive":"Text","class":"","multi":false,"embedded":true}},
+    {"name":"label","label":"Label","datatype":{"primitive":"Text","class":"","multi":false,"embedded":true}},
+    {"name":"description","label":"Description","datatype":{"primitive":"TextLines","class":"","multi":false,"embedded":true}},
+    {"name":"datatype","label":"Data Type","datatype":{"primitive":"","class":"872676b1-b6c3-4fd5-b403-ff93b583bb76","multi":false,"embedded":true}}
+  ]
+}
