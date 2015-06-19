@@ -55,7 +55,7 @@ define(function (require) {
         var old_tab_id = tab_info.tab_id;
         var new_tab_id = Contents.tab_id(tab_info.prefix, tab_info.class_id, object.uuid);
         app.contents().change(old_tab_id, new_tab_id, object.label);
-        app.contents().broadcast(tab_info.class_id, tab_info.object_id, data);
+        app.contents().broadcast(tab_info.class_id, object.uuid, object);
         alert("Saved");
       });
     } else {
