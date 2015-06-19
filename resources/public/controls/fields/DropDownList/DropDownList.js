@@ -8,6 +8,16 @@ define(function (require) {
     var _items = null;
     var _instance = this;
 
+    function get_label(value) {
+      for (var i = 0; i < _items.length; i++) {
+        var item = _items[i];
+        if (item.uuid == value) {
+          return item.label;
+        }
+      }
+      return null;
+    }
+
     function create_control(field) {
       var items = {};
       for (var i = 0; i < _items.length; i++) {
@@ -51,16 +61,17 @@ define(function (require) {
     };
 
     this.backuped = function() {
-      return _root.find("div").text();
+      return _root.find("div").attr("value");
     };
 
     this.commit = function() {
       var value = _root.find("select").val();
-      _root.find("div").text(value);
+      _root.find("div").text(get_label(value));
+      _root.find("div").attr("value", value);
     };
 
     this.restore = function() {
-      var value = _root.find("div").text();
+      var value = _root.find("div").attr("value");
       _root.find("select").val(value);
     };
 
@@ -69,7 +80,8 @@ define(function (require) {
         return _root.find("select").val();
       } else {
         _root.find("select").val(value);
-        _root.find("div").text(value);
+        _root.find("div").text(get_label(value));
+        _root.find("div").attr("value", value);
       }
     };
   }; 
