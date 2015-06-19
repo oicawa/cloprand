@@ -178,7 +178,9 @@
         file          (File. absolute-path)
         res           (if (. file exists)
                           (response/file-response absolute-path)
-                          (response/resource-response default-path))]
+                          ;(response/resource-response default-path)
+                          (response/resource-response file-name {:root "public/defaults"})
+                          )]
     (println "  absolute-path:" absolute-path)
     (println "  default-path :" default-path)
     (println "  exists?      :" (. file exists))
