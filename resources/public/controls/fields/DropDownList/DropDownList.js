@@ -19,12 +19,13 @@ define(function (require) {
     }
 
     function create_control(field) {
-      var items = {};
+      var items = [];
       for (var i = 0; i < _items.length; i++) {
         if (!_items[i].uuid) {
           _items[i].uuid = _items[i].name;
         }
       }
+      _items.splice(0, 0, {uuid: "", label: ""});
       var html = _template.render({ name: field.name, items: _items });
       _root.append(html);
     }

@@ -34,6 +34,7 @@ define(function (require) {
       if (typeof func_error != "function") {
         alert("The error function is not assigned.\n(" + url + ")\n\nresponse:" + JSON.stringify(response) + "\nstatus:" + status);
         dfd.reject();
+        return;
       }
       if (!func_error(response, status)) {
         dfd.reject();

@@ -45,7 +45,7 @@ define(function (require) {
     var field_name = null;
     for (var i = 0; i < class_.object_fields.length; i++) {
       var object_field = class_.object_fields[i];
-      if (!object_field.datatype.caption) {
+      if (!object_field.caption) {
         continue;
       }
       field_name = object_field.name;
@@ -79,24 +79,29 @@ define(function (require) {
     var template = null;
     var assist = null;
     var self = this;
-    var toolbar_selector = selector + "> .view-panel > .object-operations";
-    var grid_selector = selector + "> .view-panel > .object-list";
+    var toolbar_selector = selector + "> div.view-panel > div.object-operations";
+    var grid_selector = selector + "> div.view-panel > div.object-list";
     $.when(
       Utils.get_template("controls/views", "GridView", function (data) { template = $.templates(data); }),
-      Utils.get_file(class_id, "GridView.json", "json", function (data) { assist = data; }),
+      //Utils.get_file(class_id, "GridView.json", "json", function (data) { assist = data; }),
       Utils.get_data(class_id, null, function (data) { classes = data; }),
       Utils.get_data(Utils.CLASS_UUID, class_id, function (data) { self._class = data; })
-    ).always(function() {
+    ).then(function() {
       var view_html = template.render();
       view.append(view_html);
 
       // Toolbar
-      self._toolbar.init(toolbar_selector, assist.toolbar);
+      var default_toolbar = {"items": [{"name": "create", "caption": "Create", "description": "Create new data"}]};
+      var assist_toolbar = !assist ? default_toolbar : (!assist.toolbar ? default_toolbar : assist.toolbar);
+      self._toolbar.init(toolbar_selector, assist_toolbar);
+      self._toolbar.bind("create", GridView.create);
 
       // Grid
-      self._grid.init(grid_selector, null, assist)
+      self._grid.init(grid_selector, self._class)
       .then(function () {
+        self._grid.add_operation("click", GridView.show_detail);
         self._grid.data(classes);
+        self._toolbar.visible(true);
       });
     });
   };

@@ -61,7 +61,6 @@ define(function (require) {
     } else {
       this._editor.val(value);
       this._viewer.text(value);
-      console.log("[Text.data] done");
     }
   };
   

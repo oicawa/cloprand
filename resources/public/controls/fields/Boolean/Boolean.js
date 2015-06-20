@@ -95,7 +95,6 @@ define(function (require) {
       } else {
         checked(_editor, value);
         checked(_renderer, value);
-        console.log("[Boolean.data] done");
       }
     };
   }; 

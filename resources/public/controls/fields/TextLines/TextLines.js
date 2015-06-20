@@ -60,8 +60,6 @@ define(function (require) {
     } else {
       this._editor.val(value);
       this._viewer.text(value);
-      console.log("this._editor.val() = " + this._editor.val() + ", value = " + value);
-      console.log("[Text.data] done");
     }
   };
   

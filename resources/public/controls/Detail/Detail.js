@@ -3,7 +3,6 @@ define(function (require) {
   require("jsrender");
   require("JSON");
   var Utils = require("core/Utils");
-  var Toolbar = require("controls/Toolbar/Toolbar");
 
   function get_control_assist(self, field) {
     if (!self._custom_assist) {
@@ -58,7 +57,6 @@ define(function (require) {
       try {
         control.init(field_selector, field, assist)
         .then(function() {
-          console.log("[init] Completed " + control_path);
           dfd.resolve();
         });
       } catch (e) {
@@ -81,16 +79,6 @@ define(function (require) {
       promises[i] = field_func(self, selector, object_field);
     }
     $.when.apply(null, promises)
-    .then(function() {
-      dfd.resolve();
-    });
-    return dfd.promise();
-  }
-
-  function create_toolbar(self, selector) {
-    var dfd = new $.Deferred;
-    self._toolbar = new Toolbar();
-    self._toolbar.init(selector + " > div.detail-operations", self._basic_assist ? self._basic_assist.toolbar : null)
     .then(function() {
       dfd.resolve();
     });
@@ -123,7 +111,6 @@ define(function (require) {
     this._root_template = null;
     this._assist_template = null;
     this._fields_template = null;
-    this._toolbar = null;
     this._controls = {};
     this._is_new = true;
     this._instance = this;
@@ -151,8 +138,7 @@ define(function (require) {
       var root_html = self._root_template.render(self._class);
       self._root.append(root_html);
       $.when(
-        create_form(self, selector_buf),
-        create_toolbar(self, selector_buf)
+        create_form(self, selector_buf)
       ).always(function() {
         dfd.resolve();
       });
@@ -172,18 +158,6 @@ define(function (require) {
   };
 
   Detail.prototype.edit = function(on) {
-    if (on) {
-      this._toolbar.button("edit").hide();
-      this._toolbar.button("delete").hide();
-      this._toolbar.button("save").show();
-      this._toolbar.button("cancel").show();
-    } else {
-      this._toolbar.button("edit").show();
-      this._toolbar.button("delete").show();
-      this._toolbar.button("save").hide();
-      this._toolbar.button("cancel").hide();
-    }
-    
     if (!this._class.object_fields) {
       return;
     }
@@ -224,7 +198,6 @@ define(function (require) {
     var data = {};
 
     var exist_object_fields = !this._class.object_fields ? false : true;
-    console.log("[data] exist_object_fields = " + exist_object_fields);
     if (exist_object_fields) {
       for (var i = 0; i < this._class.object_fields.length; i++) {
         var object_field = this._class.object_fields[i];
@@ -233,7 +206,6 @@ define(function (require) {
         if (arguments.length == 0) {
           data[name] = control.data();
         } else {
-          console.log(value);
           control.data(value ? value[name] : null);
         }
       }

@@ -35,32 +35,42 @@ define(function (require) {
       function() { $(this).removeClass("ui-state-hover"); }
     );
     
-    var dfd = new $.Deferred;
-    if (!self._assist) {
-      dfd.resolve();
-      return dfd.promise();
-    }
-    require([self._assist.operations], function(operations) {
-      self._operations = {};
-      for (var i = 0; i < self._assist.items.length; i++) {
-        var item = self._assist.items[i];
-        var icon = self._root.find("ul > li > span." + item.icon_name);
-        var li = icon.parent();
-        if (item.caption && item.caption != "") {
-          var caption = li.find("span.caption");
-          caption.addClass("space");
-        }
-        self._operations[item.operation] = operations[item.operation];
+    for (var i = 0; i < self._assist.items.length; i++) {
+      var item = self._assist.items[i];
+      var icon = self._root.find("ul > li > span." + item.icon_name);
+      var li = icon.parent();
+      if (item.caption && item.caption != "") {
+        var caption = li.find("span.caption");
+        caption.addClass("space");
       }
-      dfd.resolve();
-    });
-    return dfd.promise();
+    }
+    //var dfd = new $.Deferred;
+    //if (!self._assist) {
+    //  dfd.resolve();
+    //  return dfd.promise();
+    //}
+    //require([self._assist.operations], function(operations) {
+    //  self._operations = {};
+    //  for (var i = 0; i < self._assist.items.length; i++) {
+    //    var item = self._assist.items[i];
+    //    var icon = self._root.find("ul > li > span." + item.icon_name);
+    //    var li = icon.parent();
+    //    if (item.caption && item.caption != "") {
+    //      var caption = li.find("span.caption");
+    //      caption.addClass("space");
+    //    }
+    //    self._operations[item.operation] = operations[item.operation];
+    //  }
+    //  dfd.resolve();
+    //});
+    //return dfd.promise();
   }
 
   Toolbar.prototype.init = function(selector, assist) {
   	//console.assert(assist && assist.items, "assit:" + assist);
     var dfd = new $.Deferred;
     this._root = $(selector);
+    this._root.hide();
     this._assist = !assist ? { "items" : [] } : assist;
     for (var i = 0; i < this._assist.items.length; i++) {
       var item = this._assist.items[i];
@@ -77,8 +87,7 @@ define(function (require) {
     .then(function() {
       var root_html = template.render(self._assist);
       self._root.append(root_html);
-      return create_toolbar(self);
-    }).then(function() {
+      create_toolbar(self);
       dfd.resolve();
     });
     return dfd.promise();

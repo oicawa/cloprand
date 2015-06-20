@@ -55,7 +55,6 @@ define(function (require) {
     } else {
       this._editor.text(value);
       this._viewer.text(value);
-      console.log("[UUID.data] done");
     }
   };
   

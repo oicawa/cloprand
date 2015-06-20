@@ -4,28 +4,45 @@ define(function (require) {
   var Utils = require("core/Utils");
   var Toolbar = require("controls/Toolbar/Toolbar");
 
-  function create_control(self, root, template) {
-    var dfd = new $.Deferred;
-    var html = template.render(self._assist);
-    root.append(html);
+  function create_assist(klass, assist) {
+    if (!(!assist)) {
+      return assist;
+    }
+    if (!klass) {
+      return null;
+    }
+    var fields = klass.object_fields;
+    var columns = [];
+    for (var i = 0; i < fields.length; i++) {
+      var field = fields[i];
+      if (!field.column) {
+        continue;
+      }
+      columns.push({name: field.name, label: field.label, renderer: null});
+    }
+    return {columns: columns, header:{visible: true}};
+  }
 
-    self._table = root.children("table.grid");
-    require([self._assist.row.operations], function(operations) {
-      self._table.on("click", "tbody > tr", function(event) {
-        self._table.find("tr.selected").removeClass("selected");
-        $(this).addClass("selected");
-        var event_name = self._assist.row.events["click"];
-        operations[event_name](event);
-      });
-
-      self._table.on("dblclick", "tbody > tr", function(event) {
-        var event_name = self._assist.row.events["dblclick"];
-        operations[event_name](event);
-      });
-      dfd.resolve();
+  function regist_event(self, event_name) {
+    self._table.on(event_name, "tbody > tr", function(event) {
+      self._table.find("tr.selected").removeClass("selected");
+      $(this).addClass("selected");
+      var operation = self._operations[event_name];
+      if (!operation) {
+      	return;
+      }
+      operation(event);
     });
+  }
 
-    return dfd.promise();
+  function create_control(self, root, template) {
+    var assist = self._assist;
+    var html = template.render(assist);
+    root.append(html);
+    self._table = root.children("table.grid");
+
+    regist_event(self, "click");
+    regist_event(self, "dblclick");
   }
 
   function refresh(self) {
@@ -80,13 +97,14 @@ define(function (require) {
     this._table = null;
     this._columns = [];
     this._items = [];
+    this._operations = {};
   }
 
   Grid.prototype.init = function(selector, klass, assist) {
     var dfd = new $.Deferred;
 
     this._class = klass;
-    this._assist = assist;
+    this._assist = create_assist(klass, assist);
     var root = $(selector);
     var template = null;
     var self = this;
@@ -97,11 +115,14 @@ define(function (require) {
     // Load template data & Create form tags
     Utils.get_template("controls", "Grid", function(response) { template = $.templates(response); })
     .then(function() {
-      return create_control(self, root, template);
-    }).then(function() {
+      create_control(self, root, template);
       dfd.resolve();
     });
     return dfd.promise();
+  };
+
+  Grid.prototype.add_operation = function(event_name, operation) {
+    this._operations[event_name] = operation;
   };
 
   Grid.prototype.add_item = function(item) {
@@ -149,7 +170,7 @@ define(function (require) {
     if (arguments.length == 0) {
       return this._data
     } else {
-      this._data = value;
+      this._data = !value ? [] : value;
       refresh(this);
     }
   };

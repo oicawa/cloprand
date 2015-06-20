@@ -49,14 +49,17 @@ define(function (require) {
   	this._object_id = object_id;
   	this._grid = new Grid();
     var assist = null;
+    var class_ = null;
     var classes = null;
     var self = this;
     $.when(
       Utils.get_file(null, "controls/views/MenuView/MenuView.json", "json", function (data) { assist = data; }),
-      Utils.get_data(Utils.CLASS_UUID, null, function (data) { classes = data; })
+      Utils.get_data(Utils.CLASS_UUID, null, function (data) { classes = data; }),
+      Utils.get_data(Utils.CLASS_UUID, Utils.CLASS_UUID, function (data) { class_ = data; })
     ).always(function() {
-      self._grid.init(self._selector, null, assist)
+      self._grid.init(self._selector, class_)
       .then(function () {
+        self._grid.add_operation("click", MenuView.show_gridview);
         self._grid.data(classes);
       });
     });

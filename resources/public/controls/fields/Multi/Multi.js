@@ -7,6 +7,17 @@ define(function (require) {
   var Detail = require("controls/Detail/Detail");
   var Dialog = require("core/Dialog");
 
+  var default_toolbar = {
+    "operations" : "ae727055-cb09-49ed-84af-6cbc8cd37ba8/operations",
+    "items" : [
+      { "name": "add",    "caption": "Add",    "description": "Add new field",               "operation": "add" },
+      { "name": "edit",   "caption": "Edit",   "description": "Edit field",                  "operation": "edit" },
+      { "name": "delete", "caption": "Delete", "description": "Delete field",                "operation": "delete" },
+      { "name": "up",     "caption": "Up",     "description": "Move upward selected item",   "operation": "up" },
+      { "name": "down",   "caption": "Down",   "description": "Move downward selected item", "operation": "down" }
+    ]
+  };
+
   function Multi() {
     this._toolbar = null;
     this._grid = null;
@@ -41,9 +52,11 @@ define(function (require) {
       self._detail = new Detail();
       self._dialog = new Dialog();
 
+      var toolbar = !assist ? default_toolbar : (!assist.toolbar ? default_toolbar : assist.toolbar);
+
       $.when(
-        self._toolbar.init(selector + " > div.toolbar", assist.toolbar),
-        self._grid.init(selector + " > div.grid", null, assist.grid),
+        self._toolbar.init(selector + " > div.toolbar", toolbar),
+        self._grid.init(selector + " > div.grid", class_),
         self._detail.init(selector + " > div.dialog > div.detail", class_)
         .then(function () {
           self._detail.visible(true);
