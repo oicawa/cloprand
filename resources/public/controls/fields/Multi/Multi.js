@@ -91,10 +91,26 @@ define(function (require) {
           self._grid.delete(index);
         });
         self._toolbar.bind("up", function(event) {
-          self._dialog.show();
+          var index = self._grid.selected_index();
+          if (index < 0) {
+            alert("Select item.");
+            return;
+          }
+          if (index == 0) {
+            return;
+          }
+          self._grid.move(index, -1);
         });
         self._toolbar.bind("down", function(event) {
-          self._dialog.show();
+          var index = self._grid.selected_index();
+          if (index < 0) {
+            alert("Select item.");
+            return;
+          }
+          if (index == self._grid.data().length - 1) {
+            return;
+          }
+          self._grid.move(index, 1);
         });
         self._dialog.bind("OK", function(event) {
           var data = self._detail.data();

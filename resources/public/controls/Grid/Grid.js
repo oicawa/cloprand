@@ -186,6 +186,33 @@ define(function (require) {
     }
   };
 
+  Grid.prototype.move = function(index, step) {
+  	// index check
+    if (index < 0 || step == 0 || index + step < 0) {
+      return;
+    }
+    var max_index = this._data.length - 1;
+    if (max_index <= 0 || max_index < index || max_index < index + step) {
+      return;
+    }
+
+    var offset = step < 0 ? index + step : index;
+    var count = Math.abs(step) + 1;
+    var target = this._data[index];
+    var start = step < 0 ? index + step : index + 1;
+    var end = start + count - 1;
+    var args = this._data.slice(start, end);
+    if (step < 0) {
+      args.splice(0, 0, offset, count, target);
+    } else {
+      args.splice(0, 0, offset, count);
+      args.push(target);
+    }
+    Array.prototype.splice.apply(this._data, args);
+    
+    refresh(this);
+  };
+
   Grid.prototype.update = function(object_id, item) {
     console.assert(object_id && Utils.UUID.test(object_id) && object_id != Utils.NULL_UUID, "object_id=" + object_id);
     if (!this._data) {
