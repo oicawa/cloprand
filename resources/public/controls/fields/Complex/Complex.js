@@ -45,11 +45,12 @@ define(function (require) {
   };
 
   Complex.prototype.commit = function() {
-    this._backuped = this._grid.data();
+    this._backuped = this._detail.data();
+    this._detail.commit();
   };
 
   Complex.prototype.restore = function() {
-    this._grid.data(this._backuped);
+    this._detail.data(this._backuped);
   };
 
   Complex.prototype.edit = function(on) {

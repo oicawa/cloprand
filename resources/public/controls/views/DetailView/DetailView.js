@@ -75,6 +75,8 @@ define(function (require) {
         alert("Saved");
       });
     } else {
+      if (!data.uuid)
+        data.uuid = tab_info.object_id;
       Utils.put_data(tab_info.class_id, data.uuid, data, function(response) { object = response; })
       .then(function() {
         edit_toolbar(view.toolbar(), false);

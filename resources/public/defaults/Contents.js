@@ -129,10 +129,12 @@ define(function (require) {
     // Maybe, we have to broadcast these arguments information to all 'tab's,
     // and it leaves the determination of whether to be refreshed on the tab.
     // But now, implement easy...
-    var menu_id = create_tab_id("MenuView", class_id, null);
-    var menuview = this._tabs.content(menu_id);
-    menuview.update(class_id, object_id, data);
-    
+    if (class_id == Utils.CLASS_UUID) {
+      var menu_id = create_tab_id("MenuView", class_id, null);
+      var menuview = this._tabs.content(menu_id);
+      menuview.update(class_id, object_id, data);
+    }
+
     var grid_id = create_tab_id("GridView", class_id, null);
     var gridview = this._tabs.content(grid_id);
     gridview.update(class_id, object_id, data);

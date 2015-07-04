@@ -11,8 +11,11 @@ define(function (require) {
     if (!klass) {
       return null;
     }
-    var fields = klass.object_fields;
     var columns = [];
+    var fields = klass.object_fields;
+    if (!fields) {
+      return {columns: columns, header:{visible: true}};
+    }
     for (var i = 0; i < fields.length; i++) {
       var field = fields[i];
       if (!field.column) {

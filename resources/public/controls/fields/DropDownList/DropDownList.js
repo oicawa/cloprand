@@ -2,88 +2,110 @@ define(function (require) {
   require("jquery");
   require("jsrender");
   var Utils = require("core/Utils");
-  return function () {
-  	var _root = null;
-    var _template = null;
-    var _items = null;
-    var _instance = this;
+  
+  function DropDownList() {
+  	this._editor = null;
+  	this._viewer = null;
+    this._template = null;
+    this._class = null;
+    this._objects = null;
+    this._items = {};
+  }
 
-    function get_label(value) {
-      for (var i = 0; i < _items.length; i++) {
-        var item = _items[i];
-        if (item.uuid == value) {
-          return item.label;
-        }
+  function create_control(self, root, template, field) {
+    var caption_fields = [];
+    if (!self._class.object_fields) {
+      self._class.object_fields = [];
+    }
+    for (var i = 0; i < self._class.object_fields.length; i++) {
+      var object_field = self._class.object_fields[i];
+      if (!object_field.caption) {
+        continue;
       }
-      return null;
+      caption_fields.push(object_field.name);
     }
 
-    function create_control(field) {
-      var items = [];
-      for (var i = 0; i < _items.length; i++) {
-        if (!_items[i].uuid) {
-          _items[i].uuid = _items[i].name;
-        }
+    var items = [];
+    items.push({uuid: "", label: ""});
+    for (var i = 0; i < self._objects.length; i++) {
+      var item = self._objects[i];
+      var captions = [];
+      for (var j = 0; j < caption_fields.length; j++) {
+        var value = item[caption_fields[j]];
+        captions.push(value);
       }
-      _items.splice(0, 0, {uuid: "", label: ""});
-      var html = _template.render({ name: field.name, items: _items });
-      _root.append(html);
+      var value = !item.uuid ? item[caption_fields[0]] : item.uuid;
+      var caption = captions.join(" ");
+      items.push({value : value, caption : caption });
+      self._items[value] = caption;
     }
+    
+    var html = template.render({ name: field.name, items: items });
+    root.append(html);
+    
+    self._editor = root.find("select");
+    self._viewer = root.find("div");
+  }
 
-    this.init = function(selector, field) {
-      var dfd = new $.Deferred;
-      // Set member fields
-      _root = $(selector);
-      if (0 < _root.children()) {
-        dfd.resolve();
-        return dfd.promise();
-      }
-
-      // Load template data & Create form tags
-      //Utils.add_css("/controls/fields/DropDownList/DropDownList.css");
-      $.when(
-        Utils.get_template("controls/fields", "DropDownList", function(response) { _template = $.templates(response); }),
-        Utils.get_data(field.datatype["class"], null, function(response) { _items = response; })
-      ).then(function() {
-        create_control(field);
-        dfd.resolve();
-      });
+  DropDownList.prototype.init = function(selector, field) {
+    var dfd = new $.Deferred;
+    // Set member fields
+    var root = $(selector);
+    if (0 < root.children()) {
+      dfd.resolve();
       return dfd.promise();
-    };
+    }
 
-    this.edit = function(on) {
-      if (on) {
-        _root.find("select").show();
-        _root.find("div").hide();
-      } else {
-        _root.find("select").hide();
-        _root.find("div").show();
-      }
-    };
+    // Load template data & Create form tags
+    //Utils.add_css("/controls/fields/DropDownList/DropDownList.css");
+    var self = this;
+    var template = null;
+    var class_id = field.datatype["class"];
+    $.when(
+      Utils.get_template("controls/fields", "DropDownList", function(response) { template = $.templates(response); }),
+      Utils.get_data(Utils.CLASS_UUID, class_id, function(response) { self._class = response; }),
+      Utils.get_data(class_id, null, function(response) { self._objects = response; })
+    ).then(function() {
+      create_control(self, root, template, field);
+      dfd.resolve();
+    });
+    return dfd.promise();
+  };
 
-    this.backuped = function() {
-      return _root.find("div").attr("value");
-    };
+  DropDownList.prototype.edit = function(on) {
+    if (on) {
+      this._editor.show();
+      this._viewer.hide();
+    } else {
+      this._editor.hide();
+      this._viewer.show();
+    }
+  };
 
-    this.commit = function() {
-      var value = _root.find("select").val();
-      _root.find("div").text(get_label(value));
-      _root.find("div").attr("value", value);
-    };
+  DropDownList.prototype.backuped = function() {
+    return this._viewer.attr("value");
+  };
 
-    this.restore = function() {
-      var value = _root.find("div").attr("value");
-      _root.find("select").val(value);
-    };
+  DropDownList.prototype.commit = function() {
+    var value = this._editor.val();
+    this._viewer.text(this._items[value]);
+    this._viewer.attr("value", value);
+  };
 
-    this.data = function(value) {
-      if (arguments.length == 0) {
-        return _root.find("select").val();
-      } else {
-        _root.find("select").val(value);
-        _root.find("div").text(get_label(value));
-        _root.find("div").attr("value", value);
-      }
-    };
-  }; 
+  DropDownList.prototype.restore = function() {
+    var value = this._viewer.attr("value");
+    this._editor.val(value);
+  };
+
+  DropDownList.prototype.data = function(value) {
+    if (arguments.length == 0) {
+      return this._editor.val();
+    } else {
+      this._editor.val(value);
+      this._viewer.text(this._items[value]);
+      this._viewer.attr("value", value);
+    }
+  };
+
+  return DropDownList;
 }); 
