@@ -3,6 +3,7 @@ define(function (require) {
   require("jsrender");
   require("JSON");
   var Utils = require("core/Utils");
+  var Cache = require("core/Cache");
 
   function get_control_assist(self, field) {
     if (!self._custom_assist) {
@@ -21,18 +22,23 @@ define(function (require) {
     //}
     var datatype = field.datatype;
     // Primitive
-    var primitive = datatype["primitive"];
-    if (primitive && primitive != "") {
-      return "controls/fields/" + primitive + "/" + primitive;
+    var uuid = datatype["primitive"];
+    if (uuid != "") {
+      var primitive = Cache.get_data(Utils.PRIMITIVE_UUID, uuid);
+      if (primitive) {
+        return "controls/fields/" + primitive.name + "/" + primitive.name;
+      }
     }
     var class_id = datatype["class"];
+    if (!Utils.UUID.test(class_id))
+      debugger;
+    
     console.assert(Utils.UUID.test(class_id), "class_id:" + class_id);
     
     var is_multi = datatype["multi"];
     var is_embedded = datatype["embedded"];
 
     if (is_multi && is_embedded ) {
-      //return "controls/Grid/Grid";
       return "controls/fields/Multi/Multi";
     } else if (is_multi && !is_embedded) {
       return "controls/fields/List/List";

@@ -4,6 +4,7 @@ define(function (require) {
   var _UUID = /[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}/;
   var _NULL_UUID = "00000000-0000-0000-0000-000000000000";
   var _CLASS_UUID = "ae727055-cb09-49ed-84af-6cbc8cd37ba8";
+  var _PRIMITIVE_UUID = "d57a1a1c-0f11-4bf7-84bd-c1912fc29ba4";
   function create_path() {
     var args = Array.prototype.slice.call(arguments);
     var result = args.every(function(arg) { return arg == null || typeof arg == "string"; });
@@ -60,6 +61,7 @@ define(function (require) {
   	UUID : _UUID,
   	NULL_UUID : _NULL_UUID,
   	CLASS_UUID : _CLASS_UUID,
+  	PRIMITIVE_UUID : _PRIMITIVE_UUID,
     get_file: function(class_id, file_name, data_type, data, func_success, func_error) {
       var url = create_path(class_id, file_name);
       //console.log(url);
