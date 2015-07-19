@@ -40,7 +40,7 @@ define(function (require) {
     ).always(function() {
       var root_html = template.render();
       $("body").append(root_html);
-      $('#root-panel').css({width: '100%', height: '100%'}).split({orientation: 'horizontal', limit: 20, position: '30px', invisible: true, fixed: true});
+      //$('#root-panel').css({width: '100%', height: '100%'}).split({orientation: 'horizontal', limit: 20, position: '30px', invisible: true, fixed: true});
 
       self._title = $("span#title");
       self._sub_title = $("span#sub-title");

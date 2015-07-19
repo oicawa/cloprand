@@ -186,6 +186,16 @@
     (println "  exists?      :" (. file exists))
     (response-with-content-type res content-type)))
 
+(defn get-extension-file
+  [class-id object-id file-name]
+  (println "  [systems/get-extension-file]")
+  (println "  class-id     :" class-id)
+  (println "  object-id    :" object-id)
+  (println "  file-name    :" file-name)
+  (let [absolute-path (get-absolute-path (str "extentions/" class-id "/" file-name))
+        res           (response/file-response absolute-path)]
+    (response-with-content-type res "text/text; charset=utf-8")))
+
 (defn get-data
   [class-id object-id]
   (response-with-content-type
@@ -288,4 +298,5 @@
 
 (defn init
   []
-  (ensure-init-files "data"))
+  (ensure-init-files "data")
+  (ensure-init-files "extensions"))

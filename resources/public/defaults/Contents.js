@@ -35,14 +35,14 @@ define(function (require) {
     return "#" + tab_id + " > div.tab-content-frame > div.tab-content-panel";
   }
   
-  function create_view(self, tab_id, selector, view_name, class_id, object_id) {
+  function create_view(self, tab_id, selector, view_name, class_id, object_id, options) {
     //var dfd = new $.Deferred;
     var view_path = "controls/views/" + view_name + "/" + view_name;
     require([view_path], function(View) {
       var view = new View();
       self._tabs.content(tab_id, view);
       try {
-        view.init(selector, class_id, object_id);
+        view.init(selector, class_id, object_id, options);
         //.then(function() {
         //  dfd.resolve();
         //});
@@ -93,11 +93,11 @@ define(function (require) {
     this._tabs.content(tab_id, detail);
   };
   
-  Contents.prototype.show_tab = function (class_id, object_id, label) {
+  Contents.prototype.show_tab = function (view_name, class_id, object_id, label, options) {
+    console.assert(typeof view_name == "string" && 1 <= view_name.length);
     console.assert(Utils.UUID.test(class_id));
     console.assert(object_id == null || Utils.UUID.test(object_id));
-    var view = object_id == null ? "GridView" : "DetailView";
-    var tab_id = create_tab_id(view, class_id, object_id);
+    var tab_id = create_tab_id(view_name, class_id, object_id);
     var exists = this._tabs.show(tab_id);
     if (exists) {
       return;
@@ -105,7 +105,7 @@ define(function (require) {
     this._tabs.add(tab_id, label, true, true);
 
     var selector = create_content_selector(tab_id);
-    create_view(this, tab_id, selector, view, class_id, object_id);
+    create_view(this, tab_id, selector, view_name, class_id, object_id, options);
   };
   
   Contents.prototype.content = function (tab_id) {

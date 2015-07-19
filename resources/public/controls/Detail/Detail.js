@@ -152,10 +152,6 @@ define(function (require) {
     return dfd.promise();
   };
 
-  Detail.prototype.ok_func = function(func_ok) {
-    this._func_ok = func_ok;
-  };
-
   Detail.prototype.visible = function(visible) {
     if (arguments.length == 0) {
       return this._root.css("display") == "none" ? false : true;
@@ -194,12 +190,6 @@ define(function (require) {
     return this._is_new;
   };
 
-  //Detail.prototype.key = function() {
-  //  var key_name = this._assist.key;
-  //  var control = this._controls[key_name];
-  //  return control.backuped();
-  //};
-    
   Detail.prototype.data = function(value) {
     var data = {};
 

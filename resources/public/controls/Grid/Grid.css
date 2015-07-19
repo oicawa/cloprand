@@ -1,6 +1,16 @@
+/*
+table.grid > thead {
+  display: block;
+}
+table.grid > tbody {
+  display: block;
+  overflow-y:scroll;
+}
+*/
 table.grid > thead > tr > th {
     border-right: 1px solid lightgrey;
     border-bottom: 1px solid lightgrey;
+    table-layout:fixed;
 }
 table.grid > thead > tr > th:last-child {
     border-right: 0px solid lightgrey;
@@ -14,6 +24,7 @@ table.grid > tbody > tr > td {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap; 
+    table-layout:fixed;
     */
 }
 table.grid > tbody > tr > td:last-child {

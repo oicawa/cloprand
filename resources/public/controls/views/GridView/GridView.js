@@ -29,7 +29,7 @@ define(function (require) {
   GridView.create = function (event) {
     var tab_info = Contents.get_tab_info(event);
     var view = app.contents().content(tab_info.tab_id);
-    app.contents().show_tab(tab_info.class_id, Utils.NULL_UUID, "New " + view._class.label);
+    app.contents().show_tab("DetailView", tab_info.class_id, Utils.NULL_UUID, "New " + view._class.label);
   };
 
   GridView.show_detail = function (event) {
@@ -52,7 +52,7 @@ define(function (require) {
       break;
     }
     var caption = data[field_name];
-    app.contents().show_tab(tab_info.class_id, data.uuid, caption);
+    app.contents().show_tab("DetailView", tab_info.class_id, data.uuid, caption);
   };
   
   GridView.prototype.update = function (class_id, object_id, data) {
@@ -79,8 +79,9 @@ define(function (require) {
     var template = null;
     var assist = null;
     var self = this;
-    var toolbar_selector = selector + "> div.view-panel > div.object-operations";
-    var grid_selector = selector + "> div.view-panel > div.object-list";
+    var toolbar_selector = selector + "> div.gridview-panel > div.object-operations";
+    var grid_selector = selector + "> div.gridview-panel > div.object-list";
+    Utils.add_css("/controls/views/GridView/GridView.css");
     $.when(
       Utils.get_template("controls/views", "GridView", function (data) { template = $.templates(data); }),
       //Utils.get_file(class_id, "GridView.json", "json", function (data) { assist = data; }),

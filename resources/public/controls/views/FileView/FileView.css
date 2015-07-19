@@ -1,0 +1,24 @@
+div.fileview-panel {
+  position:absolute;
+  top:0px;
+  left:0px;
+  bottom:0px;
+  right:0px;
+}
+div.fileview-panel > div.file-contents {
+  position:absolute;
+  top:37px;
+  left:0px;
+  bottom:0px;
+  right:0px;
+}
+div.fileview-panel > div.file-contents > textarea {
+  position:absolute;
+  top:0px;
+  left:0px;
+  bottom:0px;
+  right:0px;
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+}

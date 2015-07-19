@@ -15,7 +15,7 @@ define(function (require) {
     this._grid = null;
   }
   
-  MenuView.show_gridview = function (event, row) {
+  MenuView.show_gridview = function (event) {
     // Get event source information
     var tab = $(event.target).closest("div.tab-panel");
     var tr = $(event.target).closest("tr");
@@ -30,7 +30,7 @@ define(function (require) {
     var view = app.contents().content(tab_id);
     var grid = view.list();
     var data = grid.data()[index];
-    app.contents().show_tab(data.uuid, null, data.label);
+    app.contents().show_tab("GridView", data.uuid, null, data.label);
   };
   
   MenuView.prototype.list = function () {
@@ -48,16 +48,23 @@ define(function (require) {
   	this._class_id = class_id;
   	this._object_id = object_id;
   	this._grid = new Grid();
+    var view = $(selector)
+  	var template = null;
     var assist = null;
     var class_ = null;
     var classes = null;
     var self = this;
+    var grid_selector = selector + "> div.menuview-panel > div.menu-list";
+    Utils.add_css("/controls/views/MenuView/MenuView.css");
     $.when(
-      Utils.get_file(null, "controls/views/MenuView/MenuView.json", "json", function (data) { assist = data; }),
-      Utils.get_data(Utils.CLASS_UUID, null, function (data) { classes = data; }),
-      Utils.get_data(Utils.CLASS_UUID, Utils.CLASS_UUID, function (data) { class_ = data; })
+      Utils.get_template("controls/views", "MenuView", function (data) { template = $.templates(data); })
+      ,Utils.get_file(null, "controls/views/MenuView/MenuView.json", "json", function (data) { assist = data; })
+      ,Utils.get_data(Utils.CLASS_UUID, null, function (data) { classes = data; })
+      ,Utils.get_data(Utils.CLASS_UUID, Utils.CLASS_UUID, function (data) { class_ = data; })
     ).always(function() {
-      self._grid.init(self._selector, class_)
+      var view_html = template.render();
+      view.append(view_html);
+      self._grid.init(grid_selector, class_)
       .then(function () {
         self._grid.add_operation("click", MenuView.show_gridview);
         self._grid.data(classes);

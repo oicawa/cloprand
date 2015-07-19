@@ -1,38 +1,69 @@
+#root-panel {
+  position:absolute;
+  top:0px;
+  left:0px;
+  bottom:0px;
+  right:0px;
+}
+#header-panel {
+  height: 30px;
+}
+#contents-panel {
+  position:absolute;
+  top:30px;	/* same to #header-panel{height} value. */
+  left:0px;
+  bottom:0px;
+  right:0px;
+}
 #contents-frame {
-  position: static;
+  position:absolute;
+  top:0px;
+  left:0px;
+  bottom:0px;
+  right:0px;
 }
 
 #contents-tabs {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    bottom: 0px;
-    right: 0px;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
 }
 
 .tab-panel {
-    position: absolute;
-    overflow: auto;
-    top: 60px;
-    left: 0px;
-    bottom: 0px;
-    right: 0px;
+  position: absolute;
+  top: 50px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
 }
 
 .tab-content-frame {
-    height: 100%;
-    padding: 5px;
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  bottom: 10px;
+  right: 10px;
+}
+
+.tab-content-panel {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
 }
 
 p.tab_title {
-    font-size: 30pt;
-    margin-top: 5px;
-    margin-bottom: 20px;
+  font-size: 30pt;
+  margin-top: 5px;
+  margin-bottom: 20px;
 }
 
 span.ui-icon-close {
-    float: left;
-    vertical-align: middle;
+  float: left;
+  vertical-align: middle;
 }
 
 ul.toolbar { margin: 0; padding: 0; }

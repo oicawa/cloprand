@@ -2,10 +2,29 @@ define(function (require) {
   require("jquery");
   require("jsrender");
   var Utils = require("core/Utils");
+  var app = require("app");
   
   function File() {
     this._editor = null;
     this._viewer = null;
+  };
+  
+  File.show_editor = function (event) {
+    // Get event source information
+    var a = $(event.target);
+    var file_name = a.text();
+    
+    var tab = $(event.target).closest("div.tab-panel");
+    //var tr = $(event.target).closest("tr");
+    //var index = tr.index();
+    var tab_id = tab.prop("id");
+    var ids = tab_id.split("_");
+    var prefix = 0 < ids.length ? ids[0] : null;
+    var class_id = 1 < ids.length ? ids[1] : null;
+    var object_id = 2 < ids.length ? ids[2] : null;
+
+    // Show FileView
+    app.contents().show_tab("FileView", class_id, object_id, file_name, { "file_name" : file_name });
   };
   
   File.prototype.init = function(selector, field) {
@@ -25,6 +44,10 @@ define(function (require) {
       root.append(html);
       self._editor = root.find("input.editor");
       self._viewer = root.find("a.viewer");
+      self._viewer.on("click", function(event) {
+        File.show_editor(event);
+        return false;
+      });
       dfd.resolve();
     });
     return dfd.promise();
@@ -45,7 +68,7 @@ define(function (require) {
   };
 
   File.prototype.edit = function(on) {
-    if (on) {
+    if (on && 0 == this._editor.val().length) {
       this._editor.show();
       this._viewer.hide();
     } else {

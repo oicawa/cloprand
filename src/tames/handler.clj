@@ -49,6 +49,10 @@
   (DELETE "/api/:class-id/:object-id" [class-id object-id]
     (println (str "[DELETE] /api/:class-id/:object-id = /api/" class-id "/" object-id))
     (systems/delete-data class-id object-id))
+  ; extensions
+  (GET "/extensions/:class-id/:object-id/:extension-file-name" [class-id object-id extension-file-name]
+    (println "/extensions/:class-id/:object-id/:extension-file-name =" (str "/extensions/" class-id "/" object-id "/" extension-file-name))
+    (systems/get-extension-file class-id object-id extension-file-name))
   (GET "/:class-id/index.html" [class-id]
     (println "/:class-id/index.html =" class-id)
     (response/resource-response "index.html" {:root "public/core"}))
