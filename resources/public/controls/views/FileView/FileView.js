@@ -133,16 +133,17 @@ define(function (require) {
     var toolbar_selector = selector + "> div.fileview-panel > div.file-operations";
     var detail_selector = selector + "> div.fileview-panel > div.file-contents";
     
-    function get_object_data(self, class_id_, object_id_) {
-      if (object_id_ == Utils.NULL_UUID) {
-        console.log("Didn't call Utils.get_data method to get object data.");
+    function get_extension_data(self, class_id_, object_id_, file_name) {
+      if (!file_name) {
+        console.log("Didn't call Utils.get_extension method to get object data.");
+        file_contents = "";
         var dfd = new $.Deferred;
         dfd.resolve();
         return dfd.promise();
       }
 
-      return Utils.get_data(class_id_, object_id_, function (data) {
-        self._object = data;
+      return Utils.get_extension(class_id_, object_id_, file_name, function (data) {
+        file_contents = data;
       });
     }
 
@@ -150,7 +151,7 @@ define(function (require) {
     $.when(
       Utils.get_template("controls/views", "FileView", function (data) { template = $.templates(data); })
       ,Utils.get_file(class_id, "FileView.json", "json", function (data) { basic_assist = data; }, function(data) { return true; })
-      ,Utils.get_extension(class_id, object_id, options.file_name, function (data) { file_contents = data; })
+      ,get_extension_data(self, class_id, object_id, options.file_name)
     ).then(function() {
       var view_html = template.render(file_contents);
       view.append(view_html);
