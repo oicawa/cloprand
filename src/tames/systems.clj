@@ -186,13 +186,26 @@
     (println "  exists?      :" (. file exists))
     (response-with-content-type res content-type)))
 
+(defn get-extension-file-list
+  [class-id object-id]
+  (println "  [systems/get-extension-file-list]")
+  (println "  class-id     :" class-id)
+  (println "  object-id    :" object-id)
+  (let [absolute-path (get-absolute-path (str "data/" class-id "/" object-id "/extension"))
+        file-list     (. (File. absolute-path) list)
+        files         (map (fn [file_name] {"file_name" file_name})
+                           file-list)
+        body          (json/write-str files)]
+    (pprint/pprint files)
+    (response-with-content-type (response/response body) "text/json; charset=utf-8")))
+
 (defn get-extension-file
   [class-id object-id file-name]
   (println "  [systems/get-extension-file]")
   (println "  class-id     :" class-id)
   (println "  object-id    :" object-id)
   (println "  file-name    :" file-name)
-  (let [absolute-path (get-absolute-path (str "extentions/" class-id "/" file-name))
+  (let [absolute-path (get-absolute-path (str "data/" class-id "/" file-name))
         res           (response/file-response absolute-path)]
     (response-with-content-type res "text/text; charset=utf-8")))
 
@@ -252,6 +265,23 @@
     (response-with-content-type
       (response/response (get-object class-id (new-object "uuid")))
       "text/json; charset=utf-8")))
+
+(defn post-extension-file
+  [class-id object-id file-name file_contents]
+  (println "Called post-extension-file function.")
+  (println "----------")
+  (pprint/pprint file_contents)
+  (println "----------")
+  (let [dir-path  (str "data/" class-id "/" object-id "/extension")
+        file-path (get-absolute-path (str dir-path "/" file-name))]
+    (ensure-directory dir-path)
+    (with-open [w (io/writer file-path)]
+      (. w write file_contents))
+    (println "Posted OK.")
+    (response-with-content-type
+      (response/response "OK")
+      "text/json; charset=utf-8")))
+  
 
 (defn put-data
   [class-id object-id s-exp-data]

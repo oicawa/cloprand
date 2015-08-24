@@ -14,14 +14,26 @@ define(function (require) {
     ]
   };
 
-  Extensions.prototype.is_new = function() {
-    var tab = this._root.closest("div.tab-panel");
+  function assign_ids(self) {
+  	console.assert(self);
+  	if (!self._root)
+  	  return;
+    var tab = self._root.closest("div.tab-panel");
     var tab_id = tab.prop("id");
     var ids = tab_id.split("_");
     var prefix = 0 < ids.length ? ids[0] : null;
-    var class_id = 1 < ids.length ? ids[1] : null;
-    var object_id = 2 < ids.length ? ids[2] : null;
-    return object_id == null || object_id == Utils.NULL_UUID;
+    self._class_id = 1 < ids.length ? ids[1] : null;
+    self._object_id = 2 < ids.length ? ids[2] : null;
+  }
+
+  Extensions.prototype.is_new = function() {
+    assign_ids(this);
+    console.log("this._object_id = " + this._object_id);
+  	if (!this._object_id)
+  	  return true;
+  	if (this._object_id == Utils.NULL_UUID)
+  	  return true;
+    return false;
   }
 
   function show_fileview(data) {
@@ -30,6 +42,8 @@ define(function (require) {
 
   function Extensions() {
     this._root = null;
+    this._class_id = null;
+    this._object_id = null;
     this._toolbar = null;
     this._grid = null;
     this._data = null;
@@ -54,10 +68,60 @@ define(function (require) {
     // Show FileView
     app.contents().show_tab("FileView", class_id, object_id, file_name == null ? "New Extension" : file_name, { "file_name" : file_name });
   };
+
+  function init_template(self) {
+    var dfd = new $.Deferred;
+    var template = null;
+    Utils.get_template("controls/fields", "Extensions", function(response) { template = $.templates(response); })
+    .then(function() {
+      var html = template.render();
+      self._root.append(html);
+      dfd.resolve();
+    });
+    return dfd.promise();
+  }
+
+  function init_grid(selector, self) {
+    var dfd = new $.Deferred;
+    var extensions = null;
+    self._grid = new Grid();
+    $.when(
+      Utils.get_extension(self._class_id, self._object_id, null, function (data) { extensions = data; })
+      ,self._grid.init(selector + " > div.extensions", [{name: "file_name", label: "Extension File Name", renderer: null}])
+    ).always(function() {
+      self._grid.data(extensions);
+      dfd.resolve();
+    });
+    return dfd.promise();
+  }
+
+  function init_toolbar(selector, self, toolbar) {
+    var dfd = new $.Deferred;
+    self._toolbar = new Toolbar();
+    self._toolbar.init(selector + " > div.toolbar", toolbar)
+    .then(function() {
+      self._toolbar.bind("add", function(event) {
+        Extensions.show_editor(event);
+      });
+      self._toolbar.bind("edit", function(event) {
+        var index = self._grid.selected_index();
+        if (index < 0) {
+          alert("Select item.");
+          return;
+        }
+        var data = self._grid.data()[index];
+        Extensions.show_editor(event);
+      });
+      self._toolbar.visible(false);
+      dfd.resolve();
+    });
+    return dfd.promise();
+  }
   
   Extensions.prototype.init = function(selector, field, assist) {
     var dfd = new $.Deferred;
     this._root = $(selector);
+  	assign_ids(this);
     if (0 < this._root.children()) {
       dfd.resolve();
       return dfd.promise();
@@ -67,38 +131,12 @@ define(function (require) {
     var template = null;
     var class_ = null;
     var self = this;
+    var toolbar = !assist ? default_toolbar : (!assist.toolbar ? default_toolbar : assist.toolbar);
     
-    $.when(
-      Utils.get_template("controls/fields", "Extensions", function(response) { template = $.templates(response); }),
-      Utils.get_data(Utils.CLASS_UUID, field.datatype.class, function (data) { class_ = data; })
-    ).always(function() {
-      var html = template.render(field);
-      self._root.append(html);
-      // Create controls
-      self._toolbar = new Toolbar();
-      self._grid = new Grid();
-
-      var toolbar = !assist ? default_toolbar : (!assist.toolbar ? default_toolbar : assist.toolbar);
-
-      $.when(
-        self._toolbar.init(selector + " > div.toolbar", toolbar),
-        self._grid.init(selector + " > div.extensions", class_)
-      ).always(function() {
-        self._toolbar.bind("add", function(event) {
-          Extensions.show_editor(event);
-        });
-        self._toolbar.bind("edit", function(event) {
-          var index = self._grid.selected_index();
-          if (index < 0) {
-            alert("Select item.");
-            return;
-          }
-          var data = self._grid.data()[index];
-          Extensions.show_editor(event);
-        });
-        dfd.resolve();
-      });
-    });
+    init_template(self)
+    .then(function() { return init_grid(selector, self); })
+    .then(function() { return init_toolbar(selector, self, toolbar); })
+    .then(function() { dfd.resolve(); });
     return dfd.promise();
   };
 
@@ -115,8 +153,15 @@ define(function (require) {
   };
 
   Extensions.prototype.edit = function(on) {
-    this._toolbar.visible(on && !this.is_new());
-    //this._toolbar.visible(on);
+    if (!on) {
+      this._toolbar.visible(false);
+      return;
+    }
+    if (this.is_new()) {
+      this._toolbar.visible(false);
+      return;
+    }
+    this._toolbar.visible(on);
   };
 
   Extensions.prototype.data = function(values) {

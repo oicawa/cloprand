@@ -64,7 +64,8 @@ define(function (require) {
     ).always(function() {
       var view_html = template.render();
       view.append(view_html);
-      self._grid.init(grid_selector, class_)
+      var columns = Grid.create_columns(class_);
+      self._grid.init(grid_selector, columns)
       .then(function () {
         self._grid.add_operation("click", MenuView.show_gridview);
         self._grid.data(classes);

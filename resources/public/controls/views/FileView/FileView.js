@@ -12,15 +12,13 @@ define(function (require) {
 
   function edit_toolbar(toolbar, on) {
     if (on) {
-      toolbar.button("edit").hide();
-      toolbar.button("delete").hide();
       toolbar.button("save").show();
       toolbar.button("cancel").show();
+      toolbar.button("delete").hide();
     } else {
-      toolbar.button("edit").show();
-      toolbar.button("delete").show();
       toolbar.button("save").hide();
       toolbar.button("cancel").hide();
+      toolbar.button("delete").show();
     }
   };
 
@@ -30,25 +28,20 @@ define(function (require) {
     this._class = null;
     this._object = null;
     this._toolbar = null;
-    this._detail = null;
+    this._file_name = null;
+    this._file_contents = null;
+    this._textarea_selector = null;
   }
   
-  FileView.edit = function (event) {
-    var tab_info = Contents.get_tab_info(event);
-    var view = app.contents().content(tab_info.tab_id);
-    view.detail().edit(true);
-    edit_toolbar(view.toolbar(), true);
-  };
-  
   FileView.delete = function (event) {
-    var res = confirm("Delete this class?");
+    var res = confirm("Delete this extension?");
     if (!res) {
       return;
     }
     
     var tab_info = Contents.get_tab_info(event);
     var objects = null;
-    Utils.delete_data(tab_info.class_id, tab_info.object_id, function(response) { objects = response; })
+    Utils.delete_extention(tab_info.class_id, tab_info.object_id, function(response) { objects = response; })
     .then(function() {
       alert("Deleted");
       app.contents().remove(tab_info.tab_id);
@@ -59,15 +52,19 @@ define(function (require) {
   FileView.save = function (event) {
     var tab_info = Contents.get_tab_info(event);
     var view = app.contents().content(tab_info.tab_id);
-    var detail = view.detail();
-    var data = detail.data();
+    //var file_contents = view.file_contents();
+    var file_contents = $(view._textarea_selector);
+    var data = file_contents.val();
     var object = null;
-    if (detail.is_new()) {
-      Utils.post_data(tab_info.class_id, data, function(response) { object = response;})
+    var file_name = view.file_name();
+    if (!file_name || file_name == "") {
+      file_name = prompt("Input extension file name.");
+      if (!file_name || file_name == "") {
+        alert("To save this contents as a new extension file,\nthe file name is required.");
+        return;
+      }
+      Utils.post_extension(tab_info.class_id, tab_info.object_id, file_name, data, function(response) { object = response;})
       .then(function() {
-        edit_toolbar(view.toolbar(), false);
-        detail.edit(false);
-        detail.data(object);
         var old_tab_id = tab_info.tab_id;
         var new_tab_id = Contents.tab_id(tab_info.prefix, tab_info.class_id, object.uuid);
         app.contents().change(old_tab_id, new_tab_id, object.label);
@@ -77,7 +74,7 @@ define(function (require) {
     } else {
       if (!data.uuid)
         data.uuid = tab_info.object_id;
-      Utils.put_data(tab_info.class_id, data.uuid, data, function(response) { object = response; })
+      Utils.put_extension(tab_info.class_id, data.uuid, data, function(response) { object = response; })
       .then(function() {
         edit_toolbar(view.toolbar(), false);
         detail.edit(false);
@@ -101,8 +98,12 @@ define(function (require) {
     detail.edit(false);
   };
   
-  FileView.prototype.detail = function () {
-    return this._detail;
+  FileView.prototype.file_name = function () {
+    return this._file_name;
+  };
+  
+  FileView.prototype.file_contents = function () {
+    return this._file_contents;
   };
   
   FileView.prototype.toolbar = function () {
@@ -113,6 +114,7 @@ define(function (require) {
     this._class_id = class_id;
     this._object_id = object_id;
     this._toolbar = new Toolbar();
+    this._file_name = options.file_name;
     //this._detail = new Detail();
     var view = $(selector)
     var template = null;
@@ -120,7 +122,6 @@ define(function (require) {
     var basic_assist = null;
     var custom_assist = null;
     var object = null;
-    var file_contents = null;
     var self = this;
     
     var default_toolbar = {
@@ -131,7 +132,9 @@ define(function (require) {
       ]
     };
     var toolbar_selector = selector + "> div.fileview-panel > div.file-operations";
-    var detail_selector = selector + "> div.fileview-panel > div.file-contents";
+    var file_contents_selector = selector + "> div.fileview-panel > div.file-contents > textarea";
+    this._textarea_selector = selector + "> div.fileview-panel > div.file-contents > textarea";
+    this._file_contents = $(file_contents_selector);
     
     function get_extension_data(self, class_id_, object_id_, file_name) {
       if (!file_name) {
@@ -143,7 +146,7 @@ define(function (require) {
       }
 
       return Utils.get_extension(class_id_, object_id_, file_name, function (data) {
-        file_contents = data;
+        self._file_contents.text(data);
       });
     }
 

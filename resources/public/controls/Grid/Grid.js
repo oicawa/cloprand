@@ -4,28 +4,6 @@ define(function (require) {
   var Utils = require("core/Utils");
   var Toolbar = require("controls/Toolbar/Toolbar");
 
-  function create_assist(klass, assist) {
-    if (!(!assist)) {
-      return assist;
-    }
-    if (!klass) {
-      return null;
-    }
-    var columns = [];
-    var fields = klass.object_fields;
-    if (!fields) {
-      return {columns: columns, header:{visible: true}};
-    }
-    for (var i = 0; i < fields.length; i++) {
-      var field = fields[i];
-      if (!field.column) {
-        continue;
-      }
-      columns.push({name: field.name, label: field.label, renderer: null});
-    }
-    return {columns: columns, header:{visible: true}};
-  }
-
   function regist_event(self, event_name) {
     self._table.on(event_name, "tbody > tr", function(event) {
       self._table.find("tr.selected").removeClass("selected");
@@ -38,33 +16,34 @@ define(function (require) {
     });
   }
 
-  function create_control(self, root, template) {
-    var assist = self._assist;
-    var html = template.render(assist);
-    root.append(html);
-    self._table = root.children("table.grid");
+  function create_control(self) {
+    var html = template.render();
+    self._root.append(html);
+    self._table = self._root.children("table.grid");
 
     regist_event(self, "click");
     regist_event(self, "dblclick");
   }
 
   function refresh(self) {
+    // header
     var thead = self._table.find("thead");
     thead.empty();
     var thead_buf = [];
     thead_buf.push("<tr>");
-    for (var i = 0; i < self._assist.columns.length; i++) {
-      var column = self._assist.columns[i];
+    for (var i = 0; i < self._columns.length; i++) {
+      var column = self._columns[i];
       thead_buf.push("<th>", "<div>", column.label, "</div>", "</th>");
     }
     thead_buf.push("</tr>");
     $(thead_buf.join("")).appendTo(thead);
-    if (self._assist.header.visible) {
+    if (self._header_visible) {
       thead.show();
     } else {
       thead.hide();
     }
 
+    // row
     var tbody = self._table.find("tbody");
     tbody.empty();
     if (!self._data) {
@@ -74,8 +53,8 @@ define(function (require) {
       var item = self._data[i];
       var buf = [];
       buf.push("<tr>");
-      for (var j = 0; j < self._assist.columns.length; j++) {
-        var column = self._assist.columns[j];
+      for (var j = 0; j < self._columns.length; j++) {
+        var column = self._columns[j];
         buf.push("<td>", "<div>", item[column.name], "</div>", "</td>");
       }
       buf.push("</tr>");
@@ -84,8 +63,8 @@ define(function (require) {
   }
 
   function assign_item(self, tr, item) {
-    for (var i = 0; i < self._assist.columns.length; i++) {
-      var column = self._assist.columns[i];
+    for (var i = 0; i < self._columns.length; i++) {
+      var column = self._columns[i];
       var value = column.renderer ? column.renderer(item) : item[column.name];
       tr.children("td." + column.name).text(value);
     }
@@ -93,23 +72,39 @@ define(function (require) {
 
   function Grid() {
     this._root = null;
-    this._assist = null;
-    this._class = null;
-    this._template = null;
     this._data = [];
     this._table = null;
     this._columns = [];
+    this._header_visible = true;
     this._items = [];
     this._operations = {};
   }
 
-  Grid.prototype.init = function(selector, klass, assist) {
+  Grid.create_columns = function (klass) {
+    console.assert(typeof assist == "undefined", "assist not undefined.");
+    if (!klass) {
+      return null;
+    }
+    var columns = [];
+    var fields = klass.object_fields;
+    if (!fields) {
+      return columns;
+    }
+    for (var i = 0; i < fields.length; i++) {
+      var field = fields[i];
+      if (!field.column) {
+        continue;
+      }
+      columns.push({name: field.name, label: field.label, renderer: null});
+    }
+    return columns;
+  }
+
+  Grid.prototype.init = function(selector, columns) {
     var dfd = new $.Deferred;
 
-    this._class = klass;
-    this._assist = create_assist(klass, assist);
-    var root = $(selector);
-    var template = null;
+    this._root = $(selector);
+    this._columns = columns;
     var self = this;
 
     // CSS
@@ -118,7 +113,7 @@ define(function (require) {
     // Load template data & Create form tags
     Utils.get_template("controls", "Grid", function(response) { template = $.templates(response); })
     .then(function() {
-      create_control(self, root, template);
+      create_control(self, template);
       dfd.resolve();
     });
     return dfd.promise();
@@ -167,6 +162,16 @@ define(function (require) {
   };
 
   Grid.prototype.restore = function() {
+  };
+
+  Grid.prototype.columns = function(columns_) {
+    this._columns = columns_;
+    refresh(this);
+  };
+
+  Grid.prototype.header_visible = function(visible) {
+    this._header_visible = visible;
+    refresh(this);
   };
 
   Grid.prototype.data = function(value) {

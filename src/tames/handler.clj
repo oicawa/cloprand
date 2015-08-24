@@ -50,9 +50,16 @@
     (println (str "[DELETE] /api/:class-id/:object-id = /api/" class-id "/" object-id))
     (systems/delete-data class-id object-id))
   ; extensions
-  (GET "/extensions/:class-id/:object-id/:extension-file-name" [class-id object-id extension-file-name]
-    (println "/extensions/:class-id/:object-id/:extension-file-name =" (str "/extensions/" class-id "/" object-id "/" extension-file-name))
-    (systems/get-extension-file class-id object-id extension-file-name))
+  (GET "/:class-id/:object-id/extension" [class-id object-id]
+    (println "/:class-id/:object-id/extension =" (str "/" class-id "/" object-id "/extension"))
+    (systems/get-extension-file-list class-id object-id))
+  (GET "/:class-id/:object-id/extensions/:file-name" [class-id object-id file-name]
+    (println "/:class-id/:object-id/extension/:file-name =" (str "/" class-id "/" object-id "/extension/" file-name))
+    (systems/get-extension-file class-id object-id file-name))
+  (POST "/:class-id/:object-id/extensions/:file-name" [class-id object-id file-name & params]
+    (println "/:class-id/:object-id/extensions/:file-name =" (str "/" class-id "/" object-id "/extensions/" file-name))
+    (systems/post-extension-file class-id object-id file-name (json/read-str (params :value))))
+  
   (GET "/:class-id/index.html" [class-id]
     (println "/:class-id/index.html =" class-id)
     (response/resource-response "index.html" {:root "public/core"}))

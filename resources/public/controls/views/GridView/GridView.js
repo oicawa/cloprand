@@ -98,7 +98,8 @@ define(function (require) {
       self._toolbar.bind("create", GridView.create);
 
       // Grid
-      self._grid.init(grid_selector, self._class)
+      var columns = Grid.create_columns(self._class);
+      self._grid.init(grid_selector, columns)
       .then(function () {
         self._grid.add_operation("click", GridView.show_detail);
         self._grid.data(classes);

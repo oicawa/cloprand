@@ -63,20 +63,20 @@ define(function (require) {
   	CLASS_UUID : _CLASS_UUID,
   	PRIMITIVE_UUID : _PRIMITIVE_UUID,
     get_extension: function(class_id, object_id, file_name, func_success, func_error) {
-      var url = create_path("extensions", class_id, object_id, file_name);
-      return get_function(url, "text", func_success, func_error);
+      var url = create_path(class_id, object_id, "extension", file_name);
+      return get_function(url, "json", func_success, func_error);
     },
     post_extension: function(class_id, object_id, file_name, data, func_success, func_error) {
-      var url = create_path("extensions", class_id, object_id, file_name);
-      return post_function(url, "text", data, func_success, func_error);
+      var url = create_path(class_id, object_id, "extension", file_name);
+      return post_function(url, "json", data, func_success, func_error);
     },
     put_extension: function(class_id, object_id, file_name, data, func_success, func_error) {
-      var url = create_path("extensions", class_id, object_id, file_name);
-      return put_function(url, "text", data, func_success, func_error);
+      var url = create_path(class_id, object_id, "extension", file_name);
+      return put_function(url, "json", data, func_success, func_error);
     },
     delete_extension: function(class_id, object_id, file_name, func_success, func_error) {
-      var url = create_path("extensions", class_id, object_id, file_name);
-      return delete_function(url, "text", func_success, func_error);
+      var url = create_path(class_id, object_id, "extension", file_name);
+      return delete_function(url, "json", func_success, func_error);
     },
     get_file: function(class_id, file_name, data_type, func_success, func_error) {
       var url = create_path(class_id, file_name);

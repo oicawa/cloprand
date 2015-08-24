@@ -54,9 +54,11 @@ define(function (require) {
 
       var toolbar = !assist ? default_toolbar : (!assist.toolbar ? default_toolbar : assist.toolbar);
 
+      var columns = Grid.create_columns(class_);
+
       $.when(
         self._toolbar.init(selector + " > div.toolbar", toolbar),
-        self._grid.init(selector + " > div.grid", class_),
+        self._grid.init(selector + " > div.grid", columns),
         self._detail.init(selector + " > div.dialog > div.detail", class_)
         .then(function () {
           self._detail.visible(true);
