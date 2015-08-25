@@ -146,7 +146,7 @@ define(function (require) {
     var template = null;
     var assist = null;
     var self = this;
-    Utils.add_css("/style.css");
+    Utils.add_css("/defaults/style.css");
     $.when(
       Utils.get_file(null, "Contents.html", "html", function (data) { template = $.templates(data); }),
       Utils.get_file(null, "Contents.json", "json", function (data) { assist = data; })
