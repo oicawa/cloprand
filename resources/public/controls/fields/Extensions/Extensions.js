@@ -168,8 +168,7 @@ define(function (require) {
     if (arguments.length == 0) {
       return null;
     } else {
-      this._grid.data(values);
-      this._backuped = values;
+      // Not Implement because Extension field get file names by itself.
     }
   };
   
