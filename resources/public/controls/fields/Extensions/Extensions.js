@@ -50,15 +50,10 @@ define(function (require) {
     this._backuped = null;
   };
 
-  Extensions.show_editor = function (event) {
+  Extensions.show_editor = function (event, file_name) {
     var tab = $(event.target).closest("div.tab-panel");
     var tr = $(event.target).closest("tr");
     var index = tr.index();
-    var file_name = null;
-    if (index <= 0) {
-      var td = $(event.target).closest("td");
-      file_name = td.text();
-    }
     var tab_id = tab.prop("id");
     var ids = tab_id.split("_");
     var prefix = 0 < ids.length ? ids[0] : null;
@@ -101,7 +96,7 @@ define(function (require) {
     self._toolbar.init(selector + " > div.toolbar", toolbar)
     .then(function() {
       self._toolbar.bind("add", function(event) {
-        Extensions.show_editor(event);
+        Extensions.show_editor(event, null);
       });
       self._toolbar.bind("edit", function(event) {
         var index = self._grid.selected_index();
@@ -110,7 +105,7 @@ define(function (require) {
           return;
         }
         var data = self._grid.data()[index];
-        Extensions.show_editor(event);
+        Extensions.show_editor(event, data.file_name);
       });
       self._toolbar.visible(false);
       dfd.resolve();

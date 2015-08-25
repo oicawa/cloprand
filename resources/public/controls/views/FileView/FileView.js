@@ -67,18 +67,17 @@ define(function (require) {
       .then(function() {
         var old_tab_id = tab_info.tab_id;
         var new_tab_id = Contents.tab_id(tab_info.prefix, tab_info.class_id, object.uuid);
+        app.contents().label(tab_info.tab_id, file_name);
         app.contents().change(old_tab_id, new_tab_id, object.label);
         app.contents().broadcast(tab_info.class_id, object.uuid, object);
         alert("Saved");
       });
     } else {
-      if (!data.uuid)
-        data.uuid = tab_info.object_id;
-      Utils.put_extension(tab_info.class_id, data.uuid, data, function(response) { object = response; })
+      Utils.put_extension(tab_info.class_id, tab_info.object_id, file_name, data, function(response) { object = response; })
       .then(function() {
-        edit_toolbar(view.toolbar(), false);
-        detail.edit(false);
-        detail.commit();
+        //edit_toolbar(view.toolbar(), false);
+        //detail.edit(false);
+        //detail.commit();
         app.contents().label(tab_info.tab_id, data.label);
         app.contents().broadcast(tab_info.class_id, tab_info.object_id, data);
         alert("Saved");
@@ -135,6 +134,7 @@ define(function (require) {
     var file_contents_selector = selector + "> div.fileview-panel > div.file-contents > textarea";
     this._textarea_selector = selector + "> div.fileview-panel > div.file-contents > textarea";
     this._file_contents = $(file_contents_selector);
+    var file_contents = null;
     
     function get_extension_data(self, class_id_, object_id_, file_name) {
       if (!file_name) {
@@ -146,7 +146,7 @@ define(function (require) {
       }
 
       return Utils.get_extension(class_id_, object_id_, file_name, function (data) {
-        self._file_contents.text(data);
+        file_contents = data.file_contents;
       });
     }
 
@@ -156,8 +156,10 @@ define(function (require) {
       ,Utils.get_file(class_id, "FileView.json", "json", function (data) { basic_assist = data; }, function(data) { return true; })
       ,get_extension_data(self, class_id, object_id, options.file_name)
     ).then(function() {
-      var view_html = template.render(file_contents);
+      var view_html = template.render();
       view.append(view_html);
+      
+      $(self._textarea_selector).val(file_contents);
 
       self._class = class_;
 

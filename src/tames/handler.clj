@@ -59,6 +59,9 @@
   (POST "/:class-id/:object-id/extension/:file-name" [class-id object-id file-name & params]
     (println "/:class-id/:object-id/extension/:file-name =" (str "/" class-id "/" object-id "/extension/" file-name))
     (systems/post-extension-file class-id object-id file-name (json/read-str (params :value))))
+  (PUT "/:class-id/:object-id/extension/:file-name" [class-id object-id file-name & params]
+    (println "/:class-id/:object-id/extension/:file-name =" (str "/" class-id "/" object-id "/extension/" file-name))
+    (systems/put-extension-file class-id object-id file-name (json/read-str (params :value))))
   
   (GET "/:class-id/index.html" [class-id]
     (println "/:class-id/index.html =" class-id)

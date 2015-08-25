@@ -205,9 +205,12 @@
   (println "  class-id     :" class-id)
   (println "  object-id    :" object-id)
   (println "  file-name    :" file-name)
-  (let [absolute-path (get-absolute-path (str "data/" class-id "/" file-name))
+  (let [absolute-path (get-absolute-path (str "data/" class-id "/" object-id "/extension/" file-name))
+        file_contents (slurp absolute-path)
         res           (response/file-response absolute-path)]
-    (response-with-content-type res "text/text; charset=utf-8")))
+    (response-with-content-type
+      (response/response (json/write-str { "file_name" file-name "file_contents" file_contents }))
+      "text/text; charset=utf-8")))
 
 (defn get-data
   [class-id object-id]
@@ -279,9 +282,8 @@
       (. w write file_contents))
     (println "Posted OK.")
     (response-with-content-type
-      (response/response "OK")
+      (response/response (json/write-str { "file_name" file-name }))
       "text/json; charset=utf-8")))
-  
 
 (defn put-data
   [class-id object-id s-exp-data]
@@ -294,6 +296,22 @@
   (response-with-content-type
     (response/response (get-objects class-id))
     "text/json; charset=utf-8"))
+
+(defn put-extension-file
+  [class-id object-id file-name file_contents]
+  (println "Called put-extension-file function.")
+  (println "----------")
+  (pprint/pprint file_contents)
+  (println "----------")
+  (let [dir-path  (str "data/" class-id "/" object-id "/extension")
+        file-path (get-absolute-path (str dir-path "/" file-name))]
+    (ensure-directory dir-path)
+    (with-open [w (io/writer file-path)]
+      (. w write file_contents))
+    (println "Put OK.")
+    (response-with-content-type
+      (response/response (json/write-str { "file_name" file-name }))
+      "text/json; charset=utf-8")))
 
 (defn delete-data
   [class-id object-id]
