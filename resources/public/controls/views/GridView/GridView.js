@@ -29,7 +29,7 @@ define(function (require) {
   GridView.create = function (event) {
     var tab_info = Contents.get_tab_info(event);
     var view = app.contents().content(tab_info.tab_id);
-    app.contents().show_tab("DetailView", tab_info.class_id, Utils.NULL_UUID, "New " + view._class.label);
+    app.contents().show_tab("New " + view._class.label, null, "DetailView", tab_info.class_id, Utils.NULL_UUID);
   };
 
   GridView.show_detail = function (event) {
@@ -52,7 +52,7 @@ define(function (require) {
       break;
     }
     var caption = data[field_name];
-    app.contents().show_tab("DetailView", tab_info.class_id, data.uuid, caption);
+    app.contents().show_tab(caption, null, "DetailView", tab_info.class_id, data.uuid);
   };
   
   GridView.prototype.update = function (class_id, object_id, data) {

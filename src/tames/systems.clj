@@ -322,6 +322,18 @@
     (response/response (get-objects class-id))
     "text/json; charset=utf-8"))
 
+(defn delete-extension-file
+  [class-id object-id file-name]
+  (println "Called delete-extension-file function.")
+  (let [dir-path  (str "data/" class-id "/" object-id "/extension")
+        file-path (get-absolute-path (str dir-path "/" file-name))]
+    (ensure-directory dir-path)
+    (remove-file (File. file-path))
+    (println "Delete OK.")
+    (response-with-content-type
+      (response/response (json/write-str { "file_name" file-name }))
+      "text/json; charset=utf-8")))
+
 (defn copy-resource-file
   [resource-path dest-path]
   (with-open [src (io/input-stream (io/resource resource-path))]

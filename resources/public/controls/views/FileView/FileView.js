@@ -40,8 +40,10 @@ define(function (require) {
     }
     
     var tab_info = Contents.get_tab_info(event);
+    var view = app.contents().content(tab_info.tab_id);
+    var file_name = view.file_name();
     var objects = null;
-    Utils.delete_extention(tab_info.class_id, tab_info.object_id, function(response) { objects = response; })
+    Utils.delete_extension(tab_info.class_id, tab_info.object_id, file_name, function(response) { objects = response; })
     .then(function() {
       alert("Deleted");
       app.contents().remove(tab_info.tab_id);
@@ -65,10 +67,11 @@ define(function (require) {
       }
       Utils.post_extension(tab_info.class_id, tab_info.object_id, file_name, data, function(response) { object = response;})
       .then(function() {
-        var old_tab_id = tab_info.tab_id;
-        var new_tab_id = Contents.tab_id(tab_info.prefix, tab_info.class_id, object.uuid);
-        app.contents().label(tab_info.tab_id, file_name);
-        app.contents().change(old_tab_id, new_tab_id, object.label);
+        var current_tab_id = tab_info.tab_id;
+        //var new_tab_id = Contents.tab_id(tab_info.prefix, tab_info.class_id, object.uuid);
+        var new_tab_id = current_tab_id + "_" + file_name;
+        app.contents().label(current_tab_id, file_name);
+        app.contents().change(current_tab_id, new_tab_id, object.file_name);
         app.contents().broadcast(tab_info.class_id, object.uuid, object);
         alert("Saved");
       });

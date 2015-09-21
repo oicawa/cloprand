@@ -27,8 +27,12 @@ define(function (require) {
     tabs.tabs("refresh");
   }
 
-  function create_tab_id(prefix, class_id, object_id) {
-    return prefix + "_" + class_id + (object_id ? "_" + object_id : "");
+  //function create_tab_id(prefix, class_id, object_id) {
+  function create_tab_id(parts) {
+  	console.log("typeof(parts): " + typeof(parts));
+  	console.log("parts: " + parts);
+    //return prefix + "_" + class_id + (object_id ? "_" + object_id : "");
+    return parts.join("_");
   }
   
   function create_content_selector(tab_id) {
@@ -93,11 +97,13 @@ define(function (require) {
     this._tabs.content(tab_id, detail);
   };
   
-  Contents.prototype.show_tab = function (view_name, class_id, object_id, label, options) {
+  Contents.prototype.show_tab = function (label, options, view_name, class_id, object_id) {
     console.assert(typeof view_name == "string" && 1 <= view_name.length);
     console.assert(Utils.UUID.test(class_id));
     console.assert(object_id == null || Utils.UUID.test(object_id));
-    var tab_id = create_tab_id(view_name, class_id, object_id);
+    var params = Array.prototype.slice.call(arguments, 2);
+    console.log(params);
+    var tab_id = create_tab_id(params);
     var exists = this._tabs.show(tab_id);
     if (exists) {
       return;
@@ -135,9 +141,13 @@ define(function (require) {
       menuview.update(class_id, object_id, data);
     }
 
-    var grid_id = create_tab_id("GridView", class_id, null);
+    var grid_id = create_tab_id(["GridView", class_id, null]);
     var gridview = this._tabs.content(grid_id);
     gridview.update(class_id, object_id, data);
+
+    var detail_id = create_tab_id(["DetailView", class_id, object_id]);
+    var detailview = this._tabs.content(detail_id);
+    detailview.update(class_id, object_id, data);
   }
   
   Contents.prototype.init = function (selector) {
@@ -159,7 +169,7 @@ define(function (require) {
       self._tabs.init("#contents-tabs");
       for (var i = 0; i < assist.tabs.length; i++) {
         var tab = assist.tabs[i];
-        var tab_id = create_tab_id(tab.view, tab.class_id, tab.object_id);
+        var tab_id = create_tab_id([tab.view, tab.class_id, tab.object_id]);
         var selector = create_content_selector(tab_id);
         self._tabs.add(tab_id, tab.label, true, false);
         create_view(self, tab_id, selector, tab.view, tab.class_id, tab.object_id);

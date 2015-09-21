@@ -61,7 +61,7 @@ define(function (require) {
     var object_id = 2 < ids.length ? ids[2] : null;
 
     // Show FileView
-    app.contents().show_tab("FileView", class_id, object_id, file_name == null ? "New Extension" : file_name, { "file_name" : file_name });
+    app.contents().show_tab(file_name == null ? "New Extension" : file_name, { "file_name" : file_name }, "FileView", class_id, object_id);
   };
 
   function init_template(self) {

@@ -30,7 +30,7 @@ define(function (require) {
     var view = app.contents().content(tab_id);
     var grid = view.list();
     var data = grid.data()[index];
-    app.contents().show_tab("GridView", data.uuid, null, data.label);
+    app.contents().show_tab(data.label, null, "GridView", data.uuid, null);
   };
   
   MenuView.prototype.list = function () {
