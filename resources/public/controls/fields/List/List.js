@@ -2,19 +2,23 @@ define(function (require) {
   require("jquery");
   require("jsrender");
   var Utils = require("core/Utils");
+  var Inherits = require("core/Inherits");
+  var Field = require("controls/fields/Field");
+  
   function List() {
-  	var _editor = null;
-  	var _viewer = null;
-    var _items = null;
-    var _values = null;
+    Field.call(this, "controls/fields", "List");
+  	this._editor = null;
+  	this._viewer = null;
+    this._items = null;
+    this._values = null;
   }
+  Inherits(List, Field);
 
   List.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
     var root = $(selector);
     var template = null;
     var self = this;
-    Utils.add_css("controls/fields/List/List.css");
     $.when(
       Utils.get_template("controls/fields", "List", function(response) { template = $.templates(response); }),
       Utils.get_data(field.datatype["class"], null, function(response) { self._items = response; })
@@ -62,7 +66,7 @@ define(function (require) {
     // convert values (Array -> Hash)
     var flags = {};
     for (var i = 0; i < this._values.length; i++) {
-      flags[_values[i]] = true;
+      flags[this._values[i]] = true;
     }
       // change selected attribute
     var options = this._editor.find("option");

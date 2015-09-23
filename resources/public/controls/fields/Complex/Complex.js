@@ -3,10 +3,14 @@ define(function (require) {
   require("jsrender");
   var Utils = require("core/Utils");
   var Detail = require("controls/Detail/Detail");
+  var Inherits = require("core/Inherits");
+  var Field = require("controls/fields/Field");
 
   function Complex() {
+    Field.call(this, "controls/fields", "Complex");
     this._detail = null;
   };
+  Inherits(Complex, Field);
   
   Complex.prototype.init = function(selector, field, assist) {
     var dfd = new $.Deferred;

@@ -4,6 +4,7 @@ define(function (require) {
   require("JSON");
   var Utils = require("core/Utils");
   var Cache = require("core/Cache");
+  var Inherits = require("core/Inherits");
 
   function get_control_assist(self, field) {
     if (!self._custom_assist) {
@@ -121,6 +122,13 @@ define(function (require) {
     this._is_new = true;
     this._instance = this;
   }
+
+  Detail.prototype.update = function(keys) {
+    for (var name in this._controls) {
+      var control = this._controls[name]
+      control.update(keys);
+    }
+  };
 
   Detail.prototype.init = function(selector, class_, basic_assist, custom_assist) {
     var dfd = new $.Deferred;

@@ -2,15 +2,8 @@ define(function (require) {
   require("jquery");
   require("jsrender");
   var Utils = require("core/Utils");
-  
-  function DropDownList() {
-  	this._editor = null;
-  	this._viewer = null;
-    this._template = null;
-    this._class = null;
-    this._objects = null;
-    this._items = {};
-  }
+  var Inherits = require("core/Inherits");
+  var Field = require("controls/fields/Field");
 
   function create_control(self, root, template, field) {
     var caption_fields = [];
@@ -39,13 +32,26 @@ define(function (require) {
       items.push({value : value, caption : caption });
       self._items[value] = caption;
     }
-    
+
     var html = template.render({ name: field.name, items: items });
+    root.empty();
     root.append(html);
     
     self._editor = root.find("select");
     self._viewer = root.find("div");
   }
+  
+  function DropDownList() {
+    Field.call(this, "controls/fields", "DropDownList");
+    this._class_id = null;
+  	this._editor = null;
+  	this._viewer = null;
+    this._template = null;
+    this._class = null;
+    this._objects = null;
+    this._items = {};
+  }
+  Inherits(DropDownList, Field);
 
   DropDownList.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
@@ -58,13 +64,13 @@ define(function (require) {
 
     // Load template data & Create form tags
     //Utils.add_css("/controls/fields/DropDownList/DropDownList.css");
+    this._class_id = field.datatype["class"];
     var self = this;
     var template = null;
-    var class_id = field.datatype["class"];
     $.when(
       Utils.get_template("controls/fields", "DropDownList", function(response) { template = $.templates(response); }),
-      Utils.get_data(Utils.CLASS_UUID, class_id, function(response) { self._class = response; }),
-      Utils.get_data(class_id, null, function(response) { self._objects = response; })
+      Utils.get_data(Utils.CLASS_UUID, this._class_id, function(response) { self._class = response; }),
+      Utils.get_data(this._class_id, null, function(response) { self._objects = response; })
     ).then(function() {
       create_control(self, root, template, field);
       dfd.resolve();
@@ -106,6 +112,11 @@ define(function (require) {
       this._viewer.attr("value", value);
     }
   };
+  
+  DropDownList.prototype.update = function(keys) {
+
+  
+  }
 
   return DropDownList;
 }); 

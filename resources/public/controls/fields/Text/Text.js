@@ -2,11 +2,15 @@ define(function (require) {
   require("jquery");
   require("jsrender");
   var Utils = require("core/Utils");
+  var Inherits = require("core/Inherits");
+  var Field = require("controls/fields/Field");
   
   function Text() {
+    Field.call(this, "controls/fields", "Text");
     this._editor = null;
     this._viewer = null;
   };
+  Inherits(Text, Field);
   
   Text.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
@@ -19,7 +23,6 @@ define(function (require) {
     // Load template data & Create form tags
     var template = null;
     var self = this;
-    Utils.add_css("/controls/fields/Text/Text.css");
     Utils.get_template("controls/fields", "Text", function(response) { template = $.templates(response); })
     .then(function() {
       var html = template.render(field);

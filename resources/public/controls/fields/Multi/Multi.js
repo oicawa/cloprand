@@ -6,7 +6,9 @@ define(function (require) {
   var Grid = require("controls/Grid/Grid");
   var Detail = require("controls/Detail/Detail");
   var Dialog = require("core/Dialog");
-
+  var Inherits = require("core/Inherits");
+  var Field = require("controls/fields/Field");
+  
   var default_toolbar = {
     "operations" : "ae727055-cb09-49ed-84af-6cbc8cd37ba8/operations",
     "items" : [
@@ -19,6 +21,7 @@ define(function (require) {
   };
 
   function Multi() {
+    Field.call(this, "controls/fields", "Multi");
     this._toolbar = null;
     this._grid = null;
     this._detail = null;
@@ -26,6 +29,7 @@ define(function (require) {
     this._data = null;
     this._backuped = null;
   };
+  Inherits(Multi, Field);
   
   Multi.prototype.init = function(selector, field, assist) {
     var dfd = new $.Deferred;

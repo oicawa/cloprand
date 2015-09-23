@@ -5,6 +5,8 @@ define(function (require) {
   var Toolbar = require("controls/Toolbar/Toolbar");
   var Grid = require("controls/Grid/Grid");
   var app = require("app");
+  var Inherits = require("core/Inherits");
+  var Field = require("controls/fields/Field");
 
   var default_toolbar = {
     "operations" : "ae727055-cb09-49ed-84af-6cbc8cd37ba8/operations",
@@ -26,6 +28,22 @@ define(function (require) {
     self._object_id = 2 < ids.length ? ids[2] : null;
   }
 
+  function show_fileview(data) {
+    alert("Show FileView.\n" + data);
+  }
+
+  function Extensions() {
+    Field.call(this, "controls/fields", "Extensions");
+    this._root = null;
+    this._class_id = null;
+    this._object_id = null;
+    this._toolbar = null;
+    this._grid = null;
+    this._data = null;
+    this._backuped = null;
+  };
+  Inherits(Extensions, Field);
+
   Extensions.prototype.is_new = function() {
     assign_ids(this);
     console.log("this._object_id = " + this._object_id);
@@ -35,20 +53,6 @@ define(function (require) {
   	  return true;
     return false;
   }
-
-  function show_fileview(data) {
-    alert("Show FileView.\n" + data);
-  }
-
-  function Extensions() {
-    this._root = null;
-    this._class_id = null;
-    this._object_id = null;
-    this._toolbar = null;
-    this._grid = null;
-    this._data = null;
-    this._backuped = null;
-  };
 
   Extensions.show_editor = function (event, file_name) {
     var tab = $(event.target).closest("div.tab-panel");

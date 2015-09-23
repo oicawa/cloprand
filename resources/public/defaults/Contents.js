@@ -26,14 +26,6 @@ define(function (require) {
     tabs.append("<div id='" + id + "' class='tab-panel'><div class='tab-contents-panel'><div class='object_detail'></div></div></div>");
     tabs.tabs("refresh");
   }
-
-  //function create_tab_id(prefix, class_id, object_id) {
-  function create_tab_id(parts) {
-  	console.log("typeof(parts): " + typeof(parts));
-  	console.log("parts: " + parts);
-    //return prefix + "_" + class_id + (object_id ? "_" + object_id : "");
-    return parts.join("_");
-  }
   
   function create_content_selector(tab_id) {
     return "#" + tab_id + " > div.tab-content-frame > div.tab-content-panel";
@@ -79,9 +71,9 @@ define(function (require) {
     };
   };
 
-  Contents.tab_id = function (prefix, class_id, object_id) {
-    return create_tab_id(prefix, class_id, object_id);
-  };
+//  Contents.tab_id = function (prefix, class_id, object_id) {
+//    return Tabs.create_tab_id(prefix, class_id, object_id);
+//  };
   
   Contents.prototype.add = function () {
     var label = "New " + def_class.label;
@@ -103,7 +95,7 @@ define(function (require) {
     console.assert(object_id == null || Utils.UUID.test(object_id));
     var params = Array.prototype.slice.call(arguments, 2);
     console.log(params);
-    var tab_id = create_tab_id(params);
+    var tab_id = Tabs.create_tab_id(params);
     var exists = this._tabs.show(tab_id);
     if (exists) {
       return;
@@ -130,24 +122,10 @@ define(function (require) {
     return this._tabs.label(tab_id, value);
   };
 
-  Contents.prototype.broadcast = function (class_id, object_id, data) {
-    // *TODO*
-    // Maybe, we have to broadcast these arguments information to all 'tab's,
-    // and it leaves the determination of whether to be refreshed on the tab.
-    // But now, implement easy...
-    if (class_id == Utils.CLASS_UUID) {
-      var menu_id = create_tab_id("MenuView", class_id, null);
-      var menuview = this._tabs.content(menu_id);
-      menuview.update(class_id, object_id, data);
-    }
-
-    var grid_id = create_tab_id(["GridView", class_id, null]);
-    var gridview = this._tabs.content(grid_id);
-    gridview.update(class_id, object_id, data);
-
-    var detail_id = create_tab_id(["DetailView", class_id, object_id]);
-    var detailview = this._tabs.content(detail_id);
-    detailview.update(class_id, object_id, data);
+  Contents.prototype.broadcast = function (class_id, object_id, options) {
+    var key = { "class_id" : class_id, "object_id" : object_id, "options" : options };
+    var keys = [key];
+    this._tabs.broadcast(keys);
   }
   
   Contents.prototype.init = function (selector) {
@@ -169,7 +147,7 @@ define(function (require) {
       self._tabs.init("#contents-tabs");
       for (var i = 0; i < assist.tabs.length; i++) {
         var tab = assist.tabs[i];
-        var tab_id = create_tab_id([tab.view, tab.class_id, tab.object_id]);
+        var tab_id = Tabs.create_tab_id(tab.id);
         var selector = create_content_selector(tab_id);
         self._tabs.add(tab_id, tab.label, true, false);
         create_view(self, tab_id, selector, tab.view, tab.class_id, tab.object_id);

@@ -2,10 +2,15 @@ define(function (require) {
   require("jquery");
   require("jsrender");
   var Utils = require("core/Utils");
+  var Inherits = require("core/Inherits");
+  var Field = require("controls/fields/Field");
+  
   function UUID() {
-  	this._editor = null;
-  	this._viewer = null;
+    Field.call(this, "controls/fields", "UUID");
+    this._editor = null;
+    this._viewer = null;
   }
+  Inherits(UUID, Field);
 
   UUID.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
@@ -13,7 +18,6 @@ define(function (require) {
     var template = null;
     var self = this;
     
-    Utils.add_css("/controls/fields/UUID/UUID.css");
     Utils.get_template("controls/fields", "UUID", function(response) { template = $.templates(response); })
     .then(function() {
       var html = template.render(field);

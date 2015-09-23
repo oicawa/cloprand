@@ -69,7 +69,7 @@ define(function (require) {
         detail.edit(false);
         detail.data(object);
         var old_tab_id = tab_info.tab_id;
-        var new_tab_id = Contents.tab_id(tab_info.prefix, tab_info.class_id, object.uuid);
+        var new_tab_id = Tabs.create_tab_id([tab_info.prefix, tab_info.class_id, object.uuid]);
         app.contents().change(old_tab_id, new_tab_id, object.label);
         app.contents().broadcast(tab_info.class_id, object.uuid, object);
         alert("Saved");
@@ -107,6 +107,36 @@ define(function (require) {
   
   DetailView.prototype.toolbar = function () {
     return this._toolbar;
+  };
+
+  function update_self_data(keys) {
+    var target = false;
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      if (key.class_id != this._class_id) {
+        continue;
+      }
+      if (key.object_id != this._object_id) {
+        continue;
+      }
+      target = true;
+      break;
+  	}
+
+  	if (!target) {
+  	  return;
+  	}
+
+  	var self = this;
+    Utils.get_data(this._class_id, this._object_id, function (data) { self._object = data; })
+    .then(function () {
+      self._detail.data(self._object);
+    });
+  }
+  
+  DetailView.prototype.update = function (keys) {
+    update_self_data(keys);
+    this._detail.update(keys);
   };
   
   DetailView.prototype.init = function (selector, class_id, object_id) {

@@ -2,11 +2,15 @@ define(function (require) {
   require("jquery");
   require("jsrender");
   var Utils = require("core/Utils");
+  var Inherits = require("core/Inherits");
+  var Field = require("controls/fields/Field");
 
   function TextLines() {
-  	this._editor = null;
+    Field.call(this, "controls/fields", "TextLines");
+    this._editor = null;
     this._viewer = null;
   }
+  Inherits(TextLines, Field);
 
   TextLines.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
@@ -16,7 +20,6 @@ define(function (require) {
     // Load template data & Create form tags
     var template = null;
     var self = this;
-    Utils.add_css("/controls/fields/TextLines/TextLines.css");
     Utils.get_template("controls/fields", "TextLines", function(response) { template = $.templates(response); })
     .then(function() {
       var html = template.render(field);

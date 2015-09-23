@@ -16,6 +16,13 @@ define(function (require) {
     this._contents = null;
   }
 
+  Tabs.create_tab_id = function(parts) {
+  	var copied = parts.concat();
+  	while(!copied[copied.length - 1])
+  	  copied.pop();
+    return copied.join("_");
+  }
+
   Tabs.prototype.add = function (tab_id, label, set_active, is_closable) {
     var closable = "<li class='tab-label'><a href='#{href}'>#{label}</a><span class='ui-icon ui-icon-close'>Remove Tab</span></li>";
     var unclosable = "<li class='tab-label'><a href='#{href}'>#{label}</a></li>";
@@ -68,6 +75,29 @@ define(function (require) {
     var li = this._tabs.find("ul > li[aria-controls='" + tab_id + "']");
     var a = li.find("a");
     a.text(value);
+  };
+
+  Tabs.prototype.broadcast = function (keys) {
+  	//// MenuView
+    //var menu_id = Tabs.create_tab_id(["MenuView", Utils.CLASS_UUID]);
+    //var menuview = this._tabs.content(menu_id);
+    //menuview.update(keys);
+
+    //// GridView
+    //var grid_id = Tabs.create_tab_id(["GridView", class_id]);
+    //var gridview = this._tabs.content(grid_id);
+    //gridview.update(keys);
+
+    //// DetailView
+    //var detail_id = Tabs.create_tab_id(["DetailView", class_id, object_id]);
+    //var detailview = this._tabs.content(detail_id);
+    //detailview.update(class_id, object_id, data);
+
+    for (var key in this._contents) {
+      console.log("key : " + key);
+      var view = this._contents[key];
+      view.update(keys);
+    }
   };
 
   Tabs.prototype.change = function (old_id, new_id, label) {

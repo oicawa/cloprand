@@ -6,6 +6,7 @@ define(function (require) {
   var Toolbar = require("controls/Toolbar/Toolbar");
   var Detail = require("controls/Detail/Detail");
   var Grid = require("controls/Grid/Grid");
+  var Tabs = require("controls/Tabs/Tabs");
   var app = require("app");
 
   function MenuView() {
@@ -37,10 +38,26 @@ define(function (require) {
     return this._grid;
   };
   
-  MenuView.prototype.update = function (class_id, object_id, data) {
-    console.assert(class_id == Utils.CLASS_UUID, "class_id=" + class_id);
-    console.assert(object_id && Utils.UUID.test(object_id) && object_id != Utils.NULL_UUID, "object_id=" + object_id);
-    this._grid.update(object_id, data);
+  MenuView.prototype.update = function (keys) {
+  	var target = false;
+  	for (var i = 0; i < keys.length; i++) {
+  	  var key = keys[i];
+  	  if (key.class_id == Utils.CLASS_UUID) {
+  	    target = true;
+  	    break;
+  	  }
+  	}
+
+  	if (!target) {
+  	  return;
+  	}
+
+    var classes = null;
+    var self = this;
+    Utils.get_data(Utils.CLASS_UUID, null, function (data) { classes = data; })
+    .then(function () {
+      self._grid.data(classes);
+    });
   };
   
   MenuView.prototype.init= function (selector, class_id, object_id) {

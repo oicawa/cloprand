@@ -55,10 +55,26 @@ define(function (require) {
     app.contents().show_tab(caption, null, "DetailView", tab_info.class_id, data.uuid);
   };
   
-  GridView.prototype.update = function (class_id, object_id, data) {
-    console.assert(class_id == this._class_id, "class_id=" + class_id + ", this._class_id=" + this._class_id);
-    console.assert(object_id && Utils.UUID.test(object_id) && object_id != Utils.NULL_UUID, "object_id=" + object_id);
-    this._grid.update(object_id, data);
+  GridView.prototype.update = function (keys) {
+  	var target = false;
+  	for (var i = 0; i < keys.length; i++) {
+  	  var key = keys[i];
+  	  if (key.class_id == this._class_id) {
+  	    target = true;
+  	    break;
+  	  }
+  	}
+
+  	if (!target) {
+  	  return;
+  	}
+
+  	var objects = null;
+  	var self = this;
+    Utils.get_data(key.class_id, null, function (data) { objects = data; })
+    .then(function () {
+      self._grid.data(objects);
+    });
   };
   
   GridView.prototype.add = function () {
