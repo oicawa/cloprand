@@ -91,8 +91,6 @@ define(function (require) {
   
   Contents.prototype.show_tab = function (label, options, view_name, class_id, object_id) {
     console.assert(typeof view_name == "string" && 1 <= view_name.length);
-    console.assert(Utils.UUID.test(class_id));
-    console.assert(object_id == null || Utils.UUID.test(object_id));
     var params = Array.prototype.slice.call(arguments, 2);
     console.log(params);
     var tab_id = Tabs.create_tab_id(params);
@@ -152,37 +150,6 @@ define(function (require) {
         self._tabs.add(tab_id, tab.label, true, false);
         create_view(self, tab_id, selector, tab.view, tab.class_id, tab.object_id);
       }
-    });
-  };
-  Contents.prototype.init2 = function () {
-    $('#root-panel').css({width: '100%', height: '100%'}).split({orientation: 'horizontal', limit: 20, position: '45px', invisible: true, fixed: true});
-    var classes = null;
-    var template = null;
-    var assist = null;
-    Utils.add_css("/style.css");
-    $.when(
-      Utils.get_file(class_id, "crud.html", "html", function (data) { template = $.templates(data); }),
-      Utils.get_file(class_id, "crud.json", "json", function (data) { assist = data; }),
-      Utils.get_data(class_id, function (data) { classes = data; }),
-      Utils.get_file("ae727055-cb09-49ed-84af-6cbc8cd37ba8", class_id + ".json", "json", function (data) { def_class = data; }),
-      Utils.get_file(class_id, "assist.json", "json", function (data) { assist_class = data; })
-    ).always(function() {
-      document.title = document.title + " - " + def_class.label;
-      var application_html = template.render();
-      $("#contents-panel").append(application_html);
-      var application = $("#application-panel");
-      application.split({orientation: 'vertical', limit: 20, position: '300px'});
-      
-      // Grid
-      _grid = new Grid();
-      _grid.init("#object-list", null, assist)
-      .then(function () {
-        _grid.data(classes);
-      });
-      
-      // Tabs
-      _tabs = new Tabs("#object-detail-tabs");
-      _tabs.init();
     });
   };
   

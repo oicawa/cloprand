@@ -31,7 +31,7 @@ define(function (require) {
     var view = app.contents().content(tab_id);
     var grid = view.list();
     var data = grid.data()[index];
-    app.contents().show_tab(data.label, null, "GridView", data.uuid, null);
+    app.contents().show_tab(data.label, null, "GridView", data.id, null);
   };
   
   MenuView.prototype.list = function () {
@@ -42,7 +42,7 @@ define(function (require) {
   	var target = false;
   	for (var i = 0; i < keys.length; i++) {
   	  var key = keys[i];
-  	  if (key.class_id == Utils.CLASS_UUID) {
+  	  if (key.class_id == Utils.CLASS_ID) {
   	    target = true;
   	    break;
   	  }
@@ -54,7 +54,7 @@ define(function (require) {
 
     var classes = null;
     var self = this;
-    Utils.get_data(Utils.CLASS_UUID, null, function (data) { classes = data; })
+    Utils.get_data(Utils.CLASS_ID, null, function (data) { classes = data; })
     .then(function () {
       self._grid.data(classes);
     });
@@ -76,8 +76,8 @@ define(function (require) {
     $.when(
       Utils.get_template("controls/views", "MenuView", function (data) { template = $.templates(data); })
       ,Utils.get_file(null, "controls/views/MenuView/MenuView.json", "json", function (data) { assist = data; })
-      ,Utils.get_data(Utils.CLASS_UUID, null, function (data) { classes = data; })
-      ,Utils.get_data(Utils.CLASS_UUID, Utils.CLASS_UUID, function (data) { class_ = data; })
+      ,Utils.get_data(Utils.CLASS_ID, null, function (data) { classes = data; })
+      ,Utils.get_data(Utils.CLASS_ID, Utils.CLASS_ID, function (data) { class_ = data; })
     ).always(function() {
       var view_html = template.render();
       view.append(view_html);

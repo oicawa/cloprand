@@ -19,7 +19,7 @@ define(function (require) {
     }
 
     var items = [];
-    items.push({uuid: "", label: ""});
+    items.push({id: "", label: ""});
     for (var i = 0; i < self._objects.length; i++) {
       var item = self._objects[i];
       var captions = [];
@@ -27,7 +27,7 @@ define(function (require) {
         var value = item[caption_fields[j]];
         captions.push(value);
       }
-      var value = !item.uuid ? item[caption_fields[0]] : item.uuid;
+      var value = !item.id ? item[caption_fields[0]] : item.id;
       var caption = captions.join(" ");
       items.push({value : value, caption : caption });
       self._items[value] = caption;
@@ -67,9 +67,10 @@ define(function (require) {
     this._class_id = field.datatype["class"];
     var self = this;
     var template = null;
+    console.assert(!(!this._class_id), field);
     $.when(
       Utils.get_template("controls/fields", "DropDownList", function(response) { template = $.templates(response); }),
-      Utils.get_data(Utils.CLASS_UUID, this._class_id, function(response) { self._class = response; }),
+      Utils.get_data(Utils.CLASS_ID, this._class_id, function(response) { self._class = response; }),
       Utils.get_data(this._class_id, null, function(response) { self._objects = response; })
     ).then(function() {
       create_control(self, root, template, field);

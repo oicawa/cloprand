@@ -23,18 +23,14 @@ define(function (require) {
     //}
     var datatype = field.datatype;
     // Primitive
-    var uuid = datatype["primitive"];
-    if (uuid != "") {
-      var primitive = Cache.get_data(Utils.PRIMITIVE_UUID, uuid);
+    var primitive_id = datatype["primitive"];
+    if (primitive_id != "") {
+      var primitive = Cache.get_data(Utils.PRIMITIVE_ID, primitive_id);
       if (primitive) {
         return "controls/fields/" + primitive.name + "/" + primitive.name;
       }
     }
     var class_id = datatype["class"];
-    if (!Utils.UUID.test(class_id))
-      debugger;
-    
-    console.assert(Utils.UUID.test(class_id), "class_id:" + class_id);
     
     var is_multi = datatype["multi"];
     var is_embedded = datatype["embedded"];

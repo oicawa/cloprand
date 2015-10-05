@@ -26,7 +26,7 @@ define(function (require) {
     var self = this;
     $.when(
       Utils.get_template("controls/fields", "Complex", function(response) { template = $.templates(response); }),
-      Utils.get_data(Utils.CLASS_UUID, field.datatype.class, function (data) { class_ = data; })
+      Utils.get_data(Utils.CLASS_ID, field.datatype.class, function (data) { class_ = data; })
     ).always(function() {
       var html = template.render();
       root.append(html);

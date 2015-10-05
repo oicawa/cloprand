@@ -62,6 +62,24 @@ define(function (require) {
     var detail = view.detail();
     var data = detail.data();
     var object = null;
+
+    // Get field information
+    var fields = detail._class.object_fields;
+    var key_field_names = fields.filter(function(field, index) { return !(!field.key); })
+                                .map(function(field){ return field.name; });
+    var caption_field_names = fields.filter(function(field, index) { return !(!field.caption); })
+                                    .map(function(field){ return field.name; });
+    console.assert(0 < key_field_names.length, key_field_names);
+    console.assert(0 < caption_field_names.length, caption_field_names);
+    var key_field_name = key_field_names[0];
+    function create_label(names, object) {
+      var label = object[names[0]];
+      for (var i = 1; i < names.length; i++) {
+      	var name = names[i];
+        label += " " + object[name];
+      }
+      return label;
+    }
     if (detail.is_new()) {
       Utils.post_data(tab_info.class_id, data, function(response) { object = response;})
       .then(function() {
@@ -69,20 +87,22 @@ define(function (require) {
         detail.edit(false);
         detail.data(object);
         var old_tab_id = tab_info.tab_id;
-        var new_tab_id = Tabs.create_tab_id([tab_info.prefix, tab_info.class_id, object.uuid]);
-        app.contents().change(old_tab_id, new_tab_id, object.label);
-        app.contents().broadcast(tab_info.class_id, object.uuid, object);
+        var new_tab_id = Tabs.create_tab_id([tab_info.prefix, tab_info.class_id, object[key_field_name]]);
+        var label = caption_field_names.map(function(name) { return object[name]; }).join(" ");
+        app.contents().change(old_tab_id, new_tab_id, label);
+        app.contents().broadcast(tab_info.class_id, object[key_field_name], object);
         alert("Saved");
       });
     } else {
-      if (!data.uuid)
-        data.uuid = tab_info.object_id;
-      Utils.put_data(tab_info.class_id, data.uuid, data, function(response) { object = response; })
+      if (!data[key_field_name])
+        data[key_field_name] = tab_info.object_id;
+      Utils.put_data(tab_info.class_id, data[key_field_name], data, function(response) { object = response; })
       .then(function() {
         edit_toolbar(view.toolbar(), false);
         detail.edit(false);
         detail.commit();
-        app.contents().label(tab_info.tab_id, data.label);
+        var label = caption_field_names.map(function(name) { return data[name]; }).join(" ");
+        app.contents().label(tab_info.tab_id, label);
         app.contents().broadcast(tab_info.class_id, tab_info.object_id, data);
         alert("Saved");
       });
@@ -109,14 +129,14 @@ define(function (require) {
     return this._toolbar;
   };
 
-  function update_self_data(keys) {
+  function update_self_data(self, keys) {
     var target = false;
     for (var i = 0; i < keys.length; i++) {
       var key = keys[i];
-      if (key.class_id != this._class_id) {
+      if (key.class_id != self._class_id) {
         continue;
       }
-      if (key.object_id != this._object_id) {
+      if (key.object_id != self._object_id) {
         continue;
       }
       target = true;
@@ -127,15 +147,14 @@ define(function (require) {
   	  return;
   	}
 
-  	var self = this;
-    Utils.get_data(this._class_id, this._object_id, function (data) { self._object = data; })
+    Utils.get_data(self._class_id, self._object_id, function (data) { self._object = data; })
     .then(function () {
       self._detail.data(self._object);
     });
   }
   
   DetailView.prototype.update = function (keys) {
-    update_self_data(keys);
+    update_self_data(this, keys);
     this._detail.update(keys);
   };
   
@@ -178,7 +197,7 @@ define(function (require) {
 	Utils.add_css("/controls/views/DetailView/DetailView.css");
     $.when(
       Utils.get_template("controls/views", "DetailView", function (data) { template = $.templates(data); }),
-      Utils.get_data(Utils.CLASS_UUID, class_id, function (data) { class_ = data; }),
+      Utils.get_data(Utils.CLASS_ID, class_id, function (data) { class_ = data; }),
       Utils.get_file(class_id, "DetailView.json", "json", function (data) { basic_assist = data; }, function(data) { return true; }),
       Utils.get_file(class_id, "CustomAssist.json", "json", function (data) { custom_assist = data; }, function(data) { return true; }),
       get_object_data(self, class_id, object_id)

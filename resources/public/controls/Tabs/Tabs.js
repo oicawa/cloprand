@@ -78,23 +78,7 @@ define(function (require) {
   };
 
   Tabs.prototype.broadcast = function (keys) {
-  	//// MenuView
-    //var menu_id = Tabs.create_tab_id(["MenuView", Utils.CLASS_UUID]);
-    //var menuview = this._tabs.content(menu_id);
-    //menuview.update(keys);
-
-    //// GridView
-    //var grid_id = Tabs.create_tab_id(["GridView", class_id]);
-    //var gridview = this._tabs.content(grid_id);
-    //gridview.update(keys);
-
-    //// DetailView
-    //var detail_id = Tabs.create_tab_id(["DetailView", class_id, object_id]);
-    //var detailview = this._tabs.content(detail_id);
-    //detailview.update(class_id, object_id, data);
-
     for (var key in this._contents) {
-      console.log("key : " + key);
       var view = this._contents[key];
       view.update(keys);
     }

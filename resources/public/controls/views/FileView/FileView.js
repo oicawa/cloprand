@@ -68,11 +68,10 @@ define(function (require) {
       Utils.post_extension(tab_info.class_id, tab_info.object_id, file_name, data, function(response) { object = response;})
       .then(function() {
         var current_tab_id = tab_info.tab_id;
-        //var new_tab_id = Contents.tab_id(tab_info.prefix, tab_info.class_id, object.uuid);
         var new_tab_id = current_tab_id + "_" + file_name;
         app.contents().label(current_tab_id, file_name);
         app.contents().change(current_tab_id, new_tab_id, object.file_name);
-        app.contents().broadcast(tab_info.class_id, object.uuid, object);
+        app.contents().broadcast(tab_info.class_id, object.id, object);
         alert("Saved");
       });
     } else {

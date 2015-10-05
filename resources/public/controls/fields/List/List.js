@@ -82,7 +82,7 @@ define(function (require) {
     var items_dictionary = {};
     for (var i = 0; i < this._items.length; i++) {
       var item = this._items[i];
-      items_dictionary[item.uuid] = item;
+      items_dictionary[item.id] = item;
     }
     // refresh viewer tags
     this._viewer.empty();

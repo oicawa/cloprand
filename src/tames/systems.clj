@@ -12,7 +12,8 @@
 ;(def REGEXP_UUID #"^[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}$")
 (def REGEXP_UUID #"[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}")
 (def REGEXP_OBJECT_FILE_NAME #"^[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}\.json$")
-(def CLASS_UUID "ae727055-cb09-49ed-84af-6cbc8cd37ba8")
+(def CLASS_ID "Class")
+(def FIELD_KEY "key")
 
 (defn get-absolute-path
   [relative-path]
@@ -139,8 +140,10 @@
   [class-id]
   (let [class-dir-path (get-absolute-path (str "data/" class-id))
         class-dir      (File. class-dir-path)
-        object-files   (filter #(and (not (. %1 isDirectory))
-                                     (re-find REGEXP_OBJECT_FILE_NAME (. %1 getName)))
+        ;object-files   (filter #(and (not (. %1 isDirectory))
+        ;                             (re-find REGEXP_OBJECT_FILE_NAME (. %1 getName)))
+        ;                       (. class-dir listFiles))
+        object-files   (filter #(not (. %1 isDirectory))
                                (. class-dir listFiles))
         objects        (map #(with-open [rdr (io/reader (. %1 getAbsolutePath))]
                               (json/read rdr))
@@ -220,14 +223,42 @@
                            (get-object class-id object-id)))
     "text/json; charset=utf-8"))
 
+(defn get-key-field
+  [class-id]
+  (let [klass  (json/read-str (get-object CLASS_ID class-id))
+        fields (klass "object_fields")]
+    (loop [field       (first fields)
+           rest-fields (rest fields)]
+      (let [key-value (field FIELD_KEY)]
+        (if (= key-value true)
+            field
+            (recur (first rest-fields) (rest rest-fields)))))))
+
+(defn get-key-field-name
+  [class-id]
+  (let [field (get-key-field class-id)]
+    (field "name")))
+
+(defn is-key-field-uuid
+  [class-id]
+  (let [field     (get-key-field class-id)
+        datatype  (field "datatype")
+        primitive (datatype "primitive")]
+    (= primitive "UUID")))
+
 (defn create-object
   [class-id s-exp-data]
   (println "Called create-system function.")
   (let [dir-name    class-id
-        object-id   (str (UUID/randomUUID))
+        key-name    (get-key-field-name class-id)
+        object-id   (if (is-key-field-uuid class-id)
+                        (str (UUID/randomUUID))
+                        (s-exp-data key-name))
         object-file (get-absolute-path (str "data/" class-id "/" object-id ".json"))
-        object-data (assoc s-exp-data "uuid" object-id)]
-    (if (= CLASS_UUID class-id)
+        object-data (assoc s-exp-data key-name object-id)]
+    (println (format "  key-name  : %s" key-name))
+    (println (format "  object-id : %s" object-id))
+    (if (= CLASS_ID class-id)
         (ensure-directory (format "data/%s" object-id)))
     (with-open [w (io/writer object-file)]
       (json/write object-data w))
@@ -254,7 +285,7 @@
   (println "Called delete-object function.")
   (let [file (File. (get-absolute-path (str "data/" class-id "/" object-id ".json")))]
     (remove-file file)
-    (if (= CLASS_UUID class-id)
+    (if (= CLASS_ID class-id)
         (remove-file (File. (format "data/%s" object-id))))))
 
 (defn post-data
@@ -263,10 +294,11 @@
   (println "----------")
   (pprint/pprint s-exp-data)
   (println "----------")
-  (let [new-object (create-object class-id s-exp-data)]
+  (let [new-object (create-object class-id s-exp-data)
+        key-field-name (get-key-field-name class-id)]
     (println "Posted OK.")
     (response-with-content-type
-      (response/response (get-object class-id (new-object "uuid")))
+      (response/response (get-object class-id (new-object key-field-name)))
       "text/json; charset=utf-8")))
 
 (defn post-extension-file

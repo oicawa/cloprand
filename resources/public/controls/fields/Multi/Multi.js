@@ -10,7 +10,7 @@ define(function (require) {
   var Field = require("controls/fields/Field");
   
   var default_toolbar = {
-    "operations" : "ae727055-cb09-49ed-84af-6cbc8cd37ba8/operations",
+    "operations" : Utils.CLASS_ID,
     "items" : [
       { "name": "add",    "caption": "Add",    "description": "Add new field",               "operation": "add" },
       { "name": "edit",   "caption": "Edit",   "description": "Edit field",                  "operation": "edit" },
@@ -46,7 +46,7 @@ define(function (require) {
     //Utils.add_css("/controls/fields/Multi/Multi.css");
     $.when(
       Utils.get_template("controls/fields", "Multi", function(response) { template = $.templates(response); }),
-      Utils.get_data(Utils.CLASS_UUID, field.datatype.class, function (data) { class_ = data; })
+      Utils.get_data(Utils.CLASS_ID, field.datatype.class, function (data) { class_ = data; })
     ).always(function() {
       var html = template.render(field);
       root.append(html);

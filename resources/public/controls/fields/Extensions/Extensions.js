@@ -9,7 +9,7 @@ define(function (require) {
   var Field = require("controls/fields/Field");
 
   var default_toolbar = {
-    "operations" : "ae727055-cb09-49ed-84af-6cbc8cd37ba8/operations",
+    "operations" : Utils.CLASS_ID,
     "items" : [
       { "name": "add",    "caption": "Add",    "description": "Add new field", "operation": "add" },
       { "name": "edit",   "caption": "Edit",   "description": "Edit field",    "operation": "edit" },

@@ -42,17 +42,22 @@ define(function (require) {
     var grid = view.list();
     var data = grid.data()[index];
     var class_ = view._class;
-    var field_name = null;
-    for (var i = 0; i < class_.object_fields.length; i++) {
-      var object_field = class_.object_fields[i];
-      if (!object_field.caption) {
-        continue;
-      }
-      field_name = object_field.name;
-      break;
-    }
-    var caption = data[field_name];
-    app.contents().show_tab(caption, null, "DetailView", tab_info.class_id, data.uuid);
+    
+    var fields = class_.object_fields;
+    var caption_field_names = fields.filter(function (field, index) { return !(!field.caption); })
+                                    .map(function (field) { return field.name; });
+    var key_field_names = fields.filter(function (field, index) { return !(!field.key); })
+                                .map(function (field) { return field.name; });
+
+    console.assert(0 < caption_field_names.length, caption_field_names);
+    console.assert(0 < key_field_names.length, key_field_names);
+
+    var caption_field_name = caption_field_names[0];
+    var key_field_name = key_field_names[0];
+    
+    var caption = caption_field_names.map(function(name) { return data[name] }).join(" ");
+    var key = data[key_field_name];
+    app.contents().show_tab(caption, null, "DetailView", tab_info.class_id, key);
   };
   
   GridView.prototype.update = function (keys) {
@@ -102,7 +107,7 @@ define(function (require) {
       Utils.get_template("controls/views", "GridView", function (data) { template = $.templates(data); }),
       //Utils.get_file(class_id, "GridView.json", "json", function (data) { assist = data; }),
       Utils.get_data(class_id, null, function (data) { classes = data; }),
-      Utils.get_data(Utils.CLASS_UUID, class_id, function (data) { self._class = data; })
+      Utils.get_data(Utils.CLASS_ID, class_id, function (data) { self._class = data; })
     ).then(function() {
       var view_html = template.render();
       view.append(view_html);

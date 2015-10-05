@@ -9,12 +9,12 @@ define(function (require) {
     var map_data = {};
     for (var i = 0; i < array_data.length; i++) {
       var data = array_data[i];
-      map_data[data.uuid] = data;
+      map_data[data.id] = data;
     }
     return map_data;
   }
 
-  Utils.get_data(Utils.PRIMITIVE_UUID, null, function (data) { _data[Utils.PRIMITIVE_UUID] = convert(data); })
+  Utils.get_data(Utils.PRIMITIVE_ID, null, function (data) { _data[Utils.PRIMITIVE_ID] = convert(data); })
   
   return {
   	get_data : function(class_id, object_id) {

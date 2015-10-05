@@ -229,7 +229,7 @@ define(function (require) {
     var exists = false;
     for (var i = 0; i < this._data.length; i++) {
       var tmp_item = this._data[i];
-      if (tmp_item.uuid != object_id) {
+      if (tmp_item.id != object_id) {
         continue;
       }
       exists = true;
