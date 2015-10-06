@@ -254,12 +254,12 @@
         object-id   (if (is-key-field-uuid class-id)
                         (str (UUID/randomUUID))
                         (s-exp-data key-name))
+        class-dir   (get-absolute-path (str "data/" class-id))
         object-file (get-absolute-path (str "data/" class-id "/" object-id ".json"))
         object-data (assoc s-exp-data key-name object-id)]
     (println (format "  key-name  : %s" key-name))
     (println (format "  object-id : %s" object-id))
-    (if (= CLASS_ID class-id)
-        (ensure-directory (format "data/%s" object-id)))
+    (ensure-directory class-dir)
     (with-open [w (io/writer object-file)]
       (json/write object-data w))
     object-data))
