@@ -72,14 +72,6 @@ define(function (require) {
     console.assert(0 < key_field_names.length, key_field_names);
     console.assert(0 < caption_field_names.length, caption_field_names);
     var key_field_name = key_field_names[0];
-    function create_label(names, object) {
-      var label = object[names[0]];
-      for (var i = 1; i < names.length; i++) {
-      	var name = names[i];
-        label += " " + object[name];
-      }
-      return label;
-    }
     if (detail.is_new()) {
       Utils.post_data(tab_info.class_id, data, function(response) { object = response;})
       .then(function() {

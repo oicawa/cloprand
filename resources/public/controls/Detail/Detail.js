@@ -168,9 +168,9 @@ define(function (require) {
       return;
     }
     for (var i = 0; i < this._class.object_fields.length; i++) {
-      var object_field = this._class.object_fields[i];
-      var name = object_field.name;
-      this._controls[name].edit(on);
+      var field = this._class.object_fields[i];
+      var name = field.name;
+      this._controls[name].edit((!this._is_new && !(!field.key)) ? false : on);
     }
   };
 
