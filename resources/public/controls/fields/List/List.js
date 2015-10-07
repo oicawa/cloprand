@@ -7,6 +7,7 @@ define(function (require) {
   
   function List() {
     Field.call(this, "controls/fields", "List");
+    this._class = null;
   	this._editor = null;
   	this._viewer = null;
     this._items = null;
@@ -18,15 +19,20 @@ define(function (require) {
     var dfd = new $.Deferred;
     var root = $(selector);
     var template = null;
+    var class_id = field.datatype["class"];
     var self = this;
     $.when(
       Utils.get_template("controls/fields", "List", function(response) { template = $.templates(response); }),
-      Utils.get_data(field.datatype["class"], null, function(response) { self._items = response; })
+      Utils.get_data(Utils.CLASS_ID, class_id, function(response) { self._class = response; }),
+      Utils.get_data(class_id, null, function(response) { self._items = response; })
     ).always(function() {
-      var html = template.render(field);
+      var key_field_name = self._class.object_fields.filter(function(field) { return !(!field.key); }).map(function(field) { return field.name; })[0];
+      var caption_field_names = self._class.object_fields.filter(function(field) { return !(!field.caption); }).map(function(field) { return field.name; });
+      var items = self._items.map(function(item) { return { "value" : item[key_field_name], "caption" : item[caption_field_names[0]] }; });
+      var html = template.render({ "name" : field.name, "items" : items });
       root.append(html);
-      self._editor = _root.find("div.editor");
-      self._viewer = _root.find("div.viewer");
+      self._editor = root.find("div.editor");
+      self._viewer = root.find("div.viewer");
       dfd.resolve();
     });
     return dfd.promise();
