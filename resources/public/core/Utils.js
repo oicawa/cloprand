@@ -149,5 +149,11 @@ define(function (require) {
         console.assert(false, arguments);
       }
     },
+
+    get_caption : function(class_, object_) {
+      var names = class_.object_fields.filter(function (field) { return !(!field.caption); }).map(function(field){ return field.name; });
+      var value = names.map(function(name) { return object_[name]; }).join(" ");
+      return value;
+    }
   };
 });

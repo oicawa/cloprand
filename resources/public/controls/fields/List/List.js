@@ -15,6 +15,19 @@ define(function (require) {
   }
   Inherits(List, Field);
 
+  function get_selected_values(self) {
+    var values = [];
+    var options = self._editor.find("option");
+    for (var i = 0; i < options.length; i++) {
+      var option = options[i];
+      if (!option.selected) {
+        continue;
+      }
+      values.push(option.value);
+    }
+    return values;
+  }
+
   List.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
     var root = $(selector);
@@ -53,34 +66,26 @@ define(function (require) {
   };
 
   List.prototype.commit = function() {
-    var values = [];
-    var options = this._editor.find("option");
-    for (var i = 0; i < options.length; i++) {
-      var option = options[i];
-      var selected = option.prop("selected");
-      if (!selected) {
-        continue;
-      }
-      var value = option.prop("value");
-      values.push(value);
-    }
-    this._values = values;
+    this._values = get_selected_values(this);
   };
 
   List.prototype.refresh = function() {
     // editor
     // convert values (Array -> Hash)
     var flags = {};
-    for (var i = 0; i < this._values.length; i++) {
-      flags[this._values[i]] = true;
+    if (!(!this._values)) {
+      for (var i = 0; i < this._values.length; i++) {
+        flags[this._values[i]] = true;
+      }
     }
-      // change selected attribute
+    
+    // change selected attribute
     var options = this._editor.find("option");
     for (var i = 0; i < options.length; i++) {
       var option = options[i];
-      var value = option.prop("value");
+      var value = option.value;
       var flag = flags[value];
-      option.prop('selected', !flag ? false : true);
+      option.selected = !flag ? false : true;
     }
       
     // viewer
@@ -92,13 +97,16 @@ define(function (require) {
     }
     // refresh viewer tags
     this._viewer.empty();
-    for (var i = 0; i < this._values.length; i++) {
-      var value = this._values[i];
-      var item = items_dictionary[value];
-      if (!item) {
-        continue;
+    if (!(!this._values)) {
+      for (var i = 0; i < this._values.length; i++) {
+        var value = this._values[i];
+        var item = items_dictionary[value];
+        if (!item) {
+          continue;
+        }
+        var caption = Utils.get_caption(this._class, item);
+        this._viewer.append("<div>" + caption + "</div>");
       }
-      this._viewer.append("<div>" + item.label + "</div>");
     }
   };
 
@@ -108,7 +116,7 @@ define(function (require) {
 
   List.prototype.data = function(values) {
     if (arguments.length == 0) {
-      return this._values;
+      return get_selected_values(this);
     } else {
       this._values = values;
     }
