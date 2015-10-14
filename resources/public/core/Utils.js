@@ -105,6 +105,10 @@ define(function (require) {
       var url = create_path("api", class_id, object_id);
       return delete_function(url, "json", func_success, func_error);
     },
+    get_session: function(key, func_success, func_error) {
+      var url = create_path("session", key);
+      return send_function("GET", url, "json", null, func_success, func_error);
+    },
     add_css: function(path) {
       var head = $("head");
       var css = head.children("link[href='" + path + "']");

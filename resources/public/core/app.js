@@ -11,6 +11,7 @@ define(function (require) {
     this._title = null;
     this._sub_title = null;
     this._contents = null;
+    this._user_name = null;
   }
   
   App.prototype.title = function() {
@@ -33,19 +34,24 @@ define(function (require) {
   App.prototype.init = function() {
     var template = null;
     var config = null;
+    var session = null;
     var self = this;
     $.when(
       Utils.get_file(null, "App.html", "html", function(data){ template = $.templates(data); }),
-      Utils.get_file(null, "config.json", "json", function(data){ config = data; })
+      Utils.get_file(null, "config.json", "json", function(data){ config = data; }),
+      Utils.get_session("user_name", function(data){ session = data; })
     ).always(function() {
       var root_html = template.render();
       $("body").append(root_html);
-      //$('#root-panel').css({width: '100%', height: '100%'}).split({orientation: 'horizontal', limit: 20, position: '30px', invisible: true, fixed: true});
 
       self._title = $("span#title");
       self._sub_title = $("span#sub-title");
+      self._user_name = $("span#user_name");
       
       self.title(config.label);
+
+	  
+      self._user_name.text(session.user_name);
 
       self._contents = new Contents();
       self._contents.init("#contents-panel");

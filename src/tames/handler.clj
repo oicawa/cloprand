@@ -4,14 +4,63 @@
   (:require [clojure.pprint :as pprint]
             [compojure.core :refer :all]
             [compojure.route :as route]
+            [buddy.auth :refer [authenticated?]]
+            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+            [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
             [ring.util.response :as response]
+            [hiccup.core :refer [html]]
             [clojure.data.json :as json]
             [tames.systems :as systems]))
+
+(defn login-get
+  [req]
+  (html
+    [:div {:style "width:100%; text-align:center;height:100px;"}]
+    [:h1 {:style "text-align:center;height:100px;"} "tames"]
+    [:form {:method "post"}
+      [:div {:style "width:100%; text-align:center;"}
+        [:span {:style "display:inline-block;width:100px;"} "Login ID "]
+        [:input {:type "text" :name "account_id"}]
+        [:br]
+        [:span {:style "display:inline-block;width:100px;"} "Password"]
+        [:input {:type "password" :name "password"}]
+        [:br]
+        [:br]
+        [:input {:type "hidden" :name "__anti-forgery-token" :value *anti-forgery-token*}]
+        [:input {:type "submit" :value "Login"}]]]))
+
+(defn login-post
+  [req]
+  (let [username (get-in req [:form-params "account_id"])
+        next_url (get-in req [:query-params "next"] "/")]
+    (println "[username] :" username)
+    (println "[next url] :" next_url)
+    (-> (response/redirect next_url)
+        (assoc-in [:session :identity] (keyword username)))))
+
+(defn logout
+  []
+  (-> (response/redirect "/")
+      (assoc :session {})))
+
+(defn unauthorized
+  [req meta]
+  (let [res (authenticated? req)]
+    (println "[Authenticated] :" res)
+    (if res
+        (response/redirect "/")
+        (response/redirect (format "/login?next=%s" (:uri req))))))
 
 (defroutes app-routes
   ;; for Menu Page
   (GET "/" []
     (response/redirect "/index.html"))
+  (GET "/login" req
+    (login-get req))
+  (POST "/login" req
+    (login-post req))
+  (GET "/logout" []
+    (logout))
   (GET "/index.html" []
     (println "/index.html")
     (response/resource-response "index.html" {:root "public/core"}))
@@ -49,6 +98,10 @@
   (DELETE "/api/:class-id/:object-id" [class-id object-id]
     (println (str "[DELETE] /api/:class-id/:object-id = /api/" class-id "/" object-id))
     (systems/delete-data class-id object-id))
+  ;; Session
+  (GET "/session/:session-key" [session-key]
+    (println (format "[GET] /session/:key = /session/%s" session-key))
+    (format "{ \"%s\" : \"Dummy Session Value www\"}", session-key))
   ; extensions
   (GET "/:class-id/:object-id/extension" [class-id object-id]
     (println "[GET] /:class-id/:object-id/extension =" (str "/" class-id "/" object-id "/extension"))
