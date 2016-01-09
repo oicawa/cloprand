@@ -67,7 +67,6 @@ define(function (require) {
   	this._grid = new Grid();
     var view = $(selector)
   	var template = null;
-    var assist = null;
     var class_ = null;
     var classes = null;
     var self = this;
@@ -75,7 +74,6 @@ define(function (require) {
     Utils.add_css("/controls/views/MenuView/MenuView.css");
     $.when(
       Utils.get_template("controls/views", "MenuView", function (data) { template = $.templates(data); })
-      ,Utils.get_file(null, "controls/views/MenuView/MenuView.json", "json", function (data) { assist = data; })
       ,Utils.get_data(Utils.CLASS_ID, null, function (data) { classes = data; })
       ,Utils.get_data(Utils.CLASS_ID, Utils.CLASS_ID, function (data) { class_ = data; })
     ).always(function() {

@@ -21,6 +21,16 @@ require.config({
   }
 });
 
+//requirejs.onError = function (err) {
+//  debugger;
+//  console.log(err.requireType);
+  //if (err.requireType === 'timeout') {
+  //  console.log('modules: ' + err.requireModules);
+  //}
+  //throw err;
+  //location.href = "/index.html";
+//};
+
 define(['app'], function (app) {
   app.init();
 });

@@ -1,20 +1,24 @@
 define(function (require) {
   require('jquery');
   require('json2');
+  //require("JSON");
+  
   var _UUID = /[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}/;
   var _NULL_UUID = "00000000-0000-0000-0000-000000000000";
   var _CLASS_ID = "Class";
   var _PRIMITIVE_ID = "Primitive";
+  
   function create_path() {
     var args = Array.prototype.slice.call(arguments);
     var result = args.every(function(arg) { return arg == null || typeof arg == "string"; });
     console.assert(result, args);
     var path = args.reduce(function (prev, current, index, array) {
-      var adding = (current == null || current.length == 0) ? "" : "/" + current;
+      var adding = (current == null || current.length == 0) ? "" : "/" + encodeURIComponent(current);
       return (prev == null ? "" : prev) + adding;
     });
     return path.substr(0, 1) == "/" ? path : "/" + path;
   }
+  
   function send_function(method, url, dataType, data, func_success, func_error) {
     var dfd = new $.Deferred;
     console.assert(url != "/api", url);
@@ -33,6 +37,11 @@ define(function (require) {
         dfd.reject();
       }
     }).fail(function (response, status) {
+      if (response.status == 401) {
+      	alert("Unauthenticated");
+        //location.href = response.url;
+        return;
+      }
       if (typeof func_error != "function") {
         alert("The error function is not assigned.\n(" + url + ")\n\nresponse:" + JSON.stringify(response) + "\nstatus:" + status);
         dfd.reject();

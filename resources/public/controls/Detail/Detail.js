@@ -1,7 +1,7 @@
 define(function (require) { 
   require("jquery");
   require("jsrender");
-  require("JSON");
+  //require("JSON");
   var Utils = require("core/Utils");
   var Cache = require("core/Cache");
   var Inherits = require("core/Inherits");

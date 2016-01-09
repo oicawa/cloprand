@@ -6,6 +6,7 @@
             [ring.util.response :as response]
             [clojure.data.json :as json])
   (:import (java.io File InputStream)
+           (java.nio.file Paths Path)
            (java.util.jar JarFile JarEntry)
            (java.util UUID)))
 
@@ -15,6 +16,8 @@
 (def CLASS_ID "Class")
 (def FIELD_KEY "key")
 
+(def config (atom nil))
+
 (defn get-absolute-path
   [relative-path]
   (. (File. relative-path) getAbsolutePath))
@@ -22,15 +25,6 @@
 (defn get-resource-path
   [relative-path]
   (. (File. relative-path) getPath))
-
-;(defn get-resource
-;  [relative-path]
-;  (if-let [resource (io/resource relative-path)]
-;    (if (= "file" (. resource getProtocol))
-;        (let [file (io/as-file resource)]
-;          (if (not (. file isDirectory))
-;              file))
-;        (io/input-stream resource))))
 
 (defn get-jar-path
   [resource]
@@ -114,16 +108,6 @@
         class-dir      (File. class-dir-path)]
     (and (. class-dir exists) (. class-dir isDirectory))))
 
-;(defn get-system-application-path
-;  [system-name application-name]
-;  (let [systems-path (get-absolute-path "systems")]
-;    (if (empty? system-name)
-;        systems-path
-;        (let [system-path (format "%s/%s" systems-path system-name)]
-;          (if (empty? application-name)
-;              system-path
-;              (format "%s/applications/%s" system-path application-name))))))
-
 (defn get-default-file
   [file-name]
   (let [resource-path (get-resource-path (str "public/defaults/" file-name))]
@@ -134,20 +118,29 @@
   (let [object-path (get-absolute-path (format "data/%s/%s.json" class-id object-id))
         object      (with-open [rdr (io/reader object-path)]
                       (json/read rdr))]
-    (json/write-str object)))
+    object))
+(defn get-object-as-json
+  [class-id object-id]
+  (json/write-str (get-object class-id object-id)))
 
+;(defn get-objects
+;  [class-id]
+;  (let [class-dir-path (get-absolute-path (str "data/" class-id))
+;        class-dir      (File. class-dir-path)
+;        object-files   (filter #(not (. %1 isDirectory))
+;                               (. class-dir listFiles))
+;        objects        (map #(with-open [rdr (io/reader (. %1 getAbsolutePath))]
+;                              (json/read rdr))
+;                            object-files)]
+;    (json/write-str objects)))
 (defn get-objects
   [class-id]
-  (let [class-dir-path (get-absolute-path (str "data/" class-id))
-        class-dir      (File. class-dir-path)
-        ;object-files   (filter #(and (not (. %1 isDirectory))
-        ;                             (re-find REGEXP_OBJECT_FILE_NAME (. %1 getName)))
-        ;                       (. class-dir listFiles))
-        object-files   (filter #(not (. %1 isDirectory))
-                               (. class-dir listFiles))
-        objects        (map #(with-open [rdr (io/reader (. %1 getAbsolutePath))]
-                              (json/read rdr))
-                            object-files)]
+  (let [class-dir (File. (get-absolute-path (str "data/" class-id)))
+        files     (filter #(. %1 isFile)
+                          (file-seq class-dir))
+        objects   (map #(with-open [rdr (io/reader (. %1 getAbsolutePath))]
+                         (json/read rdr))
+                       files)]
     (json/write-str objects)))
 
 (defn get-resource-classes
@@ -170,12 +163,20 @@
   (-> resp
       (response/header "Contents-Type" content-type)))
 
+(defn create-authorized-result
+  [authorized? url]
+  (let [resp (response/response (json/write-str { "url" url }))]
+    (-> resp
+        (response/status (if authorized? 200 401))
+        (response/header "Contents-Type" "text/json; charset=utf-8")
+        )))
+
 (defn get-file
   [class-id file-name content-type]
-  (println "  [systems/get-file]")
-  (println "  class-id     :" class-id)
-  (println "  file-name    :" file-name)
-  (println "  content-type :" content-type)
+  ;(println "  [systems/get-file]")
+  ;(println "  class-id     :" class-id)
+  ;(println "  file-name    :" file-name)
+  ;(println "  content-type :" content-type)
   (let [absolute-path (get-absolute-path (str "data/" class-id "/" file-name))
         default-path  (get-default-file file-name)
         file          (File. absolute-path)
@@ -184,9 +185,9 @@
                           ;(response/resource-response default-path)
                           (response/resource-response file-name {:root "public/defaults"})
                           )]
-    (println "  absolute-path:" absolute-path)
-    (println "  default-path :" default-path)
-    (println "  exists?      :" (. file exists))
+    ;(println "  absolute-path:" absolute-path)
+    ;(println "  default-path :" default-path)
+    ;(println "  exists?      :" (. file exists))
     (response-with-content-type res content-type)))
 
 (defn get-extension-file-list
@@ -220,12 +221,12 @@
   (response-with-content-type
     (response/response (if (nil? object-id)
                            (get-objects class-id)
-                           (get-object class-id object-id)))
+                           (get-object-as-json class-id object-id)))
     "text/json; charset=utf-8"))
 
 (defn get-key-field
   [class-id]
-  (let [klass  (json/read-str (get-object CLASS_ID class-id))
+  (let [klass  (get-object CLASS_ID class-id)
         fields (klass "object_fields")]
     (loop [field       (first fields)
            rest-fields (rest fields)]
@@ -249,18 +250,18 @@
 (defn create-object
   [class-id s-exp-data]
   (println "Called create-system function.")
-  (let [dir-name    class-id
-        key-name    (get-key-field-name class-id)
-        object-id   (if (is-key-field-uuid class-id)
-                        (str (UUID/randomUUID))
-                        (s-exp-data key-name))
-        class-dir   (get-absolute-path (str "data/" class-id))
-        object-file (get-absolute-path (str "data/" class-id "/" object-id ".json"))
-        object-data (assoc s-exp-data key-name object-id)]
+  (let [key-name      (get-key-field-name class-id)
+        object-id     (if (is-key-field-uuid class-id)
+                          (str (UUID/randomUUID))
+                          (s-exp-data key-name))
+        relative-path (Paths/get (str "data/" class-id) (into-array String [(str object-id ".json")]))
+        base-name     (. relative-path getFileName)
+        dir-path      (. relative-path getParent)
+        object-data   (assoc s-exp-data key-name object-id)]
     (println (format "  key-name  : %s" key-name))
     (println (format "  object-id : %s" object-id))
-    (ensure-directory class-dir)
-    (with-open [w (io/writer object-file)]
+    (ensure-directory (. dir-path toString))
+    (with-open [w (io/writer (. relative-path toString))]
       (json/write object-data w))
     object-data))
 
@@ -298,7 +299,7 @@
         key-field-name (get-key-field-name class-id)]
     (println "Posted OK.")
     (response-with-content-type
-      (response/response (get-object class-id (new-object key-field-name)))
+      (response/response (get-object-as-json class-id (new-object key-field-name)))
       "text/json; charset=utf-8")))
 
 (defn post-extension-file
@@ -390,5 +391,4 @@
 
 (defn init
   []
-  (ensure-init-files "data")
-  (ensure-init-files "extensions"))
+  (ensure-init-files "data"))

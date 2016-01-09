@@ -12,6 +12,12 @@
             [clojure.data.json :as json]
             [tames.systems :as systems]))
 
+(defn print-request
+  [req]
+  (println "--- < Display Request > ---")
+  (pprint/pprint req)
+  (println "---------------------------"))
+
 (defn login-get
   [req]
   (html
@@ -22,34 +28,50 @@
         [:span {:style "display:inline-block;width:100px;"} "Login ID "]
         [:input {:type "text" :name "account_id"}]
         [:br]
+        [:div {:style "width:100%;height:10px;"}]
         [:span {:style "display:inline-block;width:100px;"} "Password"]
         [:input {:type "password" :name "password"}]
         [:br]
-        [:br]
+        [:div {:style "width:100%;height:20px;"}]
         [:input {:type "hidden" :name "__anti-forgery-token" :value *anti-forgery-token*}]
         [:input {:type "submit" :value "Login"}]]]))
 
 (defn login-post
   [req]
+  (print-request req)
   (let [username (get-in req [:form-params "account_id"])
-        next_url (get-in req [:query-params "next"] "/")]
+        next_url (get-in req [:query-params "next"] "/index.html")]
     (println "[username] :" username)
     (println "[next url] :" next_url)
+    ;(println "[forgery]  :" 
     (-> (response/redirect next_url)
-        (assoc-in [:session :identity] (keyword username)))))
+        ;(assoc-in [:session :identity] (keyword username))
+        (assoc-in [:session :identity] username)
+        )))
 
 (defn logout
-  []
-  (-> (response/redirect "/")
+  [req]
+  (-> (response/redirect "/index.html")
       (assoc :session {})))
 
 (defn unauthorized
   [req meta]
-  (let [res (authenticated? req)]
-    (println "[Authenticated] :" res)
-    (if res
-        (response/redirect "/")
-        (response/redirect (format "/login?next=%s" (:uri req))))))
+  (let [result (authenticated? req)]
+    (println "[Unauthenticated] :" result)
+    (print-request req)
+    (cond result (response/redirect "/index.html")
+          (= (req :uri) "/index.html") (response/redirect (format "/login?next=%s" (:uri req)))
+          :else (systems/create-authorized-result false (format "/login?next=%s" (:uri req)))
+        )))
+
+;(defn unauthorized
+;  [req meta]
+;  (let [res (authenticated? req)]
+;    (println "[Unauthenticated] :" res)
+;    (print-request req)
+;    (if res
+;        (systems/create-authorized-result true "/index.html")
+;        (systems/create-authorized-result false (format "/login?next=%s" (:uri req))))))
 
 (defroutes app-routes
   ;; for Menu Page
@@ -59,8 +81,8 @@
     (login-get req))
   (POST "/login" req
     (login-post req))
-  (GET "/logout" []
-    (logout))
+  (GET "/logout" req
+    (logout req))
   (GET "/index.html" []
     (println "/index.html")
     (response/resource-response "index.html" {:root "public/core"}))
@@ -99,25 +121,12 @@
     (println (str "[DELETE] /api/:class-id/:object-id = /api/" class-id "/" object-id))
     (systems/delete-data class-id object-id))
   ;; Session
-  (GET "/session/:session-key" [session-key]
-    (println (format "[GET] /session/:key = /session/%s" session-key))
-    (format "{ \"%s\" : \"Dummy Session Value www\"}", session-key))
-  ; extensions
-  (GET "/:class-id/:object-id/extension" [class-id object-id]
-    (println "[GET] /:class-id/:object-id/extension =" (str "/" class-id "/" object-id "/extension"))
-    (systems/get-extension-file-list class-id object-id))
-  (GET "/:class-id/:object-id/extension/:file-name" [class-id object-id file-name]
-    (println "[GET] /:class-id/:object-id/extension/:file-name =" (str "/" class-id "/" object-id "/extension/" file-name))
-    (systems/get-extension-file class-id object-id file-name))
-  (POST "/:class-id/:object-id/extension/:file-name" [class-id object-id file-name & params]
-    (println "[POST] /:class-id/:object-id/extension/:file-name =" (str "/" class-id "/" object-id "/extension/" file-name))
-    (systems/post-extension-file class-id object-id file-name (json/read-str (params :value))))
-  (PUT "/:class-id/:object-id/extension/:file-name" [class-id object-id file-name & params]
-    (println "[PUT] /:class-id/:object-id/extension/:file-name =" (str "/" class-id "/" object-id "/extension/" file-name))
-    (systems/put-extension-file class-id object-id file-name (json/read-str (params :value))))
-  (DELETE "/:class-id/:object-id/extension/:file-name" [class-id object-id file-name]
-    (println (str "[DELETE] /:class-id/:object-id/extension/:file-name = /" class-id "/" object-id "/extension/" file-name))
-    (systems/delete-extension-file class-id object-id file-name))
+  (GET "/session/:session-key" req
+    (let [session-key (get-in req [:route-params :session-key] nil)
+          user-name   (get-in req [:session :identity] nil)]
+      (println (format "[GET] /session/:session-key = /session/%s" session-key))
+      (print-request req)
+      (format "{ \"%s\" : \"%s\"}" session-key user-name)))
   
   (GET "/:class-id/index.html" [class-id]
     (println "/:class-id/index.html =" class-id)

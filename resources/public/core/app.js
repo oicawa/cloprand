@@ -12,6 +12,7 @@ define(function (require) {
     this._sub_title = null;
     this._contents = null;
     this._user_name = null;
+    this._config = null;
   }
   
   App.prototype.title = function() {
@@ -31,11 +32,16 @@ define(function (require) {
     return this._contents;
   };
   
+  App.prototype.config = function() {
+    return this._config;
+  };
+  
   App.prototype.init = function() {
     var template = null;
     var config = null;
     var session = null;
     var self = this;
+/*
     $.when(
       Utils.get_file(null, "App.html", "html", function(data){ template = $.templates(data); }),
       Utils.get_file(null, "config.json", "json", function(data){ config = data; }),
@@ -55,6 +61,33 @@ define(function (require) {
 
       self._contents = new Contents();
       self._contents.init("#contents-panel");
+    });
+*/
+    Utils.get_session("user_name", function(data){ session = data; }, null)
+    .fail(function(response, status) {
+    	console.log(status);
+    	//location.href = "/index.html";
+    })
+    .then(function() {
+      $.when(
+        Utils.get_file(null, "App.html", "html", function(data){ template = $.templates(data); }),
+        //Utils.get_file(null, "config.json", "json", function(data){ config = data; })
+        Utils.get_data("System", "config", function(data){ config = data; })
+      ).always(function() {
+        var root_html = template.render();
+        $("body").append(root_html);
+
+        self._title = $("span#title");
+        self._sub_title = $("span#sub-title");
+        self._user_name = $("span#user_name");
+        self._config = config;
+
+        self.title(config.system_name);
+        self._user_name.text(session.user_name);
+
+        self._contents = new Contents();
+        self._contents.init("#contents-panel");
+      });
     });
   };
 

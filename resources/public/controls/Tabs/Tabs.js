@@ -20,7 +20,7 @@ define(function (require) {
   	var copied = parts.concat();
   	while(!copied[copied.length - 1])
   	  copied.pop();
-    return copied.join("_");
+    return copied.join("_").replace(/\//g, "-");
   }
 
   Tabs.prototype.add = function (tab_id, label, set_active, is_closable) {
