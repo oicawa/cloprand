@@ -6,7 +6,7 @@ define(function (require) {
   var Toolbar = require("controls/Toolbar/Toolbar");
   var Detail = require("controls/Detail/Detail");
   var Grid = require("controls/Grid/Grid");
-  var Contents = require("Contents");
+  var Contents = require("core/Contents");
   var app = require("app");
 
   function show_tab(tab_id, label) {

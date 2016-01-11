@@ -2,7 +2,7 @@ define(function (require) {
   require("jquery");
   require("jsrender");
   var Utils = require("core/Utils");
-  var Contents = require("Contents");
+  var Contents = require("core/Contents");
   
   // Dialog
   function Dialog() {

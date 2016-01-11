@@ -7,7 +7,7 @@ define(function (require) {
   var Detail = require("controls/Detail/Detail");
   var Grid = require("controls/Grid/Grid");
   var Tabs = require("controls/Tabs/Tabs");
-  var Contents = require("Contents");
+  var Contents = require("core/Contents");
   var app = require("app");
 
   function edit_toolbar(toolbar, on) {

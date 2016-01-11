@@ -5,7 +5,7 @@ define(function (require) {
   require("jquery_splitter");
   require("jsrender");
   var Utils = require("core/Utils");
-  var Contents = require("Contents");
+  var Contents = require("core/Contents");
   
   function App() {
     this._title = null;
@@ -70,7 +70,7 @@ define(function (require) {
     })
     .then(function() {
       $.when(
-        Utils.get_file(null, "App.html", "html", function(data){ template = $.templates(data); }),
+        Utils.get_file(null, "core/App.html", "html", function(data){ template = $.templates(data); }),
         //Utils.get_file(null, "config.json", "json", function(data){ config = data; })
         Utils.get_data("System", "config", function(data){ config = data; })
       ).always(function() {

@@ -1,6 +1,9 @@
 resources/public/lib/
 target/
 class/
-/data/
+data/
+controls/
+lib/
+core/
 .lein-repl-history
 *~

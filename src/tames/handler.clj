@@ -40,7 +40,7 @@
   [req]
   (print-request req)
   (let [username (get-in req [:form-params "account_id"])
-        next_url (get-in req [:query-params "next"] "/index.html")]
+        next_url (get-in req [:query-params "next"] "/tames.html")]
     (println "[username] :" username)
     (println "[next url] :" next_url)
     ;(println "[forgery]  :" 
@@ -51,7 +51,7 @@
 
 (defn logout
   [req]
-  (-> (response/redirect "/index.html")
+  (-> (response/redirect "/tames.html")
       (assoc :session {})))
 
 (defn unauthorized
@@ -59,8 +59,8 @@
   (let [result (authenticated? req)]
     (println "[Unauthenticated] :" result)
     (print-request req)
-    (cond result (response/redirect "/index.html")
-          (= (req :uri) "/index.html") (response/redirect (format "/login?next=%s" (:uri req)))
+    (cond result (response/redirect "/tames.html")
+          (= (req :uri) "/tames.html") (response/redirect (format "/login?next=%s" (:uri req)))
           :else (systems/create-authorized-result false (format "/login?next=%s" (:uri req)))
         )))
 
@@ -74,33 +74,19 @@
 ;        (systems/create-authorized-result false (format "/login?next=%s" (:uri req))))))
 
 (defroutes app-routes
-  ;; for Menu Page
-  (GET "/" []
-    (response/redirect "/index.html"))
+  ;; Authentication
   (GET "/login" req
     (login-get req))
   (POST "/login" req
     (login-post req))
   (GET "/logout" req
     (logout req))
-  (GET "/index.html" []
-    (println "/index.html")
-    (response/resource-response "index.html" {:root "public/core"}))
-  (GET "/dialog.html" []
-    (println "/dialog.html")
-    (response/resource-response "index.html" {:root "public/core"}))
-  (GET "/:css-name.css" [css-name]
-    (println "/:css-name.css =" css-name)
-    (systems/get-file nil (format "%s.css" css-name) "text/css"))
-  (GET "/:js-name.js" [js-name]
-    (println "/:js-name.js =" js-name)
-    (systems/get-file nil (format "%s.js" js-name) "text/javascript; charset=utf-8"))
-  (GET "/:template-name.html" [template-name]
-    (println "/:template-name.html =" template-name)
-    (systems/get-file nil (format "%s.html" template-name) "text/html; charset=utf-8"))
-  (GET "/:json-name.json" [json-name]
-    (println "/:json-name.json =" json-name)
-    (systems/get-file nil (format "%s.json" json-name) "text/json; charset=utf-8"))
+
+  ;; Portal Top Page
+  (GET "/tames.html" []
+    (println "[GET] /tames.html")
+    (response/file-response "core/tames.html"))
+  
   ;; REST API for CRUD
   (GET "/api/:class-id" [class-id]
     (println (str "[GET] /api/:class-id = /api/" class-id))
@@ -128,18 +114,12 @@
       (print-request req)
       (format "{ \"%s\" : \"%s\"}" session-key user-name)))
   
-  (GET "/:class-id/index.html" [class-id]
-    (println "/:class-id/index.html =" class-id)
-    (response/resource-response "index.html" {:root "public/core"}))
-  (GET ["/:class-id/:js-name.js" :class-id systems/REGEXP_UUID :js-name #"[\w]+"] [class-id js-name]
-    (println "/:class-id/:js-name.js =" (str "/" class-id "/" js-name))
-    (systems/get-file class-id (format "%s.js" js-name) "text/javascript; charset=utf-8"))
-  (GET "/:class-id/:template-name.html" [class-id template-name]
-    (println "/:class-id/:template-name.html =" (str "/" class-id "/" template-name))
-    (systems/get-file class-id (format "%s.html" template-name) "text/html; charset=utf-8"))
-  (GET "/:class-id/:json-name.json" [class-id json-name]
-    (println "/:class-id/:json-name.json =" (str "/" class-id "/" json-name))
-    (systems/get-file class-id (format "%s.json" json-name) "text/json; charset=utf-8"))
+  ;; Other resources
+  (GET "/*" [& params]
+    (println (format "[GET] /* (path=%s)" (params :*)))
+    (let [relative-path (params :*)
+          absolute-path (systems/get-absolute-path relative-path)]
+      (response/file-response relative-path)))
   
   (route/resources "/")
   (route/not-found "Not Found"))

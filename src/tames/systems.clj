@@ -110,7 +110,7 @@
 
 (defn get-default-file
   [file-name]
-  (let [resource-path (get-resource-path (str "public/defaults/" file-name))]
+  (let [resource-path (get-resource-path (str "tames/defaults/" file-name))]
     resource-path))
 
 (defn get-object
@@ -145,7 +145,7 @@
 
 (defn get-resource-classes
   []
-  (let [classes-path    (get-resource-path "public/classes")
+  (let [classes-path    (get-resource-path "tames/classes")
         class-dir-names (get-resource-children classes-path true false)
         class-jsons     (map #(let [relative-path (format "%s/%s/class.json" classes-path %1)
                                     resource      (io/resource relative-path)]
@@ -156,7 +156,7 @@
 
 (defn get-resources-list
   []
-  (json/write-str (get-resource-children "public/defaults" true false)))
+  (json/write-str (get-resource-children "tames/defaults" true false)))
 
 (defn response-with-content-type
   [resp content-type]
@@ -183,7 +183,7 @@
         res           (if (. file exists)
                           (response/file-response absolute-path)
                           ;(response/resource-response default-path)
-                          (response/resource-response file-name {:root "public/defaults"})
+                          (response/resource-response file-name {:root "tames/defaults"})
                           )]
     ;(println "  absolute-path:" absolute-path)
     ;(println "  default-path :" default-path)
@@ -385,10 +385,18 @@
           (doseq [file files]
             (let [src-path (str "public/" relative-path "/" file)
                   dst-path (str relative-path "/" file)]
+              (println (format "[systems/ensure-init-files] %s" src-path))
               (if (not (. (File. (get-absolute-path dst-path)) exists))
                   (copy-resource-file src-path dst-path))
                   ))))))
 
 (defn init
   []
-  (ensure-init-files "data"))
+  (ensure-init-files "lib")
+  (ensure-init-files "core")
+  (ensure-init-files "data")
+  (ensure-init-files "controls")
+  )
+
+
+
