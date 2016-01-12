@@ -12,6 +12,12 @@
             [clojure.data.json :as json]
             [tames.systems :as systems]))
 
+(def content-types {""     ""
+                    "css"  "text/css"
+                    "js"   "text/javascript; charset=utf-8"
+                    "html" "text/html; charset=utf-8"
+                    "json" "text/json; charset=utf-8"})
+
 (defn print-request
   [req]
   (println "--- < Display Request > ---")
@@ -118,8 +124,17 @@
   (GET "/*" [& params]
     (println (format "[GET] /* (path=%s)" (params :*)))
     (let [relative-path (params :*)
-          absolute-path (systems/get-absolute-path relative-path)]
-      (response/file-response relative-path)))
+          absolute-path (systems/get-absolute-path relative-path)
+          offset        (. relative-path lastIndexOf ".")
+          extension     (if (= offset -1) "" (. relative-path substring (+ offset 1)))
+          content-type  (content-types (. extension toLowerCase))
+          res           (-> (response/file-response absolute-path)
+                            (response/header "Content-Type" content-type))]
+      ;(println (format "  offset       = %d" offset))
+      ;(println (format "  extension    = %s" extension))
+      ;(println (format "  content-type = %s" content-type))
+      ;(pprint/pprint res)
+      res))
   
   (route/resources "/")
   (route/not-found "Not Found"))
