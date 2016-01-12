@@ -52,8 +52,7 @@
     ;(println "[forgery]  :" 
     (-> (response/redirect next_url)
         ;(assoc-in [:session :identity] (keyword username))
-        (assoc-in [:session :identity] username)
-        )))
+        (assoc-in [:session :identity] username))))
 
 (defn logout
   [req]
@@ -88,10 +87,11 @@
   (GET "/logout" req
     (logout req))
 
-  ;; Portal Top Page
-  (GET "/tames.html" []
-    (println "[GET] /tames.html")
-    (response/file-response "core/tames.html"))
+  ;; Portal Top
+  (GET "/tames" []
+    (println "[GET] /tames")
+    (-> (response/file-response "core/tames.html")
+        (response/header "Content-Type" (content-types "html"))))
   
   ;; REST API for CRUD
   (GET "/api/:class-id" [class-id]
