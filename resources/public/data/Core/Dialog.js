@@ -1,8 +1,8 @@
 define(function (require) {
   require("jquery");
   require("jsrender");
-  var Utils = require("core/Utils");
-  var Contents = require("core/Contents");
+  var Utils = require("data/Core/Utils");
+  var Contents = require("data/Core/Contents");
   
   // Dialog
   function Dialog() {

@@ -2,11 +2,20 @@ define(function (require) {
   require("jquery");
   require("jquery_splitter");
   require("jsrender");
-  var Utils = require("core/Utils");
+  var Utils = require("data/Core/Utils");
   var Toolbar = require("controls/Toolbar/Toolbar");
   var Detail = require("controls/Detail/Detail");
   var Grid = require("controls/Grid/Grid");
   var Tabs = require("controls/Tabs/Tabs");
+
+  var TEMPLATE = `
+<div id="contents-frame">
+  <div id="contents-tabs">
+    <ul>
+    </ul>
+  </div>
+</div>
+`;
 
   function show_tab(tab_id, label) {
     var tabTemplate = "<li class='tab-label'><a href='#{href}'>#{label}</a><span class='ui-icon ui-icon-close'>Remove Tab</span></li>"
@@ -132,13 +141,11 @@ define(function (require) {
     var template = null;
     var assist = null;
     var self = this;
-    Utils.add_css("/core/style.css");
+    Utils.add_css("/data/Core/Contents.css");
     $.when(
-      Utils.get_file(null, "core/Contents.html", "html", function (data) { template = $.templates(data); }),
-      Utils.get_file(null, "core/Contents.json", "json", function (data) { assist = data; })
+      Utils.get_file(null, "data/Core/Contents.json", "json", function (data) { assist = data; })
     ).always(function() {
-      var contents_html = template.render();
-      contents.append(contents_html);
+      contents.append(TEMPLATE);
       
       // Tabs
       self._tabs = new Tabs();

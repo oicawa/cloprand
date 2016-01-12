@@ -1,9 +1,9 @@
 define(function (require) { 
   require("jquery");
   require("jsrender");
-  var Utils = require("core/Utils");
+  var Utils = require("data/Core/Utils");
+  var Inherits = require("data/Core/Inherits");
   var Detail = require("controls/Detail/Detail");
-  var Inherits = require("core/Inherits");
   var Field = require("controls/fields/Field");
 
   function Complex() {

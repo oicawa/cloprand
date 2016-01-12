@@ -1,7 +1,7 @@
 define(function (require) {
   require("jquery");
   require("jsrender");
-  var Utils = require("core/Utils");
+  var Utils = require("data/Core/Utils");
   var Toolbar = require("controls/Toolbar/Toolbar");
 
   function regist_event(self, event_name) {

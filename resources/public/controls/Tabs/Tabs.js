@@ -1,6 +1,6 @@
 define(function (require) {
   require("jquery");
-  var Utils = require("core/Utils");
+  var Utils = require("data/Core/Utils");
   
   function index(self, tab_id) {
     return self._tabs.find("ul > li[aria-controls='" + tab_id + "']").index();

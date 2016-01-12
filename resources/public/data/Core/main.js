@@ -17,7 +17,7 @@ require.config({
     jquery_ui : '/lib/jquery-ui-1.11.4/jquery-ui',
     jsrender: '/lib/jsrender',
     jquery_splitter : '/lib/jquery.splitter/js/jquery.splitter-0.14.0',
-    app : '/core/app'
+    app : '/data/Core/app'
   }
 });
 

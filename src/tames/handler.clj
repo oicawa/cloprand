@@ -10,7 +10,8 @@
             [ring.util.response :as response]
             [hiccup.core :refer [html]]
             [clojure.data.json :as json]
-            [tames.systems :as systems]))
+            [tames.systems :as systems])
+  (:import (java.io File)))
 
 (def content-types {""     ""
                     "css"  "text/css"
@@ -90,7 +91,7 @@
   ;; Portal Top
   (GET "/tames" []
     (println "[GET] /tames")
-    (-> (response/file-response "core/tames.html")
+    (-> (response/file-response "data/Core/tames.html")
         (response/header "Content-Type" (content-types "html"))))
   
   ;; REST API for CRUD
@@ -128,8 +129,11 @@
           offset        (. relative-path lastIndexOf ".")
           extension     (if (= offset -1) "" (. relative-path substring (+ offset 1)))
           content-type  (content-types (. extension toLowerCase))
-          res           (-> (response/file-response absolute-path)
-                            (response/header "Content-Type" content-type))]
+          exist?        (. (File. absolute-path) exists)
+          res           (if exist?
+                            (-> (response/file-response absolute-path)
+                                (response/header "Content-Type" content-type))
+                            (route/not-found "Not Found"))]
       ;(println (format "  offset       = %d" offset))
       ;(println (format "  extension    = %s" extension))
       ;(println (format "  content-type = %s" content-type))

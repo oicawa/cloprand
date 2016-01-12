@@ -1,7 +1,7 @@
 define(function (require) {
   require("jquery");
   require("jsrender");
-  var Utils = require("core/Utils");
+  var Utils = require("data/Core/Utils");
   
   function Toolbar() {
     this._default_icons = {

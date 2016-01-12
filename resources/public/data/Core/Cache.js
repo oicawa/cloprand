@@ -1,7 +1,7 @@
 define(function (require) {
   require('jquery');
   require('json2');
-  var Utils = require("core/Utils");
+  var Utils = require("data/Core/Utils");
 
   var _data = {};
 

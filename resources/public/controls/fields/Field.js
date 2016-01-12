@@ -1,6 +1,6 @@
 define(function (require) { 
   require("jquery");
-  var Inherits = require("core/Inherits");
+  var Inherits = require("data/Core/Inherits");
   var Control = require("controls/Control");
   
   function Field(template_path, template_name) {

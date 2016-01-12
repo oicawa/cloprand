@@ -2,12 +2,12 @@ define(function (require) {
   require("jquery");
   require("jquery_splitter");
   require("jsrender");
-  var Utils = require("core/Utils");
+  var app = require("app");
+  var Utils = require("data/Core/Utils");
   var Toolbar = require("controls/Toolbar/Toolbar");
   var Detail = require("controls/Detail/Detail");
   var Grid = require("controls/Grid/Grid");
   var Tabs = require("controls/Tabs/Tabs");
-  var app = require("app");
 
   function MenuView() {
   	this._selector = null;

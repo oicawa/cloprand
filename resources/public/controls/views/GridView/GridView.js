@@ -2,12 +2,12 @@ define(function (require) {
   require("jquery");
   require("jquery_splitter");
   require("jsrender");
-  var Utils = require("core/Utils");
+  var app = require("app");
+  var Utils = require("data/Core/Utils");
+  var Contents = require("data/Core/Contents");
   var Toolbar = require("controls/Toolbar/Toolbar");
   var Detail = require("controls/Detail/Detail");
   var Grid = require("controls/Grid/Grid");
-  var Contents = require("core/Contents");
-  var app = require("app");
 
   function show_tab(tab_id, label) {
     var tabTemplate = "<li class='tab-label'><a href='#{href}'>#{label}</a><span class='ui-icon ui-icon-close'>Remove Tab</span></li>"

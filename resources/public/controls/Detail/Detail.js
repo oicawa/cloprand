@@ -2,9 +2,9 @@ define(function (require) {
   require("jquery");
   require("jsrender");
   //require("JSON");
-  var Utils = require("core/Utils");
-  var Cache = require("core/Cache");
-  var Inherits = require("core/Inherits");
+  var Utils = require("data/Core/Utils");
+  var Cache = require("data/Core/Cache");
+  var Inherits = require("data/Core/Inherits");
 
   function get_control_assist(self, field) {
     if (!self._custom_assist) {

@@ -1,12 +1,12 @@
 define(function (require) { 
   require("jquery");
   require("jsrender");
-  var Utils = require("core/Utils");
+  var Utils = require("data/Core/Utils");
+  var Dialog = require("data/Core/Dialog");
+  var Inherits = require("data/Core/Inherits");
   var Toolbar = require("controls/Toolbar/Toolbar");
   var Grid = require("controls/Grid/Grid");
   var Detail = require("controls/Detail/Detail");
-  var Dialog = require("core/Dialog");
-  var Inherits = require("core/Inherits");
   var Field = require("controls/fields/Field");
   
   var default_toolbar = {

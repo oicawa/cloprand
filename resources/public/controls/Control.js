@@ -1,5 +1,5 @@
 define(function (require) { 
-  var Inherits = require("core/Inherits");
+  var Inherits = require("data/Core/Inherits");
   
   function Control(css_path, template_path, template_name) {
     this._selector = null;

@@ -1,11 +1,11 @@
 define(function (require) { 
   require("jquery");
   require("jsrender");
-  var Utils = require("core/Utils");
+  var app = require("app");
+  var Utils = require("data/Core/Utils");
+  var Inherits = require("data/Core/Inherits");
   var Toolbar = require("controls/Toolbar/Toolbar");
   var Grid = require("controls/Grid/Grid");
-  var app = require("app");
-  var Inherits = require("core/Inherits");
   var Field = require("controls/fields/Field");
 
   var default_toolbar = {
