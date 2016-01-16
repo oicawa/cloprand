@@ -3,15 +3,15 @@ define(function (require) {
   require("jsrender");
   var Utils = require("data/Core/Utils");
   
-  var TEMPLATE = `
-<ul class="ui-widget ui-helper-clearfix toolbar">
-{{for items}}
-  <li class="ui-state-default ui-corner-all" name="{{:name}}" title="{{:description}}">
-    <span class="ui-icon {{:icon_name}}"></span>
-    <span class="caption">{{:caption}}</span>
-  </li>
-{{/for}}
-</ul>`;
+  var TEMPLATE = '' +
+'<ul class="ui-widget ui-helper-clearfix toolbar">' +
+'{{for items}}' +
+'  <li class="ui-state-default ui-corner-all" name="{{:name}}" title="{{:description}}">' +
+'    <span class="ui-icon {{:icon_name}}"></span>' +
+'    <span class="caption">{{:caption}}</span>' +
+'  </li>' +
+'{{/for}}' +
+'</ul>';
   
   function Toolbar() {
     this._default_icons = {

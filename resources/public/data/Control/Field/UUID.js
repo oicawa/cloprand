@@ -5,10 +5,9 @@ define(function (require) {
   var Inherits = require("data/Core/Inherits");
   var Field = require("data/Control/Field/Field");
   
-  var TEMPLATE = `
-<div class="editor"></div>
-<div class="viewer"></div>
-`;
+  var TEMPLATE = '' +
+'<div class="editor"></div>' +
+'<div class="viewer"></div>';
   
   function UUID() {
     Field.call(this, "data/Control/Field", "UUID");

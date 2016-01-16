@@ -10,12 +10,11 @@ define(function (require) {
   var Grid = require("data/Control/Grid");
   var Tabs = require("data/Control/Tabs");
 
-  var TEMPLATE = `
-<div class="detailview-panel">
-  <div class="object-operations"></div>
-  <div class="object-detail"></div>
-</div>
-`;
+  var TEMPLATE = '' +
+'<div class="detailview-panel">' +
+'  <div class="object-operations"></div>' +
+'  <div class="object-detail"></div>' +
+'</div>';
 
   function edit_toolbar(toolbar, on) {
     if (on) {

@@ -3,19 +3,19 @@ define(function (require) {
   require("jquery_splitter");
   require("jsrender");
   var Utils = require("data/Core/Utils");
-  var Toolbar = require("controls/Toolbar/Toolbar");
-  var Detail = require("controls/Detail/Detail");
-  var Grid = require("controls/Grid/Grid");
-  var Tabs = require("controls/Tabs/Tabs");
+  var Toolbar = require("data/Control/Toolbar");
+  var Detail = require("data/Control/Detail");
+  var Grid = require("data/Control/Grid");
+  var Tabs = require("data/Control/Tabs");
 
-  var TEMPLATE = `
-<div id="contents-frame">
-  <div id="contents-tabs">
-    <ul>
-    </ul>
-  </div>
-</div>
-`;
+  var TEMPLATE = '' +
+'<div id="contents-frame">' +
+'  <div id="contents-tabs">' +
+'    <ul>' +
+'    </ul>' +
+'  </div>' +
+'</div>';
+
 
   function show_tab(tab_id, label) {
     var tabTemplate = "<li class='tab-label'><a href='#{href}'>#{label}</a><span class='ui-icon ui-icon-close'>Remove Tab</span></li>"
@@ -42,7 +42,7 @@ define(function (require) {
   
   function create_view(self, tab_id, selector, view_name, class_id, object_id, options) {
     //var dfd = new $.Deferred;
-    var view_path = "controls/views/" + view_name + "/" + view_name;
+    var view_path = "data/Control/View/" + view_name;
     require([view_path], function(View) {
       var view = new View();
       self._tabs.content(tab_id, view);

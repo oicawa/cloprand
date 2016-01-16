@@ -5,10 +5,9 @@ define(function (require) {
   var Inherits = require("data/Core/Inherits");
   var Field = require("data/Control/Field/Field");
   
-  var TEMPLATE = `
-<input type="text" name="{{:name}}" value=""/>
-<div></div>
-`;
+  var TEMPLATE = '' +
+'<input type="text" name="{{:name}}" value=""/>' +
+'<div></div>';
   
   function Text() {
     Field.call(this, "data/Control/Field", "Text");

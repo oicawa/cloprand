@@ -9,13 +9,12 @@ define(function (require) {
   var Detail = require("data/Control/Detail");
   var Field = require("data/Control/Field/Field");
   
-  var TEMPLATE = `
-<div class="toolbar" style="display:none;"></div>
-<div class="grid"></div>
-<div class="dialog">
-  <div class="detail"></div>
-</div>
-`;
+  var TEMPLATE = '' +
+'<div class="toolbar" style="display:none;"></div>' +
+'<div class="grid"></div>' +
+'<div class="dialog">' +
+'  <div class="detail"></div>' +
+'</div>';
   
   var default_toolbar = {
     "operations" : Utils.CLASS_ID,

@@ -9,14 +9,13 @@ define(function (require) {
   var Detail = require("data/Control/Detail");
   var Grid = require("data/Control/Grid");
 
-  var TEMPLATE = `
-<div class="gridview-panel">
-  <div class="object-operations"></div>
-  <div class="object-list">
-    <div><a href="#"></a></div>
-  </div>
-</div>
-`;
+  var TEMPLATE = '' +
+'<div class="gridview-panel">' +
+'  <div class="object-operations"></div>' +
+'  <div class="object-list">' +
+'    <div><a href="#"></a></div>' +
+'  </div>' +
+'</div>';
 
   function show_tab(tab_id, label) {
     var tabTemplate = "<li class='tab-label'><a href='#{href}'>#{label}</a><span class='ui-icon ui-icon-close'>Remove Tab</span></li>"

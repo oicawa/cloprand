@@ -5,10 +5,9 @@ define(function (require) {
   var Inherits = require("data/Core/Inherits");
   var Field = require("data/Control/Field/Field");
   
-  var TEMPLATE = `
-<div class="editor"><label><input type="checkbox" name="{{:name}}" /> {{:description}}<label></div>
-<div class="renderer"><input type="checkbox" name="{{:name}}" onclick="return false;" /> {{:description}}</div>
-`;
+  var TEMPLATE = '' +
+'<div class="editor"><label><input type="checkbox" name="{{:name}}" /> {{:description}}<label></div>' +
+'<div class="renderer"><input type="checkbox" name="{{:name}}" onclick="return false;" /> {{:description}}</div>';
   
   function parse_value(value) {
     // false, 0, null, undefined

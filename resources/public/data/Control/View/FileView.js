@@ -9,14 +9,13 @@ define(function (require) {
   var Grid = require("data/Control/Grid");
   var Tabs = require("data/Control/Tabs");
   
-  var TEMPLATE = `
-<div class="fileview-panel">
-  <div class="file-operations"></div>
-  <div class="file-contents">
-    <textarea></textarea>
-  </div>
-</div>
-`;
+  var TEMPLATE = '' +
+'<div class="fileview-panel">' +
+'  <div class="file-operations"></div>' +
+'  <div class="file-contents">' +
+'    <textarea></textarea>' +
+'  </div>' +
+'</div>';
 
   function edit_toolbar(toolbar, on) {
     if (on) {

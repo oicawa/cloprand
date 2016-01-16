@@ -6,11 +6,10 @@ define(function (require) {
   var Detail = require("data/Control/Detail");
   var Field = require("data/Control/Field/Field");
   
-  var TEMPLATE = `
-<div class="complex">
-  <div class="detail"></div>
-</div>
-`;
+  var TEMPLATE = '' +
+'<div class="complex">' +
+'  <div class="detail"></div>' +
+'</div>';
 
   function Complex() {
     Field.call(this, "data/Control/Field", "Complex");

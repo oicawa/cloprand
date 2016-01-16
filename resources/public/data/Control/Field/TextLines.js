@@ -5,10 +5,9 @@ define(function (require) {
   var Inherits = require("data/Core/Inherits");
   var Field = require("data/Control/Field/Field");
   
-  var TEMPLATE = `
-<textarea name="{{:name}}" value=""></textarea>
-<pre></pre>
-`;
+  var TEMPLATE = '' +
+'<textarea name="{{:name}}" value=""></textarea>' +
+'<pre></pre>';
 
   function TextLines() {
     Field.call(this, "data/Control/Field", "TextLines");

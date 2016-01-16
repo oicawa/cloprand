@@ -8,10 +8,9 @@ define(function (require) {
   var Grid = require("data/Control/Grid");
   var Field = require("data/Control/Field/Field");
   
-  var TEMPLATE = `
-<div class="toolbar" style="display:none;"></div>
-<div class="extensions"></div>
-`;
+  var TEMPLATE = '' +
+'<div class="toolbar" style="display:none;"></div>' +
+'<div class="extensions"></div>';
 
   var default_toolbar = {
     "operations" : Utils.CLASS_ID,

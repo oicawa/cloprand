@@ -5,14 +5,13 @@ define(function (require) {
   var Inherits = require("data/Core/Inherits");
   var Field = require("data/Control/Field/Field");
   
-  var TEMPLATE = `
-<select name="{{:name}}">
-{{for items}}
-  <option value="{{:value}}">{{:caption}}</option>
-{{/for}}
-</select>
-<div></div>
-`;
+  var TEMPLATE = '' +
+'<select name="{{:name}}">' +
+'{{for items}}' +
+'  <option value="{{:value}}">{{:caption}}</option>' +
+'{{/for}}' +
+'</select>' +
+'<div></div>';
 
   function create_control(self, root, template, field) {
     var caption_fields = [];

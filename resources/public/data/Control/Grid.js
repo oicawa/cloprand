@@ -4,12 +4,11 @@ define(function (require) {
   var Utils = require("data/Core/Utils");
   var Toolbar = require("data/Control/Toolbar");
   
-  var TEMPLATE = `
-<table class='grid'>
-  <thead></thead>
-  <tbody></tbody>
-</table>
-`;
+  var TEMPLATE = '' +
+'<table class="grid">' +
+'  <thead></thead>' +
+'  <tbody></tbody>' +
+'</table>';
 
   function regist_event(self, event_name) {
     self._table.on(event_name, "tbody > tr", function(event) {

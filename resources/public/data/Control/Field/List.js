@@ -5,17 +5,16 @@ define(function (require) {
   var Inherits = require("data/Core/Inherits");
   var Field = require("data/Control/Field/Field");
   
-  var TEMPLATE = `
-<div class="editor">
-  <select name="{{:name}}" multiple size="10">
-  {{for items}}
-    <option value="{{:value}}">{{:caption}}</option>
-  {{/for}}
-  </select>
-</div>
-<div class="viewer">
-</div>
-`;
+  var TEMPLATE = '' +
+'<div class="editor">' +
+'  <select name="{{:name}}" multiple size="10">' +
+'  {{for items}}' +
+'    <option value="{{:value}}">{{:caption}}</option>' +
+'  {{/for}}' +
+'  </select>' +
+'</div>' +
+'<div class="viewer">' +
+'</div>';
   
   function List() {
     Field.call(this, "data/Control/Field", "List");

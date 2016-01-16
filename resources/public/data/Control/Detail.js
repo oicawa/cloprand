@@ -6,21 +6,20 @@ define(function (require) {
   var Cache = require("data/Core/Cache");
   var Inherits = require("data/Core/Inherits");
 
-  var TEMPLATE = `
-<table class="detail-fields">
-  <thead>
-    <tr><th></th><th></th></tr>
-  </thead>
-  <tbody>
-    {{for object_fields}}
-    <tr>
-      <td class="caption">{{:label}}</td>
-      <td class="value"><div class="{{:name}}"></div></td>
-    </tr>
-    {{/for}}
-  </tbody>
-</table>
-`;
+  var TEMPLATE = 
+'<table class="detail-fields">' +
+'  <thead>' +
+'    <tr><th></th><th></th></tr>' +
+'  </thead>' +
+'  <tbody>' +
+'    {{for object_fields}}' +
+'    <tr>' +
+'      <td class="caption">{{:label}}</td>' +
+'      <td class="value"><div class="{{:name}}"></div></td>' +
+'    </tr>' +
+'    {{/for}}' +
+'  </tbody>' +
+'</table>';
 
   function get_control_assist(self, field) {
     if (!self._custom_assist) {

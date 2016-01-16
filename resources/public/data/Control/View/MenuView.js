@@ -9,12 +9,11 @@ define(function (require) {
   var Grid = require("data/Control/Grid");
   var Tabs = require("data/Control/Tabs");
   
-  var TEMPLATE = `
-<div class="menuview-panel">
-  <div class="menu-list">
-  </div>
-</div>
-`;
+  var TEMPLATE = '' +
+'<div class="menuview-panel">' +
+'  <div class="menu-list">' +
+'  </div>' +
+'</div>';
 
   function MenuView() {
   	this._selector = null;
