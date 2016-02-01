@@ -10,7 +10,7 @@ define(function (require) {
   var TEMPLATE = '' +
 '<div id="root-panel">' +
 '  <div id="header-panel" style="height: 30px;">' +
-'    <img src="/data/Core/tames.svg" height="24px" width="24px" />' +
+'    <object type="image/svg+xml" data="/data/Core/tames.svg" />' +
 '    <span id="title" style="font-size:20px; vertical-align: top;"></span>' +
 '    <span style="display:inline-block; width:30px;"></span>' +
 '    <span id="sub-title"></span>' +
