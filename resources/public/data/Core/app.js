@@ -2,7 +2,6 @@ define(function (require) {
   require("jquery");
   require("json2");
   require("jquery_ui");
-  require("jquery_splitter");
   require("jsrender");
   var Utils = require("data/Core/Utils");
   var Contents = require("data/Core/Contents");

@@ -1,6 +1,5 @@
 define(function (require) {
   require("jquery");
-  require("jquery_splitter");
   require("jsrender");
   var app = require("app");
   var Utils = require("data/Core/Utils");
