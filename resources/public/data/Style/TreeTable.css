@@ -1,0 +1,46 @@
+/*
+table.grid > thead {
+  display: block;
+}
+table.grid > tbody {
+  display: block;
+  overflow-y:scroll;
+}
+*/
+table.treetable > thead > tr > th {
+    border-right: 1px solid lightgrey;
+    border-bottom: 1px solid lightgrey;
+    table-layout:fixed;
+}
+table.treetable > thead > tr > th:last-child {
+    border-right: 0px solid lightgrey;
+    border-bottom: 1px solid lightgrey;
+}
+
+table.treetable > tbody > tr > td {
+    border-right: 1px solid lightgrey;
+    border-bottom: 1px solid lightgrey;
+    /*
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; 
+    table-layout:fixed;
+    */
+}
+table.treetable > tbody > tr > td:last-child {
+    border-right: 0px solid lightgrey;
+    border-bottom: 1px solid lightgrey;
+}
+table.treetable > tbody > tr > td > div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 300px;
+}
+table.treetable > tbody > tr:hover {
+    background-color: lightgreen;
+    cursor: pointer;
+}
+table.treetable > tbody > tr.selected {
+    background-color: lightblue;
+}

@@ -7,6 +7,7 @@ require.config({
     'json2': { deps: ['jquery'] },
     'jquery_ui': { deps: ['jquery'] },
     'jsrender': { deps: ['jquery'] },
+    'jquery_treetable': { deps: ['jquery', 'jquery_ui'] },
     'app': { deps: ['jquery'] }
   },
   
@@ -15,6 +16,7 @@ require.config({
     json2 : '/lib/json2',
     jquery_ui : '/lib/jquery-ui-1.11.4/jquery-ui',
     jsrender: '/lib/jsrender',
+    jquery_treetable : '/lib/jquery.treetable',
     app : '/data/Core/app'
   }
 });

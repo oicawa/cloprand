@@ -1,0 +1,15 @@
+div.listview-panel {
+  position:absolute;
+  top:0px;
+  left:0px;
+  bottom:0px;
+  right:0px;
+}
+div.listview-panel > div.object-list {
+  position:absolute;
+  top:37px;
+  left:0px;
+  bottom:0px;
+  right:0px;
+  overflow-y: scroll;
+}

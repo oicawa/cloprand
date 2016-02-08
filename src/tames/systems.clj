@@ -393,9 +393,7 @@
 (defn init
   []
   (ensure-init-files "lib")
-  (ensure-init-files "core")
   (ensure-init-files "data")
-  (ensure-init-files "controls")
   )
 
 
