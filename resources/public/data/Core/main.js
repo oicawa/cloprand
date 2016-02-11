@@ -14,7 +14,7 @@ require.config({
   paths : {
     jquery : '/lib/jquery-2.1.3',
     json2 : '/lib/json2',
-    jquery_ui : '/lib/jquery-ui-1.11.4/jquery-ui',
+    jquery_ui : '/lib/jquery-ui-1.11.4/jquery-ui.min',
     jsrender: '/lib/jsrender',
     jquery_treetable : '/lib/jquery.treetable',
     app : '/data/Core/app'
