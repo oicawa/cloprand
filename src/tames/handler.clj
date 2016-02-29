@@ -95,12 +95,18 @@
         (response/header "Content-Type" (content-types "html"))))
   
   ;; REST API for CRUD
-  (GET "/api/:class-id" [class-id]
-    (println (str "[GET] /api/:class-id = /api/" class-id))
-    (systems/get-data class-id nil))
-  (GET "/api/:class-id/:object-id" [class-id object-id]
-    (println (format "[GET] /api/:class-id/:object-id = /api/%s/%s" class-id object-id))
-    (systems/get-data class-id object-id))
+  ;(GET "/api/:class-id" [class-id]
+  ;  (println (str "[GET] /api/:class-id = /api/" class-id))
+  ;  (systems/get-data class-id nil))
+  ;(GET "/api/:class-id/:object-id" [class-id object-id]
+  ;  (println (format "[GET] /api/:class-id/:object-id = /api/%s/%s" class-id object-id))
+  ;  (systems/get-data class-id object-id))
+  ;(GET "/api/:resource-path" [resource-path]
+  ;  (println (str "[GET] /api/:resource-path = /api/" resource-path))
+  ;  (systems/get-data resource-path))
+  (GET "/api/*" [& params]
+    (println (format "[GET] /api/* (path=%s)" (params :*)))
+    (systems/get-data (params :*)))
   (POST "/api/:class-id" [class-id & params]	;;; https://github.com/weavejester/compojure/wiki/Destructuring-Syntax
     (println (str "[POST] /api/:class-id = /api/" class-id))
     (systems/post-data class-id (json/read-str (params :value))))

@@ -4,7 +4,8 @@
   (:require [clojure.pprint :as pprint]
             [clojure.java.io :as io]
             [ring.util.response :as response]
-            [clojure.data.json :as json])
+            [clojure.data.json :as json]
+            [clojure.string :as string])
   (:import (java.io File InputStream)
            (java.nio.file Paths Path)
            (java.util.jar JarFile JarEntry)
@@ -108,39 +109,70 @@
         class-dir      (File. class-dir-path)]
     (and (. class-dir exists) (. class-dir isDirectory))))
 
+(defn is-class-only?
+  [resource-path]
+  (let [fields (string/split resource-path #"/")]
+    (= (count fields) 1)))
+
 (defn get-default-file
   [file-name]
   (let [resource-path (get-resource-path (str "tames/defaults/" file-name))]
     resource-path))
 
+(defn get-file-extension
+  [path]
+  (let [start (. path lastIndexOf ".")
+        ext   (if (= start -1)
+                  ""
+                  (. path substring (+ start 1)))]
+    ext))
+
+;(defn get-object
+;  [class-id object-id]
+;  (let [object-path (get-absolute-path (format "data/%s/%s.json" class-id object-id))
+;        object      (with-open [rdr (io/reader object-path)]
+;                      (json/read rdr))]
+;    object))
 (defn get-object
-  [class-id object-id]
-  (let [object-path (get-absolute-path (format "data/%s/%s.json" class-id object-id))
-        object      (with-open [rdr (io/reader object-path)]
-                      (json/read rdr))]
-    object))
+  [path]
+  (with-open [rdr (io/reader (format (if (= (get-file-extension path) "")
+                                         "%s.json"
+                                         "%s")
+                                     path))]
+    (json/read rdr)))
+(defn get-file-contents
+  [path]
+  { "file_path" path "file_contents" (slurp path) })
+
+;(defn get-object-as-json
+;  [class-id object-id]
+;  (json/write-str (get-object class-id object-id)))
 (defn get-object-as-json
-  [class-id object-id]
-  (json/write-str (get-object class-id object-id)))
+  [path]
+  (json/write-str (if (= (get-file-extension path) "")
+                      (get-object path)
+                      (get-file-contents path))))
+      
 
 ;(defn get-objects
 ;  [class-id]
-;  (let [class-dir-path (get-absolute-path (str "data/" class-id))
-;        class-dir      (File. class-dir-path)
-;        object-files   (filter #(not (. %1 isDirectory))
-;                               (. class-dir listFiles))
-;        objects        (map #(with-open [rdr (io/reader (. %1 getAbsolutePath))]
-;                              (json/read rdr))
-;                            object-files)]
+;  (let [class-dir (File. (get-absolute-path (str "data/" class-id)))
+;        files     (filter #(. %1 isFile)
+;                          (file-seq class-dir))
+;        objects   (map #(with-open [rdr (io/reader (. %1 getAbsolutePath))]
+;                         (json/read rdr))
+;                       files)]
 ;    (json/write-str objects)))
 (defn get-objects
-  [class-id]
-  (let [class-dir (File. (get-absolute-path (str "data/" class-id)))
-        files     (filter #(. %1 isFile)
-                          (file-seq class-dir))
-        objects   (map #(with-open [rdr (io/reader (. %1 getAbsolutePath))]
-                         (json/read rdr))
-                       files)]
+  [path]
+  (let [dir     (File. path)
+        objects (map #(cond (. % isDirectory)
+                              {"path" (. %1 getAbsolutePath) "dir" true}
+                            (= (get-file-extension (. %1 getAbsolutePath)) "json")
+                              (get-object (. %1 getAbsolutePath))
+                            :else
+                              {"path" (. %1 getAbsolutePath) "dir" false})
+                     (. dir listFiles))]
     (json/write-str objects)))
 
 (defn get-resource-classes
@@ -216,17 +248,30 @@
       (response/response (json/write-str { "file_name" file-name "file_contents" file_contents }))
       "text/text; charset=utf-8")))
 
+;(defn get-data
+;  [class-id object-id]
+;  (response-with-content-type
+;    (response/response (if (nil? object-id)
+;                           (get-objects class-id)
+;                           (get-object-as-json class-id object-id)))
+;    "text/json; charset=utf-8"))
 (defn get-data
-  [class-id object-id]
-  (response-with-content-type
-    (response/response (if (nil? object-id)
-                           (get-objects class-id)
-                           (get-object-as-json class-id object-id)))
-    "text/json; charset=utf-8"))
+  [resource-path]
+  (let [path       (get-absolute-path (str "data/" resource-path))
+        file       (File. path)]
+    (response-with-content-type
+      (response/response (cond (. file isDirectory)
+                                 (get-objects path)
+                               (is-class-only? resource-path)
+                                 (get-objects path)
+                               :else
+                                 (get-object-as-json path)))
+      "text/json; charset=utf-8")))
 
 (defn get-key-field
   [class-id]
-  (let [klass  (get-object CLASS_ID class-id)
+  (let [path   (get-absolute-path (format "data/%s/%s" CLASS_ID class-id))
+        klass  (get-object path)
         fields (klass "object_fields")]
     (loop [field       (first fields)
            rest-fields (rest fields)]
@@ -295,11 +340,12 @@
   (println "----------")
   (pprint/pprint s-exp-data)
   (println "----------")
-  (let [new-object (create-object class-id s-exp-data)
-        key-field-name (get-key-field-name class-id)]
+  (let [new-object     (create-object class-id s-exp-data)
+        key-field-name (get-key-field-name class-id)
+        path           (get-absolute-path (format "data/%s/%s.json" class-id (new-object key-field-name)))]
     (println "Posted OK.")
     (response-with-content-type
-      (response/response (get-object-as-json class-id (new-object key-field-name)))
+      (response/response (get-object-as-json path))
       "text/json; charset=utf-8")))
 
 (defn post-extension-file
