@@ -342,7 +342,7 @@
   (println "----------")
   (let [new-object     (create-object class-id s-exp-data)
         key-field-name (get-key-field-name class-id)
-        path           (get-absolute-path (format "data/%s/%s.json" class-id (new-object key-field-name)))]
+        path           (get-absolute-path (format "data/%s/%s" class-id (new-object key-field-name)))]
     (println "Posted OK.")
     (response-with-content-type
       (response/response (get-object-as-json path))
