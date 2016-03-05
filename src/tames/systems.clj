@@ -167,11 +167,11 @@
   [path]
   (let [dir     (File. path)
         objects (map #(cond (. % isDirectory)
-                              {"path" (. %1 getAbsolutePath) "dir" true}
+                              {"name" (. %1 getName) "path" (. %1 getAbsolutePath) "dir" true}
                             (= (get-file-extension (. %1 getAbsolutePath)) "json")
                               (get-object (. %1 getAbsolutePath))
                             :else
-                              {"path" (. %1 getAbsolutePath) "dir" false})
+                              {"name" (. %1 getName) "path" (. %1 getAbsolutePath) "dir" false})
                      (. dir listFiles))]
     (json/write-str objects)))
 
