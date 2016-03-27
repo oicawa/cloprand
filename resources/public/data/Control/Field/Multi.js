@@ -11,7 +11,7 @@ define(function (require) {
   
   var TEMPLATE = '' +
 '<div class="toolbar" style="display:none;"></div>' +
-'<div class="grid"></div>' +
+'<div class="records"></div>' +
 '<div class="dialog">' +
 '  <div class="detail"></div>' +
 '</div>';
@@ -68,7 +68,7 @@ define(function (require) {
 
       $.when(
         self._toolbar.init(selector + " > div.toolbar", toolbar),
-        self._grid.init(selector + " > div.grid", columns),
+        self._grid.init(selector + " > div.records", columns, 'height:100px;'),
         self._detail.init(selector + " > div.dialog > div.detail", class_)
         .then(function () {
           self._detail.visible(true);
@@ -81,58 +81,58 @@ define(function (require) {
           self._dialog.show();
         });
         self._toolbar.bind("edit", function(event) {
-          var index = self._grid.selected_index();
-          if (index < 0) {
-            alert("Select item.");
+          var selection = self._grid.selection();
+          if (selection.length == 0)
             return;
-          }
+          var index = selection[0];
           var data = self._grid.data()[index];
           self._detail.data(data);
           self._dialog.show();
         });
         self._toolbar.bind("delete", function(event) {
-          var index = self._grid.selected_index();
-          if (index < 0) {
-            alert("Select item.");
+          var selection = self._grid.selection();
+          if (selection.length == 0)
             return;
-          }
+          var index = selection[0];
           var res = confirm("Delete?");
           if (!res) {
             return;
           }
           self._grid.delete(index);
+          self._grid.refresh();
         });
         self._toolbar.bind("up", function(event) {
-          var index = self._grid.selected_index();
-          if (index < 0) {
-            alert("Select item.");
+          var selection = self._grid.selection();
+          if (selection.length == 0)
             return;
-          }
+          var index = selection[0];
           if (index == 0) {
             return;
           }
           self._grid.move(index, -1);
+          self._grid.refresh();
         });
         self._toolbar.bind("down", function(event) {
-          var index = self._grid.selected_index();
-          if (index < 0) {
-            alert("Select item.");
+          var selection = self._grid.selection();
+          if (selection.length == 0)
             return;
-          }
+          var index = selection[0];
           if (index == self._grid.data().length - 1) {
             return;
           }
           self._grid.move(index, 1);
+          self._grid.refresh();
         });
         self._dialog.bind("OK", function(event) {
           var data = self._detail.data();
           if (self._detail.is_new()) {
-            self._grid.add_item(data);
+            self._grid.add(data);
           } else {
-            var index = self._grid.selected_index();
+            var index = self._grid.selection()[0];
             self._grid.item(index, data);
           }
           self._dialog.close();
+          self._grid.refresh();
         });
         self._dialog.bind("Cancel", function(event) {
           self._dialog.close();
@@ -168,5 +168,9 @@ define(function (require) {
     }
   };
   
+  Multi.prototype.refresh = function(on) {
+    this._grid.refresh();
+  };
+
   return Multi;
 }); 

@@ -13,6 +13,9 @@ define(function (require) {
 
   Field.prototype.update = function(keys) {
   };
+
+  Field.prototype.refresh = function() {
+  };
   
   return Field;
 }); 

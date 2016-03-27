@@ -1,70 +1,38 @@
 define(function (require) {
   require("jquery");
   require("jsrender");
+  require("w2ui");
   var Utils = require("data/Core/Utils");
   var Toolbar = require("data/Control/Toolbar");
   
-  var TEMPLATE = '' +
-'<table class="grid">' +
-'  <thead></thead>' +
-'  <tbody></tbody>' +
-'</table>';
+  var TEMPLATE = '<div class="grid"></div>';
 
-  function regist_event(self, event_name) {
-    self._table.on(event_name, "tbody > tr", function(event) {
-      self._table.find("tr.selected").removeClass("selected");
-      $(this).addClass("selected");
-      var operation = self._operations[event_name];
-      if (!operation) {
-      	return;
-      }
-      operation(event);
-    });
-  }
-
-  function create_control(self, template) {
+  function create_control(self, template, style) {
     self._root.append(template);
-    self._table = self._root.children("table.grid");
+    var grid = self._root.children("div.grid");
+    var uuid = Utils.create_uuid();
+    var name = uuid.replace(/-/g, "_");
+    grid.w2grid({
+      name:name,
+      style:style,
+      columns:self._columns
+    });
+    
+    self._grid = w2ui[name];
+    
+    self._grid.on('click', function(event) {
+      event.onComplete = function() {
+        var operation = self._operations["click"];
+        if (!operation) {
+          return;
+        }
+        //event.target = self;
+        operation(event);
+      };
+    });
 
-    regist_event(self, "click");
-    regist_event(self, "dblclick");
-  }
-
-  function refresh(self) {
-    // header
-    var thead = self._table.find("thead");
-    thead.empty();
-    var thead_buf = [];
-    thead_buf.push("<tr>");
-    for (var i = 0; i < self._columns.length; i++) {
-      var column = self._columns[i];
-      thead_buf.push("<th>", "<div>", column.label, "</div>", "</th>");
-    }
-    thead_buf.push("</tr>");
-    $(thead_buf.join("")).appendTo(thead);
-    if (self._header_visible) {
-      thead.show();
-    } else {
-      thead.hide();
-    }
-
-    // row
-    var tbody = self._table.find("tbody");
-    tbody.empty();
-    if (!self._data) {
-      return;
-    }
-    for (var i = 0; i < self._data.length; i++) {
-      var item = self._data[i];
-      var buf = [];
-      buf.push("<tr>");
-      for (var j = 0; j < self._columns.length; j++) {
-        var column = self._columns[j];
-        buf.push("<td>", "<div>", item[column.name], "</div>", "</td>");
-      }
-      buf.push("</tr>");
-      $(buf.join("")).appendTo(tbody);
-    }
+    //regist_event(self, "click");
+    //regist_event(self, "dblclick");
   }
 
   function assign_item(self, tr, item) {
@@ -76,13 +44,14 @@ define(function (require) {
   }
 
   function Grid() {
+    this._selector = null;
     this._root = null;
     this._data = [];
     this._table = null;
     this._columns = [];
-    this._header_visible = true;
     this._items = [];
     this._operations = {};
+    this._grid = null;
   }
 
   Grid.create_columns = function (klass) {
@@ -90,7 +59,7 @@ define(function (require) {
     if (!klass) {
       return null;
     }
-    var columns = [];
+    var columns = [{ field: 'recid', caption: 'RECID', size: '50px' }];
     var fields = klass.object_fields;
     if (!fields) {
       return columns;
@@ -100,23 +69,23 @@ define(function (require) {
       if (!field.column) {
         continue;
       }
-      columns.push({name: field.name, label: field.label, renderer: null});
+      
+      columns.push({field: field.name, caption: field.label, type: "text", size: "50px", resizable: true, sortable:true});
     }
     return columns;
   }
 
-  Grid.prototype.init = function(selector, columns) {
+  Grid.prototype.init = function(selector, columns, style) {
     var dfd = new $.Deferred;
-
+　　　　this._selector = selector;
     this._root = $(selector);
     this._columns = columns;
-    var self = this;
 
     // CSS
     Utils.add_css("/data/Style/Grid.css");
     
-    // Load template data & Create form tags
-    create_control(this, TEMPLATE);
+    // Create form tags
+    create_control(this, TEMPLATE, style);
     dfd.resolve();
     return dfd.promise();
   };
@@ -125,33 +94,21 @@ define(function (require) {
     this._operations[event_name] = operation;
   };
 
-  Grid.prototype.add_item = function(item) {
+  Grid.prototype.add = function(item) {
     this._data.push(item);
-    refresh(this);
   };
 
-  Grid.prototype.selected_item = function(item) {
-    var selected_tr = this._table.find("tbody > tr.selected");
-    var index = selected_tr.index();
-    if (index < 0) {
-      return;
-    }
-    if (arguments.length == 0) {
-      return this._items[index];
-    }
-    this._items.splice(index, 1, item);
-    assign_item(this, selected_tr, item);
+  Grid.prototype.select = function() {
+    //var args = Array.prototype.slice.call(arguments);
+    this._grid.select.apply(arguments);
   };
-
-  Grid.prototype.selected_index = function(item) {
-    var selected_tr = this._table.find("tbody > tr.selected");
-    var index = selected_tr.index();
-    return index;
+  
+  Grid.prototype.selection = function() {
+    return this._grid.getSelection();
   };
 
   Grid.prototype.delete = function(index) {
     this._data.splice(index, 1);
-    refresh(this);
   };
 
   Grid.prototype.edit = function(on) {
@@ -168,12 +125,10 @@ define(function (require) {
 
   Grid.prototype.columns = function(columns_) {
     this._columns = columns_;
-    refresh(this);
   };
 
   Grid.prototype.header_visible = function(visible) {
-    this._header_visible = visible;
-    refresh(this);
+    console.assert(false, "*NOT* Implemented.");
   };
 
   Grid.prototype.data = function(value) {
@@ -181,8 +136,19 @@ define(function (require) {
       return this._data
     } else {
       this._data = !value ? [] : value;
-      refresh(this);
     }
+  };
+  
+  Grid.prototype.refresh = function() {
+    this._data.map(function(currentValue, index, array) {
+      currentValue.recid = index;
+      return currentValue;
+    }, null);
+    this._grid.clear();
+    this._grid.columns = this._columns;
+    this._grid.records = this._data;
+    this._grid.total = this._data.length;
+    this._grid.refresh();
   };
 
   Grid.prototype.item = function(index, value) {
@@ -190,7 +156,6 @@ define(function (require) {
       return this._data[index];
     } else if (arguments.length == 2) {
       this._data[index] = value;
-      refresh(this);
     } else {
       console.assert(false, "arguments = " + arguments);
     }
@@ -219,8 +184,6 @@ define(function (require) {
       args.push(target);
     }
     Array.prototype.splice.apply(this._data, args);
-    
-    refresh(this);
   };
 
   Grid.prototype.update = function(object_id, item) {
@@ -240,13 +203,11 @@ define(function (require) {
       } else {
         this._data[i] = item;		// update
       }
-      refresh(this);
       return;
     }
     // create
     if (item) {
       this._data.push(item);
-      refresh(this);
     }
   };
 

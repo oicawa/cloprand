@@ -23,9 +23,8 @@ define(function (require) {
   
   MenuView.show_gridview = function (event) {
     // Get event source information
-    var tab = $(event.target).closest("div.tab-panel");
-    var tr = $(event.target).closest("tr");
-    var index = tr.index();
+    var tab = $(event.originalEvent.target).closest("div.tab-panel");
+    var index = event.recid;
     var tab_id = tab.prop("id");
     var ids = tab_id.split("_");
     var prefix = 0 < ids.length ? ids[0] : null;
@@ -66,6 +65,10 @@ define(function (require) {
     });
   };
   
+  MenuView.prototype.refresh = function () {
+    this._grid.refresh();
+  };
+  
   MenuView.prototype.init= function (selector, class_id, object_id) {
     this._selector = selector;
   	this._class_id = class_id;
@@ -87,6 +90,7 @@ define(function (require) {
       .then(function () {
         self._grid.add_operation("click", MenuView.show_gridview);
         self._grid.data(classes);
+        self.refresh();
       });
     });
   };

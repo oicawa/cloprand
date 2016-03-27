@@ -100,9 +100,20 @@ define(function (require) {
   Tabs.prototype.init = function (selector) {
     this._tabs = $(selector);
     // Create tab object by jQuery
-    this._tabs.tabs({active: 1});
+    var self = this;
+    this._tabs.tabs({
+      active: 1,
+      activate: function( event, ui ) {
+        var tab_id = ui.newPanel.selector.substring(1);
+        var view = self._contents[tab_id];
+        if (!view)
+          return;
+        if (view.refresh)
+          view.refresh();
+      }
+    });
     this._contents = {};
-	var self = this;
+    var self = this;
     // Set close button on each tab
     this._tabs.on("click", "span.ui-icon-close", function() {
       var panelId = $(this).closest("li").remove().attr("aria-controls");

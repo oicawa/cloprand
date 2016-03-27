@@ -65,7 +65,7 @@ define(function (require) {
   
   Contents.get_tab_info = function (event) {
     // Get event source information
-    var tab = $(event.target).closest("div.tab-panel");
+    var tab = $(event.originalEvent.target).closest("div.tab-panel");
     var tab_id = tab.prop("id");
     var ids = tab_id.split("_");
     var prefix = 0 < ids.length ? ids[0] : null;

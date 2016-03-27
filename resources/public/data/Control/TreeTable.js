@@ -1,7 +1,7 @@
 define(function (require) {
   require("jquery");
   require("jsrender");
-  require("jquery_treetable");
+  require("w2ui");
   var Utils = require("data/Core/Utils");
   var Toolbar = require("data/Control/Toolbar");
   
@@ -9,7 +9,8 @@ define(function (require) {
 '<table class="treetable">' +
 '  <thead></thead>' +
 '  <tbody></tbody>' +
-'</table>';
+'</table>' +
+'<div class="tree" style="height: 300px; width: 200px;"></div>';
 
   function regist_event(self, event_name) {
     self._table.on(event_name, "tbody > tr", function(event) {
@@ -28,8 +29,8 @@ define(function (require) {
     self._table = self._root.children("table.treetable");
     self._table.treetable();
 
-    regist_event(self, "click");
-    regist_event(self, "dblclick");
+    //regist_event(self, "click");
+    //regist_event(self, "dblclick");
   }
 
   function refresh(self) {
@@ -59,7 +60,7 @@ define(function (require) {
     for (var i = 0; i < self._data.length; i++) {
       var item = self._data[i];
       var buf = [];
-      buf.push("<tr>");
+      buf.push("<tr data-tt-id='" + (i + 1) + "'>");
       for (var j = 0; j < self._columns.length; j++) {
         var column = self._columns[j];
         buf.push("<td>", "<div>", item[column.name], "</div>", "</td>");
@@ -117,7 +118,7 @@ define(function (require) {
 
     // CSS
     Utils.add_css("/lib/jquery.treetable.css");
-    Utils.add_css("/data/Style/TreeTable.css");
+    //Utils.add_css("/data/Style/TreeTable.css");
     
     // Load template data & Create form tags
     create_control(this, TEMPLATE);

@@ -208,6 +208,19 @@ define(function (require) {
     return this._is_new;
   };
 
+  Detail.prototype.refresh = function() {
+    if (!this._class.object_fields) {
+      return;
+    }
+    
+    for (var i = 0; i < this._class.object_fields.length; i++) {
+      var object_field = this._class.object_fields[i];
+      var name = object_field.name;
+      var control = this._controls[name];
+      control.refresh();
+    }
+  };
+
   Detail.prototype.data = function(value) {
     var data = {};
 

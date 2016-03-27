@@ -114,6 +114,9 @@ define(function (require) {
     return this._toolbar;
   };
   
+  FileView.prototype.refresh = function () {
+  };
+  
   FileView.prototype.init = function (selector, class_id, object_id, options) {
     this._class_id = class_id;
     this._object_id = object_id;

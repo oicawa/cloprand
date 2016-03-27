@@ -19,6 +19,13 @@ define(function (require) {
     return path.substr(0, 1) == "/" ? path : "/" + path;
   }
   
+  function create_uuid() {
+    var S4 = function () {
+      return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+    }
+    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+  }
+  
   function send_function(method, url, dataType, data, func_success, func_error) {
     var dfd = new $.Deferred;
     console.assert(url != "/api", url);
@@ -167,6 +174,7 @@ define(function (require) {
       var names = class_.object_fields.filter(function (field) { return !(!field.caption); }).map(function(field){ return field.name; });
       var value = names.map(function(name) { return object_[name]; }).join(" ");
       return value;
-    }
+    },
+    create_uuid : create_uuid
   };
 });

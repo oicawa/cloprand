@@ -72,6 +72,10 @@ define(function (require) {
       this._detail.data(values);
     }
   };
+
+  Complex.prototype.refresh = function() {
+    this._detail.refresh();
+  };
   
   return Complex;
 }); 

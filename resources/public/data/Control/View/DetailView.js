@@ -155,6 +155,10 @@ define(function (require) {
     this._detail.update(keys);
   };
   
+  DetailView.prototype.refresh = function () {
+    this._detail.refresh();
+  };
+  
   DetailView.prototype.init = function (selector, class_id, object_id) {
     this._class_id = class_id;
     this._object_id = object_id;
@@ -219,6 +223,7 @@ define(function (require) {
           self._detail.data(self._object);
         }
         self._toolbar.visible(true);
+        self.refresh();
       });
     });
   };

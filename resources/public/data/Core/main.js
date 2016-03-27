@@ -7,7 +7,7 @@ require.config({
     'json2': { deps: ['jquery'] },
     'jquery_ui': { deps: ['jquery'] },
     'jsrender': { deps: ['jquery'] },
-    'jquery_treetable': { deps: ['jquery', 'jquery_ui'] },
+    'w2ui': { deps: ['jquery', 'jquery_ui'] },
     'app': { deps: ['jquery'] }
   },
   
@@ -16,7 +16,7 @@ require.config({
     json2 : '/lib/json2',
     jquery_ui : '/lib/jquery-ui-1.11.4/jquery-ui.min',
     jsrender: '/lib/jsrender',
-    jquery_treetable : '/lib/jquery.treetable',
+    w2ui : '/lib/w2ui.1.3/w2ui-1.3',
     app : '/data/Core/app'
   }
 });

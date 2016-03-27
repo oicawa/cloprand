@@ -98,6 +98,9 @@ define(function (require) {
     return this._grid;
   };
   
+  GridView.prototype.refresh = function () {
+  };
+  
   GridView.prototype.init = function (selector, class_id, object_id) {
     this._class_id = class_id;
     this._toolbar = new Toolbar();

@@ -6,7 +6,7 @@ define(function (require) {
   var Contents = require("data/Core/Contents");
   var Toolbar = require("data/Control/Toolbar");
   var Detail = require("data/Control/Detail");
-  var TreeTable = require("data/Control/TreeTable");
+  var Grid = require("data/Control/Grid");
 
   var TEMPLATE = '' +
 '<div class="listview-panel">' +
@@ -30,7 +30,7 @@ define(function (require) {
     this._class_id = null;
     this._class = null;
     this._toolbar = null;
-    this._treetable = null;
+    this._grid = null;
   }
   
   ListView.create = function (event) {
@@ -41,13 +41,12 @@ define(function (require) {
 
   ListView.show_detail = function (event) {
     var tab_info = Contents.get_tab_info(event);
-    var tr = $(event.target).closest("tr");
-    var index = tr.index();
+    var index = event.recid;
     
-    // Get clicked data (from 'tab_id'->'view'->'treetable'->'data'-> item of the selected index row.)
+    // Get clicked data (from 'tab_id'->'view'->'grid'->'data'-> item of the selected index row.)
     var view = app.contents().content(tab_info.tab_id);
-    var treetable = view.list();
-    var data = treetable.data()[index];
+    var grid = view.list();
+    var data = grid.data()[index];
     var class_ = view._class;
     
     var fields = class_.object_fields;
@@ -85,7 +84,7 @@ define(function (require) {
   	var self = this;
     Utils.get_data(key.class_id, null, function (data) { objects = data; })
     .then(function () {
-      self._treetable.data(objects);
+      self._grid.data(objects);
     });
   };
   
@@ -95,13 +94,17 @@ define(function (require) {
   };
   
   ListView.prototype.list = function () {
-    return this._treetable;
+    return this._grid;
   };
   
+  ListView.prototype.refresh = function () {
+    this._grid.refresh();
+  };
+
   ListView.prototype.init = function (selector, class_id, object_id) {
     this._class_id = class_id;
     this._toolbar = new Toolbar();
-    this._treetable = new TreeTable();
+    this._grid = new Grid();
     var view = $(selector)
     var classes = null;
     var assist = null;
@@ -116,18 +119,21 @@ define(function (require) {
       view.append(TEMPLATE);
 
       // Toolbar
-      var default_toolbar = {"items": [{"name": "create", "caption": "Create", "description": "Create new data"}]};
+      var default_toolbar = {"items": [
+        {"name": "create", "caption": "Create", "description": "Create new data"}
+      ]};
       var assist_toolbar = !assist ? default_toolbar : (!assist.toolbar ? default_toolbar : assist.toolbar);
       self._toolbar.init(toolbar_selector, assist_toolbar);
       self._toolbar.bind("create", ListView.create);
 
-      // TreeTable
-      var columns = TreeTable.create_columns(self._class);
-      self._treetable.init(list_selector, columns)
+      // Grid
+      var columns = Grid.create_columns(self._class);
+      self._grid.init(list_selector, columns)
       .then(function () {
-        self._treetable.add_operation("click", ListView.show_detail);
-        self._treetable.data(classes);
+        self._grid.add_operation("click", ListView.show_detail);
+        self._grid.data(classes);
         self._toolbar.visible(true);
+        self.refresh();
       });
     });
   };
