@@ -16,7 +16,7 @@ require.config({
     json2 : '/lib/json2',
     jquery_ui : '/lib/jquery-ui-1.11.4/jquery-ui.min',
     jsrender: '/lib/jsrender',
-    w2ui : '/lib/w2ui.1.3/w2ui-1.3',
+    w2ui : '/lib/w2ui-1.4.3/w2ui-1.4.3',
     app : '/data/Core/app'
   }
 });

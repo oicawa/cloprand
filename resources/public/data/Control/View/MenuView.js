@@ -24,7 +24,7 @@ define(function (require) {
   MenuView.show_gridview = function (event) {
     // Get event source information
     var tab = $(event.originalEvent.target).closest("div.tab-panel");
-    var index = event.recid;
+    var index = event.recid - 1;
     var tab_id = tab.prop("id");
     var ids = tab_id.split("_");
     var prefix = 0 < ids.length ? ids[0] : null;

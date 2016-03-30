@@ -99,16 +99,21 @@ define(function (require) {
   };
 
   Grid.prototype.select = function() {
-    //var args = Array.prototype.slice.call(arguments);
-    this._grid.select.apply(arguments);
+    var indexes = Array.prototype.slice.call(arguments);
+    var recids = indexes.map(function(currentValue, index, array) { return currentValue + 1; });
+    this._grid.select.apply(this._grid, recids);
   };
   
   Grid.prototype.selection = function() {
-    return this._grid.getSelection();
+    return this._grid.getSelection().map(function(currentValue, index, array) {
+      return currentValue - 1;
+    });
   };
 
-  Grid.prototype.delete = function(index) {
-    this._data.splice(index, 1);
+  Grid.prototype.delete = function(indexes) {
+    indexes.sort().reverse().forEach(function(currentValue, index, array) {
+      this._data.splice(currentValue, 1);
+    }, this);
   };
 
   Grid.prototype.edit = function(on) {
@@ -141,7 +146,7 @@ define(function (require) {
   
   Grid.prototype.refresh = function() {
     this._data.map(function(currentValue, index, array) {
-      currentValue.recid = index;
+      currentValue.recid = index + 1;
       return currentValue;
     }, null);
     this._grid.clear();

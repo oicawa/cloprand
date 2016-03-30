@@ -41,7 +41,7 @@ define(function (require) {
 
   ListView.show_detail = function (event) {
     var tab_info = Contents.get_tab_info(event);
-    var index = event.recid;
+    var index = event.recid - 1;
     
     // Get clicked data (from 'tab_id'->'view'->'grid'->'data'-> item of the selected index row.)
     var view = app.contents().content(tab_info.tab_id);

@@ -1,6 +1,7 @@
 define(function (require) { 
   require("jquery");
   require("jsrender");
+  require("w2ui");
   var Utils = require("data/Core/Utils");
   var Dialog = require("data/Core/Dialog");
   var Inherits = require("data/Core/Inherits");
@@ -68,7 +69,7 @@ define(function (require) {
 
       $.when(
         self._toolbar.init(selector + " > div.toolbar", toolbar),
-        self._grid.init(selector + " > div.records", columns, 'height:100px;'),
+        self._grid.init(selector + " > div.records", columns, 'height:300px;'),
         self._detail.init(selector + " > div.dialog > div.detail", class_)
         .then(function () {
           self._detail.visible(true);
@@ -82,8 +83,10 @@ define(function (require) {
         });
         self._toolbar.bind("edit", function(event) {
           var selection = self._grid.selection();
-          if (selection.length == 0)
+          if (selection.length != 1) {
+            w2alert("Select one item.");
             return;
+          }
           var index = selection[0];
           var data = self._grid.data()[index];
           self._detail.data(data);
@@ -91,37 +94,47 @@ define(function (require) {
         });
         self._toolbar.bind("delete", function(event) {
           var selection = self._grid.selection();
-          if (selection.length == 0)
-            return;
-          var index = selection[0];
-          var res = confirm("Delete?");
-          if (!res) {
+          if (selection.length == 0) {
+            w2alert("Select one or more items.");
             return;
           }
-          self._grid.delete(index);
-          self._grid.refresh();
+          w2confirm("Delete?")
+          .yes(function () {
+            self._grid.delete(selection);
+            self._grid.refresh();
+          });
         });
         self._toolbar.bind("up", function(event) {
+          var message = "Select one item. (without 1st)";
           var selection = self._grid.selection();
-          if (selection.length == 0)
+          if (selection.length != 1) {
+            w2alert(message);
             return;
+          }
           var index = selection[0];
           if (index == 0) {
+            w2alert(message);
             return;
           }
           self._grid.move(index, -1);
           self._grid.refresh();
+          self._grid.select(index - 1);
         });
         self._toolbar.bind("down", function(event) {
+          var message = "Select one item. (without last)";
           var selection = self._grid.selection();
-          if (selection.length == 0)
+          if (selection.length == 0) {
+            w2alert(message);
             return;
+          }
           var index = selection[0];
           if (index == self._grid.data().length - 1) {
+            w2alert(message);
             return;
           }
           self._grid.move(index, 1);
           self._grid.refresh();
+          self._grid.select(index + 1);
         });
         self._dialog.bind("OK", function(event) {
           var data = self._detail.data();
