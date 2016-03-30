@@ -46,7 +46,7 @@ define(function (require) {
     // Get clicked data (from 'tab_id'->'view'->'grid'->'data'-> item of the selected index row.)
     var view = app.contents().content(tab_info.tab_id);
     var grid = view.list();
-    var data = grid.data()[index];
+    var data = grid.get(event.recid);
     var class_ = view._class;
     
     var fields = class_.object_fields;

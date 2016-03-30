@@ -98,6 +98,10 @@ define(function (require) {
     this._data.push(item);
   };
 
+  Grid.prototype.get = function(recid) {
+    return this._grid.get(recid);
+  };
+
   Grid.prototype.select = function() {
     var indexes = Array.prototype.slice.call(arguments);
     var recids = indexes.map(function(currentValue, index, array) { return currentValue + 1; });
