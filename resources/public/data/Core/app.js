@@ -1,29 +1,30 @@
 define(function (require) {
   require("jquery");
   require("json2");
-  require("jquery_ui");
-  require("jsrender");
+  require("w2ui");
   var Utils = require("data/Core/Utils");
+  var Uuid = require("data/Core/Uuid");
+  var Connector = require("data/Core/Connector");
   var Contents = require("data/Core/Contents");
 
-  var TEMPLATE = '' +
-'<div id="root-panel">' +
-'  <div id="header-panel" style="height: 30px;">' +
-'    <object type="image/svg+xml" data="/data/Core/tames.svg" />' +
-'    <span id="title" style="font-size:20px; vertical-align: top;"></span>' +
-'    <span style="display:inline-block; width:30px;"></span>' +
-'    <span id="sub-title"></span>' +
-'    <form method="get" action="/logout" style="display:inline-block;position:absolute; right:0px;">' +
-'      <span id="user_name"></span>' +
-'      <input type="submit" value="Logout" />' +
-'    </form>' +
-'  </div>' +
-'  <div id="contents-panel"></div>' +
+  var LAYOUT_TEMPLATE = '<div id="layout"></div>';
+  var TOP_TEMPLATE = '' +
+'<div id="header-panel" style="height: 30px;">' +
+'  <object type="image/svg+xml" data="/data/Core/tames.svg" />' +
+'  <span id="title" style="font-size:20px; vertical-align: top;"></span>' +
+'  <span style="display:inline-block; width:30px;"></span>' +
+'  <span id="sub-title"></span>' +
+'  <form method="get" action="/logout" style="display:inline-block;position:absolute; right:0px;">' +
+'    <span id="user_name"></span>' +
+'    <input type="submit" value="Logout" />' +
+'  </form>' +
 '</div>';
+  var LEFT_TEMPLATE = '<div id="left-panel"></div>';
+  var MAIN_TEMPLATE = '<div id="contents-panel"></div>';
   
   function App() {
+    this._layout = null;
     this._title = null;
-    this._sub_title = null;
     this._contents = null;
     this._user_name = null;
     this._config = null;
@@ -38,10 +39,6 @@ define(function (require) {
     return Utils.property_value(this, this._title, "text", arguments);
   };
   
-  App.prototype.sub_title = function() {
-    return Utils.property_value(this, this._sub_title, "text", arguments);
-  };
-  
   App.prototype.contents = function() {
     return this._contents;
   };
@@ -53,30 +50,37 @@ define(function (require) {
   App.prototype.init = function() {
     var config = null;
     var session = null;
-    var self = this;
     
-    Utils.get_session("user_name", function(data){ session = data; }, null)
-    .fail(function(response, status) {
-    	console.log(status);
-    	//location.href = "/index.html";
-    })
-    .then(function() {
-      $.when(
-        Utils.get_data("System", "config", function(data){ config = data; })
-      ).always(function() {
-        $("body").append(TEMPLATE);
-
-        self._title = $("span#title");
-        self._sub_title = $("span#sub-title");
-        self._user_name = $("span#user_name");
-        self._config = config;
-
-        self.title(config.system_name);
-        self._user_name.text(session.user_name);
-
-        self._contents = new Contents();
-        self._contents.init("#contents-panel");
+    Utils.load_css("data/Core/app.css");
+    
+    var self = this;
+    $.when(
+      Connector.session("user_name", function(data){ session = data; }, null),
+      Connector.crud.read("/api/System/config", "json", function(data){ config = data; })
+    ).always(function() {
+      $("body").append(LAYOUT_TEMPLATE);
+      
+      // Create Layout Panel
+      var layout_name = Uuid.version4();
+      var pstyle='border: 3px solid #dfdfdf; padding: 5px;';
+      $("#layout").w2layout({
+        name:layout_name,
+        panels:[
+          {type:'top', size:42, resizable:false, style:pstyle, content:TOP_TEMPLATE},
+          {type:'left',size:200,resizable:true,hidden:true,style:pstyle,content:LEFT_TEMPLATE},
+          {type:'main',style:pstyle,content:MAIN_TEMPLATE}
+        ]
       });
+      self._layout= w2ui[layout_name];
+      self._layout.refresh();
+      
+      self._title = $("span#title");
+      
+      self._contents = new Contents();
+      self._contents.init("#contents-panel");
+      
+      self._config = config;
+      self.title(config.system_name);
     });
   };
 

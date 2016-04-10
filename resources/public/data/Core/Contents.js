@@ -1,11 +1,11 @@
 define(function (require) {
   require("jquery");
-  require("jsrender");
   var Utils = require("data/Core/Utils");
-  var Toolbar = require("data/Control/Toolbar");
-  var Detail = require("data/Control/Detail");
-  var Grid = require("data/Control/Grid");
-  var Tabs = require("data/Control/Tabs");
+  var Connector = require("data/Core/Connector");
+  //var Toolbar = require("data/Control/Toolbar");
+  //var Detail = require("data/Control/Detail");
+  //var Grid = require("data/Control/Grid");
+  //var Tabs = require("data/Control/Tabs");
 
   var TEMPLATE = '' +
 '<div id="contents-frame">' +
@@ -140,22 +140,22 @@ define(function (require) {
     var template = null;
     var assist = null;
     var self = this;
-    Utils.add_css("/data/Core/Contents.css");
+    Utils.load_css("/data/Core/Contents.css");
     $.when(
-      Utils.get_file(null, "data/Core/Contents.json", "json", function (data) { assist = data; })
+      Connector.crud.read("api/Core/Contents", "json", function (data) { assist = data; })
     ).always(function() {
       contents.append(TEMPLATE);
       
       // Tabs
-      self._tabs = new Tabs();
-      self._tabs.init("#contents-tabs");
-      for (var i = 0; i < assist.tabs.length; i++) {
-        var tab = assist.tabs[i];
-        var tab_id = Tabs.create_tab_id(tab.id);
-        var selector = create_content_selector(tab_id);
-        self._tabs.add(tab_id, tab.label, true, false);
-        create_view(self, tab_id, selector, tab.view, tab.class_id, tab.object_id);
-      }
+      //self._tabs = new Tabs();
+      //self._tabs.init("#contents-tabs");
+      //for (var i = 0; i < assist.tabs.length; i++) {
+      //  var tab = assist.tabs[i];
+      //  var tab_id = Tabs.create_tab_id(tab.id);
+      //  var selector = create_content_selector(tab_id);
+      //  self._tabs.add(tab_id, tab.label, true, false);
+      //  create_view(self, tab_id, selector, tab.view, tab.class_id, tab.object_id);
+      //}
     });
   };
   
