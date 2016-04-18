@@ -1,6 +1,12 @@
 define(function (require) {
   require("jquery");
   var Utils = require("data/Core/Utils");
+  var Uuid = require("data/Core/Uuid");
+  
+  var FRAME_TEMPLATE = ''+
+    '<div class="tabs-header"></div>' +
+    '<div class="tabs-body"></div>';
+  var BODY_TEMPLATE = '<div class="tab-panel"></div>';
   
   function index(self, tab_id) {
     return self._tabs.find("ul > li[aria-controls='" + tab_id + "']").index();
@@ -12,7 +18,9 @@ define(function (require) {
   }
   
   function Tabs () {
+    this._root = null;
     this._tabs = null;
+    this._body = null;
     this._contents = null;
   }
 
@@ -24,19 +32,24 @@ define(function (require) {
   }
 
   Tabs.prototype.add = function (tab_id, label, set_active, is_closable) {
-    var closable = "<li class='tab-label'><a href='#{href}'>#{label}</a><span class='ui-icon ui-icon-close'>Remove Tab</span></li>";
-    var unclosable = "<li class='tab-label'><a href='#{href}'>#{label}</a></li>";
-    var tabTemplate = !is_closable ? unclosable : closable;
-    var li = $(tabTemplate.replace( /#\{href\}/g, "#" + tab_id ).replace( /#\{label\}/g, label ) );
-    this._tabs.find(".ui-tabs-nav").append(li);
-    this._tabs.append("<div id='" + tab_id + "' class='tab-panel'><div class='tab-content-frame'><div class='tab-content-panel'></div></div></div>");
-    this._tabs.tabs("refresh");
+    //var closable = "<li class='tab-label'><a href='#{href}'>#{label}</a><span class='ui-icon ui-icon-close'>Remove Tab</span></li>";
+    //var unclosable = "<li class='tab-label'><a href='#{href}'>#{label}</a></li>";
+    //var tabTemplate = !is_closable ? unclosable : closable;
+    //var li = $(tabTemplate.replace( /#\{href\}/g, "#" + tab_id ).replace( /#\{label\}/g, label ) );
+    //this._tabs.find(".ui-tabs-nav").append(li);
+    //this._tabs.append("<div id='" + tab_id + "' class='tab-panel'><div class='tab-content-frame'><div class='tab-content-panel'></div></div></div>");
+    //this._tabs.tabs("refresh");
 
-    if (!set_active) {
-      return;
-    }
-    var i = index(this, tab_id);
-    active(this, i);
+    //if (!set_active) {
+    //  return;
+    //}
+    //var i = index(this, tab_id);
+    //active(this, i);
+    
+    this._tabs.add({id: tab_id, caption: label});
+    this._body.append(BODY_TEMPLATE);
+    var tab_contents = this._body.find(".tab-panel:last-child");
+    tab_contents.attr("id", tab_id);
   };
 
   Tabs.prototype.content = function (tab_id, content) {
@@ -98,28 +111,43 @@ define(function (require) {
   };
 
   Tabs.prototype.init = function (selector) {
-    this._tabs = $(selector);
-    // Create tab object by jQuery
-    var self = this;
-    this._tabs.tabs({
-      active: 1,
-      activate: function( event, ui ) {
-        var tab_id = ui.newPanel.selector.substring(1);
-        var view = self._contents[tab_id];
-        if (!view)
-          return;
-        if (view.refresh)
-          view.refresh();
-      }
-    });
+    //this._tabs = $(selector);
+    //// Create tab object by jQuery
+    //var self = this;
+    //this._tabs.tabs({
+    //  active: 1,
+    //  activate: function( event, ui ) {
+    //    var tab_id = ui.newPanel.selector.substring(1);
+    //    var view = self._contents[tab_id];
+    //    if (!view)
+    //      return;
+    //    if (view.refresh)
+    //      view.refresh();
+    //  }
+    //});
     this._contents = {};
-    var self = this;
-    // Set close button on each tab
-    this._tabs.on("click", "span.ui-icon-close", function() {
-      var panelId = $(this).closest("li").remove().attr("aria-controls");
-      $("#" + panelId ).remove();
-      self._tabs.tabs("refresh");
+    //var self = this;
+    //// Set close button on each tab
+    //this._tabs.on("click", "span.ui-icon-close", function() {
+    //  var panelId = $(this).closest("li").remove().attr("aria-controls");
+    //  $("#" + panelId ).remove();
+    //  self._tabs.tabs("refresh");
+    //});
+    
+    this._root = $(selector);
+    this._root.append(FRAME_TEMPLATE);
+    
+    var header_id = Uuid.version4();
+    var header = this._root.find('.tabs-header');
+    header.attr("id", header_id);
+    
+    var tabs_name = Uuid.version4();
+    var tabs = header.w2tabs({
+      name: tabs_name,
     });
+    this._tabs = w2ui[tabs_name];
+    
+    this._body = this._root.find('.tabs-body');
   };
   
   return Tabs;

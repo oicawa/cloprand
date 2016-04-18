@@ -5,14 +5,11 @@ define(function (require) {
   //var Toolbar = require("data/Control/Toolbar");
   //var Detail = require("data/Control/Detail");
   //var Grid = require("data/Control/Grid");
-  //var Tabs = require("data/Control/Tabs");
+  var Tabs = require("data/Control/Tabs");
 
   var TEMPLATE = '' +
 '<div id="contents-frame">' +
-'  <div id="contents-tabs">' +
-'    <ul>' +
-'    </ul>' +
-'  </div>' +
+'  <div id="contents-tabs"></div>' +
 '</div>';
 
 
@@ -147,15 +144,15 @@ define(function (require) {
       contents.append(TEMPLATE);
       
       // Tabs
-      //self._tabs = new Tabs();
-      //self._tabs.init("#contents-tabs");
-      //for (var i = 0; i < assist.tabs.length; i++) {
-      //  var tab = assist.tabs[i];
-      //  var tab_id = Tabs.create_tab_id(tab.id);
-      //  var selector = create_content_selector(tab_id);
-      //  self._tabs.add(tab_id, tab.label, true, false);
-      //  create_view(self, tab_id, selector, tab.view, tab.class_id, tab.object_id);
-      //}
+      self._tabs = new Tabs();
+      self._tabs.init("#contents-tabs");
+      for (var i = 0; i < assist.tabs.length; i++) {
+        var tab = assist.tabs[i];
+        var tab_id = Tabs.create_tab_id(tab.id);
+        var selector = create_content_selector(tab_id);
+        self._tabs.add(tab_id, tab.label, true, false);
+        //create_view(self, tab_id, selector, tab.view, tab.class_id, tab.object_id);
+      }
     });
   };
   

@@ -10,7 +10,7 @@
 }
 #contents-panel {
   position:absolute;
-  top:30px;	/* same to #header-panel{height} value. */
+  top:0px;
   left:0px;
   bottom:0px;
   right:0px;
@@ -30,10 +30,17 @@
   bottom: 0px;
   right: 0px;
 }
+.tabs-body {
+  position: absolute;
+  top: 30px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+}
 
 .tab-panel {
   position: absolute;
-  top: 50px;
+  top: 0px;
   left: 0px;
   bottom: 0px;
   right: 0px;
