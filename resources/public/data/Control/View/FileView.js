@@ -1,6 +1,5 @@
 define(function (require) {
   require("jquery");
-  require("jsrender");
   var app = require("app");
   var Utils = require("data/Core/Utils");
   var Contents = require("data/Core/Contents");
@@ -155,7 +154,7 @@ define(function (require) {
       });
     }
 
-    Utils.add_css("/data/Style/View/FileView.css");
+    Utils.load_css("/data/Style/View/FileView.css");
     $.when(
       get_extension_data(self, class_id, object_id, options.file_name)
     ).then(function() {

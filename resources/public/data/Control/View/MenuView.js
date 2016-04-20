@@ -1,12 +1,12 @@
 define(function (require) {
   require("jquery");
-  require("jsrender");
   var app = require("app");
   var Utils = require("data/Core/Utils");
-  var Toolbar = require("data/Control/Toolbar");
-  var Detail = require("data/Control/Detail");
+  var Connector = require("data/Core/Connector");
+  //var Toolbar = require("data/Control/Toolbar");
+  //var Detail = require("data/Control/Detail");
   var Grid = require("data/Control/Grid");
-  var Tabs = require("data/Control/Tabs");
+  //var Tabs = require("data/Control/Tabs");
   
   var TEMPLATE = '' +
 '<div class="menuview-panel">' +
@@ -15,9 +15,9 @@ define(function (require) {
 '</div>';
 
   function MenuView() {
-  	this._selector = null;
-  	this._class_id = null;
-  	this._object_id = null;
+    this._selector = null;
+    this._class_id = null;
+    this._object_id = null;
     this._grid = null;
   }
   
@@ -72,18 +72,18 @@ define(function (require) {
   
   MenuView.prototype.init= function (selector, class_id, object_id) {
     this._selector = selector;
-  	this._class_id = class_id;
-  	this._object_id = object_id;
-  	this._grid = new Grid();
+    this._class_id = class_id;
+    this._object_id = object_id;
+    this._grid = new Grid();
     var view = $(selector)
     var class_ = null;
     var classes = null;
     var self = this;
     var grid_selector = selector + "> div.menuview-panel > div.menu-list";
-    Utils.add_css("/data/Style/View/MenuView.css");
+    Utils.load_css("/data/Style/View/MenuView.css");
     $.when(
-      Utils.get_data(Utils.CLASS_ID, null, function (data) { classes = data; })
-      ,Utils.get_data(Utils.CLASS_ID, Utils.CLASS_ID, function (data) { class_ = data; })
+      Connector.crud.read("api/" + Utils.CLASS_ID, "json", function (data) { classes = data; }),
+      Connector.crud.read("api/" + Utils.CLASS_ID + "/" +  Utils.CLASS_ID, "json", function (data) { class_ = data; })
     ).always(function() {
       view.append(TEMPLATE);
       var columns = Grid.create_columns(class_);

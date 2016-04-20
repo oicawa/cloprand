@@ -1,25 +1,10 @@
 define(function (require) { 
   require("jquery");
-  require("jsrender");
-  //require("JSON");
   var Utils = require("data/Core/Utils");
   var Cache = require("data/Core/Cache");
   var Inherits = require("data/Core/Inherits");
 
-  var TEMPLATE = 
-'<table class="detail-fields">' +
-'  <thead>' +
-'    <tr><th></th><th></th></tr>' +
-'  </thead>' +
-'  <tbody>' +
-'    {{for object_fields}}' +
-'    <tr>' +
-'      <td class="caption">{{:label}}</td>' +
-'      <td class="value"><div class="{{:name}}"></div></td>' +
-'    </tr>' +
-'    {{/for}}' +
-'  </tbody>' +
-'</table>';
+  var TEMPLATE = '<div></div>';
 
   function get_control_assist(self, field) {
     if (!self._custom_assist) {
@@ -156,17 +141,24 @@ define(function (require) {
     var self = this;
     var selector_buf = selector;
 
-    Utils.add_css("/data/Style/Detail.css");
+    Utils.load_css("/data/Style/Detail.css");
     
-    // Create form tags
-    self._root_template = $.templates(TEMPLATE);
-    var root_html = self._root_template.render(self._class);
-    self._root.append(root_html);
-    $.when(
-      create_form(self, selector_buf)
-    ).always(function() {
-      dfd.resolve();
+    this._root.append(TEMPLATE);
+    var form = this._root.find("div");
+    form.w2form({ 
+      name   : 'myForm',
+      fields : [
+        { name: 'first_name', type: 'text', required: true },
+        { name: 'last_name',  type: 'text', required: true },
+        { name: 'comments',   type: 'text'}
+      ],
+      //actions: {
+      //  reset: function () { console.log("reset"); },
+      //  save: function () { console.log("save"); }
+      //}
     });
+    
+    dfd.resolve();
     return dfd.promise();
   };
 
@@ -184,7 +176,7 @@ define(function (require) {
     for (var i = 0; i < this._class.object_fields.length; i++) {
       var field = this._class.object_fields[i];
       var name = field.name;
-      this._controls[name].edit((!this._is_new && !(!field.key)) ? false : on);
+      //this._controls[name].edit((!this._is_new && !(!field.key)) ? false : on);
     }
   };
 
@@ -192,7 +184,7 @@ define(function (require) {
     for (var i = 0; i < this._class.object_fields.length; i++) {
       var object_field = this._class.object_fields[i];
       var name = object_field.name;
-      this._controls[name].commit();
+      //this._controls[name].commit();
     }
   };
 
@@ -200,7 +192,7 @@ define(function (require) {
     for (var i = 0; i < this._class.object_fields.length; i++) {
       var object_field = this._class.object_fields[i];
       var name = object_field.name;
-      this._controls[name].restore();
+      //this._controls[name].restore();
     }
   };
 
@@ -216,8 +208,8 @@ define(function (require) {
     for (var i = 0; i < this._class.object_fields.length; i++) {
       var object_field = this._class.object_fields[i];
       var name = object_field.name;
-      var control = this._controls[name];
-      control.refresh();
+      //var control = this._controls[name];
+      //control.refresh();
     }
   };
 
@@ -229,12 +221,12 @@ define(function (require) {
       for (var i = 0; i < this._class.object_fields.length; i++) {
         var object_field = this._class.object_fields[i];
         var name = object_field.name;
-        var control = this._controls[name];
-        if (arguments.length == 0) {
-          data[name] = control.data();
-        } else {
-          control.data(value ? value[name] : null);
-        }
+        //var control = this._controls[name];
+        //if (arguments.length == 0) {
+        //  data[name] = control.data();
+        //} else {
+        //  control.data(value ? value[name] : null);
+        //}
       }
     }
     

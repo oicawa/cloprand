@@ -1,13 +1,14 @@
 define(function (require) {
   require("jquery");
-  require("jsrender");
   var app = require("app");
   var Utils = require("data/Core/Utils");
+  var Uuid = require("data/Core/Uuid");
+  var Connector = require("data/Core/Connector");
   var Contents = require("data/Core/Contents");
-  var Toolbar = require("data/Control/Toolbar");
+  //var Toolbar = require("data/Control/Toolbar");
   var Detail = require("data/Control/Detail");
-  var Grid = require("data/Control/Grid");
-  var Tabs = require("data/Control/Tabs");
+  //var Grid = require("data/Control/Grid");
+  //var Tabs = require("data/Control/Tabs");
 
   var TEMPLATE = '' +
 '<div class="detailview-panel">' +
@@ -162,7 +163,7 @@ define(function (require) {
   DetailView.prototype.init = function (selector, class_id, object_id) {
     this._class_id = class_id;
     this._object_id = object_id;
-    this._toolbar = new Toolbar();
+    //this._toolbar = new Toolbar();
     this._detail = new Detail();
     var view = $(selector);
     var class_ = null;
@@ -183,22 +184,22 @@ define(function (require) {
     var detail_selector = selector + "> div.detailview-panel > div.object-detail";
     
     function get_object_data(self, class_id_, object_id_) {
-      if (object_id_ == Utils.NULL_UUID) {
-        console.log("Didn't call Utils.get_data method to get object data.");
+      if (object_id_ == Uuid.NULL) {
+        console.log("Didn't call Connector.crud.read method to get object data.");
         var dfd = new $.Deferred;
         dfd.resolve();
         return dfd.promise();
       }
 
-      return Utils.get_data(class_id_, object_id_, function (data) {
+      return Connector.crud.read("api/" + class_id_ + "/" + object_id_, "json", function (data) {
         self._object = data;
       });
     }
-	Utils.add_css("/data/Style/View/DetailView.css");
+    Utils.load_css("/data/Style/View/DetailView.css");
     $.when(
-      Utils.get_data(Utils.CLASS_ID, class_id, function (data) { class_ = data; }),
-      Utils.get_file(class_id, "DetailView.json", "json", function (data) { basic_assist = data; }, function(data) { return true; }),
-      Utils.get_file(class_id, "CustomAssist.json", "json", function (data) { custom_assist = data; }, function(data) { return true; }),
+      Connector.crud.read("api/" + Utils.CLASS_ID + "/" + class_id, "json", function (data) { class_ = data; }),
+      //Utils.get_file(class_id, "DetailView.json", "json", function (data) { basic_assist = data; }, function(data) { return true; }),
+      //Utils.get_file(class_id, "CustomAssist.json", "json", function (data) { custom_assist = data; }, function(data) { return true; }),
       get_object_data(self, class_id, object_id)
     ).then(function() {
       view.append(TEMPLATE);
@@ -206,23 +207,23 @@ define(function (require) {
       self._class = class_;
 
       $.when(
-        self._toolbar.init(toolbar_selector, default_toolbar),
+        //self._toolbar.init(toolbar_selector, default_toolbar),
         self._detail.init(detail_selector, self._class, basic_assist, custom_assist)
       ).then(function() {
-        self._toolbar.bind("edit", DetailView.edit);
-        self._toolbar.bind("delete", DetailView.delete);
-        self._toolbar.bind("save", DetailView.save);
-        self._toolbar.bind("cancel", DetailView.cancel);
+        //self._toolbar.bind("edit", DetailView.edit);
+        //self._toolbar.bind("delete", DetailView.delete);
+        //self._toolbar.bind("save", DetailView.save);
+        //self._toolbar.bind("cancel", DetailView.cancel);
         self._detail.visible(true);
         if (self._object_id == Utils.NULL_UUID) {
-          edit_toolbar(self._toolbar, true);
+          //edit_toolbar(self._toolbar, true);
           self._detail.edit(true);
         } else {
-          edit_toolbar(self._toolbar, false);
+          //edit_toolbar(self._toolbar, false);
           self._detail.edit(false);
           self._detail.data(self._object);
         }
-        self._toolbar.visible(true);
+        //self._toolbar.visible(true);
         self.refresh();
       });
     });

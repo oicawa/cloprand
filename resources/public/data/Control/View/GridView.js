@@ -1,6 +1,5 @@
 define(function (require) {
   require("jquery");
-  require("jsrender");
   var app = require("app");
   var Utils = require("data/Core/Utils");
   var Contents = require("data/Core/Contents");
@@ -111,7 +110,7 @@ define(function (require) {
     var self = this;
     var toolbar_selector = selector + "> div.gridview-panel > div.object-operations";
     var grid_selector = selector + "> div.gridview-panel > div.object-list";
-    Utils.add_css("/data/Style/View/GridView.css");
+    Utils.load_css("/data/Style/View/GridView.css");
     $.when(
       Utils.get_data(class_id, null, function (data) { classes = data; }),
       Utils.get_data(Utils.CLASS_ID, class_id, function (data) { self._class = data; })

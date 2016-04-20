@@ -97,16 +97,18 @@ define(function (require) {
   Contents.prototype.show_tab = function (label, options, view_name, class_id, object_id) {
     console.assert(typeof view_name == "string" && 1 <= view_name.length);
     var params = Array.prototype.slice.call(arguments, 2);
-    console.log(params);
     var tab_id = Tabs.create_tab_id(params);
-    var exists = this._tabs.show(tab_id);
-    if (exists) {
+    var tab = this._tabs.get(tab_id);
+    if (tab) {
+      this._tabs.select(tab_id);
       return;
     }
     this._tabs.add(tab_id, label, true, true);
 
     var selector = create_content_selector(tab_id);
     create_view(this, tab_id, selector, view_name, class_id, object_id, options);
+    
+    this._tabs.select(tab_id);
   };
   
   Contents.prototype.content = function (tab_id) {
@@ -151,7 +153,8 @@ define(function (require) {
         var tab_id = Tabs.create_tab_id(tab.id);
         var selector = create_content_selector(tab_id);
         self._tabs.add(tab_id, tab.label, true, false);
-        //create_view(self, tab_id, selector, tab.view, tab.class_id, tab.object_id);
+        create_view(self, tab_id, selector, tab.view, tab.class_id, tab.object_id);
+        self._tabs.select(tab_id);
       }
     });
   };

@@ -1,6 +1,5 @@
 define(function (require) { 
   require("jquery");
-  require("jsrender");
   var Utils = require("data/Core/Utils");
   var Inherits = require("data/Core/Inherits");
   var Detail = require("data/Control/Detail");

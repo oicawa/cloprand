@@ -6,12 +6,13 @@ define(function (require) {
   var FRAME_TEMPLATE = ''+
     '<div class="tabs-header"></div>' +
     '<div class="tabs-body"></div>';
-  var BODY_TEMPLATE = '<div class="tab-panel"></div>';
+  var BODY_TEMPLATE = ''+
+    '<div class="tab-panel">' +
+    '  <div class="tab-content-frame">' +
+    '    <div class="tab-content-panel"></div>' +
+    '  </div>' +
+    '</div>';
   
-  function index(self, tab_id) {
-    return self._tabs.find("ul > li[aria-controls='" + tab_id + "']").index();
-  }
-
   function active(self, index) {
     // Activate the created new tab
     self._tabs.tabs({ active : index});
@@ -25,9 +26,9 @@ define(function (require) {
   }
 
   Tabs.create_tab_id = function(parts) {
-  	var copied = parts.concat();
-  	while(!copied[copied.length - 1])
-  	  copied.pop();
+    var copied = parts.concat();
+    while(!copied[copied.length - 1])
+      copied.pop();
     return copied.join("_").replace(/\//g, "-");
   }
 
@@ -46,7 +47,7 @@ define(function (require) {
     //var i = index(this, tab_id);
     //active(this, i);
     
-    this._tabs.add({id: tab_id, caption: label});
+    this._tabs.add({id: tab_id, caption: label, closable: is_closable});
     this._body.append(BODY_TEMPLATE);
     var tab_contents = this._body.find(".tab-panel:last-child");
     tab_contents.attr("id", tab_id);
@@ -62,26 +63,20 @@ define(function (require) {
     }
   };
 
-  Tabs.prototype.show = function (tab_id) {
-    var i = index(this, tab_id);
-    if (i < 0) {
-      return false;
-    }
-    active(this, i);
-    return true;
+  Tabs.prototype.get = function (tab_id) {
+    return this._tabs.get(tab_id);
+  };
+
+  Tabs.prototype.select = function (tab_id) {
+    var tab = this._tabs.get(tab_id);
+    console.log(tab);
+    this._body.children(".tab-panel").css("display", "none");
+    this._tabs.select(tab_id);
+    this._body.find("#" + tab_id).css("display", "block");
   };
 
   Tabs.prototype.remove = function (tab_id) {
-    var i = index(this, tab_id);
-    if (i < 0) {
-      return false;
-    }
-
-    this._tabs.find("li[tabIndex=" + i + "]").remove();
-    this._tabs.find("div#" + tab_id).remove();
-    delete this._contents[tab_id];
-    this._tabs.tabs("refresh");
-    return true;
+    this._body.find("#" + tab_id).remove();
   };
 
   Tabs.prototype.label = function (tab_id, value) {
@@ -141,9 +136,19 @@ define(function (require) {
     var header = this._root.find('.tabs-header');
     header.attr("id", header_id);
     
+    var self = this;
+    
     var tabs_name = Uuid.version4();
     var tabs = header.w2tabs({
       name: tabs_name,
+      onClick: function(event) {
+        self.select(event.tab.id);
+      },
+      onClose: function (event) {
+        event.onComplete = function(completeEvent) {
+          self.remove(event.object.id);
+        }
+      }
     });
     this._tabs = w2ui[tabs_name];
     

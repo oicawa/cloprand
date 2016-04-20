@@ -1,12 +1,11 @@
 define(function (require) { 
   require("jquery");
-  require("jsrender");
   var Utils = require("data/Core/Utils");
   var Inherits = require("data/Core/Inherits");
   var Field = require("data/Control/Field/Field");
   
   var TEMPLATE = '' +
-'<input type="text" name="{{:name}}" value=""/>' +
+'<input type="text" value=""/>' +
 '<div></div>';
   
   function Text() {
@@ -25,12 +24,12 @@ define(function (require) {
     }
 
     // Create form tags
-    var template = $.templates(TEMPLATE);
     var self = this;
-    var html = template.render(field);
-    root.append(html);
+    root.append(TEMPLATE);
     self._editor = root.find("input");
     self._viewer = root.find("div");
+    
+    self._editor.attr("name", field.name);
     
     dfd.resolve();
     return dfd.promise();

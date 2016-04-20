@@ -1,11 +1,11 @@
 define(function (require) {
   require("jquery");
-  require("jsrender");
   var app = require("app");
   var Utils = require("data/Core/Utils");
+  var Connector = require("data/Core/Connector");
   var Contents = require("data/Core/Contents");
-  var Toolbar = require("data/Control/Toolbar");
-  var Detail = require("data/Control/Detail");
+  //var Toolbar = require("data/Control/Toolbar");
+  //var Detail = require("data/Control/Detail");
   var Grid = require("data/Control/Grid");
 
   var TEMPLATE = '' +
@@ -82,7 +82,7 @@ define(function (require) {
 
   	var objects = null;
   	var self = this;
-    Utils.get_data(key.class_id, null, function (data) { objects = data; })
+    Connector.crud.read("api/" + key.class_id, "json", function (data) { objects = data; })
     .then(function () {
       self._grid.data(objects);
     });
@@ -103,7 +103,7 @@ define(function (require) {
 
   ListView.prototype.init = function (selector, class_id, object_id) {
     this._class_id = class_id;
-    this._toolbar = new Toolbar();
+    //this._toolbar = new Toolbar();
     this._grid = new Grid();
     var view = $(selector)
     var classes = null;
@@ -111,20 +111,20 @@ define(function (require) {
     var self = this;
     var toolbar_selector = selector + "> div.listview-panel > div.object-operations";
     var list_selector = selector + "> div.listview-panel > div.object-list";
-    Utils.add_css("/data/Style/View/ListView.css");
+    Utils.load_css("/data/Style/View/ListView.css");
     $.when(
-      Utils.get_data(class_id, null, function (data) { classes = data; }),
-      Utils.get_data(Utils.CLASS_ID, class_id, function (data) { self._class = data; })
+      Connector.crud.read("api/" + class_id, "json", function (data) { classes = data; }),
+      Connector.crud.read("api/" + Utils.CLASS_ID + "/" + class_id, "json", function (data) { self._class = data; })
     ).then(function() {
       view.append(TEMPLATE);
 
       // Toolbar
-      var default_toolbar = {"items": [
-        {"name": "create", "caption": "Create", "description": "Create new data"}
-      ]};
-      var assist_toolbar = !assist ? default_toolbar : (!assist.toolbar ? default_toolbar : assist.toolbar);
-      self._toolbar.init(toolbar_selector, assist_toolbar);
-      self._toolbar.bind("create", ListView.create);
+      //var default_toolbar = {"items": [
+      //  {"name": "create", "caption": "Create", "description": "Create new data"}
+      //]};
+      //var assist_toolbar = !assist ? default_toolbar : (!assist.toolbar ? default_toolbar : assist.toolbar);
+      //self._toolbar.init(toolbar_selector, assist_toolbar);
+      //self._toolbar.bind("create", ListView.create);
 
       // Grid
       var columns = Grid.create_columns(self._class);
@@ -132,7 +132,7 @@ define(function (require) {
       .then(function () {
         self._grid.add_operation("click", ListView.show_detail);
         self._grid.data(classes);
-        self._toolbar.visible(true);
+        //self._toolbar.visible(true);
         self.refresh();
       });
     });

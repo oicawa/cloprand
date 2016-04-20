@@ -2,6 +2,7 @@ define(function (require) {
   require('jquery');
   require('json2');
   var Utils = require("data/Core/Utils");
+  var Connector = require("data/Core/Connector");
 
   var _data = {};
 
@@ -14,10 +15,10 @@ define(function (require) {
     return map_data;
   }
 
-  Utils.get_data(Utils.PRIMITIVE_ID, null, function (data) { _data[Utils.PRIMITIVE_ID] = convert(data); })
+  Connector.crud.read("api/" + Utils.PRIMITIVE_ID, "json", function (data) { _data[Utils.PRIMITIVE_ID] = convert(data); })
   
   return {
-  	get_data : function(class_id, object_id) {
+    get_data : function(class_id, object_id) {
       var map_data = _data[class_id];
       if (!map_data) {
         return null;

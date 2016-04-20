@@ -1,6 +1,5 @@
 define(function (require) { 
   require("jquery");
-  require("jsrender");
   require("w2ui");
   var Utils = require("data/Core/Utils");
   var Dialog = require("data/Core/Dialog");

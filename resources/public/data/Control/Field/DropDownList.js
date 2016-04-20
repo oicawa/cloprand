@@ -1,19 +1,25 @@
 define(function (require) { 
   require("jquery");
-  require("jsrender");
   var Utils = require("data/Core/Utils");
+  var Connector = require("data/Core/Connector");
   var Inherits = require("data/Core/Inherits");
   var Field = require("data/Control/Field/Field");
   
   var TEMPLATE = '' +
 '<select name="{{:name}}">' +
-'{{for items}}' +
-'  <option value="{{:value}}">{{:caption}}</option>' +
-'{{/for}}' +
 '</select>' +
 '<div></div>';
 
-  function create_control(self, root, template, field) {
+  var OPTION_TEMPLATE = '' +
+'  <option value="{{:value}}">{{:caption}}</option>';
+
+  function create_control(self, root, field) {
+    root.empty();
+    root.append(TEMPLATE);
+    
+    self._editor = root.find("select");
+    self._viewer = root.find("div");
+    
     var caption_fields = [];
     if (!self._class.object_fields) {
       self._class.object_fields = [];
@@ -40,13 +46,14 @@ define(function (require) {
       items.push({value : value, caption : caption });
       self._items[value] = caption;
     }
-
-    var html = template.render({ name: field.name, items: items });
-    root.empty();
-    root.append(html);
     
-    self._editor = root.find("select");
-    self._viewer = root.find("div");
+    self._editor.attr("name", field.name);
+    for (var i = 0; i < items.length; i++) {
+      self._editor.append(OPTION_TEMPLATE);
+      var option = self._editor.find("option:last-child");
+      option.attr("value", items[i].value);
+      option.text(items[i].caption);
+    }
   }
   
   function DropDownList() {
@@ -73,13 +80,12 @@ define(function (require) {
     // Create form tags
     this._class_id = field.datatype["class"];
     var self = this;
-    var template = $.templates(TEMPLATE);
     console.assert(!(!this._class_id), field);
     $.when(
-      Utils.get_data(Utils.CLASS_ID, this._class_id, function(response) { self._class = response; }),
-      Utils.get_data(this._class_id, null, function(response) { self._objects = response; })
+      Connector.crud.read("api/" + Utils.CLASS_ID + "/" + this._class_id, "json", function(response) { self._class = response; }),
+      Connector.crud.read("api/" + this._class_id, "json", function(response) { self._objects = response; })
     ).then(function() {
-      create_control(self, root, template, field);
+      create_control(self, root, field);
       dfd.resolve();
     });
     return dfd.promise();

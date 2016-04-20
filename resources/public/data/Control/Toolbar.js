@@ -1,6 +1,5 @@
 define(function (require) {
   require("jquery");
-  require("jsrender");
   var Utils = require("data/Core/Utils");
   
   var TEMPLATE = '' +
@@ -91,7 +90,7 @@ define(function (require) {
     
     // Load template data & Create form tags
     var template = $.templates(TEMPLATE);;
-    Utils.add_css("/data/Style/Toolbar.css");
+    Utils.load_css("/data/Style/Toolbar.css");
     var root_html = template.render(this._assist);
     this._root.append(root_html);
     create_toolbar(this);

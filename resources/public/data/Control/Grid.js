@@ -1,16 +1,16 @@
 define(function (require) {
   require("jquery");
-  require("jsrender");
   require("w2ui");
   var Utils = require("data/Core/Utils");
-  var Toolbar = require("data/Control/Toolbar");
+  var Uuid = require("data/Core/Uuid");
+  //var Toolbar = require("data/Control/Toolbar");
   
   var TEMPLATE = '<div class="grid"></div>';
 
   function create_control(self, template, style) {
     self._root.append(template);
     var grid = self._root.children("div.grid");
-    var uuid = Utils.create_uuid();
+    var uuid = Uuid.version4();
     var name = uuid.replace(/-/g, "_");
     grid.w2grid({
       name:name,
@@ -77,12 +77,12 @@ define(function (require) {
 
   Grid.prototype.init = function(selector, columns, style) {
     var dfd = new $.Deferred;
-　　　　this._selector = selector;
+    this._selector = selector;
     this._root = $(selector);
     this._columns = columns;
 
     // CSS
-    Utils.add_css("/data/Style/Grid.css");
+    Utils.load_css("/data/Style/Grid.css");
     
     // Create form tags
     create_control(this, TEMPLATE, style);
