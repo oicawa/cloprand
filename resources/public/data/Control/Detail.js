@@ -4,7 +4,7 @@ define(function (require) {
   var Cache = require("data/Core/Cache");
   var Inherits = require("data/Core/Inherits");
 
-  var TEMPLATE = '<div></div>';
+  var TEMPLATE = '<div class="w2ui-field"></div>';
 
   function get_control_assist(self, field) {
     if (!self._custom_assist) {
@@ -48,11 +48,10 @@ define(function (require) {
     }
   }
 
-  function field_func(self, selector, field) {
+  function field_func(self, field_selector, field) {
     var dfd = new $.Deferred;
     var assist = get_control_assist(self, field);
     var control_path = get_control_path(self, field, assist);
-    var field_selector = selector + " > table.detail-fields > tbody > tr > td.value > div." + field.name;
     
     require([control_path], function(Control) {
       var control = new Control();
@@ -79,7 +78,11 @@ define(function (require) {
     var promises = [];
     for (var i = 0; i < self._class.object_fields.length; i++) {
       var object_field = self._class.object_fields[i];
-      promises[i] = field_func(self, selector, object_field);
+      self._root.append(TEMPLATE);
+      var field = self._root.find("div:last-child");
+      field.attr("name", object_field.name);
+      var field_selector = selector + " > div[name='" + object_field.name + "']";
+      promises[i] = field_func(self, field_selector, object_field);
     }
     $.when.apply(null, promises)
     .then(function() {
@@ -144,21 +147,25 @@ define(function (require) {
     Utils.load_css("/data/Style/Detail.css");
     
     this._root.append(TEMPLATE);
-    var form = this._root.find("div");
-    form.w2form({ 
-      name   : 'myForm',
-      fields : [
-        { name: 'first_name', type: 'text', required: true },
-        { name: 'last_name',  type: 'text', required: true },
-        { name: 'comments',   type: 'text'}
-      ],
-      //actions: {
-      //  reset: function () { console.log("reset"); },
-      //  save: function () { console.log("save"); }
-      //}
+    $.when(
+      create_form(self, selector_buf)
+    ).always(function() {
+      dfd.resolve();
     });
+    //var form = this._root.find("div");
+    //form.w2form({ 
+    //  name   : 'myForm',
+    //  fields : [
+    //    { name: 'first_name', type: 'text', required: true },
+    //    { name: 'last_name',  type: 'text', required: true },
+    //    { name: 'comments',   type: 'text'}
+    //  ],
+    //  //actions: {
+    //  //  reset: function () { console.log("reset"); },
+    //  //  save: function () { console.log("save"); }
+    //  //}
+    //});
     
-    dfd.resolve();
     return dfd.promise();
   };
 
@@ -176,7 +183,7 @@ define(function (require) {
     for (var i = 0; i < this._class.object_fields.length; i++) {
       var field = this._class.object_fields[i];
       var name = field.name;
-      //this._controls[name].edit((!this._is_new && !(!field.key)) ? false : on);
+      this._controls[name].edit((!this._is_new && !(!field.key)) ? false : on);
     }
   };
 
@@ -184,7 +191,7 @@ define(function (require) {
     for (var i = 0; i < this._class.object_fields.length; i++) {
       var object_field = this._class.object_fields[i];
       var name = object_field.name;
-      //this._controls[name].commit();
+      this._controls[name].commit();
     }
   };
 
@@ -192,7 +199,7 @@ define(function (require) {
     for (var i = 0; i < this._class.object_fields.length; i++) {
       var object_field = this._class.object_fields[i];
       var name = object_field.name;
-      //this._controls[name].restore();
+      this._controls[name].restore();
     }
   };
 
@@ -208,8 +215,8 @@ define(function (require) {
     for (var i = 0; i < this._class.object_fields.length; i++) {
       var object_field = this._class.object_fields[i];
       var name = object_field.name;
-      //var control = this._controls[name];
-      //control.refresh();
+      var control = this._controls[name];
+      control.refresh();
     }
   };
 
@@ -221,12 +228,12 @@ define(function (require) {
       for (var i = 0; i < this._class.object_fields.length; i++) {
         var object_field = this._class.object_fields[i];
         var name = object_field.name;
-        //var control = this._controls[name];
-        //if (arguments.length == 0) {
-        //  data[name] = control.data();
-        //} else {
-        //  control.data(value ? value[name] : null);
-        //}
+        var control = this._controls[name];
+        if (arguments.length == 0) {
+          data[name] = control.data();
+        } else {
+          control.data(value ? value[name] : null);
+        }
       }
     }
     
