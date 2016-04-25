@@ -12,7 +12,7 @@ require.config({
   paths : {
     jquery : '/lib/jquery-2.1.3',
     json2 : '/lib/json2',
-    w2ui : '/lib/w2ui-1.4.3/w2ui-1.4.3',
+    w2ui : '/lib/w2ui-1.4.3/w2ui-1.4.3.min',
     app : '/data/Core/app'
   }
 });

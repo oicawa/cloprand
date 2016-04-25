@@ -1,29 +1,32 @@
 define(function (require) {
   require("jquery");
   var Utils = require("data/Core/Utils");
+  var Uuid = require("data/Core/Uuid");
   
-  var TEMPLATE = '' +
-'<ul class="ui-widget ui-helper-clearfix toolbar">' +
-'{{for items}}' +
-'  <li class="ui-state-default ui-corner-all" name="{{:name}}" title="{{:description}}">' +
-'    <span class="ui-icon {{:icon_name}}"></span>' +
-'    <span class="caption">{{:caption}}</span>' +
-'  </li>' +
-'{{/for}}' +
-'</ul>';
+//  var TEMPLATE = '' +
+//'<ul class="ui-widget ui-helper-clearfix toolbar">' +
+//'{{for items}}' +
+//'  <li class="ui-state-default ui-corner-all" name="{{:name}}" title="{{:description}}">' +
+//'    <span class="ui-icon {{:icon_name}}"></span>' +
+//'    <span class="caption">{{:caption}}</span>' +
+//'  </li>' +
+//'{{/for}}' +
+//'</ul>';
+  var TEMPLATE = '<div></div>';
   
   function Toolbar() {
     this._default_icons = {
-      "create": "ui-icon-plus",
-      "delete": "ui-icon-minus",
-      "edit"  : "ui-icon-pencil",
-      "save"  : "ui-icon-disk",
-      "cancel": "ui-icon-trash",
-      "add"   : "ui-icon-plus",
-      "up"    : "ui-icon-arrowthick-1-n",
-      "down"  : "ui-icon-arrowthick-1-s"
+      "create": "w2ui-icon-plus",
+      "delete": "w2ui-icon-cross",
+      "edit"  : "fa fa-pencil",
+      "save"  : "fa fa-save",
+      "cancel": "fa fa-trash-o",
+      "add"   : "w2ui-icon-plus",
+      "up"    : "fa fa-arrow-up",
+      "down"  : "fa fa-arrow-down"
     };
-  	this._root = null;;
+    this._root = null;;
+    this._toolbar = null;
     this._assist = null;
     this._css = null;
     this._instance = this;
@@ -76,24 +79,38 @@ define(function (require) {
   }
 
   Toolbar.prototype.init = function(selector, assist) {
-  	//console.assert(assist && assist.items, "assit:" + assist);
+    //console.assert(assist && assist.items, "assit:" + assist);
     var dfd = new $.Deferred;
     this._root = $(selector);
     this._root.hide();
     this._assist = !assist ? { "items" : [] } : assist;
+    // Hack...
     for (var i = 0; i < this._assist.items.length; i++) {
       var item = this._assist.items[i];
-      if (!item.icon_name) {
-        item.icon_name = this._default_icons[item.name];
-      }
+      item.type = "button";
+      item.id = item.name;
+      item.icon = this._default_icons[item.id];
     }
     
-    // Load template data & Create form tags
-    var template = $.templates(TEMPLATE);;
+    var self = this;
+    
     Utils.load_css("/data/Style/Toolbar.css");
-    var root_html = template.render(this._assist);
-    this._root.append(root_html);
-    create_toolbar(this);
+    
+    this._root.append(TEMPLATE);
+    var name = Uuid.version4();
+    var toolbar = this._root.find("div");
+    toolbar.w2toolbar({
+      name: name,
+      items: this._assist.items,
+      onClick: function(event) {
+        var func = self._operations[event.item.id]
+        func(event);
+      }
+    });
+    //create_toolbar(this);
+    
+    this._toolbar = w2ui[name];
+    
     dfd.resolve();
     return dfd.promise();
   };
@@ -110,8 +127,12 @@ define(function (require) {
     }
   };
 
-  Toolbar.prototype.button = function(button_name) {
-    return this._root.find("li[name='" + button_name + "']");
+  Toolbar.prototype.show = function(button_name) {
+    this._toolbar.show(button_name);
+  };
+
+  Toolbar.prototype.hide = function(button_name) {
+    this._toolbar.hide(button_name);
   };
 
   return Toolbar;

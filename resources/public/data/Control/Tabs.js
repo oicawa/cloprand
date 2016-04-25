@@ -51,6 +51,7 @@ define(function (require) {
     this._body.append(BODY_TEMPLATE);
     var tab_contents = this._body.find(".tab-panel:last-child");
     tab_contents.attr("id", tab_id);
+    this._tabs.refresh();
   };
 
   Tabs.prototype.content = function (tab_id, content) {
@@ -80,9 +81,8 @@ define(function (require) {
   };
 
   Tabs.prototype.label = function (tab_id, value) {
-    var li = this._tabs.find("ul > li[aria-controls='" + tab_id + "']");
-    var a = li.find("a");
-    a.text(value);
+    this._tabs.set(tab_id, { caption: value });
+    this._tabs.refresh();
   };
 
   Tabs.prototype.broadcast = function (keys) {
@@ -93,16 +93,15 @@ define(function (require) {
   };
 
   Tabs.prototype.change = function (old_id, new_id, label) {
-    var li = this._tabs.find("ul > li[aria-controls='" + old_id + "']");
-    var a = li.find("a");
-    a.attr("href", "#" + new_id);
-    a.text(label);
-    li.attr("aria-controls", new_id);
-    var div = this._tabs.find("div#" + old_id);
-    div.attr("id", new_id);
+    this._tabs.remove(old_id);
+    this._tabs.refresh();
+    this.remove(old_id);
     var content = this._contents[old_id];
     delete this._contents[old_id];
-    this._contents[new_id] = content;
+    
+    this.add(new_id, label, true, true);
+    this.content(new_id, content);
+    this.select(new_id);
   };
 
   Tabs.prototype.init = function (selector) {

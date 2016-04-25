@@ -4,65 +4,55 @@ define(function (require) {
   var Inherits = require("data/Core/Inherits");
   var Field = require("data/Control/Field/Field");
   
-  var TEMPLATE = '' +
-'<textarea name="{{:name}}" value=""></textarea>' +
-'<pre></pre>';
+  var TEMPLATE = '<label></label><div><textarea style="color:black; width:500px; height: 100px;"/></div>';
+  
 
   function TextLines() {
     Field.call(this, "data/Control/Field", "TextLines");
-    this._editor = null;
-    this._viewer = null;
+    this._textarea = null;
+    this._value = null;
   }
   Inherits(TextLines, Field);
 
   TextLines.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
-    
     var root = $(selector);
+    var self = this;
 
     // Create form tags
-    var template = $.templates(TEMPLATE);
-    var self = this;
-    var html = template.render(field);
-    root.append(html);
+    root.append(TEMPLATE);
       
-    self._editor = root.children("textarea");
-    self._viewer = root.children("pre");
+    self._textarea = root.find("textarea");
+    var label = root.find("label");
+    var caption = field.label;
+    label.text(caption);
       
     dfd.resolve();
     return dfd.promise();
   };
 
   TextLines.prototype.edit = function(on) {
-    if (on) {
-      this._editor.show();
-      this._viewer.hide();
-    } else {
-      this._editor.hide();
-      this._viewer.show();
-    }
+    this._textarea.attr("readonly", !on);
   };
 
   TextLines.prototype.backuped = function() {
-    return this._viewer.text();
+    return this._value;
   };
 
   TextLines.prototype.commit = function() {
-    var value = this._editor.val();
-    this._viewer.text(value);
+    this._value = this._textarea.val();
   };
 
   TextLines.prototype.restore = function() {
-    var value = this._viewer.text();
-    this._editor.val(value);
+    this._textarea.val(this._value);
   };
 
   TextLines.prototype.data = function(value) {
     if (arguments.length == 0) {
-      return this._editor.val();
+      return this._textarea.val();
     } else {
-      this._editor.val(value);
-      this._viewer.text(value);
+      this._textarea.val(value);
+      this._value = value;
     }
   };
   

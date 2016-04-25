@@ -2,9 +2,10 @@ define(function (require) {
   require("jquery");
   var app = require("app");
   var Utils = require("data/Core/Utils");
+  var Uuid = require("data/Core/Uuid");
   var Connector = require("data/Core/Connector");
   var Contents = require("data/Core/Contents");
-  //var Toolbar = require("data/Control/Toolbar");
+  var Toolbar = require("data/Control/Toolbar");
   //var Detail = require("data/Control/Detail");
   var Grid = require("data/Control/Grid");
 
@@ -36,7 +37,7 @@ define(function (require) {
   ListView.create = function (event) {
     var tab_info = Contents.get_tab_info(event);
     var view = app.contents().content(tab_info.tab_id);
-    app.contents().show_tab("New " + view._class.label, null, "DetailView", tab_info.class_id, Utils.NULL_UUID);
+    app.contents().show_tab("New " + view._class.label, null, "DetailView", tab_info.class_id, Uuid.NULL);
   };
 
   ListView.show_detail = function (event) {
@@ -103,7 +104,7 @@ define(function (require) {
 
   ListView.prototype.init = function (selector, class_id, object_id) {
     this._class_id = class_id;
-    //this._toolbar = new Toolbar();
+    this._toolbar = new Toolbar();
     this._grid = new Grid();
     var view = $(selector)
     var classes = null;
@@ -119,12 +120,12 @@ define(function (require) {
       view.append(TEMPLATE);
 
       // Toolbar
-      //var default_toolbar = {"items": [
-      //  {"name": "create", "caption": "Create", "description": "Create new data"}
-      //]};
-      //var assist_toolbar = !assist ? default_toolbar : (!assist.toolbar ? default_toolbar : assist.toolbar);
-      //self._toolbar.init(toolbar_selector, assist_toolbar);
-      //self._toolbar.bind("create", ListView.create);
+      var default_toolbar = {"items": [
+        {"name": "create", "caption": "Create", "description": "Create new data"}
+      ]};
+      var assist_toolbar = !assist ? default_toolbar : (!assist.toolbar ? default_toolbar : assist.toolbar);
+      self._toolbar.init(toolbar_selector, assist_toolbar);
+      self._toolbar.bind("create", ListView.create);
 
       // Grid
       var columns = Grid.create_columns(self._class);
@@ -132,7 +133,7 @@ define(function (require) {
       .then(function () {
         self._grid.add_operation("click", ListView.show_detail);
         self._grid.data(classes);
-        //self._toolbar.visible(true);
+        self._toolbar.visible(true);
         self.refresh();
       });
     });

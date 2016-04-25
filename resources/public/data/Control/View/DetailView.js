@@ -5,10 +5,10 @@ define(function (require) {
   var Uuid = require("data/Core/Uuid");
   var Connector = require("data/Core/Connector");
   var Contents = require("data/Core/Contents");
-  //var Toolbar = require("data/Control/Toolbar");
+  var Toolbar = require("data/Control/Toolbar");
   var Detail = require("data/Control/Detail");
   //var Grid = require("data/Control/Grid");
-  //var Tabs = require("data/Control/Tabs");
+  var Tabs = require("data/Control/Tabs");
 
   var TEMPLATE = '' +
 '<div class="detailview-panel">' +
@@ -18,15 +18,15 @@ define(function (require) {
 
   function edit_toolbar(toolbar, on) {
     if (on) {
-      toolbar.button("edit").hide();
-      toolbar.button("delete").hide();
-      toolbar.button("save").show();
-      toolbar.button("cancel").show();
+      toolbar.hide("edit");
+      toolbar.hide("delete");
+      toolbar.show("save");
+      toolbar.show("cancel");
     } else {
-      toolbar.button("edit").show();
-      toolbar.button("delete").show();
-      toolbar.button("save").hide();
-      toolbar.button("cancel").hide();
+      toolbar.show("edit");
+      toolbar.show("delete");
+      toolbar.hide("save");
+      toolbar.hide("cancel");
     }
   };
 
@@ -54,7 +54,7 @@ define(function (require) {
     
     var tab_info = Contents.get_tab_info(event);
     var objects = null;
-    Utils.delete_data(tab_info.class_id, tab_info.object_id, function(response) { objects = response; })
+    Connector.crud.delete("api/" + tab_info.class_id + "/" + tab_info.object_id, function(response) { objects = response; })
     .then(function() {
       alert("Deleted");
       app.contents().remove(tab_info.tab_id);
@@ -79,7 +79,7 @@ define(function (require) {
     console.assert(0 < caption_field_names.length, caption_field_names);
     var key_field_name = key_field_names[0];
     if (detail.is_new()) {
-      Utils.post_data(tab_info.class_id, data, function(response) { object = response;})
+      Connector.crud.create("api/" + tab_info.class_id, data, function(response) { object = response;})
       .then(function() {
         edit_toolbar(view.toolbar(), false);
         detail.edit(false);
@@ -94,7 +94,7 @@ define(function (require) {
     } else {
       if (!data[key_field_name])
         data[key_field_name] = tab_info.object_id;
-      Utils.put_data(tab_info.class_id, data[key_field_name], data, function(response) { object = response; })
+      Connector.crud.update("api/" + tab_info.class_id + "/" + data[key_field_name], data, function(response) { object = response; })
       .then(function() {
         edit_toolbar(view.toolbar(), false);
         detail.edit(false);
@@ -145,7 +145,7 @@ define(function (require) {
   	  return;
   	}
 
-    Utils.get_data(self._class_id, self._object_id, function (data) { self._object = data; })
+    Connector.crud.read("api/" + self._class_id + "/" + self._object_id, "json", function (data) { self._object = data; })
     .then(function () {
       self._detail.data(self._object);
     });
@@ -163,7 +163,7 @@ define(function (require) {
   DetailView.prototype.init = function (selector, class_id, object_id) {
     this._class_id = class_id;
     this._object_id = object_id;
-    //this._toolbar = new Toolbar();
+    this._toolbar = new Toolbar();
     this._detail = new Detail();
     var view = $(selector);
     var class_ = null;
@@ -207,23 +207,23 @@ define(function (require) {
       self._class = class_;
 
       $.when(
-        //self._toolbar.init(toolbar_selector, default_toolbar),
+        self._toolbar.init(toolbar_selector, default_toolbar),
         self._detail.init(detail_selector, self._class, basic_assist, custom_assist)
       ).then(function() {
-        //self._toolbar.bind("edit", DetailView.edit);
-        //self._toolbar.bind("delete", DetailView.delete);
-        //self._toolbar.bind("save", DetailView.save);
-        //self._toolbar.bind("cancel", DetailView.cancel);
+        self._toolbar.bind("edit", DetailView.edit);
+        self._toolbar.bind("delete", DetailView.delete);
+        self._toolbar.bind("save", DetailView.save);
+        self._toolbar.bind("cancel", DetailView.cancel);
         self._detail.visible(true);
         if (self._object_id == Utils.NULL_UUID) {
-          //edit_toolbar(self._toolbar, true);
+          edit_toolbar(self._toolbar, true);
           self._detail.edit(true);
         } else {
-          //edit_toolbar(self._toolbar, false);
+          edit_toolbar(self._toolbar, false);
           self._detail.edit(false);
           self._detail.data(self._object);
         }
-        //self._toolbar.visible(true);
+        self._toolbar.visible(true);
         self.refresh();
       });
     });
