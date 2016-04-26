@@ -23,6 +23,7 @@ define(function (require) {
     this._tabs = null;
     this._body = null;
     this._contents = null;
+    this._history = [];
   }
 
   Tabs.create_tab_id = function(parts) {
@@ -70,14 +71,40 @@ define(function (require) {
 
   Tabs.prototype.select = function (tab_id) {
     var tab = this._tabs.get(tab_id);
-    console.log(tab);
     this._body.children(".tab-panel").css("display", "none");
     this._tabs.select(tab_id);
     this._body.find("#" + tab_id).css("display", "block");
+    
+    if (this._history.length == 0) {
+      this._history = [tab_id];
+      return;
+    }
+    var last = this._history.length - 1;
+    var last_tab_id = this._history[last];
+    if (tab_id == last_tab_id) {
+      return;
+    }
+    if (tab.closable) {
+      this._history.push(tab_id);
+    } else {
+      this._history = [tab_id];
+    }
   };
 
   Tabs.prototype.remove = function (tab_id) {
     this._body.find("#" + tab_id).remove();
+    
+    var history = this._history.filter(function(id) {
+      if (tab_id == id) {
+        return false;
+      }
+      var tab = this._tabs.get(id);
+      return tab == null ? false : true;
+    }, this);
+    
+    var last_tab_id = history.pop();
+    this._history = history;
+    this.select(last_tab_id);
   };
 
   Tabs.prototype.label = function (tab_id, value) {
