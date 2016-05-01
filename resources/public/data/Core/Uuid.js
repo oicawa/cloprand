@@ -44,7 +44,7 @@ define(function (require) {
     NULL : "00000000-0000-0000-0000-000000000000",
     is_uuid : function (value) {
       var REGEXP = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
-      return REGEXP.test(value.toLowerCase);
+      return REGEXP.test(value.toLowerCase());
     },
     version1 : function () {
       var timestamp = new Date() - Date.UTC(1582, 9, 15);

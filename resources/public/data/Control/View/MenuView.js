@@ -26,17 +26,15 @@ define(function (require) {
     var tab = $(event.originalEvent.target).closest("div.tab-panel");
     var index = event.recid - 1;
     var tab_id = tab.prop("id");
-    var ids = tab_id.split("_");
-    var prefix = 0 < ids.length ? ids[0] : null;
-    var class_id = 1 < ids.length ? ids[1] : null;
-    var object_id = 2 < ids.length ? ids[2] : null;
+    //var ids = tab_id.split("_");
+    //var prefix = 0 < ids.length ? ids[0] : null;
+    //var class_id = 1 < ids.length ? ids[1] : null;
+    //var object_id = 2 < ids.length ? ids[2] : null;
 
     // Get clicked data (from 'tab_id'->'view'->'grid'->'data'-> item of the selected index row.)
     var view = app.contents().content(tab_id);
     var grid = view.list();
-    //var data = grid.data()[index];
     var data = grid.get(event.recid);
-    //app.contents().show_tab(data.label, null, "GridView", data.id, null);
     app.contents().show_tab(data.label, null, "ListView", data.id, null);
   };
   

@@ -9,6 +9,14 @@ define(function (require) {
     this._actions = null;
     this._title = null;
   };
+  
+  Dialog.show = function (message, title) {
+    w2alert(message, title);
+  };
+  
+  Dialog.confirm = function (message, title) {
+    return w2confirm(message, title);
+  };
 
   Dialog.prototype.close = function (event) {
     this._root.dialog("close");

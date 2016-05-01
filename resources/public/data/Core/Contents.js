@@ -11,38 +11,16 @@ define(function (require) {
 '<div id="contents-frame">' +
 '  <div id="contents-tabs"></div>' +
 '</div>';
-
-
-  function show_tab(tab_id, label) {
-    var tabTemplate = "<li class='tab-label'><a href='#{href}'>#{label}</a><span class='ui-icon ui-icon-close'>Remove Tab</span></li>"
-    var id = "object-new-" + (new Date()).getTime();
-    var li = $(tabTemplate.replace( /#\{href\}/g, "#" + id ).replace( /#\{label\}/g, label ) );
-    var tabs = $("#object-detail-tabs");
-    tabs.find(".ui-tabs-nav").append(li);
-    tabs.append("<div id='" + id + "' class='tab-panel'><div class='tab-contents-panel'><div class='object_detail'></div></div></div>");
-    tabs.tabs("refresh");
-  }
-
-  function show_tab2(tabs, tab_id, label) {
-    var tabTemplate = "<li class='tab-label'><a href='#{href}'>#{label}</a><span class='ui-icon ui-icon-close'>Remove Tab</span></li>"
-    var id = "object-new-" + (new Date()).getTime();
-    var li = $(tabTemplate.replace( /#\{href\}/g, "#" + id ).replace( /#\{label\}/g, label ) );
-    tabs.find(".ui-tabs-nav").append(li);
-    tabs.append("<div id='" + id + "' class='tab-panel'><div class='tab-contents-panel'><div class='object_detail'></div></div></div>");
-    tabs.tabs("refresh");
-  }
   
-  function create_content_selector(tab_id) {
-    return "#" + tab_id + " > div.tab-content-frame > div.tab-content-panel";
-  }
-  
-  function create_view(self, tab_id, selector, view_name, class_id, object_id, options) {
+  function create_view(self, tab_name, view_name, class_id, object_id, options) {
     //var dfd = new $.Deferred;
     var view_path = "data/Control/View/" + view_name;
     require([view_path], function(View) {
       var view = new View();
-      self._tabs.content(tab_id, view);
+      self._tabs.content(tab_name, view);
       try {
+        var tab_id = self._tabs.tab_id(tab_name);
+        var selector = "#" + tab_id + " > div.tab-content-frame > div.tab-content-panel";
         view.init(selector, class_id, object_id, options);
         //.then(function() {
         //  dfd.resolve();
@@ -64,7 +42,8 @@ define(function (require) {
     // Get event source information
     var tab = $(event.originalEvent.target).closest("div.tab-panel");
     var tab_id = tab.prop("id");
-    var ids = tab_id.split("_");
+    var tab_name = tab.attr("name");
+    var ids = tab_name.split("_");
     var prefix = 0 < ids.length ? ids[0] : null;
     var class_id = 1 < ids.length ? ids[1] : null;
     var object_id = 2 < ids.length ? ids[2].replace(/-/g, "/") : null;
@@ -76,10 +55,6 @@ define(function (require) {
     };
   };
 
-//  Contents.tab_id = function (prefix, class_id, object_id) {
-//    return Tabs.create_tab_id(prefix, class_id, object_id);
-//  };
-  
   Contents.prototype.add = function () {
     var label = "New " + def_class.label;
     var tab_id = "object-" + (new Date()).getTime();
@@ -97,18 +72,17 @@ define(function (require) {
   Contents.prototype.show_tab = function (label, options, view_name, class_id, object_id) {
     console.assert(typeof view_name == "string" && 1 <= view_name.length);
     var params = Array.prototype.slice.call(arguments, 2);
-    var tab_id = Tabs.create_tab_id(params);
-    var tab = this._tabs.get(tab_id);
+    var tab_name = Tabs.create_tab_name(params);
+    var tab = this._tabs.get(tab_name);
     if (tab) {
-      this._tabs.select(tab_id);
+      this._tabs.select(tab_name);
       return;
     }
-    this._tabs.add(tab_id, label, true, true);
+    this._tabs.add(tab_name, label, true, true);
 
-    var selector = create_content_selector(tab_id);
-    create_view(this, tab_id, selector, view_name, class_id, object_id, options);
+    create_view(this, tab_name, view_name, class_id, object_id, options);
     
-    this._tabs.select(tab_id);
+    this._tabs.select(tab_name);
   };
   
   Contents.prototype.content = function (tab_id) {
@@ -150,11 +124,10 @@ define(function (require) {
       self._tabs.init("#contents-tabs");
       for (var i = 0; i < assist.tabs.length; i++) {
         var tab = assist.tabs[i];
-        var tab_id = Tabs.create_tab_id(tab.id);
-        var selector = create_content_selector(tab_id);
-        self._tabs.add(tab_id, tab.label, true, false);
-        create_view(self, tab_id, selector, tab.view, tab.class_id, tab.object_id);
-        self._tabs.select(tab_id);
+        var tab_name = Tabs.create_tab_name(tab.id);
+        self._tabs.add(tab_name, tab.label, true, false);
+        create_view(self, tab_name, tab.view, tab.class_id, tab.object_id);
+        self._tabs.select(tab_name);
       }
     });
   };

@@ -18,44 +18,39 @@ define(function (require) {
     self._tabs.tabs({ active : index});
   }
   
+  function get_tab_id(self, tab_name_or_id) {
+    return Uuid.is_uuid(tab_name_or_id) ? tab_name_or_id : self._idmap[tab_name_or_id];
+  }
+  
   function Tabs () {
     this._root = null;
     this._tabs = null;
+    this._idmap = {};
     this._body = null;
-    this._contents = null;
+    this._contents = {};
     this._history = [];
   }
 
-  Tabs.create_tab_id = function(parts) {
+  Tabs.create_tab_name = function(parts) {
     var copied = parts.concat();
     while(!copied[copied.length - 1])
       copied.pop();
     return copied.join("_").replace(/\//g, "-");
-  }
+  };
 
-  Tabs.prototype.add = function (tab_id, label, set_active, is_closable) {
-    //var closable = "<li class='tab-label'><a href='#{href}'>#{label}</a><span class='ui-icon ui-icon-close'>Remove Tab</span></li>";
-    //var unclosable = "<li class='tab-label'><a href='#{href}'>#{label}</a></li>";
-    //var tabTemplate = !is_closable ? unclosable : closable;
-    //var li = $(tabTemplate.replace( /#\{href\}/g, "#" + tab_id ).replace( /#\{label\}/g, label ) );
-    //this._tabs.find(".ui-tabs-nav").append(li);
-    //this._tabs.append("<div id='" + tab_id + "' class='tab-panel'><div class='tab-content-frame'><div class='tab-content-panel'></div></div></div>");
-    //this._tabs.tabs("refresh");
-
-    //if (!set_active) {
-    //  return;
-    //}
-    //var i = index(this, tab_id);
-    //active(this, i);
-    
+  Tabs.prototype.add = function (tab_name, label, set_active, is_closable) {
+    var tab_id = Uuid.version4();
+    this._idmap[tab_name] = tab_id;
     this._tabs.add({id: tab_id, caption: label, closable: is_closable});
     this._body.append(BODY_TEMPLATE);
     var tab_contents = this._body.find(".tab-panel:last-child");
     tab_contents.attr("id", tab_id);
+    tab_contents.attr("name", tab_name);
     this._tabs.refresh();
   };
 
-  Tabs.prototype.content = function (tab_id, content) {
+  Tabs.prototype.content = function (tab_name_or_id, content) {
+    var tab_id = get_tab_id(this, tab_name_or_id);
     if (arguments.length == 1) {
       return this._contents[tab_id];
     } else if (arguments.length == 2) {
@@ -65,11 +60,13 @@ define(function (require) {
     }
   };
 
-  Tabs.prototype.get = function (tab_id) {
+  Tabs.prototype.get = function (tab_name_or_id) {
+    var tab_id = get_tab_id(this, tab_name_or_id);
     return this._tabs.get(tab_id);
   };
 
-  Tabs.prototype.select = function (tab_id) {
+  Tabs.prototype.select = function (tab_name_or_id) {
+    var tab_id = get_tab_id(this, tab_name_or_id);
     var tab = this._tabs.get(tab_id);
     this._body.children(".tab-panel").css("display", "none");
     this._tabs.select(tab_id);
@@ -91,7 +88,8 @@ define(function (require) {
     }
   };
 
-  Tabs.prototype.remove = function (tab_id) {
+  Tabs.prototype.remove = function (tab_name_or_id) {
+    var tab_id = get_tab_id(this, tab_name_or_id);
     this._body.find("#" + tab_id).remove();
     
     var history = this._history.filter(function(id) {
@@ -107,7 +105,8 @@ define(function (require) {
     this.select(last_tab_id);
   };
 
-  Tabs.prototype.label = function (tab_id, value) {
+  Tabs.prototype.label = function (tab_name_or_id, value) {
+    var tab_id = get_tab_id(this, tab_name_or_id);
     this._tabs.set(tab_id, { caption: value });
     this._tabs.refresh();
   };
@@ -119,42 +118,30 @@ define(function (require) {
     }
   };
 
-  Tabs.prototype.change = function (old_id, new_id, label) {
-    this._tabs.remove(old_id);
-    this._tabs.refresh();
-    this.remove(old_id);
-    var content = this._contents[old_id];
-    delete this._contents[old_id];
+  Tabs.prototype.change = function (old_name, new_name, label) {
+    //this._tabs.remove(old_id);
+    //this._tabs.refresh();
+    //this.remove(old_id);
+    //var content = this._contents[old_id];
+    //delete this._contents[old_id];
     
-    this.add(new_id, label, true, true);
-    this.content(new_id, content);
-    this.select(new_id);
+    //this.add(new_id, label, true, true);
+    //this.content(new_id, content);
+    //this.select(new_id);
+    
+    debugger;
+    var tab_id = this._idmap[old_name];
+    delete this._idmap[old_name];
+    this._idmap[new_name] = tab_id;
+    this._tabs.set(tab_id, {caption: label});
+  };
+  
+  Tabs.prototype.tab_id = function(tab_name) {
+    var tab_id = this._idmap[tab_name];
+    return tab_id;
   };
 
   Tabs.prototype.init = function (selector) {
-    //this._tabs = $(selector);
-    //// Create tab object by jQuery
-    //var self = this;
-    //this._tabs.tabs({
-    //  active: 1,
-    //  activate: function( event, ui ) {
-    //    var tab_id = ui.newPanel.selector.substring(1);
-    //    var view = self._contents[tab_id];
-    //    if (!view)
-    //      return;
-    //    if (view.refresh)
-    //      view.refresh();
-    //  }
-    //});
-    this._contents = {};
-    //var self = this;
-    //// Set close button on each tab
-    //this._tabs.on("click", "span.ui-icon-close", function() {
-    //  var panelId = $(this).closest("li").remove().attr("aria-controls");
-    //  $("#" + panelId ).remove();
-    //  self._tabs.tabs("refresh");
-    //});
-    
     this._root = $(selector);
     this._root.append(FRAME_TEMPLATE);
     

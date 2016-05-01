@@ -62,7 +62,7 @@ define(function (require) {
           dfd.resolve();
         });
       } catch (e) {
-        console.log("e=" + e + ", field.name=" + field.name);
+        console.assert(false, "e=" + e + ", field.name=" + field.name);
       }
     });
     return dfd.promise();

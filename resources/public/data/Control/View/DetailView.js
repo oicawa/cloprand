@@ -9,6 +9,7 @@ define(function (require) {
   var Detail = require("data/Control/Detail");
   //var Grid = require("data/Control/Grid");
   var Tabs = require("data/Control/Tabs");
+  var Dialog = require("data/Core/Dialog");
 
   var TEMPLATE = '' +
 '<div class="detailview-panel">' +
@@ -47,18 +48,19 @@ define(function (require) {
   };
   
   DetailView.delete = function (event) {
-    var res = confirm("Delete this class?");
-    if (!res) {
-      return;
-    }
-    
-    var tab_info = Contents.get_tab_info(event);
-    var objects = null;
-    Connector.crud.delete("api/" + tab_info.class_id + "/" + tab_info.object_id, function(response) { objects = response; })
-    .then(function() {
-      alert("Deleted");
-      app.contents().remove(tab_info.tab_id);
-      app.contents().broadcast(tab_info.class_id, tab_info.object_id, null);
+    Dialog.confirm("Delete this class?", function(answer) {
+      if (answer == "No") {
+        return;
+      }
+      
+      var tab_info = Contents.get_tab_info(event);
+      var objects = null;
+      Connector.crud.delete("api/" + tab_info.class_id + "/" + tab_info.object_id, function(response) { objects = response; })
+      .then(function() {
+        Dialog.show("Deleted", "Delete");
+        app.contents().remove(tab_info.tab_id);
+        app.contents().broadcast(tab_info.class_id, tab_info.object_id, null);
+      });
     });
   };
 
@@ -78,18 +80,19 @@ define(function (require) {
     console.assert(0 < key_field_names.length, key_field_names);
     console.assert(0 < caption_field_names.length, caption_field_names);
     var key_field_name = key_field_names[0];
+    
     if (detail.is_new()) {
       Connector.crud.create("api/" + tab_info.class_id, data, function(response) { object = response;})
       .then(function() {
         edit_toolbar(view.toolbar(), false);
         detail.edit(false);
         detail.data(object);
-        var old_tab_id = tab_info.tab_id;
-        var new_tab_id = Tabs.create_tab_id([tab_info.prefix, tab_info.class_id, object[key_field_name]]);
+        var old_tab_name = tab_info.tab_id;
+        var new_tab_name = Tabs.create_tab_name([tab_info.prefix, tab_info.class_id, object[key_field_name]]);
         var label = caption_field_names.map(function(name) { return object[name]; }).join(" ");
-        app.contents().change(old_tab_id, new_tab_id, label);
+        app.contents().change(old_tab_name, new_tab_name, label);
         app.contents().broadcast(tab_info.class_id, object[key_field_name], object);
-        alert("Saved");
+        Dialog.show("New item was created successfully.", "Save");
       });
     } else {
       if (!data[key_field_name])
@@ -102,21 +105,24 @@ define(function (require) {
         var label = caption_field_names.map(function(name) { return data[name]; }).join(" ");
         app.contents().label(tab_info.tab_id, label);
         app.contents().broadcast(tab_info.class_id, tab_info.object_id, data);
-        alert("Saved");
+        Dialog.show("Edited item was saved successfully.", "Save");
       });
     }
   };
   
   DetailView.cancel = function (event, li) {
-    if (!confirm("Canceled?")) {
-      return;
-    }
-    var tab_info = Contents.get_tab_info(event);
-    var view = app.contents().content(tab_info.tab_id);
-    edit_toolbar(view.toolbar(), false);
-    var detail = view.detail();
-    detail.restore();
-    detail.edit(false);
+    Dialog.confirm("Canceled?", function(answer) {
+      if (answer == "No") {
+        return;
+      }
+      
+      var tab_info = Contents.get_tab_info(event);
+      var view = app.contents().content(tab_info.tab_id);
+      edit_toolbar(view.toolbar(), false);
+      var detail = view.detail();
+      detail.restore();
+      detail.edit(false);
+    });
   };
   
   DetailView.prototype.detail = function () {
