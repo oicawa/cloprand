@@ -20,14 +20,26 @@ define(function (require) {
     CLASS_ID : _CLASS_ID,
     PRIMITIVE_ID : _PRIMITIVE_ID,
     load_css: function(path) {
+    　　var dfd = new $.Deferred;
       var head = $("head");
       var css = head.children("link[href='" + path + "']");
       if (0 < css.length) {
-        //console.log("[" +path + "]: already included (count=" + css.length + ")");
-        return;
+        dfd.resolve();
+        return dfd.promise();
       }
-      head.append("<link rel='stylesheet' type='text/css' href='" + path + "?_=" + (new Date()).getTime() + "'></link>");
-      //head.append("<link rel='stylesheet' type='text/css' href='" + path + "' />");
+      
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = path;
+      link.onload = function() {
+        console.log("*** css loaded (" + path + ")");
+        dfd.resolve();
+      };
+      
+      head.append(link);
+      
+      return dfd.promise();
     },
     property_value : function(instance, property, method_name, value) {
       if (value.length == 0) {

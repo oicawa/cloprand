@@ -78,11 +78,12 @@ define(function (require) {
     var classes = null;
     var self = this;
     var grid_selector = selector + "> div.menuview-panel > div.menu-list";
-    Utils.load_css("/data/Style/View/MenuView.css");
     $.when(
+      Utils.load_css("/data/Style/View/MenuView.css"),
       Connector.crud.read("api/" + Utils.CLASS_ID, "json", function (data) { classes = data; }),
       Connector.crud.read("api/" + Utils.CLASS_ID + "/" +  Utils.CLASS_ID, "json", function (data) { class_ = data; })
     ).always(function() {
+      console.log("*** MenuView.css");
       view.append(TEMPLATE);
       var columns = Grid.create_columns(class_);
       self._grid.init(grid_selector, columns)

@@ -80,13 +80,16 @@ define(function (require) {
     this._selector = selector;
     this._root = $(selector);
     this._columns = columns;
+    var self = this;
 
     // CSS
-    Utils.load_css("/data/Style/Grid.css");
+    Utils.load_css("/data/Style/Grid.css")
+    .then(function() {
+      // Create form tags
+      create_control(self, TEMPLATE, style);
+      dfd.resolve();
+    });
     
-    // Create form tags
-    create_control(this, TEMPLATE, style);
-    dfd.resolve();
     return dfd.promise();
   };
 
