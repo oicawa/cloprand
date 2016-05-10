@@ -6,19 +6,19 @@ define(function (require) {
   var Field = require("data/Control/Field/Field");
   
   var TEMPLATE = '' +
-'<select name="{{:name}}">' +
-'</select>' +
-'<div></div>';
+'<label></label>' +
+'<div><select style="color:black;"></select></div>';
 
-  var OPTION_TEMPLATE = '' +
-'  <option value="{{:value}}">{{:caption}}</option>';
+  var OPTION_TEMPLATE = '<option></option>';
 
   function create_control(self, root, field) {
     root.empty();
     root.append(TEMPLATE);
     
-    self._editor = root.find("select");
-    self._viewer = root.find("div");
+    var label = root.find("label");
+    label.text(field.label);
+    
+    self._dropdown = root.find("select");
     
     var caption_fields = [];
     if (!self._class.object_fields) {
@@ -47,10 +47,10 @@ define(function (require) {
       self._items[value] = caption;
     }
     
-    self._editor.attr("name", field.name);
+    self._dropdown.attr("name", field.name);
     for (var i = 0; i < items.length; i++) {
-      self._editor.append(OPTION_TEMPLATE);
-      var option = self._editor.find("option:last-child");
+      self._dropdown.append(OPTION_TEMPLATE);
+      var option = self._dropdown.find("option:last-child");
       option.attr("value", items[i].value);
       option.text(items[i].caption);
     }
@@ -59,9 +59,8 @@ define(function (require) {
   function DropDownList() {
     Field.call(this, "data/Control/Field", "DropDownList");
     this._class_id = null;
-  	this._editor = null;
-  	this._viewer = null;
-    this._template = null;
+  	this._dropdown = null;
+  	this._value = null;
     this._class = null;
     this._objects = null;
     this._items = {};
@@ -92,37 +91,28 @@ define(function (require) {
   };
 
   DropDownList.prototype.edit = function(on) {
-    if (on) {
-      this._editor.show();
-      this._viewer.hide();
-    } else {
-      this._editor.hide();
-      this._viewer.show();
-    }
+    this._dropdown.attr("disabled", on ? false : true);
   };
 
   DropDownList.prototype.backuped = function() {
-    return this._viewer.attr("value");
+    return this._value;
   };
 
   DropDownList.prototype.commit = function() {
-    var value = this._editor.val();
-    this._viewer.text(this._items[value]);
-    this._viewer.attr("value", value);
+    var value = this._dropdown.val();
+    this._value = value;
   };
 
   DropDownList.prototype.restore = function() {
-    var value = this._viewer.attr("value");
-    this._editor.val(value);
+    this._dropdown.val(this._value);
   };
 
   DropDownList.prototype.data = function(value) {
     if (arguments.length == 0) {
-      return this._editor.val();
+      return this._dropdown.val();
     } else {
-      this._editor.val(value);
-      this._viewer.text(this._items[value]);
-      this._viewer.attr("value", value);
+      this._dropdown.val(value);
+      this._value = value;
     }
   };
   
