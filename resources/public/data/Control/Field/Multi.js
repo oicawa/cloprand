@@ -2,6 +2,7 @@ define(function (require) {
   require("jquery");
   require("w2ui");
   var Utils = require("data/Core/Utils");
+  var Uuid = require("data/Core/Uuid");
   var Connector = require("data/Core/Connector");
   var Dialog = require("data/Core/Dialog");
   var Inherits = require("data/Core/Inherits");
@@ -15,9 +16,6 @@ define(function (require) {
 '<div></div>' +
 '  <div class="toolbar" style="display:none;"></div>' +
 '  <div class="records"></div>' +
-'  <div class="dialog">' +
-'    <div class="detail"></div>' +
-'  </div>' +
 '</div>';
   
   var default_toolbar = {
@@ -30,6 +28,30 @@ define(function (require) {
       { "name": "down",   "caption": "Down",   "description": "Move downward selected item", "operation": "down" }
     ]
   };
+  
+  function showDetailDialog(class_) {
+    var id = Uuid.version4();
+    var buttons = '' +
+      '<input type="button" style="width:100px;" value="OK"/>' +
+      '<input type="button" style="width:100px;" value="Cancel" onclick="w2popup.close();return false;" />';
+    w2popup.open({
+      title   : class_.label,
+      body    : '<div id="' + id + '"></div>',
+      buttons : buttons,
+      width   : 700,
+      height  : 550,
+      onOpen  : function(event) {
+        event.onComplete = function() {
+          var detail = new Detail();
+          detail.init("#" + id, class_)
+          .then(function() {
+            detail.visible(true);
+            detail.edit(true);
+          });
+        }
+      }
+    });
+  }
 
   function Multi() {
     Field.call(this, "data/Control/Field", "Multi");
@@ -62,8 +84,8 @@ define(function (require) {
       label.text(field.label);
       self._toolbar = new Toolbar();
       self._grid = new Grid();
-      self._detail = new Detail();
-      self._dialog = new Dialog();
+      //self._detail = new Detail();
+      //self._dialog = new Dialog();
 
       var toolbar = !assist ? default_toolbar : (!assist.toolbar ? default_toolbar : assist.toolbar);
 
@@ -71,45 +93,39 @@ define(function (require) {
 
       $.when(
         self._toolbar.init(selector + " > div.toolbar", toolbar),
-        self._grid.init(selector + " > div.records", columns, 'height:300px;'),
-        self._detail.init(selector + " > div.dialog > div.detail", class_)
-        .then(function () {
-          self._detail.visible(true);
-          self._detail.edit(true);
-          return self._dialog.init(selector + " > div.dialog", { title: class_.label, selector : root, buttons: [{caption: "OK"}, {caption:"Cancel"}]});
-        })
+        self._grid.init(selector + " > div.records", columns, 'height:300px;')//,
+        //self._detail.init(selector + " > div.dialog > div.detail", class_)
+        //.then(function () {
+        //  self._detail.visible(true);
+        //  self._detail.edit(true);
+        //  return self._dialog.init(selector + " > div.dialog", { title: class_.label, selector : root, buttons: [{caption: "OK"}, {caption:"Cancel"}]});
+        //})
       ).always(function() {
         self._toolbar.bind("add", function(event) {
           //self._detail.data(null);
           //self._dialog.show();
-          w2popup.open({
-            title   : class_.label,
-            body    : '<div id="form"></div>',
-            buttons : 'Buttons HTML',
-            onOpen : function(event) {
-              console.log("Popup dialog was shown.");
-            }
-          });
+          showDetailDialog(class_);
         });
         self._toolbar.bind("edit", function(event) {
           var selection = self._grid.selection();
           if (selection.length != 1) {
-            w2alert("Select one item.");
+            Dialog.show("Select one item.");
             return;
           }
           var index = selection[0];
           var data = self._grid.data()[index];
-          self._detail.data(data);
-          self._dialog.show();
+          //self._detail.data(data);
+          //self._dialog.show();
         });
         self._toolbar.bind("delete", function(event) {
           var selection = self._grid.selection();
           if (selection.length == 0) {
-            w2alert("Select one or more items.");
+            Dialog.show("Select one or more items.");
             return;
           }
-          w2confirm("Delete?")
-          .yes(function () {
+          Dialog.confirm("Delete?", function(answer) {
+            if (answer == "No")
+              return;
             self._grid.delete(selection);
             self._grid.refresh();
           });
@@ -118,12 +134,12 @@ define(function (require) {
           var message = "Select one item. (without 1st)";
           var selection = self._grid.selection();
           if (selection.length != 1) {
-            w2alert(message);
+            Dialog.show(message);
             return;
           }
           var index = selection[0];
           if (index == 0) {
-            w2alert(message);
+            Dialog.show(message);
             return;
           }
           self._grid.move(index, -1);
@@ -134,32 +150,32 @@ define(function (require) {
           var message = "Select one item. (without last)";
           var selection = self._grid.selection();
           if (selection.length == 0) {
-            w2alert(message);
+            Dialog.show(message);
             return;
           }
           var index = selection[0];
           if (index == self._grid.data().length - 1) {
-            w2alert(message);
+            Dialog.show(message);
             return;
           }
           self._grid.move(index, 1);
           self._grid.refresh();
           self._grid.select(index + 1);
         });
-        self._dialog.bind("OK", function(event) {
-          var data = self._detail.data();
-          if (self._detail.is_new()) {
-            self._grid.add(data);
-          } else {
-            var index = self._grid.selection()[0];
-            self._grid.item(index, data);
-          }
-          self._dialog.close();
-          self._grid.refresh();
-        });
-        self._dialog.bind("Cancel", function(event) {
-          self._dialog.close();
-        });
+        //self._dialog.bind("OK", function(event) {
+        //  var data = self._detail.data();
+        //  if (self._detail.is_new()) {
+        //    self._grid.add(data);
+        //  } else {
+        //    var index = self._grid.selection()[0];
+        //    self._grid.item(index, data);
+        //  }
+        //  self._dialog.close();
+        //  self._grid.refresh();
+        //});
+        //self._dialog.bind("Cancel", function(event) {
+        //  self._dialog.close();
+        //});
         dfd.resolve();
       });
     });
