@@ -53,16 +53,16 @@ define(function (require) {
     }
 
     // Create dialog
-    this._root.dialog({
-      autoOpen: false,
-      height: "auto",
-      width: "auto",
-      appendTo: assist.selector,
-      title: assist.title,
-      closeOnEscape: true,
-      modal: true,
-      buttons: buttons
-    });
+    //this._root.dialog({
+    //  autoOpen: false,
+    //  height: "auto",
+    //  width: "auto",
+    //  appendTo: assist.selector,
+    //  title: assist.title,
+    //  closeOnEscape: true,
+    //  modal: true,
+    //  buttons: buttons
+    //});
 
     dfd.resolve();
     return dfd.promise();

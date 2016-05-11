@@ -2,6 +2,7 @@ define(function (require) {
   require("jquery");
   require("w2ui");
   var Utils = require("data/Core/Utils");
+  var Connector = require("data/Core/Connector");
   var Dialog = require("data/Core/Dialog");
   var Inherits = require("data/Core/Inherits");
   var Toolbar = require("data/Control/Toolbar");
@@ -10,10 +11,13 @@ define(function (require) {
   var Field = require("data/Control/Field/Field");
   
   var TEMPLATE = '' +
-'<div class="toolbar" style="display:none;"></div>' +
-'<div class="records"></div>' +
-'<div class="dialog">' +
-'  <div class="detail"></div>' +
+'<label></label>' +
+'<div></div>' +
+'  <div class="toolbar" style="display:none;"></div>' +
+'  <div class="records"></div>' +
+'  <div class="dialog">' +
+'    <div class="detail"></div>' +
+'  </div>' +
 '</div>';
   
   var default_toolbar = {
@@ -46,17 +50,16 @@ define(function (require) {
       return dfd.promise();
     }
 
-    // Load template data & Create form tags
-    var template = $.templates(TEMPLATE);
     var class_ = null;
     var self = this;
     $.when(
-      Utils.get_data(Utils.CLASS_ID, field.datatype.class, function (data) { class_ = data; })
+      Connector.crud.read("api/" + Utils.CLASS_ID + "/" + field.datatype.class, "json", function (data) { class_ = data; })
     ).always(function() {
-      var html = template.render(field);
-      root.append(html);
+      root.append(TEMPLATE);
       
       // Create controls
+      var label = root.find("label");
+      label.text(field.label);
       self._toolbar = new Toolbar();
       self._grid = new Grid();
       self._detail = new Detail();
@@ -77,8 +80,16 @@ define(function (require) {
         })
       ).always(function() {
         self._toolbar.bind("add", function(event) {
-          self._detail.data(null);
-          self._dialog.show();
+          //self._detail.data(null);
+          //self._dialog.show();
+          w2popup.open({
+            title   : class_.label,
+            body    : '<div id="form"></div>',
+            buttons : 'Buttons HTML',
+            onOpen : function(event) {
+              console.log("Popup dialog was shown.");
+            }
+          });
         });
         self._toolbar.bind("edit", function(event) {
           var selection = self._grid.selection();

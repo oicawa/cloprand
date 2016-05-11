@@ -5,8 +5,8 @@ define(function (require) {
   var Field = require("data/Control/Field/Field");
   
   var TEMPLATE = '' +
-'<div class="editor"><label><input type="checkbox" name="{{:name}}" /> {{:description}}<label></div>' +
-'<div class="renderer"><input type="checkbox" name="{{:name}}" onclick="return false;" /> {{:description}}</div>';
+'<label></label>' +
+'<div><label><input type="checkbox" /><span></span></label></div>';
   
   function parse_value(value) {
     // false, 0, null, undefined
@@ -38,18 +38,22 @@ define(function (require) {
   }
 
   function create_control(self, field) {
-    var html = self._template.render(field);
-    self._root.append(html);
-    self._editor = self._root.find("div.editor");
-    self._renderer = self._root.find("div.renderer");
+    self._root.append(TEMPLATE);
+    
+    var label = self._root.children("label");
+    label.text(field.label);
+    
+    var description = self._root.find("span");
+    description.text(field.description);
+    
+    self._checkbox = self._root.find("input[type='checkbox']");
   }
   
   function Boolean() {
     Field.call(this, "data/Control/Field", "Boolean");
-  	this._root = null;
-    this._template = null;
-    this._editor = null;
-    this._renderer = null;
+    this._root = null;
+    this._checkbox = null;
+    this._value = null;
   };
   Inherits(Boolean, Field);
 
@@ -64,7 +68,6 @@ define(function (require) {
     var self = this;
     
     // Create form tags
-    self._template = $.templates(TEMPLATE);
     create_control(self, field);
     
     dfd.resolve();
@@ -73,35 +76,30 @@ define(function (require) {
 
   Boolean.prototype.edit = function(on) {
     if (on) {
-      this._editor.show();
-      this._renderer.hide();
+      this._checkbox.removeAttr("onclick");
     } else {
-      this._editor.hide();
-      this._renderer.show();
+      this._checkbox.attr("onclick", "return false;");
     }
   };
 
   Boolean.prototype.backuped = function() {
-    var value = checked(this._editor);
-    return checked(this._renderer, value);
+    return this._value;
   };
 
   Boolean.prototype.commit = function() {
-    var value = checked(this._editor);
-    checked(this._renderer, value);
+    this._value = this._checkbox.prop("checked");
   };
 
   Boolean.prototype.restore = function() {
-    var value = checked(this._renderer);
-    checked(this._editor, value);
+    this._checkbox.prop("checked", this._value);
   };
   
   Boolean.prototype.data = function(value) {
     if (arguments.length == 0) {
-      return checked(this._editor);
+      return this._checkbox.prop("checked");
     } else {
-      checked(this._editor, value);
-      checked(this._renderer, value);
+      this._checkbox.prop("checked", value);
+      this._value = value;
     }
   };
 

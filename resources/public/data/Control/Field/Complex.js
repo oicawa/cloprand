@@ -1,11 +1,13 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("data/Core/Utils");
+  var Connector = require("data/Core/Connector");
   var Inherits = require("data/Core/Inherits");
   var Detail = require("data/Control/Detail");
   var Field = require("data/Control/Field/Field");
   
   var TEMPLATE = '' +
+'<label></label>' +
 '<div class="complex">' +
 '  <div class="detail"></div>' +
 '</div>';
@@ -29,12 +31,13 @@ define(function (require) {
     var class_ = null;
     var self = this;
     $.when(
-      Utils.get_data(Utils.CLASS_ID, field.datatype.class, function (data) { class_ = data; })
+      Connector.crud.read("api/" + Utils.CLASS_ID + "/" + field.datatype.class, "json", function (data) { class_ = data; })
     ).always(function() {
-      var html = TEMPLATE;
-      root.append(html);
+      root.append(TEMPLATE);
       
       // Create controls
+      var label = root.find("label");
+      label.text(field.label);
       self._detail = new Detail();
       $.when(
         self._detail.init(selector + " > div.complex > div.detail", class_)
