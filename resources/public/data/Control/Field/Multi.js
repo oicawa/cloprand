@@ -13,7 +13,7 @@ define(function (require) {
   
   var TEMPLATE = '' +
 '<label></label>' +
-'<div></div>' +
+'<div>' +
 '  <div class="toolbar" style="display:none;"></div>' +
 '  <div class="records"></div>' +
 '</div>';
@@ -29,24 +29,52 @@ define(function (require) {
     ]
   };
   
-  function showDetailDialog(class_) {
-    var id = Uuid.version4();
+  function showDetailDialog(self, class_, data) {
+    var body_id = Uuid.version4();
+    var ok_id = Uuid.version4();
+    var cancel_id = Uuid.version4();
     var buttons = '' +
-      '<input type="button" style="width:100px;" value="OK"/>' +
-      '<input type="button" style="width:100px;" value="Cancel" onclick="w2popup.close();return false;" />';
+      '<input type="button" style="width:100px;" value="OK" id="' + ok_id + '" />' +
+      '<input type="button" style="width:100px;" value="Cancel" id="' + cancel_id + '" />';
+    var detail = new Detail();
     w2popup.open({
       title   : class_.label,
-      body    : '<div id="' + id + '"></div>',
+      body    : '<div id="' + body_id + '"></div>',
       buttons : buttons,
-      width   : 700,
-      height  : 550,
+      //width   : 700,
+      //height  : 550,
       onOpen  : function(event) {
         event.onComplete = function() {
-          var detail = new Detail();
-          detail.init("#" + id, class_)
+          $("#" + ok_id).on("click", function(event) {
+            console.log("[OK] clicked");
+            var data = detail.data();
+            if (detail.is_new()) {
+              self._grid.add(data);
+            } else {
+              var index = self._grid.selection()[0];
+              self._grid.item(index, data);
+            }
+            self._grid.refresh();
+            w2popup.close();
+            return false;
+          });
+          $("#" + cancel_id).on("click", function(event) {
+            console.log("[Cancel] clicked");
+            w2popup.close();
+            return false;
+          });
+          detail.init("#" + body_id, class_)
           .then(function() {
+            detail.data(data);
             detail.visible(true);
             detail.edit(true);
+            var width = detail._root.css("width");
+            var height = detail._root.css("height");
+            console.log("[Step1] width=" + width + ", height=" + height);
+            width = parseInt(width);
+            height = parseInt(height)　+ 120;
+            console.log("[Step2] width=" + width + ", height=" + height);
+            w2popup.resize(width, height);
           });
         }
       }
@@ -92,8 +120,8 @@ define(function (require) {
       var columns = Grid.create_columns(class_);
 
       $.when(
-        self._toolbar.init(selector + " > div.toolbar", toolbar),
-        self._grid.init(selector + " > div.records", columns, 'height:300px;')//,
+        self._toolbar.init(selector + " > div > div.toolbar", toolbar),
+        self._grid.init(selector + " > div > div.records", columns, 'height:300px;')//,
         //self._detail.init(selector + " > div.dialog > div.detail", class_)
         //.then(function () {
         //  self._detail.visible(true);
@@ -104,7 +132,7 @@ define(function (require) {
         self._toolbar.bind("add", function(event) {
           //self._detail.data(null);
           //self._dialog.show();
-          showDetailDialog(class_);
+          showDetailDialog(self, class_, null);
         });
         self._toolbar.bind("edit", function(event) {
           var selection = self._grid.selection();
@@ -116,6 +144,7 @@ define(function (require) {
           var data = self._grid.data()[index];
           //self._detail.data(data);
           //self._dialog.show();
+          showDetailDialog(self, class_, data);
         });
         self._toolbar.bind("delete", function(event) {
           var selection = self._grid.selection();

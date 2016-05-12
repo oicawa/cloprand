@@ -26,10 +26,6 @@ define(function (require) {
     var tab = $(event.originalEvent.target).closest("div.tab-panel");
     var index = event.recid - 1;
     var tab_id = tab.prop("id");
-    //var ids = tab_id.split("_");
-    //var prefix = 0 < ids.length ? ids[0] : null;
-    //var class_id = 1 < ids.length ? ids[1] : null;
-    //var object_id = 2 < ids.length ? ids[2] : null;
 
     // Get clicked data (from 'tab_id'->'view'->'grid'->'data'-> item of the selected index row.)
     var view = app.contents().content(tab_id);
@@ -83,7 +79,6 @@ define(function (require) {
       Connector.crud.read("api/" + Utils.CLASS_ID, "json", function (data) { classes = data; }),
       Connector.crud.read("api/" + Utils.CLASS_ID + "/" +  Utils.CLASS_ID, "json", function (data) { class_ = data; })
     ).always(function() {
-      console.log("*** MenuView.css");
       view.append(TEMPLATE);
       var columns = Grid.create_columns(class_);
       self._grid.init(grid_selector, columns)

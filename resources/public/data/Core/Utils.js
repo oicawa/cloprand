@@ -33,7 +33,6 @@ define(function (require) {
       link.type = 'text/css';
       link.href = path;
       link.onload = function() {
-        console.log("*** css loaded (" + path + ")");
         dfd.resolve();
       };
       

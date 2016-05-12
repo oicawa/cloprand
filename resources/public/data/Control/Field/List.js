@@ -1,25 +1,24 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("data/Core/Utils");
+  var Connector = require("data/Core/Connector");
   var Inherits = require("data/Core/Inherits");
   var Field = require("data/Control/Field/Field");
   
   var TEMPLATE = '' +
-'<div class="editor">' +
-'  <select name="{{:name}}" multiple size="10">' +
-'  {{for items}}' +
-'    <option value="{{:value}}">{{:caption}}</option>' +
-'  {{/for}}' +
-'  </select>' +
-'</div>' +
-'<div class="viewer">' +
+'<label></label>' +
+'<div>' +
+'  <select multiple size="8" style="color:black;"></select>' +
+'  <div class="viewer"></div>' +
 '</div>';
+
+  var OPTION_TEMPLATE = '<option style="color:black;"></option>';
   
   function List() {
     Field.call(this, "data/Control/Field", "List");
     this._class = null;
-  	this._editor = null;
-  	this._viewer = null;
+    this._list = null;
+    this._viewer = null;
     this._items = null;
     this._values = null;
   }
@@ -27,7 +26,7 @@ define(function (require) {
 
   function get_selected_values(self) {
     var values = [];
-    var options = self._editor.find("option");
+    var options = self._list.find("option");
     for (var i = 0; i < options.length; i++) {
       var option = options[i];
       if (!option.selected) {
@@ -41,19 +40,26 @@ define(function (require) {
   List.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
     var root = $(selector);
-    var template = $.templates(TEMPLATE);
     var class_id = field.datatype["class"];
     var self = this;
     $.when(
-      Utils.get_data(Utils.CLASS_ID, class_id, function(response) { self._class = response; }),
-      Utils.get_data(class_id, null, function(response) { self._items = response; })
+      Connector.crud.read("api/" + Utils.CLASS_ID + "/" + class_id, "json", function(response) { self._class = response; }),
+      Connector.crud.read("api/" + class_id, "json", function(response) { self._items = response; })
     ).always(function() {
       var key_field_name = self._class.object_fields.filter(function(field) { return !(!field.key); }).map(function(field) { return field.name; })[0];
       var caption_field_names = self._class.object_fields.filter(function(field) { return !(!field.caption); }).map(function(field) { return field.name; });
       var items = self._items.map(function(item) { return { "value" : item[key_field_name], "caption" : item[caption_field_names[0]] }; });
-      var html = template.render({ "name" : field.name, "items" : items });
-      root.append(html);
-      self._editor = root.find("div.editor");
+      root.append(TEMPLATE);
+      var label = root.find("label");
+      label.text(field.label);
+      self._list = root.find("select");
+      self._list.attr("name", field.name);
+      for (var i = 0; i < items.length; i++) {
+        self._list.append(OPTION_TEMPLATE);
+        var option = self._list.find("option:last-child");
+        option.attr("value", items[i].value);
+        option.text(items[i].caption);
+      }
       self._viewer = root.find("div.viewer");
       dfd.resolve();
     });
@@ -62,10 +68,10 @@ define(function (require) {
 
   List.prototype.edit = function(on) {
     if (on) {
-      this._editor.show();
+      this._list.show();
       this._viewer.hide();
     } else {
-      this._editor.hide();
+      this._list.hide();
       this._viewer.show();
     }
   };
@@ -89,7 +95,7 @@ define(function (require) {
     }
     
     // change selected attribute
-    var options = this._editor.find("option");
+    var options = this._list.find("option");
     for (var i = 0; i < options.length; i++) {
       var option = options[i];
       var value = option.value;
