@@ -221,7 +221,7 @@ define(function (require) {
         self._toolbar.bind("save", DetailView.save);
         self._toolbar.bind("cancel", DetailView.cancel);
         self._detail.visible(true);
-        if (self._object_id == Utils.NULL_UUID) {
+        if (self._object_id == Uuid.NULL) {
           edit_toolbar(self._toolbar, true);
           self._detail.edit(true);
         } else {

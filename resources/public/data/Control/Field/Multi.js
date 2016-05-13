@@ -71,7 +71,7 @@ define(function (require) {
             var width = detail._root.css("width");
             var height = detail._root.css("height");
             console.log("[Step1] width=" + width + ", height=" + height);
-            width = parseInt(width);
+            width = parseInt(width) + 200;
             height = parseInt(height)　+ 120;
             console.log("[Step2] width=" + width + ", height=" + height);
             w2popup.resize(width, height);
