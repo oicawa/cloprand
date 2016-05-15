@@ -129,7 +129,6 @@ define(function (require) {
     //this.content(new_id, content);
     //this.select(new_id);
     
-    debugger;
     var tab_id = this._idmap[old_name];
     delete this._idmap[old_name];
     this._idmap[new_name] = tab_id;

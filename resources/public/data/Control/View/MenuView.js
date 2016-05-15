@@ -54,7 +54,7 @@ define(function (require) {
 
     var classes = null;
     var self = this;
-    Utils.get_data(Utils.CLASS_ID, null, function (data) { classes = data; })
+    Connector.crud.read("api/" + Utils.CLASS_ID, "json", function (data) { classes = data; })
     .then(function () {
       self._grid.data(classes);
     });
@@ -84,7 +84,11 @@ define(function (require) {
       self._grid.init(grid_selector, columns)
       .then(function () {
         self._grid.add_operation("click", MenuView.show_gridview);
-        self._grid.data(classes);
+        var menus = classes.filter(function(class_) {
+          debugger;
+          return class_.application == true;
+        });
+        self._grid.data(menus);
         self.refresh();
       });
     });

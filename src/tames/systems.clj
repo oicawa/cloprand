@@ -127,12 +127,6 @@
                   (. path substring (+ start 1)))]
     ext))
 
-;(defn get-object
-;  [class-id object-id]
-;  (let [object-path (get-absolute-path (format "data/%s/%s.json" class-id object-id))
-;        object      (with-open [rdr (io/reader object-path)]
-;                      (json/read rdr))]
-;    object))
 (defn get-object
   [path]
   (with-open [rdr (io/reader (format (if (= (get-file-extension path) "")
@@ -140,29 +134,17 @@
                                          "%s")
                                      path))]
     (json/read rdr)))
+
 (defn get-file-contents
   [path]
   { "file_path" path "file_contents" (slurp path) })
 
-;(defn get-object-as-json
-;  [class-id object-id]
-;  (json/write-str (get-object class-id object-id)))
 (defn get-object-as-json
   [path]
   (json/write-str (if (= (get-file-extension path) "")
                       (get-object path)
                       (get-file-contents path))))
       
-
-;(defn get-objects
-;  [class-id]
-;  (let [class-dir (File. (get-absolute-path (str "data/" class-id)))
-;        files     (filter #(. %1 isFile)
-;                          (file-seq class-dir))
-;        objects   (map #(with-open [rdr (io/reader (. %1 getAbsolutePath))]
-;                         (json/read rdr))
-;                       files)]
-;    (json/write-str objects)))
 (defn get-objects
   [path]
   (let [dir     (File. path)
@@ -174,7 +156,7 @@
                               (get-object (. %1 getAbsolutePath))
                             :else
                               {"name" name "dir" false}))
-                     (. dir listFiles))]
+                     (sort (. dir listFiles)))]
     (json/write-str objects)))
 
 (defn get-resource-classes
@@ -250,13 +232,6 @@
       (response/response (json/write-str { "file_name" file-name "file_contents" file_contents }))
       "text/text; charset=utf-8")))
 
-;(defn get-data
-;  [class-id object-id]
-;  (response-with-content-type
-;    (response/response (if (nil? object-id)
-;                           (get-objects class-id)
-;                           (get-object-as-json class-id object-id)))
-;    "text/json; charset=utf-8"))
 (defn get-data
   [resource-path]
   (let [path       (get-absolute-path (str "data/" resource-path))
