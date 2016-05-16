@@ -4,13 +4,17 @@ define(function (require) {
   
   function send(method, url, data, data_type, on_succeeded, on_failed) {
     var dfd = new $.Deferred;
+    var formData = new FormData();
+    formData.append("value", JSON.stringify(data));
     $.ajax({
       type: method,
       url: url,
-      //contentType: "multipart/form-data"
+      contentType: false,
+      processData: false,
       dataType: data_type,
       cache: false,
-      data: { "value" : JSON.stringify(data) }
+      //data: { "value" : JSON.stringify(data) }
+      data: formData
     }).done(function (response, status) {
       if (typeof on_succeeded == "function") {
         on_succeeded(response);

@@ -85,7 +85,6 @@ define(function (require) {
       .then(function () {
         self._grid.add_operation("click", MenuView.show_gridview);
         var menus = classes.filter(function(class_) {
-          debugger;
           return class_.application == true;
         });
         self._grid.data(menus);
