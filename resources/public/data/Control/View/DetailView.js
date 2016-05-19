@@ -30,6 +30,21 @@ define(function (require) {
       toolbar.hide("cancel");
     }
   };
+  
+  function get_files(fields, data) {
+    var files_fields = fields.filter(function(field, index) {
+      return field.datatype.primitive == "Files";
+    });
+    var files = {};
+    for (var i = 0; i < files_fields.length; i++) {
+      var field = files_fields[i];
+      var added = data[field.name].added;
+      for (var key in added) {
+        files[key] = added[key];
+      }
+    }
+    return files;
+  };
 
   function DetailView () {
     this._class_id = null;
@@ -80,9 +95,10 @@ define(function (require) {
     console.assert(0 < key_field_names.length, key_field_names);
     console.assert(0 < caption_field_names.length, caption_field_names);
     var key_field_name = key_field_names[0];
+    var files = get_files(fields, data);
     
     if (detail.is_new()) {
-      Connector.crud.create("api/" + tab_info.class_id, data, function(response) { object = response;})
+      Connector.crud.create("api/" + tab_info.class_id, data, files, function(response) { object = response;})
       .then(function() {
         edit_toolbar(view.toolbar(), false);
         detail.edit(false);
@@ -97,7 +113,8 @@ define(function (require) {
     } else {
       if (!data[key_field_name])
         data[key_field_name] = tab_info.object_id;
-      Connector.crud.update("api/" + tab_info.class_id + "/" + data[key_field_name], data, function(response) { object = response; })
+      Connector.crud.update("api/" + tab_info.class_id + "/" + data[key_field_name], data, files, function(response) { object = response; })
+      //Connector.crud.create("api/" + tab_info.class_id, data, files, function(response) { object = response;})
       .then(function() {
         edit_toolbar(view.toolbar(), false);
         detail.edit(false);

@@ -1,6 +1,7 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("data/Core/Utils");
+  var Uuid = require("data/Core/Uuid");
   var Inherits = require("data/Core/Inherits");
   var Field = require("data/Control/Field/Field");
   
@@ -8,7 +9,7 @@ define(function (require) {
 '<label></label>' +
 '<div>' +
 '  <div class="list"></div>' +
-'  <div class="droparea"><input></input></div>' +
+'  <div class="droparea"><input type="file" multiple="true"></input></div>' +
 '</div>';
   var ITEM_TEMPLATE = '' +
 '<div class="item" style="border:solid 1px gray;">' +
@@ -21,9 +22,7 @@ define(function (require) {
     Field.call(this, "data/Control/Field", "Files");
     this._list = null;
     this._drop = null;
-    this._values = [];
-    this.added = [];
-    this.removed = {};
+    this._values = {};
   };
   Inherits(Files, Field);
   
@@ -48,7 +47,6 @@ define(function (require) {
     });
     self._droparea = root.find("div.droparea");
     self._drop = root.find("input");
-    self._drop.w2field("file", {style: "width:400px;"});
     
     dfd.resolve();
     return dfd.promise();
@@ -91,7 +89,15 @@ define(function (require) {
 
   Files.prototype.data = function(value) {
     if (arguments.length == 0) {
-      return this._drop.val();
+      var added = {};
+      for (var i = 0; i < this._drop.prop("files").length; i++) {
+        added["file_" + Uuid.version4()] = this._drop.prop("files")[i];
+      }
+      if (!this._values) {
+        this._values = {};
+      }
+      this._values.added = added;
+      return this._values;
     } else {
       this._values = value;
       this.refresh();

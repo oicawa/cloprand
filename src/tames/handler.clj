@@ -2,6 +2,7 @@
   (:gen-class)
   (:use ring.adapter.jetty)
   (:require [clojure.pprint :as pprint]
+            [clojure.java.io :as io]
             [compojure.core :refer :all]
             [compojure.route :as route]
             [buddy.auth :refer [authenticated?]]
@@ -79,6 +80,11 @@
 ;        (systems/create-authorized-result true "/index.html")
 ;        (systems/create-authorized-result false (format "/login?next=%s" (:uri req))))))
 
+(defn copy-file
+  [src-path dst-path]
+  (with-open [src (io/input-stream src-path)]
+    (io/copy src (File. dst-path))))
+
 (defroutes app-routes
   ;; Authentication
   (GET "/login" req
@@ -112,10 +118,35 @@
     (systems/post-data class-id (json/read-str (params :value))))
   (PUT "/api/:class-id/:object-id" [class-id object-id & params]
     (println (str "[PUT] /api/:class-id/:object-id = /api/" class-id "/" object-id))
+    ;(println "----------")
+    ;(pprint/pprint (json/read-str (params :value)))
+    ;(pprint/pprint params)
+    ;(println "----------")
+    (let [value        (json/read-str (params :value))
+          added-files  (dissoc params :value)
+          class_       (systems/get-object (format "data/%s/%s" systems/CLASS_ID class-id))
+          files_fields (filter #(= ((%1 "datatype") "primitive") "Files") (class_ "object_fields"))
+          ]
     (println "----------")
-    (pprint/pprint (json/read-str (params :value)))
-    (println "----------")
-    (systems/put-data class-id object-id (json/read-str (params :value))))
+    ;(pprint/pprint files_fields)
+    ;(pprint/pprint (class_ "object_fields"))
+    (pprint/pprint added-files)
+    ;Ensure object folder
+    (doseq [field files_fields]
+      (let [dst-dir-path (format "data/%s/.%s/%s" class-id, object-id (field "name"))
+            file-keys    (keys ((value (field "name")) "added"))]
+        (systems/ensure-directory dst-dir-path)
+        ;(pprint/pprint file-keys)
+        (doseq [file-key file-keys]
+          (println file-key)
+          (let [file     (added-files (keyword file-key))
+                tmp-file (file :tempfile)
+                dst-file (format "%s/%s" dst-dir-path (file :filename))]
+            (io/copy tmp-file (File. dst-file))))))
+    ;Ensure field folder
+    ;Copy tmp file to field folder
+    ;Convert value data (delete 'Files' field, and added to 'current' field.)
+    (systems/put-data class-id object-id value)))
   (DELETE "/api/:class-id/:object-id" [class-id object-id]
     (println (str "[DELETE] /api/:class-id/:object-id = /api/" class-id "/" object-id))
     (systems/delete-data class-id object-id))

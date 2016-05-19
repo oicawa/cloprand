@@ -144,11 +144,11 @@
   (json/write-str (if (= (get-file-extension path) "")
                       (get-object path)
                       (get-file-contents path))))
-      
+
 (defn get-objects
   [path]
   (let [dir     (File. path)
-        objects (map #(let [is-dir? (. % isDirectory)
+        objects (map #(let [is-dir? (. %1 isDirectory)
                             name    (. %1 getName)]
                        (cond is-dir?
                               {"name" name "dir" true}
@@ -156,7 +156,8 @@
                               (get-object (. %1 getAbsolutePath))
                             :else
                               {"name" name "dir" false}))
-                     (sort (. dir listFiles)))]
+                     (filter #(not (and (. %1 isDirectory) (.. %1 getName (startsWith "."))))
+                             (sort (. dir listFiles))))]
     (json/write-str objects)))
 
 (defn get-resource-classes
@@ -290,9 +291,21 @@
 (defn update-object
   [class-id object-id s-exp-data]
   (println "Called update-object function.")
-  (let [object-file (File. (get-absolute-path (str "data/" class-id "/" object-id ".json")))]
+  (let [object-file (File. (get-absolute-path (str "data/" class-id "/" object-id ".json")))
+        ;; !! CAUTION !!
+        ;; Implement decode logic to decode the uploaded files data
+        ;; 1. Extract uploaded files data.
+        ;; 2. Delete the contents data only from s-exp-data.(Rest file name)
+        ;; 3. Create UUID as saved real file name, and map uploaded file name.
+        ;; 4. Save file data. (named UUID)
+        ;s-exp-data2 (save-files-data s-exp-data)
+        ]
     ;; !! CAUTION !!
     ;; Implement 'param' data check logic!!
+    
+    
+    ;(filters-exp-data
+    
     (with-open [w (io/writer object-file)]
       (json/write s-exp-data w))))
 

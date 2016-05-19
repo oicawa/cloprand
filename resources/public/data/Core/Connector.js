@@ -2,10 +2,15 @@ define(function (require) {
   require('jquery');
   require('json2');
   
-  function send(method, url, data, data_type, on_succeeded, on_failed) {
+  function send(method, url, data, files, data_type, on_succeeded, on_failed) {
     var dfd = new $.Deferred;
     var formData = new FormData();
     formData.append("value", JSON.stringify(data));
+    if (files) {
+      for (var key in files) {
+        formData.append(key, files[key]);
+      }
+    }
     $.ajax({
       type: method,
       url: url,
@@ -51,20 +56,20 @@ define(function (require) {
     send : send,
     session: function(key, on_succeeded, on_failed) {
       var url = "/session/" + key;
-      return send("GET", url, null, "json", on_succeeded, on_failed);
+      return send("GET", url, null, null, "json", on_succeeded, on_failed);
     },
     crud : {
-      create : function(url, data, on_succeeded, on_failed) {
-        return send("POST", url, data, "json", on_succeeded, on_failed);
+      create : function(url, data, files, on_succeeded, on_failed) {
+        return send("POST", url, data, files, "json", on_succeeded, on_failed);
       },
       read : function(url, data_type, on_succeeded, on_failed) {
-        return send("GET", url, null, data_type, on_succeeded, on_failed);
+        return send("GET", url, null, null, data_type, on_succeeded, on_failed);
       },
-      update : function(url, data, on_succeeded, on_failed) {
-        return send("PUT", url, data, "json", on_succeeded, on_failed);
+      update : function(url, data, files, on_succeeded, on_failed) {
+        return send("PUT", url, data, files, "json", on_succeeded, on_failed);
       },
       delete : function(url, on_succeeded, on_failed) {
-        return send("DELETE", url, null, "json", on_succeeded, on_failed);
+        return send("DELETE", url, null, null, "json", on_succeeded, on_failed);
       }
     },
   };
