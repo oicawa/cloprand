@@ -68,9 +68,12 @@ define(function (require) {
   Tabs.prototype.select = function (tab_name_or_id) {
     var tab_id = get_tab_id(this, tab_name_or_id);
     var tab = this._tabs.get(tab_id);
-    this._body.children(".tab-panel").css("display", "none");
+    this._body.children(".tab-panel").hide();
     this._tabs.select(tab_id);
-    this._body.find("#" + tab_id).css("display", "block");
+    this._body.find("#" + tab_id).show();
+    var view = this._contents[tab_id];
+    if (view)
+      view.refresh();
     
     if (this._history.length == 0) {
       this._history = [tab_id];
