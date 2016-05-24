@@ -12,7 +12,8 @@
             [hiccup.core :refer [html]]
             [clojure.data.json :as json]
             [tames.systems :as systems])
-  (:import (java.io File)))
+  (:import (java.io File)
+           (java.net URLDecoder)))
 
 (def content-types {""     ""
                     "css"  "text/css"
@@ -85,6 +86,35 @@
   (with-open [src (io/input-stream src-path)]
     (io/copy src (File. dst-path))))
 
+(defn save-attached-files
+  [class-id object-id value files_fields added-files]
+  (doseq [field files_fields]
+    (let [dst-dir-path (format "data/%s/.%s/%s" class-id, object-id (field "name"))
+          file-keys    (keys ((value (field "name")) "added"))]
+      (systems/ensure-directory dst-dir-path)
+      ;(pprint/pprint file-keys)
+      (doseq [file-key file-keys]
+        ;(println file-key)
+        (let [file     (added-files (keyword file-key))
+              tmp-file (file :tempfile)
+              dst-file (format "%s/%s" dst-dir-path (file :filename))]
+          (io/copy tmp-file (File. dst-file)))))))
+
+(defn get-files-fields
+  [class-id]
+  (let [class_ (systems/get-object systems/CLASS_ID class-id)]
+    (filter #(= ((%1 "datatype") "primitive") "Files")
+            (class_ "object_fields"))))
+
+(defn erase-files-values
+  [files_fields raw-value]
+  (let [field_names (map #(%1 "name") files_fields)]
+    (loop [names field_names
+           value raw-value]
+      (if (empty? names)
+          value
+          (recur (rest names) (dissoc value (first names)))))))
+
 (defroutes app-routes
   ;; Authentication
   (GET "/login" req
@@ -101,52 +131,26 @@
         (response/header "Content-Type" (content-types "html"))))
   
   ;; REST API for CRUD
-  ;(GET "/api/:class-id" [class-id]
-  ;  (println (str "[GET] /api/:class-id = /api/" class-id))
-  ;  (systems/get-data class-id nil))
-  ;(GET "/api/:class-id/:object-id" [class-id object-id]
-  ;  (println (format "[GET] /api/:class-id/:object-id = /api/%s/%s" class-id object-id))
-  ;  (systems/get-data class-id object-id))
-  ;(GET "/api/:resource-path" [resource-path]
-  ;  (println (str "[GET] /api/:resource-path = /api/" resource-path))
-  ;  (systems/get-data resource-path))
-  (GET "/api/*" [& params]
-    (println (format "[GET] /api/* (path=%s)" (params :*)))
-    (systems/get-data (params :*)))
+  (GET "/api/:class-id" [class-id]
+    (println (str "[GET] /api/:class-id = /api/" class-id))
+    (systems/get-data class-id nil))
+  (GET "/api/:class-id/:object-id" [class-id object-id]
+    (println (format "[GET] /api/:class-id/:object-id = /api/%s/%s" class-id object-id))
+    (systems/get-data class-id object-id))
   (POST "/api/:class-id" [class-id & params]	;;; https://github.com/weavejester/compojure/wiki/Destructuring-Syntax
     (println (str "[POST] /api/:class-id = /api/" class-id))
-    (systems/post-data class-id (json/read-str (params :value))))
+    (let [json-str     (URLDecoder/decode (params :value) "UTF-8")
+          value        (json/read-str json-str)]
+      (systems/post-data class-id value)))
   (PUT "/api/:class-id/:object-id" [class-id object-id & params]
     (println (str "[PUT] /api/:class-id/:object-id = /api/" class-id "/" object-id))
-    ;(println "----------")
-    ;(pprint/pprint (json/read-str (params :value)))
-    ;(pprint/pprint params)
-    ;(println "----------")
-    (let [value        (json/read-str (params :value))
+    (let [json-str     (URLDecoder/decode (params :value) "UTF-8")
+          value        (json/read-str json-str)
           added-files  (dissoc params :value)
-          class_       (systems/get-object (format "data/%s/%s" systems/CLASS_ID class-id))
-          files_fields (filter #(= ((%1 "datatype") "primitive") "Files") (class_ "object_fields"))
-          ]
-    (println "----------")
-    ;(pprint/pprint files_fields)
-    ;(pprint/pprint (class_ "object_fields"))
-    (pprint/pprint added-files)
-    ;Ensure object folder
-    (doseq [field files_fields]
-      (let [dst-dir-path (format "data/%s/.%s/%s" class-id, object-id (field "name"))
-            file-keys    (keys ((value (field "name")) "added"))]
-        (systems/ensure-directory dst-dir-path)
-        ;(pprint/pprint file-keys)
-        (doseq [file-key file-keys]
-          (println file-key)
-          (let [file     (added-files (keyword file-key))
-                tmp-file (file :tempfile)
-                dst-file (format "%s/%s" dst-dir-path (file :filename))]
-            (io/copy tmp-file (File. dst-file))))))
-    ;Ensure field folder
-    ;Copy tmp file to field folder
-    ;Convert value data (delete 'Files' field, and added to 'current' field.)
-    (systems/put-data class-id object-id value)))
+          files_fields (get-files-fields class-id)]
+      (save-attached-files class-id object-id value files_fields added-files)
+      (let [clean-value (erase-files-values files_fields value)]
+        (systems/put-data class-id object-id clean-value))))
   (DELETE "/api/:class-id/:object-id" [class-id object-id]
     (println (str "[DELETE] /api/:class-id/:object-id = /api/" class-id "/" object-id))
     (systems/delete-data class-id object-id))

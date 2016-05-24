@@ -68,24 +68,25 @@ define(function (require) {
   };
   
   ListView.prototype.update = function (keys) {
-  	var target = false;
-  	for (var i = 0; i < keys.length; i++) {
-  	  var key = keys[i];
-  	  if (key.class_id == this._class_id) {
-  	    target = true;
-  	    break;
-  	  }
-  	}
+    var target = false;
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      if (key.class_id == this._class_id) {
+        target = true;
+        break;
+      }
+    }
 
-  	if (!target) {
-  	  return;
-  	}
+    if (!target) {
+      return;
+    }
 
-  	var objects = null;
-  	var self = this;
+    var objects = null;
+    var self = this;
     Connector.crud.read("api/" + key.class_id, "json", function (data) { objects = data; })
     .then(function () {
       self._grid.data(objects);
+      self._grid.refresh();
     });
   };
   

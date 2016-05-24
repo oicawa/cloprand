@@ -72,9 +72,9 @@ define(function (require) {
       var objects = null;
       Connector.crud.delete("api/" + tab_info.class_id + "/" + tab_info.object_id, function(response) { objects = response; })
       .then(function() {
-        Dialog.show("Deleted", "Delete");
-        app.contents().remove(tab_info.tab_id);
         app.contents().broadcast(tab_info.class_id, tab_info.object_id, null);
+        app.contents().remove(tab_info.tab_id);
+        Dialog.show("Deleted", "Delete");
       });
     });
   };
@@ -106,7 +106,7 @@ define(function (require) {
         var old_tab_name = tab_info.tab_id;
         var new_tab_name = Tabs.create_tab_name([tab_info.prefix, tab_info.class_id, object[key_field_name]]);
         var label = caption_field_names.map(function(name) { return object[name]; }).join(" ");
-        app.contents().change(old_tab_name, new_tab_name, label);
+        app.contents().label(tab_info.tab_id, label);
         app.contents().broadcast(tab_info.class_id, object[key_field_name], object);
         Dialog.show("New item was created successfully.", "Save");
       });

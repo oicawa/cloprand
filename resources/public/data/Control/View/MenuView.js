@@ -57,6 +57,7 @@ define(function (require) {
     Connector.crud.read("api/" + Utils.CLASS_ID, "json", function (data) { classes = data; })
     .then(function () {
       self._grid.data(classes);
+      self._grid.refresh();
     });
   };
   

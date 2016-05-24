@@ -94,6 +94,7 @@ define(function (require) {
   Tabs.prototype.remove = function (tab_name_or_id) {
     var tab_id = get_tab_id(this, tab_name_or_id);
     this._body.find("#" + tab_id).remove();
+    this._tabs.remove(tab_id);
     
     var history = this._history.filter(function(id) {
       if (tab_id == id) {
@@ -118,6 +119,7 @@ define(function (require) {
     for (var key in this._contents) {
       var view = this._contents[key];
       view.update(keys);
+      view.refresh();
     }
   };
 

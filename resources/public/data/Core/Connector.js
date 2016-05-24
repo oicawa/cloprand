@@ -5,7 +5,7 @@ define(function (require) {
   function send(method, url, data, files, data_type, on_succeeded, on_failed) {
     var dfd = new $.Deferred;
     var formData = new FormData();
-    formData.append("value", JSON.stringify(data));
+    formData.append("value", encodeURIComponent(JSON.stringify(data)));
     if (files) {
       for (var key in files) {
         formData.append(key, files[key]);
