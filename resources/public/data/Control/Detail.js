@@ -17,20 +17,22 @@ define(function (require) {
   }
 
   function get_control_path(self, field, assist) {
-    //if (assist && assist["control"]) {
-    //  var control_name = self._custom_assist[field.name]["control"];
-    //  return "controls/" + control_name + "/" + control_name;
-    //}
     var datatype = field.datatype;
-    // Primitive
     var primitive_id = datatype["primitive"];
     if (primitive_id != "") {
       var primitive = Cache.get_data(Utils.PRIMITIVE_ID, primitive_id);
       if (primitive) {
         return "data/Control/Field/" + primitive.name;
+      } else {
+        console.assert(false, "Field.name=[" + field.name + "] field.datatype.primitive = '" + primitive_id + "' does not exist in Cache object.");
+        return null;
       }
     }
     var class_id = datatype["class"];
+    if (!class_id || class_id == "") {
+      console.assert(false, "Field.name=[" + field.name + "] 'datatype' property ('primitive' or 'class') was not specified.");
+      return null;
+    }
     
     var is_multi = datatype["multi"];
     var is_embedded = datatype["embedded"];
@@ -52,6 +54,10 @@ define(function (require) {
     var dfd = new $.Deferred;
     var assist = get_control_assist(self, field);
     var control_path = get_control_path(self, field, assist);
+    if (!control_path) {
+      dfd.resolve();
+      return dfd.promise();
+    }
     
     require([control_path], function(Control) {
       var control = new Control();
@@ -216,7 +222,8 @@ define(function (require) {
       var object_field = this._class.object_fields[i];
       var name = object_field.name;
       var control = this._controls[name];
-      control.refresh();
+      if (control)
+        control.refresh();
     }
   };
 

@@ -13,7 +13,7 @@
             [clojure.data.json :as json]
             [tames.systems :as systems])
   (:import (java.io File)
-           (java.net URLDecoder)))
+           (java.net URLDecoder URLEncoder)))
 
 (def content-types {""     ""
                     "css"  "text/css"
@@ -86,6 +86,17 @@
   (with-open [src (io/input-stream src-path)]
     (io/copy src (File. dst-path))))
 
+(defn remove-attached-files
+  [class-id object-id value files_fields]
+  (doseq [field files_fields]
+    (let [dst-dir-path (systems/get-absolute-path (format "data/%s/.%s/%s" class-id, object-id (field "name")))
+          file-names   (keys ((value (field "name")) "remove"))]
+      (doseq [file-name file-names]
+        (let [file (File. (format "%s/%s" dst-dir-path file-name))]
+          (println "[** Remove File **]" (. file getAbsolutePath))
+          (if (. file exists)
+              (. file delete)))))))
+
 (defn save-attached-files
   [class-id object-id value files_fields added-files]
   (doseq [field files_fields]
@@ -106,14 +117,21 @@
     (filter #(= ((%1 "datatype") "primitive") "Files")
             (class_ "object_fields"))))
 
-(defn erase-files-values
-  [files_fields raw-value]
-  (let [field_names (map #(%1 "name") files_fields)]
+(defn update-files-values
+  [class-id object-id files_fields raw-value]
+  (let [base-dir   (systems/get-absolute-path (format "data/%s/.%s" class-id object-id))
+        field_names (map #(%1 "name") files_fields)]
     (loop [names field_names
            value raw-value]
       (if (empty? names)
           value
-          (recur (rest names) (dissoc value (first names)))))))
+          (let [name    (first names)
+                path    (format "%s/%s" base-dir name)
+                current (map (fn [file] { "name" (. file getName) "size" (. file length) })
+                             (vec (. (File. path) listFiles)))
+                value1  (dissoc value name)
+                value2  (assoc value name {"class_id" class-id "object_id" object-id "current" current})]
+            (recur (rest names) value2))))))
 
 (defroutes app-routes
   ;; Authentication
@@ -148,8 +166,9 @@
           value        (json/read-str json-str)
           added-files  (dissoc params :value)
           files_fields (get-files-fields class-id)]
+      (remove-attached-files class-id object-id value files_fields)
       (save-attached-files class-id object-id value files_fields added-files)
-      (let [clean-value (erase-files-values files_fields value)]
+      (let [clean-value (update-files-values class-id object-id files_fields value)]
         (systems/put-data class-id object-id clean-value))))
   (DELETE "/api/:class-id/:object-id" [class-id object-id]
     (println (str "[DELETE] /api/:class-id/:object-id = /api/" class-id "/" object-id))
@@ -161,6 +180,17 @@
       (println (format "[GET] /session/:session-key = /session/%s" session-key))
       (print-request req)
       (format "{ \"%s\" : \"%s\"}" session-key user-name)))
+  ;; Download
+  (GET "/download/*" [& params]
+    (println (format "[GET] /download/* = /download/%s" (params :*)))
+    (let [file        (File. (systems/get-absolute-path (format "data/%s" (params :*))))
+          file-name   (. file getName)
+          encoded-file-name (. (URLEncoder/encode file-name "UTF-8") replace "+" "%20")
+          disposition (format "attachment;filename=\"%s\";filename*=UTF-8''%s" file-name encoded-file-name)
+          ]
+      (-> (response/file-response (. file getAbsolutePath))
+          (response/header "Content-Type" "application/octet-stream")
+          (response/header "Content-Disposition" disposition))))
   
   ;; Other resources
   (GET "/*" [& params]
