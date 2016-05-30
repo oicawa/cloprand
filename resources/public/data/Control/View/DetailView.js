@@ -33,7 +33,8 @@ define(function (require) {
   
   function get_files(fields, data) {
     var files_fields = fields.filter(function(field, index) {
-      return field.datatype.primitive == "Files";
+      var attachments = ["Files", "Images"];
+      return attachments.some(function (primitive) { return field.datatype.primitive == primitive; });
     });
     var files = {};
     for (var i = 0; i < files_fields.length; i++) {

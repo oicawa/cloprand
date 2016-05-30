@@ -114,7 +114,9 @@
 (defn get-files-fields
   [class-id]
   (let [class_ (systems/get-object systems/CLASS_ID class-id)]
-    (filter #(= ((%1 "datatype") "primitive") "Files")
+    (filter #(let [primitive ((%1 "datatype") "primitive")]
+               (or (= primitive "Files")
+                   (= primitive "Images")))
             (class_ "object_fields"))))
 
 (defn update-files-values
