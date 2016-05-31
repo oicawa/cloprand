@@ -8,7 +8,7 @@ define(function (require) {
   
   var ITEM_TEMPLATE = '' +
 '<div class="item" style="margin:2px 0px;">' +
-'  <img style="display:inline-block;border:solid 1px gray;border-radius:3px;background-color:#f0f0f0;padding:2px 5px 2px 5px;font-family:Verdana,Arial,sans-serif;font-size:12px;max-width:250px;max-height:250px;"></img>' +
+'  <img style="display:inline-block;border:solid 1px gray;border-radius:3px;background-color:#f0f0f0;padding:2px 2px 2px 2px;font-family:Verdana,Arial,sans-serif;font-size:12px;max-width:250px;max-height:250px;"></img>' +
 '  <i class="fa fa-remove" />' +
 '</div>';
   
@@ -63,7 +63,7 @@ define(function (require) {
       var record = this._exist_list.find("div.item:last-child");
       var size = this.get_display_size(file.size);
       record.find(tag).text(file.name + " - (" + size + ")");
-      record.find(tag).attr("src", "data/" + this._values.class_id + "/." + this._values.object_id + "/" + this._field_name + "/" + file.name);
+      record.find(tag).attr("src", "image/" + this._values.class_id + "/." + this._values.object_id + "/" + this._field_name + "/" + file.name);
       record.find("i").attr("name", file.name);
     }
     
@@ -79,8 +79,6 @@ define(function (require) {
     }
     
     this.switch();
-    
-    console.log("*** Images field refreshed.");
   };
   
   return Images;

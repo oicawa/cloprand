@@ -1,7 +1,6 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("data/Core/Utils");
-  var Cache = require("data/Core/Cache");
   var Inherits = require("data/Core/Inherits");
 
   var TEMPLATE = '<div class="w2ui-field"></div>';
@@ -20,13 +19,7 @@ define(function (require) {
     var datatype = field.datatype;
     var primitive_id = datatype["primitive"];
     if (primitive_id != "") {
-      var primitive = Cache.get_data(Utils.PRIMITIVE_ID, primitive_id);
-      if (primitive) {
-        return "data/Control/Field/" + primitive.name;
-      } else {
-        console.assert(false, "Field.name=[" + field.name + "] field.datatype.primitive = '" + primitive_id + "' does not exist in Cache object.");
-        return null;
-      }
+      return "data/Control/Field/" + primitive_id;
     }
     var class_id = datatype["class"];
     if (!class_id || class_id == "") {

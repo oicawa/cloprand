@@ -153,7 +153,6 @@ define(function (require) {
   };
 
   Files.prototype.edit = function(on) {
-    console.log("Files field edit " + (on ? "**ON**" : "**OFF**"));
     this._editting = on;
     if (on)
       this.restore();
@@ -175,7 +174,6 @@ define(function (require) {
   };
   
   Files.prototype.update = function() {
-    console.log("*** Files field updated.");
   };
   Files.prototype.get_display_size = function(real_size) {
     var size = 0.0 + real_size;
@@ -236,8 +234,6 @@ define(function (require) {
     }
     
     this.switch();
-    
-    console.log("*** Files field refreshed.");
   };
  
   return Files;

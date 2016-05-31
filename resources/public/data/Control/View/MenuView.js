@@ -56,7 +56,8 @@ define(function (require) {
     var self = this;
     Connector.crud.read("api/" + Utils.CLASS_ID, "json", function (data) { classes = data; })
     .then(function () {
-      self._grid.data(classes);
+    　　var menus = classes.filter(function (class_) { return class_.application == true; });
+      self._grid.data(menus);
       self._grid.refresh();
     });
   };

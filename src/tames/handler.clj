@@ -19,7 +19,13 @@
                     "css"  "text/css"
                     "js"   "text/javascript; charset=utf-8"
                     "html" "text/html; charset=utf-8"
-                    "json" "text/json; charset=utf-8"})
+                    "json" "text/json; charset=utf-8"
+                    "svg"  "image/svg+xml"
+                    "ico"  "image/x-icon"
+                    "png"  "image/png"
+                    "jpg"  "image/jpg"
+                    "jpeg" "image/jpeg"
+                    })
 
 (defn print-request
   [req]
@@ -193,6 +199,13 @@
       (-> (response/file-response (. file getAbsolutePath))
           (response/header "Content-Type" "application/octet-stream")
           (response/header "Content-Disposition" disposition))))
+  (GET "/image/*" [& params]
+    (println (format "[GET] /download/* = /download/%s" (params :*)))
+    (let [path (systems/get-absolute-path (format "data/%s" (params :*)))
+          ext  (systems/get-file-extension path)
+          mime (content-types ext)]
+      (-> (response/file-response path)
+          (response/header "Content-Type" mime))))
   
   ;; Other resources
   (GET "/*" [& params]
