@@ -199,9 +199,9 @@
       (-> (response/file-response (. file getAbsolutePath))
           (response/header "Content-Type" "application/octet-stream")
           (response/header "Content-Disposition" disposition))))
-  (GET "/image/*" [& params]
-    (println (format "[GET] /download/* = /download/%s" (params :*)))
-    (let [path (systems/get-absolute-path (format "data/%s" (params :*)))
+  (GET "/image/:class-id/:object-id/*" [class-id object-id & params]
+    (println (format "[GET] /image/:class-id/:object-id/* = /image/%s/%s/%s" class-id object-id (params :*)))
+    (let [path (systems/get-absolute-path (format "data/%s/.%s/%s" class-id object-id (params :*)))
           ext  (systems/get-file-extension path)
           mime (content-types ext)]
       (-> (response/file-response path)
