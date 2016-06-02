@@ -63,7 +63,7 @@ define(function (require) {
       var record = this._exist_list.find("div.item:last-child");
       var size = this.get_display_size(file.size);
       record.find(tag).text(file.name + " - (" + size + ")");
-      record.find(tag).attr("src", "image/" + this._values.class_id + "/." + this._values.object_id + "/" + this._field_name + "/" + file.name);
+      record.find(tag).attr("src", "image/" + this._values.class_id + "/" + this._values.object_id + "/" + this._field_name + "/" + file.name);
       record.find("i").attr("name", file.name);
     }
     
