@@ -1,13 +1,21 @@
 define(function (require) {
   require("jquery");
   var Utils = require("data/Core/Utils");
+  var Uuid = require("data/Core/Uuid");
   var Contents = require("data/Core/Contents");
+  
+  function init_buttons(actions) {
+    for (var uuid in actions) {
+      var action = actions[uuid];
+      $("#" + uuid).on("click", action.proc);
+    }
+  }
   
   // Dialog
   function Dialog() {
-    this._root = null;
-    this._actions = null;
     this._title = null;
+    this._initializer = null;
+    this._actions = null;
   };
   
   Dialog.show = function (message, title) {
@@ -19,38 +27,74 @@ define(function (require) {
   };
 
   Dialog.prototype.close = function (event) {
-    this._root.dialog("close");
+    w2popup.close();
   }
   
   Dialog.prototype.show = function () {
-    this._root.dialog("open");
+    // Create div tag for this dialog area.
+    var id = Uuid.version4();
+    
+    var self = this;
+    
+    var buttons = "";
+    for (var uuid in this._actions) {
+      var action = this._actions[uuid];
+      buttons += "<input type='button' style='min-width:100px;padding:2px;' id='" + uuid + "' value='" + action.caption + "'/>";
+    }
+    
+    // Open this dialog.
+    w2popup.open({
+      title  : self._title,
+      body    : "<div id='" + id + "'></div>",
+      buttons : buttons,
+      onOpen : function(event) {
+        event.onComplete = function() {
+          var panel = $("#" + id);
+          self._initializer(panel);
+          init_buttons(self._actions);
+        };
+      },
+      onClose : function(event) {
+        var panel = $("#" + id);
+        panel.remove();
+      }
+    });
   };
   
-  Dialog.prototype.bind = function (caption, func) {
-    this._actions[caption] = func;
+  Dialog.prototype.title = function (title) {
+    this._title = title;
   };
   
-  Dialog.prototype.init = function (selector, assist) {
+  Dialog.prototype.bind = function (action) {
+    console.assert(action, "Specify action argument.");
+    console.assert(action.id, "Specify action.id property.");
+    console.assert(action.caption, "Specify action.caption property.");
+    console.assert(action.proc, "Specify action.proc property as function object.");
+    var uuid = Uuid.version4();
+    this._actions[uuid] = action;
+  };
+  
+  Dialog.prototype.init = function (initializer) {
   	var dfd = new $.Deferred;
-    this._root = $(selector);
+    this._initializer = initializer;
     this._actions = {};
     var self = this;
     
     // Create buttons
-    var buttons = {};
-    for (var i = 0; i < assist.buttons.length; i++) {
-      var button = assist.buttons[i];
-      var caption = button.caption;
-      buttons[caption] = function (event) {
-      	var text = event.currentTarget.textContent;
-        var action = self._actions[text];
-        if (!action) {
-          alert("Implement [" + text + "] action");
-          return;
-        }
-        action(event);
-      };
-    }
+    //var buttons = {};
+    //for (var i = 0; i < assist.buttons.length; i++) {
+    //  var button = assist.buttons[i];
+    //  var caption = button.caption;
+    //  buttons[caption] = function (event) {
+    //  	var text = event.currentTarget.textContent;
+    //    var action = self._actions[text];
+    //    if (!action) {
+    //      alert("Implement [" + text + "] action");
+    //      return;
+    //    }
+    //    action(event);
+    //  };
+    //}
 
     // Create dialog
     //this._root.dialog({
