@@ -49,7 +49,11 @@ define(function (require) {
     return dfd.promise();
   };
   
-  var FONT_TEMPLATE = '<i></i>';
+  //var FONT_TEMPLATE = '<i></i>';
+  var FONT_TEMPLATE = '' +
+'<span style="display:table;width:50px;height:50px;border:1px solid gray;border-radius:5px;margin:2px;">' +
+'  <i style="display:table-cell;text-align:center;vertical-align:middle;"></i>' +
+'</span>';
 
   FontAwesome.prototype.edit = function(on) {
     if (!this._icon) {
@@ -69,7 +73,11 @@ define(function (require) {
       dialog.init(function(panel) {
         for (var i = 0; i < self._fonts.length; i++) {
           var font = self._fonts[i];
-          panel.append("<i style='display:inline-block;text-align:center;vertical-align:middle;width:50px;height:50px;border:1px solid gray;border-radius:5px;margin:2px;' class='fa fa-" + font.name + " fa-3x fw'></i>");
+          panel.append(FONT_TEMPLATE);
+          var icon = panel.find("span:last-child > i");
+          icon.addClass("fa");
+          icon.addClass("fa-" + font.name);
+          icon.addClass("fa-3x");
         }
       });
       dialog.title("Select Icon");
