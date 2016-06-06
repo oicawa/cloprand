@@ -39,7 +39,7 @@ define(function (require) {
     var buttons = "";
     for (var uuid in this._actions) {
       var action = this._actions[uuid];
-      buttons += "<input type='button' style='min-width:100px;padding:2px;' id='" + uuid + "' value='" + action.caption + "'/>";
+      buttons += "<input type='button' style='min-width:100px;margin:2px;' id='" + uuid + "' value='" + action.caption + "'/>";
     }
     
     // Open this dialog.
