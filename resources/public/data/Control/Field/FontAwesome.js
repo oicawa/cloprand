@@ -4,6 +4,7 @@ define(function (require) {
   var Connector = require("data/Core/Connector");
   var Inherits = require("data/Core/Inherits");
   var Dialog = require("data/Core/Dialog");
+  var Grid = require("data/Control/Grid");
   var Field = require("data/Control/Field/Field");
   
   var TEMPLATE = '' +
@@ -27,6 +28,7 @@ define(function (require) {
     this._fonts = null;
     this._icon = null;
     this._value = null;
+    this._fixed = null;
   }
   Inherits(FontAwesome, Field);
 
@@ -52,7 +54,7 @@ define(function (require) {
   //var FONT_TEMPLATE = '<i></i>';
   var FONT_TEMPLATE = '' +
 '<span style="display:table;width:50px;height:50px;border:1px solid gray;border-radius:5px;margin:2px;">' +
-'  <i style="display:table-cell;text-align:center;vertical-align:middle;"></i>' +
+'  <i style="display:table-cell;text-align:center;vertical-align:middle;" class="fa {{FONTAWESOME_CLASSNAME}} fa-3x fw"></i>' +
 '</span>';
 
   FontAwesome.prototype.edit = function(on) {
@@ -69,23 +71,38 @@ define(function (require) {
     this._icon.on("click", function(event) {
       console.log("Show FontAwesome font select dialog.");
       var dialog = new Dialog();
+      var grid = new Grid();
       var select_panel = "";
       dialog.init(function(panel) {
-        for (var i = 0; i < self._fonts.length; i++) {
-          var font = self._fonts[i];
-          panel.append(FONT_TEMPLATE);
-          var icon = panel.find("span:last-child > i");
-          icon.addClass("fa");
-          icon.addClass("fa-" + font.name);
-          icon.addClass("fa-3x");
-        }
+        panel.append("<div name='grid'></div>");
+        var selector = "#" + panel.attr("id") +" > div[name='grid']";
+        grid.init(selector, [
+          { field   : 'id',
+            caption : 'Icon',
+            size    : '60px',
+            render  : function(record, index, column_index) {
+              var html = FONT_TEMPLATE.replace(/{{FONTAWESOME_CLASSNAME}}/, record.id);
+              return html;
+            }},
+          { field   : 'name',
+            caption : 'Name',
+            size    : '200px'}
+        ],
+        'height:200px;')
+        .then(function() {;
+          grid.data(self._fonts);
+          grid.refresh();
+        });
       });
       dialog.title("Select Icon");
       dialog.bind({
         id      : "OK",
         caption : "OK",
         proc    : function (event) {
-          console.log("[OK] clicked.");
+          var recid = grid.selection();
+          console.log("[OK] clicked. selection=" + recid);
+          self._value = self._fonts[recid].id;
+          self.refresh();
           dialog.close();
         }
       });
@@ -102,30 +119,36 @@ define(function (require) {
   };
 
   FontAwesome.prototype.backuped = function() {
-    return this._value;
+    return this._fixed;
   };
 
   FontAwesome.prototype.commit = function() {
-    var value = this._icon.val();
-    this._value = value;
+    this._fixed = this._value;
   };
 
   FontAwesome.prototype.restore = function() {
-    this._icon.val(this._value);
+    this._value = this._fixed;
   };
 
   FontAwesome.prototype.data = function(value) {
     if (arguments.length == 0) {
-      return this._icon.val();
+      return this._value;
     } else {
-      this._icon.val(value);
       this._value = value;
+      this._fixed = value;
+      this.refresh();
     }
   };
   
   FontAwesome.prototype.update = function(keys) {
-
   
+  }
+  
+  FontAwesome.prototype.refresh = function() {
+    this._icon.attr("class", "");
+    this._icon.addClass("fa");
+    this._icon.addClass(this._value);
+    this._icon.addClass("fw");
   }
 
   return FontAwesome;
