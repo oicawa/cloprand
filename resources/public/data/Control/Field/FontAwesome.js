@@ -78,6 +78,9 @@ define(function (require) {
         panel.append("<div name='grid'></div>");
         var selector = "#" + panel_id +" > div[name='grid']";
         grid.init(selector, [
+          { field   : 'recid',
+            caption : 'No.',
+            size    : '30px'},
           { field   : 'id',
             caption : 'Icon',
             size    : '60px',
@@ -89,10 +92,11 @@ define(function (require) {
             caption : 'Name',
             size    : '200px'}
         ],
-        'height:300px;')
+        'height:500px;')
         .then(function() {;
           grid.data(self._fonts);
           grid.refresh();
+          dialog.resize(400, 600);
         });
       });
       dialog.title("Select Icon");

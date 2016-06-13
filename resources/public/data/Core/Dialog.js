@@ -84,5 +84,9 @@ define(function (require) {
     return dfd.promise();
   };
   
+  Dialog.prototype.resize = function (width, height) {
+  　　w2popup.resize(width, height);
+  };
+  
   return Dialog;
 });
