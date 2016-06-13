@@ -9,9 +9,11 @@ define(function (require) {
   
   var TEMPLATE = '' +
 '<label></label>' +
-'<div><i style="display:block;height:50px;width:50px;border: 1px solid gray;border-radius: 5px;font-size: 36px;padding: 5px;"></i></div>';
-
-  var OPTION_TEMPLATE = '<i></i>';
+'<div></div>';
+  var FONT_TEMPLATE = '' +
+'<span style="display:table;border:1px solid gray;border-radius:5px;margin:2px;">' +
+'  <i style="display:table-cell;text-align:center;vertical-align:middle;padding:5px;" class="fa {{FONTAWESOME_CLASSNAME}} fa-3x fa-fw"></i>' +
+'</span>';
 
   function create_control(self, root, field) {
     root.empty();
@@ -20,7 +22,11 @@ define(function (require) {
     var label = root.find("label");
     label.text(field.label);
     
-    self._icon = root.find("i");
+    var div = root.find("div");
+    var font = FONT_TEMPLATE.replace(/{{FONTAWESOME_CLASSNAME}}/, "");
+    div.append(font);
+    
+    self._icon = div.find("i");
   }
   
   function FontAwesome() {
@@ -51,12 +57,6 @@ define(function (require) {
     return dfd.promise();
   };
   
-  //var FONT_TEMPLATE = '<i></i>';
-  var FONT_TEMPLATE = '' +
-'<span style="display:table;width:50px;height:50px;border:1px solid gray;border-radius:5px;margin:2px;">' +
-'  <i style="display:table-cell;text-align:center;vertical-align:middle;" class="fa {{FONTAWESOME_CLASSNAME}} fa-3x fw"></i>' +
-'</span>';
-
   FontAwesome.prototype.edit = function(on) {
     if (!this._icon) {
       return;
@@ -73,9 +73,10 @@ define(function (require) {
       var dialog = new Dialog();
       var grid = new Grid();
       var select_panel = "";
-      dialog.init(function(panel) {
+      dialog.init(function(panel_id) {
+        var panel = $("#" + panel_id);
         panel.append("<div name='grid'></div>");
-        var selector = "#" + panel.attr("id") +" > div[name='grid']";
+        var selector = "#" + panel_id +" > div[name='grid']";
         grid.init(selector, [
           { field   : 'id',
             caption : 'Icon',
@@ -88,7 +89,7 @@ define(function (require) {
             caption : 'Name',
             size    : '200px'}
         ],
-        'height:200px;')
+        'height:300px;')
         .then(function() {;
           grid.data(self._fonts);
           grid.refresh();
@@ -114,6 +115,7 @@ define(function (require) {
           dialog.close();
         }
       });
+      
       dialog.show();
     });
   };
@@ -128,6 +130,7 @@ define(function (require) {
 
   FontAwesome.prototype.restore = function() {
     this._value = this._fixed;
+    this.refresh();
   };
 
   FontAwesome.prototype.data = function(value) {
@@ -148,7 +151,8 @@ define(function (require) {
     this._icon.attr("class", "");
     this._icon.addClass("fa");
     this._icon.addClass(this._value);
-    this._icon.addClass("fw");
+    this._icon.addClass("fa-3x");
+    this._icon.addClass("fa-fw");
   }
 
   return FontAwesome;

@@ -13,6 +13,7 @@ define(function (require) {
   
   // Dialog
   function Dialog() {
+    this._id = null;
     this._title = null;
     this._initializer = null;
     this._actions = null;
@@ -32,7 +33,7 @@ define(function (require) {
   
   Dialog.prototype.show = function () {
     // Create div tag for this dialog area.
-    var id = Uuid.version4();
+    this._id = Uuid.version4();
     
     var self = this;
     
@@ -45,17 +46,16 @@ define(function (require) {
     // Open this dialog.
     w2popup.open({
       title  : self._title,
-      body    : "<div id='" + id + "'></div>",
+      body    : "<div id='" + self._id + "'></div>",
       buttons : buttons,
       onOpen : function(event) {
         event.onComplete = function() {
-          var panel = $("#" + id);
-          self._initializer(panel);
+          self._initializer(self._id);
           init_buttons(self._actions);
         };
       },
       onClose : function(event) {
-        var panel = $("#" + id);
+        var panel = $("#" + self._id);
         panel.remove();
       }
     });
@@ -80,34 +80,6 @@ define(function (require) {
     this._actions = {};
     var self = this;
     
-    // Create buttons
-    //var buttons = {};
-    //for (var i = 0; i < assist.buttons.length; i++) {
-    //  var button = assist.buttons[i];
-    //  var caption = button.caption;
-    //  buttons[caption] = function (event) {
-    //  	var text = event.currentTarget.textContent;
-    //    var action = self._actions[text];
-    //    if (!action) {
-    //      alert("Implement [" + text + "] action");
-    //      return;
-    //    }
-    //    action(event);
-    //  };
-    //}
-
-    // Create dialog
-    //this._root.dialog({
-    //  autoOpen: false,
-    //  height: "auto",
-    //  width: "auto",
-    //  appendTo: assist.selector,
-    //  title: assist.title,
-    //  closeOnEscape: true,
-    //  modal: true,
-    //  buttons: buttons
-    //});
-
     dfd.resolve();
     return dfd.promise();
   };
