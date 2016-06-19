@@ -70,7 +70,7 @@ define(function (require) {
         continue;
       }
       
-      columns.push({field: field.name, caption: field.label, type: "text", size: "50px", resizable: true, sortable:true});
+      columns.push({field: field.name, caption: field.label, type: "text", size: field.column + "px", resizable: true, sortable:true});
     }
     return columns;
   }
@@ -137,6 +137,14 @@ define(function (require) {
 
   Grid.prototype.columns = function(columns_) {
     this._columns = columns_;
+  };
+  
+  Grid.prototype.multi_search = function (value) {
+    this._grid.multiSearch = value;
+  };
+  
+  Grid.prototype.toolbar = function (value) {
+    this._grid.show.toolbar = value;
   };
 
   Grid.prototype.header_visible = function(visible) {

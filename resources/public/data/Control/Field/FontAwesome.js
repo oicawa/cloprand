@@ -93,10 +93,12 @@ define(function (require) {
             size    : '200px'}
         ],
         'height:500px;')
-        .then(function() {;
+        .then(function() {
+          grid.multi_search(true);
+          grid.toolbar(true);
           grid.data(self._fonts);
           grid.refresh();
-          dialog.resize(400, 600);
+          dialog.resize(500, 600);
         });
       });
       dialog.title("Select Icon");
