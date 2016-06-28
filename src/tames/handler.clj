@@ -114,7 +114,8 @@
         ;(println file-key)
         (let [file     (added-files (keyword file-key))
               tmp-file (file :tempfile)
-              dst-file (format "%s/%s" dst-dir-path (file :filename))]
+              file-name (. (File. (file :filename)) getName)
+              dst-file (format "%s/%s" dst-dir-path file-name)]
           (io/copy tmp-file (File. dst-file)))))))
 
 (defn get-files-fields
