@@ -54,18 +54,25 @@
 (defn login-post
   [req]
   (print-request req)
-  (let [username (get-in req [:form-params "account_id"])
-        next_url (get-in req [:query-params "next"] "/tames.html")]
-    (println "[username] :" username)
-    (println "[next url] :" next_url)
-    ;(println "[forgery]  :" 
+  (let [account_id (get-in req [:form-params "account_id"])
+        password   (get-in req [:form-params "password"])
+        next_url   (get-in req [:query-params "next"] "/tames")
+        ;; Draft Implement...
+        account    (systems/get-object systems/ACCOUNT_ID account_id)
+        is-ok      (cond (nil? account) false
+                         (= (account "password") password) true
+                         :else false)]
+    (println "[account_id] :" account_id)
+    (println "[next url]   :" next_url)
+    (println "----------")
+    (pprint/pprint account)
+    (println "----------")
     (-> (response/redirect next_url)
-        ;(assoc-in [:session :identity] (keyword username))
-        (assoc-in [:session :identity] username))))
+        (assoc-in [:session :identity] (if is-ok account nil)))))
 
 (defn logout
   [req]
-  (-> (response/redirect "/tames.html")
+  (-> (response/redirect "/tames")
       (assoc :session {})))
 
 (defn unauthorized
@@ -73,10 +80,9 @@
   (let [result (authenticated? req)]
     (println "[Unauthenticated] :" result)
     (print-request req)
-    (cond result (response/redirect "/tames.html")
-          (= (req :uri) "/tames.html") (response/redirect (format "/login?next=%s" (:uri req)))
-          :else (systems/create-authorized-result false (format "/login?next=%s" (:uri req)))
-        )))
+    (cond result (response/redirect "/tames")
+          (= (req :uri) "/tames") (response/redirect (format "/login?next=%s" (:uri req)))
+          :else (systems/create-authorized-result false (format "/login?next=%s" (:uri req))))))
 
 ;(defn unauthorized
 ;  [req meta]

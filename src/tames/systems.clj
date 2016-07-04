@@ -15,6 +15,7 @@
 (def REGEXP_UUID #"[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}")
 (def REGEXP_OBJECT_FILE_NAME #"^[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}\.json$")
 (def CLASS_ID "Class")
+(def ACCOUNT_ID "Account")
 (def FIELD_KEY "key")
 
 (def config (atom nil))
