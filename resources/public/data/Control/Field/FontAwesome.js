@@ -11,7 +11,7 @@ define(function (require) {
 '<label></label>' +
 '<div></div>';
   var FONT_TEMPLATE = '' +
-'<span style="display:table;border:1px solid gray;border-radius:5px;margin:2px;">' +
+'<span style="display:table;border:1px solid gray;border-radius:5px;margin:2px;height:60px;width:60px;">' +
 '  <i style="display:table-cell;text-align:center;vertical-align:middle;padding:5px;" class="fa {{FONTAWESOME_CLASSNAME}} fa-3x fa-fw"></i>' +
 '</span>';
 
@@ -83,7 +83,7 @@ define(function (require) {
             size    : '30px'},
           { field   : 'id',
             caption : 'Icon',
-            size    : '60px',
+            size    : '70px',
             render  : function(record, index, column_index) {
               var html = FONT_TEMPLATE.replace(/{{FONTAWESOME_CLASSNAME}}/, record.id);
               return html;
