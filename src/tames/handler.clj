@@ -41,11 +41,11 @@
     [:form {:method "post"}
       [:div {:style "width:100%; text-align:center;"}
         [:span {:style "display:inline-block;width:100px;"} "Login ID "]
-        [:input {:type "text" :name "account_id"}]
+        [:input {:type "text" :name "account_id" :style "width:200px;"}]
         [:br]
         [:div {:style "width:100%;height:10px;"}]
         [:span {:style "display:inline-block;width:100px;"} "Password"]
-        [:input {:type "password" :name "password"}]
+        [:input {:type "password" :name "password" :style "width:200px;"}]
         [:br]
         [:div {:style "width:100%;height:20px;"}]
         [:input {:type "hidden" :name "__anti-forgery-token" :value *anti-forgery-token*}]
@@ -68,21 +68,25 @@
     (pprint/pprint account)
     (println "----------")
     (-> (response/redirect next_url)
-        (assoc-in [:session :identity] (if is-ok account nil)))))
+        (assoc-in [:session :identity] (if is-ok account_id nil)))))
 
 (defn logout
   [req]
-  (-> (response/redirect "/tames")
+  (-> (response/redirect "/login?next=/tames")
       (assoc :session {})))
 
 (defn unauthorized
   [req meta]
-  (let [result (authenticated? req)]
-    (println "[Unauthenticated] :" result)
-    (print-request req)
-    (cond result (response/redirect "/tames")
-          (= (req :uri) "/tames") (response/redirect (format "/login?next=%s" (:uri req)))
-          :else (systems/create-authorized-result false (format "/login?next=%s" (:uri req))))))
+  (let [result (authenticated? req)
+        uri    (req :uri)]
+    (println (format "*** Unauthenticated: [%s], URI: [%s]" result, uri))
+    (cond result
+            (response/redirect "/tames")
+          (or (= uri "/tames")
+              (= uri "/logout"))
+            (response/redirect "/login?next=/tames")
+          :else
+            (systems/create-authorized-result false "/login?next=/tames"))))
 
 ;(defn unauthorized
 ;  [req meta]
@@ -155,6 +159,7 @@
   (POST "/login" req
     (login-post req))
   (GET "/logout" req
+    (println "*** LOGOUT ***")
     (logout req))
 
   ;; Portal Top

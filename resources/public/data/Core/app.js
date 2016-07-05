@@ -14,8 +14,8 @@ define(function (require) {
 '  <span id="title" style="font-size:20px; vertical-align: top;"></span>' +
 '  <span style="display:inline-block; width:30px;"></span>' +
 '  <span id="sub-title"></span>' +
-'  <form method="get" action="/logout" style="display:inline-block;position:absolute; right:0px;">' +
-'    <span id="user_name"></span>' +
+'  <form method="get" action="/logout" style="display:inline-block;position:absolute; right:5px;">' +
+'    <span id="account_id"></span>' +
 '    <input type="submit" value="Logout" />' +
 '  </form>' +
 '</div>';
@@ -26,7 +26,7 @@ define(function (require) {
     this._layout = null;
     this._title = null;
     this._contents = null;
-    this._user_name = null;
+    this._account_id = null;
     this._config = null;
   }
   
@@ -55,7 +55,7 @@ define(function (require) {
     
     var self = this;
     $.when(
-      Connector.session("user_name", function(data){ session = data; }, null),
+      Connector.session("identity", function(data){ session = data; }, null),
       Connector.crud.read("/api/System/config", "json", function(data){ config = data; })
     ).always(function() {
       $("body").append(LAYOUT_TEMPLATE);
@@ -75,12 +75,14 @@ define(function (require) {
       self._layout.refresh();
       
       self._title = $("span#title");
+      self._account_id = $("span#account_id");
       
       self._contents = new Contents();
       self._contents.init("#contents-panel");
       
       self._config = config;
       self.title(config.system_name);
+      self._account_id.text(session.identity);
     });
   };
 

@@ -31,9 +31,11 @@ define(function (require) {
         dfd.reject();
       }
     }).fail(function (response, status) {
+      console.dir(response);
       if (response.status == 401) {
         console.assert(false, "Unauthenticated");
         dfd.reject();
+        location.href = "/login?next=/tames";
         return;
       }
       if (typeof on_failed != "function") {
