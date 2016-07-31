@@ -165,7 +165,7 @@
   ;; Portal Top
   (GET "/tames" []
     (println "[GET] /tames")
-    (-> (response/file-response "data/Core/tames.html")
+    (-> (response/file-response "core/tames.html")
         (response/header "Content-Type" (content-types "html"))))
   
   ;; REST API for CRUD

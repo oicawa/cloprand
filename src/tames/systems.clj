@@ -16,6 +16,7 @@
 (def REGEXP_OBJECT_FILE_NAME #"^[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}\.json$")
 (def CLASS_ID "Class")
 (def ACCOUNT_ID "Account")
+(def GROUP_ID "Group")
 (def FIELD_KEY "key")
 
 (def config (atom nil))
@@ -257,6 +258,18 @@
         primitive (datatype "primitive")]
     (= primitive "UUID")))
 
+(defn is-user-in-group
+  [account-id group-id]
+  (let [group    (get-object GROUP_ID group-id)
+        accounts (group "acounts")]
+    (loop [rest-accounts accounts]
+      (cond (empty? rest-accounts) false
+            (= account-id (first rest-accounts)) true
+            :else (recur (rest rest-accounts))))))
+
+;(defn is-user-accessible
+;  [account-id 
+
 (defn create-object
   [class-id s-exp-data]
   (println "Called create-object function.")
@@ -415,8 +428,8 @@
 (defn init
   []
   (ensure-init-files "lib")
-  (ensure-init-files "data")
-  )
+  (ensure-init-files "core")
+  (ensure-init-files "data"))
 
 
 
