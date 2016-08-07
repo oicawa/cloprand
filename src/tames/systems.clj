@@ -14,8 +14,11 @@
 ;(def REGEXP_UUID #"^[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}$")
 (def REGEXP_UUID #"[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}")
 (def REGEXP_OBJECT_FILE_NAME #"^[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}\.json$")
-(def CLASS_ID "Class")
-(def ACCOUNT_ID "Account")
+(def OBJECT_ID_NAME "id")
+;(def CLASS_ID "Class")
+(def CLASS_ID "a7b6a9e1-c95c-4e75-8f3d-f5558a264b35")
+;(def ACCOUNT_ID "Account")
+(def ACCOUNT_ID "9643597d-5513-4377-961c-643293fa3319")
 (def GROUP_ID "Group")
 (def FIELD_KEY "key")
 
@@ -152,6 +155,11 @@
         objects   (map #(with-open [rdr (io/reader (. %1 getAbsolutePath))]
                           (json/read rdr))
                        (sort files))]
+    objects))
+
+(defn get-objects-as-json
+  [class-id]
+  (let [objects (get-objects class-id)]
     (json/write-str objects)))
 
 (defn get-resource-classes
@@ -227,11 +235,17 @@
       (response/response (json/write-str { "file_name" file-name "file_contents" file_contents }))
       "text/text; charset=utf-8")))
 
+(defn get-account
+  [account_id]
+  (let [accounts (filter #(= (%1 "account_id") account_id) (get-objects ACCOUNT_ID))
+        account  (if (= (count accounts) 0) nil (first accounts))]
+    account))
+        
 (defn get-data
   [class-id object-id]
   (response-with-content-type
     (response/response (if (nil? object-id)
-                           (get-objects class-id)
+                           (get-objects-as-json class-id)
                            (get-object-as-json class-id object-id)))
     "text/json; charset=utf-8"))
 
@@ -239,6 +253,7 @@
   [class-id]
   (let [klass  (get-object CLASS_ID class-id)
         fields (klass "object_fields")]
+    (pprint/pprint fields)
     (loop [field       (first fields)
            rest-fields (rest fields)]
       (let [key-value (field FIELD_KEY)]
@@ -273,10 +288,12 @@
 (defn create-object
   [class-id s-exp-data]
   (println "Called create-object function.")
-  (let [key-name      (get-key-field-name class-id)
-        object-id     (if (is-key-field-uuid class-id)
-                          (str (UUID/randomUUID))
-                          (s-exp-data key-name))
+  (let [;key-name      (get-key-field-name class-id)
+        key-name      OBJECT_ID_NAME
+        ;object-id     (if (is-key-field-uuid class-id)
+        ;                  (str (UUID/randomUUID))
+        ;                  (s-exp-data key-name))
+        object-id     (str (UUID/randomUUID))
         relative-path (Paths/get (str "data/" class-id) (into-array String [(str object-id ".json")]))
         base-name     (. relative-path getFileName)
         dir-path      (. relative-path getParent)
@@ -362,7 +379,7 @@
   (update-object class-id object-id s-exp-data)
   (println "Put OK.")
   (response-with-content-type
-    (response/response (get-objects class-id))
+    (response/response (get-objects-as-json class-id))
     "text/json; charset=utf-8"))
 
 (defn put-extension-file
@@ -387,7 +404,7 @@
   (delete-object class-id object-id)
   (println "Delete OK.")
   (response-with-content-type
-    (response/response (get-objects class-id))
+    (response/response (get-objects-as-json class-id))
     "text/json; charset=utf-8"))
 
 (defn delete-extension-file

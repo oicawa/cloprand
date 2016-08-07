@@ -2,6 +2,7 @@ define(function (require) {
   require("jquery");
   var Utils = require("core/Utils");
   var Inherits = require("core/Inherits");
+  var app = require("app");
 
   var TEMPLATE = '<div class="w2ui-field"></div>';
 
@@ -19,7 +20,8 @@ define(function (require) {
     var datatype = field.datatype;
     var primitive_id = datatype["primitive"];
     if (primitive_id != "") {
-      return "core/Control/Field/" + primitive_id;
+      var primitive = app._primitives[primitive_id];
+      return "core/Control/Field/" + primitive.name;
     }
     var class_id = datatype["class"];
     if (!class_id || class_id == "") {

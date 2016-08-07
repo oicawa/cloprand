@@ -58,7 +58,7 @@
         password   (get-in req [:form-params "password"])
         next_url   (get-in req [:query-params "next"] "/tames")
         ;; Draft Implement...
-        account    (systems/get-object systems/ACCOUNT_ID account_id)
+        account    (systems/get-account account_id)
         is-ok      (cond (nil? account) false
                          (= (account "password") password) true
                          :else false)]

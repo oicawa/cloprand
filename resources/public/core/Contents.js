@@ -43,7 +43,7 @@ define(function (require) {
     var ids = tab_name.split("_");
     var prefix = 0 < ids.length ? ids[0] : null;
     var class_id = 1 < ids.length ? ids[1] : null;
-    var object_id = 2 < ids.length ? ids[2].replace(/-/g, "/") : null;
+    var object_id = 2 < ids.length ? ids[2] : null;
     return {
       tab_id : tab_id,
       prefix : prefix,
