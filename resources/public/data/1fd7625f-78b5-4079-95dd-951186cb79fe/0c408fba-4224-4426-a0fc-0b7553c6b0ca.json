@@ -1,1 +1,1 @@
-{"id":"0c408fba-4224-4426-a0fc-0b7553c6b0ca", "name":"Text","label":"Text","description":"Single line string.","object_fields":[]}
+{"name":"Text","label":"Text","require_path":"core\/Control\/Field\/Text","parameters":[{"name":"Width","datatype":{"primitive":"0c408fba-4224-4426-a0fc-0b7553c6b0ca","class":"","multi":false,"embedded":false},"recid":1},{"name":"Require","datatype":{"primitive":"970944f3-da1c-4758-b929-af35dd9be4f7","class":"","multi":false,"embedded":false},"recid":2}],"id":"0c408fba-4224-4426-a0fc-0b7553c6b0ca"}

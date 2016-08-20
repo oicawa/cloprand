@@ -249,30 +249,6 @@
                            (get-object-as-json class-id object-id)))
     "text/json; charset=utf-8"))
 
-(defn get-key-field
-  [class-id]
-  (let [klass  (get-object CLASS_ID class-id)
-        fields (klass "object_fields")]
-    (pprint/pprint fields)
-    (loop [field       (first fields)
-           rest-fields (rest fields)]
-      (let [key-value (field FIELD_KEY)]
-        (if (= key-value true)
-            field
-            (recur (first rest-fields) (rest rest-fields)))))))
-
-(defn get-key-field-name
-  [class-id]
-  (let [field (get-key-field class-id)]
-    (field "name")))
-
-(defn is-key-field-uuid
-  [class-id]
-  (let [field     (get-key-field class-id)
-        datatype  (field "datatype")
-        primitive (datatype "primitive")]
-    (= primitive "UUID")))
-
 (defn is-user-in-group
   [account-id group-id]
   (let [group    (get-object GROUP_ID group-id)
@@ -288,11 +264,7 @@
 (defn create-object
   [class-id s-exp-data]
   (println "Called create-object function.")
-  (let [;key-name      (get-key-field-name class-id)
-        key-name      OBJECT_ID_NAME
-        ;object-id     (if (is-key-field-uuid class-id)
-        ;                  (str (UUID/randomUUID))
-        ;                  (s-exp-data key-name))
+  (let [key-name      OBJECT_ID_NAME
         object-id     (str (UUID/randomUUID))
         relative-path (Paths/get (str "data/" class-id) (into-array String [(str object-id ".json")]))
         base-name     (. relative-path getFileName)
@@ -347,11 +319,10 @@
   (println "----------")
   (pprint/pprint s-exp-data)
   (println "----------")
-  (let [new-object     (create-object class-id s-exp-data)
-        key-field-name (get-key-field-name class-id)]
+  (let [new-object     (create-object class-id s-exp-data)]
     (println "Posted OK.")
     (response-with-content-type
-      (response/response (get-object-as-json class-id (new-object key-field-name)))
+      (response/response (get-object-as-json class-id (new-object OBJECT_ID_NAME)))
       "text/json; charset=utf-8")))
 
 (defn post-extension-file
