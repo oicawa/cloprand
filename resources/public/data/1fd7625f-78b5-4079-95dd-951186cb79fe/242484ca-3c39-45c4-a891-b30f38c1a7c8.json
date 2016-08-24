@@ -1,0 +1,1 @@
+{"id":"242484ca-3c39-45c4-a891-b30f38c1a7c8","name":"DateTime","label":"DateTime","require_path":"core\/Control\/Field\/DateTime","properties":[{"name":"format","description":"Date format","datatype":{"primitive":"0c408fba-4224-4426-a0fc-0b7553c6b0ca","class":"","multi":false,"embedded":false},"recid":1}]}
