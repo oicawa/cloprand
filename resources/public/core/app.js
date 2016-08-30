@@ -40,6 +40,12 @@ define(function (require) {
     return Utils.property_value(this, this._title, "text", arguments);
   };
   
+  App.prototype.favicon = function(path) {
+    // <link rel="shortcut icon" href="/image/15ab1b06-3756-48df-b045-728499aa9a6c/e71de065-9b6a-42c7-9987-ddc8e75672ca/favicon/tames.ico" />
+    var icon = $("link[rel='shortcut icon']");
+    icon.attr("href", path);
+  };
+  
   App.prototype.contents = function() {
     return this._contents;
   };
@@ -76,9 +82,12 @@ define(function (require) {
       });
       self._layout= w2ui[layout_name];
       self._layout.refresh();
+
+      var logo_path = "/image/" + Utils.SYSTEM_ID + "/" + config.id + "/logo/tames.svg";
+      var favicon_path = "/image/" + Utils.SYSTEM_ID + "/" + config.id + "/favicon/tames.ico";
       
       self._system_icon = $("img#system-icon");
-      self._system_icon.attr("src", "/image/" + Utils.SYSTEM_ID + "/" + config.id + "/logo/tames.svg");
+      self._system_icon.attr("src", logo_path);
       
       self._title = $("span#title");
       self._account_id = $("span#account_id");
@@ -88,6 +97,7 @@ define(function (require) {
       
       self._config = config;
       self.title(config.system_name);
+      self.favicon(favicon_path);
       self._account_id.text(session.identity);
       
       self._primitives = {};
