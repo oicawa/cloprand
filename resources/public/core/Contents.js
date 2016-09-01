@@ -58,7 +58,7 @@ define(function (require) {
     this._tabs.add(tab_id, label, true);
 
     var detail = new Detail();
-    detail.init("#" + tab_id + " > div.tab-contents-panel > div.object_detail", def_class, assist_class, "name")
+    detail.init("#" + tab_id + " > div.tab-contents-panel > div.object_detail", def_class.object_fields, assist_class, "name")
     .then(function() {
       detail.edit(true);
       detail.visible(true);

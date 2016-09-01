@@ -10,6 +10,7 @@ define(function (require) {
   var Grid = require("core/Control/Grid");
   var Detail = require("core/Control/Detail");
   var Field = require("core/Control/Field/Field");
+  var app = require("app");
   
   var TEMPLATE = '' +
 '<label></label>' +
@@ -24,12 +25,13 @@ define(function (require) {
       { "name": "add",    "caption": "Add",    "description": "Add new field",               "operation": "add" },
       { "name": "edit",   "caption": "Edit",   "description": "Edit field",                  "operation": "edit" },
       { "name": "delete", "caption": "Delete", "description": "Delete field",                "operation": "delete" },
+      { "name": "properties", "caption": "Properties", "description": "Edit properties field", "operation": "properties" },
       { "name": "up",     "caption": "Up",     "description": "Move upward selected item",   "operation": "up" },
       { "name": "down",   "caption": "Down",   "description": "Move downward selected item", "operation": "down" }
     ]
   };
   
-  function showDetailDialog(self, class_, data) {
+  function showDetailDialog(self, title, fields, data, ok_func) {
     var body_id = Uuid.version4();
     var ok_id = Uuid.version4();
     var cancel_id = Uuid.version4();
@@ -38,7 +40,7 @@ define(function (require) {
       '<input type="button" style="width:100px;" value="Cancel" id="' + cancel_id + '" />';
     var detail = new Detail();
     w2popup.open({
-      title   : class_.label,
+      title   : title,
       body    : '<div id="' + body_id + '"></div>',
       buttons : buttons,
       //width   : 700,
@@ -47,14 +49,7 @@ define(function (require) {
         event.onComplete = function() {
           $("#" + ok_id).on("click", function(event) {
             console.log("[OK] clicked");
-            var data = detail.data();
-            if (detail.is_new()) {
-              self._grid.add(data);
-            } else {
-              var index = self._grid.selection()[0];
-              self._grid.item(index, data);
-            }
-            self._grid.refresh();
+            ok_func(detail);
             w2popup.close();
             return false;
           });
@@ -63,7 +58,7 @@ define(function (require) {
             w2popup.close();
             return false;
           });
-          detail.init("#" + body_id, class_)
+          detail.init("#" + body_id, fields)
           .then(function() {
             detail.data(data);
             detail.visible(true);
@@ -118,21 +113,28 @@ define(function (require) {
       var toolbar = !assist ? default_toolbar : (!assist.toolbar ? default_toolbar : assist.toolbar);
 
       var columns = Grid.create_columns(class_);
+      
+      function ok_func(detail) {
+        var data = detail.data();
+        if (detail.is_new()) {
+          self._grid.add(data);
+        } else {
+          var index = self._grid.selection()[0];
+          self._grid.item(index, data);
+        }
+        self._grid.refresh();
+      }
 
       $.when(
         self._toolbar.init(selector + " > div > div.toolbar", toolbar),
-        self._grid.init(selector + " > div > div.records", columns, 'height:300px;')//,
-        //self._detail.init(selector + " > div.dialog > div.detail", class_)
-        //.then(function () {
-        //  self._detail.visible(true);
-        //  self._detail.edit(true);
-        //  return self._dialog.init(selector + " > div.dialog", { title: class_.label, selector : root, buttons: [{caption: "OK"}, {caption:"Cancel"}]});
-        //})
+        self._grid.init(selector + " > div > div.records", columns, 'height:300px;')
       ).always(function() {
         self._toolbar.bind("add", function(event) {
-          //self._detail.data(null);
-          //self._dialog.show();
-          showDetailDialog(self, class_, null);
+          showDetailDialog(self, class_.label, class_.object_fields, null, function (detail) {
+            var data = detail.data();
+            self._grid.add(data);
+            self._grid.refresh();
+          });
         });
         self._toolbar.bind("edit", function(event) {
           var selection = self._grid.selection();
@@ -142,9 +144,12 @@ define(function (require) {
           }
           var index = selection[0];
           var data = self._grid.data()[index];
-          //self._detail.data(data);
-          //self._dialog.show();
-          showDetailDialog(self, class_, data);
+          showDetailDialog(self, class_.label, class_.object_fields, data, function (detail) {
+            var data = detail.data();
+            var index = self._grid.selection()[0];
+            self._grid.item(index, data);
+            self._grid.refresh();
+          });
         });
         self._toolbar.bind("delete", function(event) {
           var selection = self._grid.selection();
@@ -157,6 +162,25 @@ define(function (require) {
               return;
             self._grid.delete(selection);
             self._grid.refresh();
+          });
+        });
+        self._toolbar.bind("properties", function(event) {
+          var selection = self._grid.selection();
+          if (selection.length != 1) {
+            Dialog.show("Select one item.");
+            return;
+          }
+          var index = selection[0];
+          var data = self._grid.data()[index];
+          var primitive_id = data.datatype.primitive;
+          if (!primitive_id || primitive_id == "") {
+            Dialog.show("This property type is not Primitive.");
+            return;
+          }
+          var primitive = app._primitives[primitive_id];
+          var title = primitive.label + " (" + data.label + ")"
+          showDetailDialog(self, title, primitive.properties, data.properties, function(detail) {
+            data.properties = detail.data();
           });
         });
         self._toolbar.bind("up", function(event) {

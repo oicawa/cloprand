@@ -72,13 +72,13 @@ define(function (require) {
   function create_form(self, selector) {
     var dfd = new $.Deferred;
     // Declare 'each_field_funcs' array to closing each require 'Controls' & callback process
-    if (!self._class.object_fields) {
+    if (!self._fields) {
       dfd.resolve();
       return dfd.promise();
     }
     var promises = [];
-    for (var i = 0; i < self._class.object_fields.length; i++) {
-      var object_field = self._class.object_fields[i];
+    for (var i = 0; i < self._fields.length; i++) {
+      var object_field = self._fields[i];
       self._root.append(TEMPLATE);
       var field = self._root.find("div:last-child");
       field.attr("name", object_field.name);
@@ -110,7 +110,7 @@ define(function (require) {
   function Detail(parent) {
   	this._parent = parent;
   	this._root = null;
-    this._class = null;
+    this._fields = null;
     this._basic_assist = null;
     this._custom_assist = null;
     this._data = null;
@@ -130,7 +130,7 @@ define(function (require) {
     }
   };
 
-  Detail.prototype.init = function(selector, class_, basic_assist, custom_assist) {
+  Detail.prototype.init = function(selector, fields, basic_assist, custom_assist) {
     var dfd = new $.Deferred;
     // Set member fields
     this._root = $(selector);
@@ -139,7 +139,7 @@ define(function (require) {
       dfd.resolve();
       return dfd.promise();
     }
-    this._class = class_;
+    this._fields = fields;
     this._basic_assist = typeof basic_assist == "undefined" ? null : basic_assist;
     this._custom_assist = typeof custom_assist == "undefined" ? null : custom_assist;
     var self = this;
@@ -165,27 +165,27 @@ define(function (require) {
   };
 
   Detail.prototype.edit = function(on) {
-    if (!this._class.object_fields) {
+    if (!this._fields) {
       return;
     }
-    for (var i = 0; i < this._class.object_fields.length; i++) {
-      var field = this._class.object_fields[i];
+    for (var i = 0; i < this._fields.length; i++) {
+      var field = this._fields[i];
       var name = field.name;
       this._controls[name].edit((!this._is_new && !(!field.key)) ? false : on);
     }
   };
 
   Detail.prototype.commit = function() {
-    for (var i = 0; i < this._class.object_fields.length; i++) {
-      var object_field = this._class.object_fields[i];
+    for (var i = 0; i < this._fields.length; i++) {
+      var object_field = this._fields[i];
       var name = object_field.name;
       this._controls[name].commit();
     }
   };
 
   Detail.prototype.restore = function() {
-    for (var i = 0; i < this._class.object_fields.length; i++) {
-      var object_field = this._class.object_fields[i];
+    for (var i = 0; i < this._fields.length; i++) {
+      var object_field = this._fields[i];
       var name = object_field.name;
       this._controls[name].restore();
     }
@@ -196,12 +196,12 @@ define(function (require) {
   };
 
   Detail.prototype.refresh = function() {
-    if (!this._class.object_fields) {
+    if (!this._fields) {
       return;
     }
     
-    for (var i = 0; i < this._class.object_fields.length; i++) {
-      var object_field = this._class.object_fields[i];
+    for (var i = 0; i < this._fields.length; i++) {
+      var object_field = this._fields[i];
       var name = object_field.name;
       var control = this._controls[name];
       if (control)
@@ -212,10 +212,10 @@ define(function (require) {
   Detail.prototype.data = function(value) {
     var data = {};
 
-    var exist_object_fields = !this._class.object_fields ? false : true;
+    var exist_object_fields = !this._fields ? false : true;
     if (exist_object_fields) {
-      for (var i = 0; i < this._class.object_fields.length; i++) {
-        var object_field = this._class.object_fields[i];
+      for (var i = 0; i < this._fields.length; i++) {
+        var object_field = this._fields[i];
         var name = object_field.name;
         var control = this._controls[name];
         if (arguments.length == 0) {

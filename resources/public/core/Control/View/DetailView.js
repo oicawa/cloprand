@@ -87,7 +87,7 @@ define(function (require) {
     var object = null;
 
     // Get field information
-    var fields = detail._class.object_fields;
+    var fields = detail._fields;
     var key_field_names = fields.filter(function(field, index) { return !(!field.key); })
                                 .map(function(field){ return field.name; });
     key_field_names.push("id");
@@ -232,7 +232,7 @@ define(function (require) {
 
       $.when(
         self._toolbar.init(toolbar_selector, default_toolbar),
-        self._detail.init(detail_selector, self._class, basic_assist, custom_assist)
+        self._detail.init(detail_selector, self._class.object_fields, basic_assist, custom_assist)
       ).then(function() {
         self._toolbar.bind("edit", DetailView.edit);
         self._toolbar.bind("delete", DetailView.delete);

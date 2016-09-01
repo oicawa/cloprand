@@ -14,7 +14,8 @@ define(function (require) {
       "cancel": "fa fa-trash-o",
       "add"   : "w2ui-icon-plus",
       "up"    : "fa fa-arrow-up",
-      "down"  : "fa fa-arrow-down"
+      "down"  : "fa fa-arrow-down",
+      "properties" : "fa fa-list-alt"
     };
     this._root = null;;
     this._toolbar = null;
@@ -47,26 +48,6 @@ define(function (require) {
         caption.addClass("space");
       }
     }
-    //var dfd = new $.Deferred;
-    //if (!self._assist) {
-    //  dfd.resolve();
-    //  return dfd.promise();
-    //}
-    //require([self._assist.operations], function(operations) {
-    //  self._operations = {};
-    //  for (var i = 0; i < self._assist.items.length; i++) {
-    //    var item = self._assist.items[i];
-    //    var icon = self._root.find("ul > li > span." + item.icon_name);
-    //    var li = icon.parent();
-    //    if (item.caption && item.caption != "") {
-    //      var caption = li.find("span.caption");
-    //      caption.addClass("space");
-    //    }
-    //    self._operations[item.operation] = operations[item.operation];
-    //  }
-    //  dfd.resolve();
-    //});
-    //return dfd.promise();
   }
 
   Toolbar.prototype.init = function(selector, assist) {

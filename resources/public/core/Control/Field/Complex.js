@@ -40,7 +40,7 @@ define(function (require) {
       label.text(field.label);
       self._detail = new Detail();
       $.when(
-        self._detail.init(selector + " > div.complex > div.detail", class_)
+        self._detail.init(selector + " > div.complex > div.detail", class_.object_fields)
       ).always(function() {
         self._detail.visible(true);
         self._detail.edit(false);
