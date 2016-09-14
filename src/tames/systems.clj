@@ -292,9 +292,6 @@
     ;; !! CAUTION !!
     ;; Implement 'param' data check logic!!
     
-    
-    ;(filters-exp-data
-    
     (with-open [w (io/writer object-file)]
       (json/write s-exp-data w))))
 

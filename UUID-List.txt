@@ -10,6 +10,7 @@ a7b6a9e1-c95c-4e75-8f3d-f5558a264b35  Class
   4ee20d87-b73d-40a7-a521-170593ac2512  Images
   34d8e495-9502-4ec2-8263-1c2e11ecf33b  Extensions
   2016097a-644c-405e-aee5-2915176e8dda  UUID
+  a8cd792c-c147-4a56-bf14-080a620c749a  Dynamic
 7caa4f3b-3bd2-42df-903c-6dcbcd7ccc6b  StorageType
   3e3a8738-7283-4e46-bb5e-adb8341fe293  "* Embedded Only *"
   0d9f2532-aaaa-4a42-a7c0-30ffe398a4b8  "File System (JSON)"

@@ -18,10 +18,12 @@ define(function (require) {
 
   function get_control_path(self, field, assist) {
     var datatype = field.datatype;
-    var primitive_id = datatype["primitive"];
-    if (primitive_id != "") {
-      var primitive = app._primitives[primitive_id];
-      return "core/Control/Field/" + primitive.name;
+    var primitive = datatype["primitive"];
+    if (typeof primitive == "string" && primitive != "") {
+      return app._primitives[primitive].require_path;
+    }
+    if (typeof primitive == "object") {
+      return app._primitives[primitive.id].require_path;
     }
     var class_id = datatype["class"];
     if (!class_id || class_id == "") {
