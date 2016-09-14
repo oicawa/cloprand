@@ -1,1 +1,17 @@
-{"id":"c1fb878e-2f01-4942-8e27-d2e22626a479","name":"DateTime","label":"DateTime","require_path":"core\/Control\/Field\/DateTime","properties":[{"name":"format","description":"Date format","datatype":{"primitive":"0c408fba-4224-4426-a0fc-0b7553c6b0ca","class":"","multi":false,"embedded":false},"recid":1}]}
+{
+  "id":"c1fb878e-2f01-4942-8e27-d2e22626a479",
+  "name":"DateTime",
+  "label":"DateTime",
+  "require_path":"core\/Control\/Field\/DateTime",
+  "properties":[
+    {
+      "name":"format",
+      "description":"Date format",
+      "datatype":{
+        "id":"0c408fba-4224-4426-a0fc-0b7553c6b0ca",
+        "properties":{}
+      },
+      "recid":1
+    }
+  ]
+}

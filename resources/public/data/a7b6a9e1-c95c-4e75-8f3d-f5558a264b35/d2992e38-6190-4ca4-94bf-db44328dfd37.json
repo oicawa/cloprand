@@ -1,1 +1,99 @@
-{"access":[],"label":"Field","storage_type":"3e3a8738-7283-4e46-bb5e-adb8341fe293","id":"d2992e38-6190-4ca4-94bf-db44328dfd37","name":"Field","application":false,"core":true,"object_fields":[{"name":"name","label":"Name","description":"Field name.","datatype":{"primitive":"0c408fba-4224-4426-a0fc-0b7553c6b0ca","class":"","multi":false,"embedded":true},"column":"","caption":false,"key":false,"recid":1},{"name":"label","label":"Label","description":"Field label for display.","datatype":{"primitive":"0c408fba-4224-4426-a0fc-0b7553c6b0ca","class":"","multi":false,"embedded":true},"column":"80","caption":false,"key":false,"recid":2},{"name":"description","label":"Description","description":"Field description.","datatype":{"primitive":"1a953305-355e-4a11-be58-99144ab12424","class":"","multi":false,"embedded":true},"column":"200","caption":false,"key":false,"recid":3},{"name":"datatype","label":"Data Type","description":"Field datatype.","datatype":{"primitive":"","class":"985ac8b4-48d4-48ab-bec6-7788a9987362","multi":false,"embedded":true},"column":"","caption":false,"key":false,"recid":4},{"name":"column","label":"Column","description":"Visible column in GridView.","datatype":{"primitive":"0c408fba-4224-4426-a0fc-0b7553c6b0ca","class":"","multi":false,"embedded":true},"column":"30","caption":false,"key":false,"recid":5},{"name":"caption","label":"Caption","description":"Show as a caption.","datatype":{"primitive":"970944f3-da1c-4758-b929-af35dd9be4f7","class":"","multi":false,"embedded":true},"column":"30","caption":false,"key":false,"recid":6},{"name":"key","label":"Key","description":"Key field.","datatype":{"primitive":"970944f3-da1c-4758-b929-af35dd9be4f7","class":"","multi":false,"embedded":true},"column":"30","caption":false,"key":false,"recid":7}],"description":"Field Definition.","icon":"fa-columns"}
+{
+  "label":"Field",
+  "description":"Field Definition.",
+  "icon":"fa-columns",
+  "core":true,
+  "application":false,
+  "storage_type":"3e3a8738-7283-4e46-bb5e-adb8341fe293",
+  "object_fields":[
+    {
+      "name":"name",
+      "label":"Name",
+      "description":"Field name.",
+      "datatype":{
+        "id":"0c408fba-4224-4426-a0fc-0b7553c6b0ca",
+        "properties":{}
+      },
+      "column":"",
+      "caption":false,
+      "key":false,
+      "recid":1
+    },
+    {
+      "name":"label",
+      "label":"Label",
+      "description":"Field label for display.",
+      "datatype":{
+        "id":"0c408fba-4224-4426-a0fc-0b7553c6b0ca",
+        "properties":{}
+      },
+      "column":"80",
+      "caption":false,
+      "key":false,
+      "recid":2
+    },
+    {
+      "name":"description",
+      "label":"Description",
+      "description":"Field description.",
+      "datatype":{
+        "id":"1a953305-355e-4a11-be58-99144ab12424",
+        "properties":{}
+      },
+      "column":"200",
+      "caption":false,
+      "key":false,
+      "recid":3},
+    {
+      "name":"datatype",
+      "label":"Data Type",
+      "description":"Field datatype.",
+      "datatype":{
+        "id":"a8cd792c-c147-4a56-bf14-080a620c749a",
+        "properties":{
+          "class_id":"1fd7625f-78b5-4079-95dd-951186cb79fe",
+          "field_name":"properties"
+        }
+      },
+      "column":"",
+      "caption":false,
+      "key":false,
+      "recid":4},
+    {
+      "name":"column",
+      "label":"Column",
+      "description":"Visible column in GridView.",
+      "datatype":{
+        "id":"0c408fba-4224-4426-a0fc-0b7553c6b0ca",
+        "properties":{}
+      },
+      "column":"30",
+      "caption":false,
+      "key":false,
+      "recid":5},
+    {
+      "name":"caption",
+      "label":"Caption",
+      "description":"Show as a caption.",
+      "datatype":{
+        "id":"970944f3-da1c-4758-b929-af35dd9be4f7",
+        "properties":{}
+      },
+      "column":"30",
+      "caption":false,
+      "key":false,
+      "recid":6},
+    {"name":"key",
+      "label":"Key",
+      "description":"Key field.",
+      "datatype":{
+        "id":"970944f3-da1c-4758-b929-af35dd9be4f7",
+        "properties":{}
+      },
+      "column":"30",
+      "caption":false,
+      "key":false,
+      "recid":7}
+  ],
+  "id":"d2992e38-6190-4ca4-94bf-db44328dfd37"
+}

@@ -40,7 +40,7 @@ define(function (require) {
   List.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
     var root = $(selector);
-    var class_id = field.datatype["class"];
+    var class_id = field.datatype.properties.class_id;
     var self = this;
     $.when(
       Connector.crud.read("api/" + Utils.CLASS_ID + "/" + class_id, "json", function(response) { self._class = response; }),

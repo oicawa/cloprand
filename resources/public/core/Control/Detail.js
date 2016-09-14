@@ -18,33 +18,9 @@ define(function (require) {
 
   function get_control_path(self, field, assist) {
     var datatype = field.datatype;
-    var primitive = datatype["primitive"];
-    if (typeof primitive == "string" && primitive != "") {
-      return app._primitives[primitive].require_path;
-    }
-    if (typeof primitive == "object") {
-      return app._primitives[primitive.id].require_path;
-    }
-    var class_id = datatype["class"];
-    if (!class_id || class_id == "") {
-      console.assert(false, "Field.name=[" + field.name + "] 'datatype' property ('primitive' or 'class') was not specified.");
-      return null;
-    }
-    
-    var is_multi = datatype["multi"];
-    var is_embedded = datatype["embedded"];
-
-    if (is_multi && is_embedded ) {
-      return "core/Control/Field/Multi";
-    } else if (is_multi && !is_embedded) {
-      return "core/Control/Field/List";
-    } else if (!is_multi && is_embedded) {
-      return "core/Control/Field/Complex";
-    } else if (!is_multi && !is_embedded) {
-      return "core/Control/Field/DropDownList";
-    } else {
-      console.assert(false, "Unexpected case.");
-    }
+    var id = datatype.id;
+    var primitive = app._primitives[id];
+    return primitive.require_path;
   }
 
   function field_func(self, field_selector, field) {
@@ -173,6 +149,9 @@ define(function (require) {
     for (var i = 0; i < this._fields.length; i++) {
       var field = this._fields[i];
       var name = field.name;
+      if (!this._controls[name]) {
+        continue;
+      }
       this._controls[name].edit((!this._is_new && !(!field.key)) ? false : on);
     }
   };
@@ -220,6 +199,9 @@ define(function (require) {
         var object_field = this._fields[i];
         var name = object_field.name;
         var control = this._controls[name];
+        if (!control) {
+          continue;
+        }
         if (arguments.length == 0) {
           data[name] = control.data();
         } else {

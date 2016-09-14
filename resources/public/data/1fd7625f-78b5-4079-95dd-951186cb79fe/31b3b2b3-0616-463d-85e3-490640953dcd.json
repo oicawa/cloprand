@@ -1,0 +1,23 @@
+{
+  "id":"31b3b2b3-0616-463d-85e3-490640953dcd",
+  "name":"Complex",
+  "label":"Complex",
+  "require_path":"core\/Control\/Field\/Complex",
+  "properties":[
+    {
+      "name":"class",
+      "label":"Class",
+      "description":"Select Class.",
+      "datatype":{
+        "id":"b95d64d9-5773-4b6e-b9ad-3a566f0cdfd1",
+        "properties":{
+          "class_id":"a7b6a9e1-c95c-4e75-8f3d-f5558a264b35"
+        }
+      },
+      "column":"",
+      "caption":false,
+      "key":false,
+      "recid":1
+    }
+  ]
+}

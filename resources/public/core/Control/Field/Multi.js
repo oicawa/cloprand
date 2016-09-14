@@ -97,8 +97,9 @@ define(function (require) {
 
     var class_ = null;
     var self = this;
+    var class_id = field.datatype.properties.class_id;
     $.when(
-      Connector.crud.read("api/" + Utils.CLASS_ID + "/" + field.datatype.class, "json", function (data) { class_ = data; })
+      Connector.crud.read("api/" + Utils.CLASS_ID + "/" + class_id, "json", function (data) { class_ = data; })
     ).always(function() {
       root.append(TEMPLATE);
       

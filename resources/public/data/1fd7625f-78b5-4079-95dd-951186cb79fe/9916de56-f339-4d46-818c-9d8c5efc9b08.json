@@ -1,1 +1,7 @@
-{"name":"FontAwesome","label":"FontAwesome","require_path":"core\/Control\/Field\/FontAwesome","properties":[],"id":"9916de56-f339-4d46-818c-9d8c5efc9b08"}
+{
+  "name":"FontAwesome",
+  "label":"FontAwesome",
+  "require_path":"core\/Control\/Field\/FontAwesome",
+  "properties":[],
+  "id":"9916de56-f339-4d46-818c-9d8c5efc9b08"
+}

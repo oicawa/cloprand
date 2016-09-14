@@ -77,7 +77,7 @@ define(function (require) {
     }
 
     // Create form tags
-    this._class_id = field.datatype["class"];
+    this._class_id = field.datatype.properties.class_id;
     var self = this;
     console.assert(!(!this._class_id), field);
     $.when(

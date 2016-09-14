@@ -113,9 +113,9 @@ define(function (require) {
     }
 
     // Create form tags
-    var properties = field.datatype["primitive"].properties;
-    var class_id = properties["class_id"];
-    this._field_name = properties["field_name"];
+    var properties = field.datatype.properties;
+    var class_id = properties.class_id;
+    this._field_name = properties.field_name;
     var self = this;
     console.assert(!(!class_id), field);
     $.when(

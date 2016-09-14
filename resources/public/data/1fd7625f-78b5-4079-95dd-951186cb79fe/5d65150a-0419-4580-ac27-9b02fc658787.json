@@ -1,1 +1,33 @@
-{"name":"Password","label":"Password","require_path":"core\/Control\/Field\/Password","properties":[{"name":"width","label":"Width","description":"Password box width.","datatype":{"primitive":"0c408fba-4224-4426-a0fc-0b7553c6b0ca","class":"","multi":false,"embedded":false},"column":"","caption":false,"key":false,"recid":1},{"name":"require","label":"Require","description":"If value must be set, check this property.","datatype":{"primitive":"970944f3-da1c-4758-b929-af35dd9be4f7","class":"","multi":false,"embedded":false},"column":"","caption":false,"key":false,"recid":2}],"id":"5d65150a-0419-4580-ac27-9b02fc658787"}
+{
+  "name":"Password",
+  "label":"Password",
+  "require_path":"core\/Control\/Field\/Password",
+  "properties":[
+    {
+      "name":"width",
+      "label":"Width",
+      "description":"Password box width.",
+      "datatype":{
+        "id":"0c408fba-4224-4426-a0fc-0b7553c6b0ca",
+        "properties":{}
+      },
+      "column":"",
+      "caption":false,
+      "key":false,
+      "recid":1},
+    {
+      "name":"require",
+      "label":"Require",
+      "description":"If value must be set, check this property.",
+      "datatype":{
+        "id":"970944f3-da1c-4758-b929-af35dd9be4f7",
+        "properties":{}
+      },
+      "column":"",
+      "caption":false,
+      "key":false,
+      "recid":2
+    }
+  ],
+  "id":"5d65150a-0419-4580-ac27-9b02fc658787"
+}

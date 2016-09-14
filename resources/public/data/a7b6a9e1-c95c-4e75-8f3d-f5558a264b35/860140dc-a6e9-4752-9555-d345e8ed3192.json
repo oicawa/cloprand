@@ -1,0 +1,72 @@
+{
+  "label":"Sample",
+  "description":"Sample Class for Testing Dynamic primitive.",
+  "icon":null,
+  "core":false,
+  "application":true,
+  "storage_type":"0d9f2532-aaaa-4a42-a7c0-30ffe398a4b8",
+  "object_fields":[
+    {
+      "name":"label",
+      "label":"Label",
+      "description":"Label",
+      "datatype":{
+        "primitive":{
+          "id":"0c408fba-4224-4426-a0fc-0b7553c6b0ca",
+          "properties":{}
+        },
+        "class":"",
+        "multi":false,
+        "embedded":false
+      },
+      "column":"200",
+      "caption":true,
+      "key":false,
+      "recid":1
+    },
+    {
+      "name":"class",
+      "label":"Class",
+      "description":"Dynamic Class form.",
+      "datatype":{
+        "primitive":{
+          "id":"a8cd792c-c147-4a56-bf14-080a620c749a",
+          "properties":{
+            "class_id":"a7b6a9e1-c95c-4e75-8f3d-f5558a264b35",
+            "field_name":"object_fields"
+          }
+        },
+        "class":"",
+        "multi":false,
+        "embedded":false
+      },
+      "column":"",
+      "caption":false,
+      "key":false,
+      "recid":2
+    },
+    {
+      "name":"primitive",
+      "label":"Primitive",
+      "description":"Primitive Class.",
+      "datatype":{
+        "primitive": {
+          "id":"a8cd792c-c147-4a56-bf14-080a620c749a",
+          "properties":{
+            "class_id":"1fd7625f-78b5-4079-95dd-951186cb79fe",
+            "field_name":"properties"
+          }
+        },
+        "class":"",
+        "multi":false,
+        "embedded":false
+      },
+      "column":"",
+      "caption":false,
+      "key":false,
+      "recid":3
+    }
+  ],
+  "id":"860140dc-a6e9-4752-9555-d345e8ed3192"
+}
+
