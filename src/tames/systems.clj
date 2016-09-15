@@ -15,12 +15,12 @@
 (def REGEXP_UUID #"[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}")
 (def REGEXP_OBJECT_FILE_NAME #"^[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}\.json$")
 (def OBJECT_ID_NAME "id")
-;(def CLASS_ID "Class")
 (def CLASS_ID "a7b6a9e1-c95c-4e75-8f3d-f5558a264b35")
-;(def ACCOUNT_ID "Account")
 (def ACCOUNT_ID "9643597d-5513-4377-961c-643293fa3319")
 (def GROUP_ID "Group")
 (def FIELD_KEY "key")
+(def FILES_ID "748189ad-ce16-43f6-ae2a-fa48e5ec4a39")
+(def IMAGES_ID "4ee20d87-b73d-40a7-a521-170593ac2512")
 
 (def config (atom nil))
 

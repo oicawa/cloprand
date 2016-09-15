@@ -32,8 +32,13 @@ define(function (require) {
   
   function get_files(fields, data) {
     var files_fields = fields.filter(function(field, index) {
-      var attachments = ["Files", "Images"];
-      return attachments.some(function (primitive) { return field.datatype.primitive == primitive; });
+      var attachments = [
+        "748189ad-ce16-43f6-ae2a-fa48e5ec4a39", // Files
+        "4ee20d87-b73d-40a7-a521-170593ac2512"  // Images
+      ];
+      return attachments.some(function (id) {
+        return field.datatype.id == id;
+      });
     });
     var files = {};
     for (var i = 0; i < files_fields.length; i++) {

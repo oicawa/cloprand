@@ -119,7 +119,7 @@
     (let [dst-dir-path (format "data/%s/.%s/%s" class-id, object-id (field "name"))
           file-keys    (keys ((value (field "name")) "added"))]
       (systems/ensure-directory dst-dir-path)
-      ;(pprint/pprint file-keys)
+      (pprint/pprint file-keys)
       (doseq [file-key file-keys]
         ;(println file-key)
         (let [file     (added-files (keyword file-key))
@@ -131,9 +131,9 @@
 (defn get-files-fields
   [class-id]
   (let [class_ (systems/get-object systems/CLASS_ID class-id)]
-    (filter #(let [primitive ((%1 "datatype") "primitive")]
-               (or (= primitive "Files")
-                   (= primitive "Images")))
+    (filter #(let [id ((%1 "datatype") "id")]
+               (or (= id systems/FILES_ID)
+                   (= id systems/IMAGES_ID)))
             (class_ "object_fields"))))
 
 (defn update-files-values
@@ -187,7 +187,9 @@
           added-files  (dissoc params :value)
           files_fields (get-files-fields class-id)]
       (remove-attached-files class-id object-id value files_fields)
+      (println (format ">>> added-files = %d, files_fields = %d" (count added-files) (count files_fields)))
       (save-attached-files class-id object-id value files_fields added-files)
+      (println "<<<")
       (let [clean-value (update-files-values class-id object-id files_fields value)]
         (systems/put-data class-id object-id clean-value))))
   (DELETE "/api/:class-id/:object-id" [class-id object-id]
