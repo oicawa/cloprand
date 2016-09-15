@@ -5,7 +5,7 @@
   "require_path":"core\/Control\/Field\/Complex",
   "properties":[
     {
-      "name":"class",
+      "name":"class_id",
       "label":"Class",
       "description":"Select Class.",
       "datatype":{

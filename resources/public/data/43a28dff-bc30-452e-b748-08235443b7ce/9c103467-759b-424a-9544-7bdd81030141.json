@@ -1,6 +1,6 @@
 {
   "id":"9c103467-759b-424a-9544-7bdd81030141",
-  "Name":"FontAwesome",
+  "name":"FontAwesome",
   "fonts":[
     {"id":"fa-glass","name":"glass","recid":1}
     {"id":"fa-music","name":"music","recid":1},

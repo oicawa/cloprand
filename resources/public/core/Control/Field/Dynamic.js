@@ -67,11 +67,12 @@ define(function (require) {
   }
   
   function create_detail(self, root) {
-    var object = self._objects.find(function (element, index, array) {
+    var objects = self._objects.filter(function (element, index, array) {
       var value = self._dropdown.val();
       return element.id == value;
     });
-    
+    var object = objects[0];
+
     var detail = root.find("div > div.detail");
     detail.empty();
     
