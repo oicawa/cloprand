@@ -9,3 +9,15 @@ body {
   bottom:0px;
   right:0px;
 }
+
+.ui-front {
+  z-index: 1000;
+}
+
+.ui-widget {
+  font-size: 0.8em;
+}
+
+.ui-dialog {
+  background-color: #f5f6f7
+}

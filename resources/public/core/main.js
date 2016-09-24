@@ -4,6 +4,7 @@ require.config({
   
   shim: {
     'jquery': { exports: '$' },
+    'jquery_ui': { deps: ['jquery'] },
     'json2': { deps: ['jquery'] },
     'w2ui': { deps: ['jquery'] },
     'app': { deps: ['jquery'] }
@@ -11,8 +12,9 @@ require.config({
   
   paths : {
     jquery : '/lib/jquery-2.1.3',
+    jquery_ui : '/lib/jquery-ui-1.12.1',
     json2 : '/lib/json2',
-    w2ui : '/lib/w2ui-1.4.3/w2ui-1.4.3.min',
+    w2ui : '/lib/w2ui-1.4.3/w2ui-1.4.3',
     app : '/core/app'
   }
 });

@@ -10,6 +10,7 @@ define(function (require) {
   var Grid = require("core/Control/Grid");
   var Detail = require("core/Control/Detail");
   var Field = require("core/Control/Field/Field");
+  var Dialog = require("core/Dialog");
   var app = require("app");
   
   var TEMPLATE = '' +
@@ -30,14 +31,14 @@ define(function (require) {
       { "name": "down",   "caption": "Down",   "description": "Move downward selected item", "operation": "down" }
     ]
   };
-  
+  /*
   function showDetailDialog(self, title, fields, data, ok_func) {
     var body_id = Uuid.version4();
     var ok_id = Uuid.version4();
     var cancel_id = Uuid.version4();
     var buttons = '' +
-      '<input type="button" style="width:100px;" value="OK" id="' + ok_id + '" />' +
-      '<input type="button" style="width:100px;" value="Cancel" id="' + cancel_id + '" />';
+      '<input type="button" style="width:100px;margin:5px;" value="OK" id="' + ok_id + '" />' +
+      '<input type="button" style="width:100px;margin:5px;" value="Cancel" id="' + cancel_id + '" />';
     var detail = new Detail();
     w2popup.open({
       title   : title,
@@ -75,7 +76,8 @@ define(function (require) {
       }
     });
   }
-
+  */
+  
   function Multi() {
     Field.call(this, "core/Control/Field", "Multi");
     this._toolbar = null;
@@ -86,6 +88,97 @@ define(function (require) {
     this._backuped = null;
   };
   Inherits(Multi, Field);
+  
+  /*
+  Multi.prototype.showDetailDialog = function (self, title, fields, data, ok_func) {
+    var dialog_id = Uuid.version4();
+    var detail_id = Uuid.version4();
+    console.log("[detail_id] " + detail_id);
+    var ok_id = Uuid.version4();
+    var cancel_id = Uuid.version4();
+    var buttons = '' +
+      '<input type="button" style="width:100px;margin:5px;" value="OK" id="' + ok_id + '" />' +
+      '<input type="button" style="width:100px;margin:5px;" value="Cancel" id="' + cancel_id + '" />';
+      
+    $('body').append('<div id="' + dialog_id + '"><div id="' + detail_id + '"></div></div>');
+    var detail = new Detail();
+    detail.init("#" + detail_id, fields)
+    .then(function() {
+      var dialog = $("#" + dialog_id).w2popup({
+        title   : title,
+        buttons : buttons,
+        onOpen  : function(event) {
+          event.onComplete = function() {
+            $("#" + ok_id).on("click", function(event) {
+              console.log("[OK] clicked");
+              ok_func(detail);
+              dialog.close();
+              return false;
+            });
+            $("#" + cancel_id).on("click", function(event) {
+              console.log("[Cancel] clicked");
+              dialog.close();
+              return false;
+            });
+            detail.data(data);
+            //detail.visible(true);
+            detail.edit(true);
+            detail.refresh();
+            var width = detail._root.css("width");
+            var height = detail._root.css("height");
+            console.log("[Step1] width=" + width + ", height=" + height);
+            width = parseInt(width) + 200;
+            height = parseInt(height)　+ 120;
+            console.log("[Step2] width=" + width + ", height=" + height);
+            //dialog.resize(width, height);
+            dialog.resize(500, 500);
+          }
+        },
+        onClose  : function(event) {
+          $("#" + dialog_id).remove();
+          console.log("[Dialog Removed] #" + dialog_id);
+        }
+      });
+    });
+  }
+  */
+  
+  Multi.prototype.showDetailDialog = function (self, title, fields, data, ok_func) {
+	  var detail = new Detail();
+    var dialog = new Dialog();
+    dialog.init(function(id) {
+  	  var dfd = new $.Deferred;
+  	  detail.init('#' + id, fields)
+  	  .then(function () {
+  	    detail.data(data);
+  	    detail.edit(true);
+  	    detail.visible(true);
+  	    dfd.resolve();
+  	  });
+      return dfd.promise();
+    }).then(function () {
+      dialog.buttons([
+        {
+          text : "OK",
+          click: function (event) {
+            console.log("[OK] clicked");
+            ok_func(detail);
+            dialog.close();
+            return false;
+          }
+        },
+        {
+          text : "Cancel",
+          click: function (event) {
+            console.log("[Cancel] clicked");
+            dialog.close();
+            return false;
+          }
+        }
+      ]);
+      dialog.open();
+    });
+  };
   
   Multi.prototype.init = function(selector, field, assist) {
     var dfd = new $.Deferred;
@@ -131,7 +224,7 @@ define(function (require) {
         self._grid.init(selector + " > div > div.records", columns, 'height:300px;')
       ).always(function() {
         self._toolbar.bind("add", function(event) {
-          showDetailDialog(self, class_.label, class_.object_fields, null, function (detail) {
+          self.showDetailDialog(self, class_.label, class_.object_fields, null, function (detail) {
             var data = detail.data();
             self._grid.add(data);
             self._grid.refresh();
@@ -145,7 +238,7 @@ define(function (require) {
           }
           var index = selection[0];
           var data = self._grid.data()[index];
-          showDetailDialog(self, class_.label, class_.object_fields, data, function (detail) {
+          self.showDetailDialog(self, class_.label, class_.object_fields, data, function (detail) {
             var data = detail.data();
             var index = self._grid.selection()[0];
             self._grid.item(index, data);
@@ -180,7 +273,7 @@ define(function (require) {
           }
           var primitive = app._primitives[primitive_id];
           var title = primitive.label + " (" + data.label + ")"
-          showDetailDialog(self, title, primitive.properties, data.properties, function(detail) {
+          self.showDetailDialog(self, title, primitive.properties, data.properties, function(detail) {
             data.properties = detail.data();
           });
         });

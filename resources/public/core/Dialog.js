@@ -1,22 +1,15 @@
 define(function (require) {
   require("jquery");
+  require("jquery_ui");
   var Utils = require("core/Utils");
   var Uuid = require("core/Uuid");
   var Contents = require("core/Contents");
   
-  function init_buttons(actions) {
-    for (var uuid in actions) {
-      var action = actions[uuid];
-      $("#" + uuid).on("click", action.proc);
-    }
-  }
+  var DIALOG_TEMPLATE = '<div id="{{DIALOG_ID}}" style="display:none;"><div id="{{CONTENTS_ID}}"></div></div>';
   
-  // Dialog
   function Dialog() {
     this._id = null;
-    this._title = null;
-    this._initializer = null;
-    this._actions = null;
+    this._dialog = null;
   };
   
   Dialog.show = function (message, title) {
@@ -27,65 +20,60 @@ define(function (require) {
     return w2confirm(message, title);
   };
 
-  Dialog.prototype.close = function (event) {
-    w2popup.close();
+  Dialog.prototype.close = function () {
+    this._dialog.dialog('close');
   }
   
-  Dialog.prototype.show = function () {
-    // Create div tag for this dialog area.
-    this._id = Uuid.version4();
-    
-    var self = this;
-    
-    var buttons = "";
-    for (var uuid in this._actions) {
-      var action = this._actions[uuid];
-      buttons += "<input type='button' style='min-width:100px;margin:2px;' id='" + uuid + "' value='" + action.caption + "'/>";
-    }
-    
-    // Open this dialog.
-    w2popup.open({
-      title  : self._title,
-      body    : "<div id='" + self._id + "'></div>",
-      buttons : buttons,
-      onOpen : function(event) {
-        event.onComplete = function() {
-          self._initializer(self._id);
-          init_buttons(self._actions);
-        };
-      },
-      onClose : function(event) {
-        var panel = $("#" + self._id);
-        panel.remove();
-      }
-    });
+  Dialog.prototype.open = function () {
+    this._dialog.dialog('open');
   };
   
   Dialog.prototype.title = function (title) {
-    this._title = title;
+    this._dialog.dialog({ title : title });
   };
   
-  Dialog.prototype.bind = function (action) {
-    console.assert(action, "Specify action argument.");
-    console.assert(action.id, "Specify action.id property.");
-    console.assert(action.caption, "Specify action.caption property.");
-    console.assert(action.proc, "Specify action.proc property as function object.");
-    var uuid = Uuid.version4();
-    this._actions[uuid] = action;
+  Dialog.prototype.buttons = function (buttons) {
+    buttons.forEach(function (button) {
+      console.assert(button.text, "Specify button.text property.");
+      console.assert(button.click, "Specify button.click property.");
+      console.assert(typeof button.click == 'function', "Specify button.click handler as a function.");
+    });
+    this._dialog.dialog({ buttons : buttons });
+  };
+  
+  Dialog.prototype.size = function (width, height) {
+  　　this._dialog.dialog({
+  　　  width : width,
+  　　  height: height
+  　　});
   };
   
   Dialog.prototype.init = function (initializer) {
   	var dfd = new $.Deferred;
-    this._initializer = initializer;
-    this._actions = {};
+  	
+    this._id = Uuid.version4();
+    var contents_id = Uuid.version4();
+    var html = DIALOG_TEMPLATE.replace(/{{DIALOG_ID}}/, this._id).replace(/{{CONTENTS_ID}}/, contents_id);
+    $('body').append(html);
+    
+    this._dialog = $('#' + this._id);
+    
     var self = this;
     
-    dfd.resolve();
+    initializer(contents_id)
+    .then(function() {
+      self._dialog.dialog({
+        modal : true,
+        width : 'auto',
+        height : 'auto',
+        close : function (event, ui) {
+          self._dialog.remove();
+        }
+      });
+      dfd.resolve();
+    });
+    
     return dfd.promise();
-  };
-  
-  Dialog.prototype.resize = function (width, height) {
-  　　w2popup.resize(width, height);
   };
   
   return Dialog;

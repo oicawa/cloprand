@@ -76,6 +76,7 @@ define(function (require) {
       var grid = new Grid();
       var select_panel = "";
       dialog.init(function(panel_id) {
+        var dfd = new $.Deferred;
         var panel = $("#" + panel_id);
         panel.append("<div name='grid'></div>");
         var selector = "#" + panel_id +" > div[name='grid']";
@@ -100,31 +101,33 @@ define(function (require) {
           grid.toolbar(true);
           grid.data(self._fonts);
           grid.refresh();
-          dialog.resize(500, 600);
+          dfd.resolve();
         });
+        return dfd.promise();
       });
       dialog.title("Select Icon");
-      dialog.bind({
-        id      : "OK",
-        caption : "OK",
-        proc    : function (event) {
-          var recid = grid.selection();
-          console.log("[OK] clicked. selection=" + recid);
-          self._value = self._fonts[recid].id;
-          self.refresh();
-          dialog.close();
+      dialog.buttons([
+        {
+          text : "OK",
+          click: function (event) {
+            var recid = grid.selection();
+            console.log("[OK] clicked. selection=" + recid);
+            self._value = self._fonts[recid].id;
+            self.refresh();
+            dialog.close();
+          }
+        },
+        {
+          text : "Cancel",
+          click: function (event) {
+            console.log("[Cancel] clicked.");
+            dialog.close();
+          }
         }
-      });
-      dialog.bind({
-        id      : "Cancel",
-        caption : "Cancel",
-        proc    : function (event) {
-          console.log("[Cancel] clicked.");
-          dialog.close();
-        }
-      });
+      ]);
+      dialog.size(500, 600);
       
-      dialog.show();
+      dialog.open();
     });
   };
 
