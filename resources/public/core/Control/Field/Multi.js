@@ -152,6 +152,7 @@ define(function (require) {
   	  .then(function () {
   	    detail.data(data);
   	    detail.edit(true);
+  	    detail.refresh();
   	    detail.visible(true);
   	    dfd.resolve();
   	  });
