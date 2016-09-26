@@ -1,0 +1,1 @@
+{"name":"integer","label":"Integer","require_path":"core\/Control\/Field\/Integer","properties":[{"recid":1,"access":[],"label":"Auto Format","key":false,"name":"autoFormat","column":"","datatype":{"id":"970944f3-da1c-4758-b929-af35dd9be4f7","properties":{"default":true}},"caption":false,"description":"Auto Format."}],"id":"ab83aa2f-0303-46a5-bc41-bda556288f51"}

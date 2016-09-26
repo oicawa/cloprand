@@ -26,57 +26,10 @@ define(function (require) {
       { "name": "add",    "caption": "Add",    "description": "Add new field",               "operation": "add" },
       { "name": "edit",   "caption": "Edit",   "description": "Edit field",                  "operation": "edit" },
       { "name": "delete", "caption": "Delete", "description": "Delete field",                "operation": "delete" },
-      { "name": "properties", "caption": "Properties", "description": "Edit properties field", "operation": "properties" },
       { "name": "up",     "caption": "Up",     "description": "Move upward selected item",   "operation": "up" },
       { "name": "down",   "caption": "Down",   "description": "Move downward selected item", "operation": "down" }
     ]
   };
-  /*
-  function showDetailDialog(self, title, fields, data, ok_func) {
-    var body_id = Uuid.version4();
-    var ok_id = Uuid.version4();
-    var cancel_id = Uuid.version4();
-    var buttons = '' +
-      '<input type="button" style="width:100px;margin:5px;" value="OK" id="' + ok_id + '" />' +
-      '<input type="button" style="width:100px;margin:5px;" value="Cancel" id="' + cancel_id + '" />';
-    var detail = new Detail();
-    w2popup.open({
-      title   : title,
-      body    : '<div id="' + body_id + '"></div>',
-      buttons : buttons,
-      //width   : 700,
-      //height  : 550,
-      onOpen  : function(event) {
-        event.onComplete = function() {
-          $("#" + ok_id).on("click", function(event) {
-            console.log("[OK] clicked");
-            ok_func(detail);
-            w2popup.close();
-            return false;
-          });
-          $("#" + cancel_id).on("click", function(event) {
-            console.log("[Cancel] clicked");
-            w2popup.close();
-            return false;
-          });
-          detail.init("#" + body_id, fields)
-          .then(function() {
-            detail.data(data);
-            detail.visible(true);
-            detail.edit(true);
-            var width = detail._root.css("width");
-            var height = detail._root.css("height");
-            console.log("[Step1] width=" + width + ", height=" + height);
-            width = parseInt(width) + 200;
-            height = parseInt(height)　+ 120;
-            console.log("[Step2] width=" + width + ", height=" + height);
-            w2popup.resize(width, height);
-          });
-        }
-      }
-    });
-  }
-  */
   
   function Multi() {
     Field.call(this, "core/Control/Field", "Multi");
@@ -88,60 +41,6 @@ define(function (require) {
     this._backuped = null;
   };
   Inherits(Multi, Field);
-  
-  /*
-  Multi.prototype.showDetailDialog = function (self, title, fields, data, ok_func) {
-    var dialog_id = Uuid.version4();
-    var detail_id = Uuid.version4();
-    console.log("[detail_id] " + detail_id);
-    var ok_id = Uuid.version4();
-    var cancel_id = Uuid.version4();
-    var buttons = '' +
-      '<input type="button" style="width:100px;margin:5px;" value="OK" id="' + ok_id + '" />' +
-      '<input type="button" style="width:100px;margin:5px;" value="Cancel" id="' + cancel_id + '" />';
-      
-    $('body').append('<div id="' + dialog_id + '"><div id="' + detail_id + '"></div></div>');
-    var detail = new Detail();
-    detail.init("#" + detail_id, fields)
-    .then(function() {
-      var dialog = $("#" + dialog_id).w2popup({
-        title   : title,
-        buttons : buttons,
-        onOpen  : function(event) {
-          event.onComplete = function() {
-            $("#" + ok_id).on("click", function(event) {
-              console.log("[OK] clicked");
-              ok_func(detail);
-              dialog.close();
-              return false;
-            });
-            $("#" + cancel_id).on("click", function(event) {
-              console.log("[Cancel] clicked");
-              dialog.close();
-              return false;
-            });
-            detail.data(data);
-            //detail.visible(true);
-            detail.edit(true);
-            detail.refresh();
-            var width = detail._root.css("width");
-            var height = detail._root.css("height");
-            console.log("[Step1] width=" + width + ", height=" + height);
-            width = parseInt(width) + 200;
-            height = parseInt(height)　+ 120;
-            console.log("[Step2] width=" + width + ", height=" + height);
-            //dialog.resize(width, height);
-            dialog.resize(500, 500);
-          }
-        },
-        onClose  : function(event) {
-          $("#" + dialog_id).remove();
-          console.log("[Dialog Removed] #" + dialog_id);
-        }
-      });
-    });
-  }
-  */
   
   Multi.prototype.showDetailDialog = function (self, title, fields, data, ok_func) {
 	  var detail = new Detail();
@@ -158,6 +57,7 @@ define(function (require) {
   	  });
       return dfd.promise();
     }).then(function () {
+      dialog.title(title);
       dialog.buttons([
         {
           text : "OK",
@@ -219,10 +119,19 @@ define(function (require) {
         }
         self._grid.refresh();
       }
+      
+      var width = 500;
+      var height = 200;
+      var prop = field.datatype.properties;
+      if (prop) {
+        width = prop.width ? prop.width : width;
+        height = prop.height ? prop.height : height;
+      }
+      var style = 'width:' + width + 'px;height:' + height + 'px;';
 
       $.when(
         self._toolbar.init(selector + " > div > div.toolbar", toolbar),
-        self._grid.init(selector + " > div > div.records", columns, 'height:300px;')
+        self._grid.init(selector + " > div > div.records", columns, style)
       ).always(function() {
         self._toolbar.bind("add", function(event) {
           self.showDetailDialog(self, class_.label, class_.object_fields, null, function (detail) {
@@ -257,25 +166,6 @@ define(function (require) {
               return;
             self._grid.delete(selection);
             self._grid.refresh();
-          });
-        });
-        self._toolbar.bind("properties", function(event) {
-          var selection = self._grid.selection();
-          if (selection.length != 1) {
-            Dialog.show("Select one item.");
-            return;
-          }
-          var index = selection[0];
-          var data = self._grid.data()[index];
-          var primitive_id = data.datatype.primitive;
-          if (!primitive_id || primitive_id == "") {
-            Dialog.show("This property type is not Primitive.");
-            return;
-          }
-          var primitive = app._primitives[primitive_id];
-          var title = primitive.label + " (" + data.label + ")"
-          self.showDetailDialog(self, title, primitive.properties, data.properties, function(detail) {
-            data.properties = detail.data();
           });
         });
         self._toolbar.bind("up", function(event) {
