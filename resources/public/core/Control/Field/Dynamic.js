@@ -5,11 +5,12 @@ define(function (require) {
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
   var Detail = require("core/Control/Detail");
+  var Dialog = require("core/Dialog");
   
   var TEMPLATE = '' +
 '<label></label>' +
 '<div>' +
-'  <select style="color:black;"></select>' +
+'  <select style="color:black;"></select><button style="width:30px;">...</button>' +
 '  <div class="detail"></div>' +
 '</div>';
 
@@ -60,13 +61,67 @@ define(function (require) {
     }
     
     self._dropdown.on("change", function(event) {
+      if (!self._embedded) {
+        return;
+      }
       create_detail(self, root);
     });
     
     self._dropdown.val(self._value == null ? "" : self._value.id);
   }
   
+  function create_button(self, root) {
+    self._button = root.find("button");
+    self._button.on('click', function (evnet) {
+      var object = null;
+      var detail = new Detail();
+      var dialog = new Dialog();
+      dialog.init(function(id) {
+        var dfd = new $.Deferred;
+        
+        var objects = self._objects.filter(function (element, index, array) {
+          var value = self._dropdown.val();
+          return element.id == value;
+        });
+        object = objects[0];
+        
+  	    detail.init('#' + id, object[self._field_name])
+  	    .then(function () {
+  	      detail.data(self._dialog_data);
+          detail.edit(true);
+          detail.refresh();
+          detail.visible(true);
+          dfd.resolve();
+        });
+        return dfd.promise();
+      }).then(function () {
+        dialog.title(object.label + " Properties");
+        dialog.buttons([
+          {
+            text : "OK",
+            click: function (event) {
+              console.log("[OK] clicked");
+              self._dialog_data = detail.data();
+              dialog.close();
+              return false;
+            }
+          },
+          {
+            text : "Cancel",
+            click: function (event) {
+              console.log("[Cancel] clicked");
+              dialog.close();
+              return false;
+            }
+          }
+        ]);
+        dialog.open();
+      });
+    });
+  }
+  
   function create_detail(self, root) {
+    var dfd = new $.Deferred;
     var objects = self._objects.filter(function (element, index, array) {
       var value = self._dropdown.val();
       return element.id == value;
@@ -77,7 +132,8 @@ define(function (require) {
     detail.empty();
     
     if (!object) {
-      return;
+      dfd.resolve();
+      return dfd.promise();
     }
     
     self._detail = new Detail();
@@ -87,19 +143,24 @@ define(function (require) {
       self._detail.edit(self.edit());
       self._detail.data(self._value == null ? null : self._value.properties);
       self._detail.visible(true);
+      dfd.resolve();
     });
+    return dfd.promise();
   }
   
   function Dynamic() {
     Field.call(this, "core/Control/Field", "Dynamic");
     this._selector = null;
     this._field_name = null;
+    this._embedded = null;
   	this._dropdown = null;
+  	this._button = null;
   	this._detail = null;
   	this._value = null;
     this._class = null;
     this._objects = null;
     this._items = {};
+    this._dialog_data = null;
   }
   Inherits(Dynamic, Field);
 
@@ -117,6 +178,7 @@ define(function (require) {
     var properties = field.datatype.properties;
     var class_id = properties.class_id;
     this._field_name = properties.field_name;
+    this._embedded = properties.embedded;
     var self = this;
     console.assert(!(!class_id), field);
     $.when(
@@ -124,7 +186,11 @@ define(function (require) {
       Connector.crud.read("api/" + class_id, "json", function(response) { self._objects = response; })
     ).then(function() {
       create_dropdown(self, root, field);
-      create_detail(self, root);
+      create_button(self, root, self._class[this._field_name]);
+      if (self._embedded) {
+        create_detail(self, root);
+        self._button.hide();
+      }
       dfd.resolve();
     });
     return dfd.promise();
@@ -162,13 +228,17 @@ define(function (require) {
       var properties = {};
       if (this._detail) {
         properties = this._detail.data();
+      } else {
+        properties = this._dialog_data;
       }
       return { "id":id, "properties":properties };
     } else {
       this._value = value;
+      this._dialog_data = value.properties;
       this._dropdown.val(value == null ? "" : value.id);
       var root = $(this._selector);
-      create_detail(this, root);
+      if (this._embedded)
+        create_detail(this, root);
       // set value.properties into this._detail in event handler.
     }
   };

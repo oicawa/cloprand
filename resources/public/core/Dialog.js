@@ -68,6 +68,9 @@ define(function (require) {
         height : 'auto',
         close : function (event, ui) {
           self._dialog.remove();
+        },
+        resize : function (event) {
+          console.log("Dialog (ID:" + this._id + ") resize.");
         }
       });
       dfd.resolve();
