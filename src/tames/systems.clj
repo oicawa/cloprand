@@ -235,12 +235,61 @@
       (response/response (json/write-str { "file_name" file-name "file_contents" file_contents }))
       "text/text; charset=utf-8")))
 
+(defn get-files-fields
+  [class-id]
+  (let [class_ (get-object CLASS_ID class-id)]
+    (filter #(let [id ((%1 "datatype") "id")]
+               (or (= id FILES_ID)
+                   (= id IMAGES_ID)))
+            (class_ "object_fields"))))
+
+(defn remove-attached-files
+  [class-id object-id value files_fields]
+  (doseq [field files_fields]
+    (let [dst-dir-path (get-absolute-path (format "data/%s/.%s/%s" class-id, object-id (field "name")))
+          file-names   (keys ((value (field "name")) "remove"))]
+      (doseq [file-name file-names]
+        (let [file (File. (format "%s/%s" dst-dir-path file-name))]
+          (println "[** Remove File **]" (. file getAbsolutePath))
+          (if (. file exists)
+              (. file delete)))))))
+
+(defn save-attached-files
+  [class-id object-id value files_fields added-files]
+  (doseq [field files_fields]
+    (let [dst-dir-path (format "data/%s/.%s/%s" class-id, object-id (field "name"))
+          file-keys    (keys ((value (field "name")) "added"))]
+      (ensure-directory dst-dir-path)
+      (pprint/pprint file-keys)
+      (doseq [file-key file-keys]
+        (let [file      (added-files (keyword file-key))
+              tmp-file  (file :tempfile)
+              file-name (. (File. (file :filename)) getName)
+              dst-file  (format "%s/%s" dst-dir-path file-name)]
+          (io/copy tmp-file (File. dst-file)))))))
+
+(defn update-files-values
+  [class-id object-id files_fields raw-value]
+  (let [base-dir   (get-absolute-path (format "data/%s/.%s" class-id object-id))
+        field_names (map #(%1 "name") files_fields)]
+    (loop [names field_names
+           value raw-value]
+      (if (empty? names)
+          value
+          (let [name    (first names)
+                path    (format "%s/%s" base-dir name)
+                current (map (fn [file] { "name" (. file getName) "size" (. file length) })
+                             (vec (. (File. path) listFiles)))
+                value1  (dissoc value name)
+                value2  (assoc value name {"class_id" class-id "object_id" object-id "current" current})]
+            (recur (rest names) value2))))))
+
 (defn get-account
   [account_id]
   (let [accounts (filter #(= (%1 "account_id") account_id) (get-objects ACCOUNT_ID))
         account  (if (= (count accounts) 0) nil (first accounts))]
     account))
-        
+
 (defn get-data
   [class-id object-id]
   (response-with-content-type
@@ -262,20 +311,14 @@
 ;  [account-id 
 
 (defn create-object
-  [class-id s-exp-data]
+  [class-id object-id s-exp-data]
   (println "Called create-object function.")
-  (let [key-name      OBJECT_ID_NAME
-        object-id     (str (UUID/randomUUID))
-        relative-path (Paths/get (str "data/" class-id) (into-array String [(str object-id ".json")]))
+  (let [relative-path (Paths/get (str "data/" class-id) (into-array String [(str object-id ".json")]))
         base-name     (. relative-path getFileName)
-        dir-path      (. relative-path getParent)
-        object-data   (assoc s-exp-data key-name object-id)]
-    (println (format "  key-name  : %s" key-name))
-    (println (format "  object-id : %s" object-id))
+        dir-path      (. relative-path getParent)]
     (ensure-directory (. dir-path toString))
     (with-open [w (io/writer (. relative-path toString))]
-      (json/write object-data w))
-    object-data))
+      (json/write s-exp-data w))))
 
 (defn update-object
   [class-id object-id s-exp-data]
@@ -310,17 +353,34 @@
     (if (= CLASS_ID class-id)
         (remove-file (File. (format "data/%s" object-id))))))
 
+;(defn post-data
+;  [class-id s-exp-data]
+;  (println "Called post-data function.")
+;  (println "----------")
+;  (pprint/pprint s-exp-data)
+;  (println "----------")
+;  (let [new-object     (create-object class-id s-exp-data)]
+;    (println "Posted OK.")
+;    (response-with-content-type
+;      (response/response (get-object-as-json class-id (new-object OBJECT_ID_NAME)))
+;      "text/json; charset=utf-8")))
+
 (defn post-data
-  [class-id s-exp-data]
-  (println "Called post-data function.")
-  (println "----------")
-  (pprint/pprint s-exp-data)
-  (println "----------")
-  (let [new-object     (create-object class-id s-exp-data)]
-    (println "Posted OK.")
-    (response-with-content-type
-      (response/response (get-object-as-json class-id (new-object OBJECT_ID_NAME)))
-      "text/json; charset=utf-8")))
+  [class-id data added-files]
+  (let [object-id    (str (UUID/randomUUID))
+        files_fields (get-files-fields class-id)
+        data-with-id (assoc data OBJECT_ID_NAME object-id)]
+    ;(println "Called post-data function.")
+    ;(println "----------")
+    ;(pprint/pprint data)
+    ;(println "----------")
+    (save-attached-files class-id object-id data-with-id files_fields added-files)
+    (let [pure-data (update-files-values class-id object-id files_fields data-with-id)]
+      (create-object class-id object-id pure-data)
+      (println "Posted OK.")
+      (response-with-content-type
+        (response/response (get-object-as-json class-id object-id))
+        "text/json; charset=utf-8"))))
 
 (defn post-extension-file
   [class-id object-id file-name file_contents]
@@ -339,16 +399,24 @@
       "text/json; charset=utf-8")))
 
 (defn put-data
-  [class-id object-id s-exp-data]
-  (println "Called put-data function.")
-  (println "----------")
-  (pprint/pprint s-exp-data)
-  (println "----------")
-  (update-object class-id object-id s-exp-data)
-  (println "Put OK.")
-  (response-with-content-type
-    (response/response (get-objects-as-json class-id))
-    "text/json; charset=utf-8"))
+  [class-id object-id data added-files]
+  (let [files_fields (get-files-fields class-id)]
+    (remove-attached-files class-id object-id data files_fields)
+    ;(println (format ">>> added-files = %d, files_fields = %d" (count added-files) (count files_fields)))
+    (save-attached-files class-id object-id data files_fields added-files)
+    ;(println "<<<")
+    ;(println "Called put-data function.")
+    ;(println "----------")
+    ;(pprint/pprint data)
+    ;(println "----------")
+    (let [pure-data (update-files-values class-id object-id files_fields data)]
+      ;(pprint/pprint pure-data)
+      ;(println "----------")
+      (update-object class-id object-id pure-data)
+      ;(println "Put OK.")
+      (response-with-content-type
+        (response/response (get-objects-as-json class-id))
+        "text/json; charset=utf-8"))))
 
 (defn put-extension-file
   [class-id object-id file-name file_contents]

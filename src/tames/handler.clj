@@ -102,56 +102,6 @@
   (with-open [src (io/input-stream src-path)]
     (io/copy src (File. dst-path))))
 
-(defn remove-attached-files
-  [class-id object-id value files_fields]
-  (doseq [field files_fields]
-    (let [dst-dir-path (systems/get-absolute-path (format "data/%s/.%s/%s" class-id, object-id (field "name")))
-          file-names   (keys ((value (field "name")) "remove"))]
-      (doseq [file-name file-names]
-        (let [file (File. (format "%s/%s" dst-dir-path file-name))]
-          (println "[** Remove File **]" (. file getAbsolutePath))
-          (if (. file exists)
-              (. file delete)))))))
-
-(defn save-attached-files
-  [class-id object-id value files_fields added-files]
-  (doseq [field files_fields]
-    (let [dst-dir-path (format "data/%s/.%s/%s" class-id, object-id (field "name"))
-          file-keys    (keys ((value (field "name")) "added"))]
-      (systems/ensure-directory dst-dir-path)
-      (pprint/pprint file-keys)
-      (doseq [file-key file-keys]
-        ;(println file-key)
-        (let [file     (added-files (keyword file-key))
-              tmp-file (file :tempfile)
-              file-name (. (File. (file :filename)) getName)
-              dst-file (format "%s/%s" dst-dir-path file-name)]
-          (io/copy tmp-file (File. dst-file)))))))
-
-(defn get-files-fields
-  [class-id]
-  (let [class_ (systems/get-object systems/CLASS_ID class-id)]
-    (filter #(let [id ((%1 "datatype") "id")]
-               (or (= id systems/FILES_ID)
-                   (= id systems/IMAGES_ID)))
-            (class_ "object_fields"))))
-
-(defn update-files-values
-  [class-id object-id files_fields raw-value]
-  (let [base-dir   (systems/get-absolute-path (format "data/%s/.%s" class-id object-id))
-        field_names (map #(%1 "name") files_fields)]
-    (loop [names field_names
-           value raw-value]
-      (if (empty? names)
-          value
-          (let [name    (first names)
-                path    (format "%s/%s" base-dir name)
-                current (map (fn [file] { "name" (. file getName) "size" (. file length) })
-                             (vec (. (File. path) listFiles)))
-                value1  (dissoc value name)
-                value2  (assoc value name {"class_id" class-id "object_id" object-id "current" current})]
-            (recur (rest names) value2))))))
-
 (defroutes app-routes
   ;; Authentication
   (GET "/login" req
@@ -178,20 +128,15 @@
   (POST "/api/:class-id" [class-id & params]	;;; https://github.com/weavejester/compojure/wiki/Destructuring-Syntax
     (println (str "[POST] /api/:class-id = /api/" class-id))
     (let [json-str     (URLDecoder/decode (params :value) "UTF-8")
-          value        (json/read-str json-str)]
-      (systems/post-data class-id value)))
+          data         (json/read-str json-str)
+          added-files  (dissoc params :value)]
+      (systems/post-data class-id data added-files)))
   (PUT "/api/:class-id/:object-id" [class-id object-id & params]
     (println (str "[PUT] /api/:class-id/:object-id = /api/" class-id "/" object-id))
     (let [json-str     (URLDecoder/decode (params :value) "UTF-8")
-          value        (json/read-str json-str)
-          added-files  (dissoc params :value)
-          files_fields (get-files-fields class-id)]
-      (remove-attached-files class-id object-id value files_fields)
-      (println (format ">>> added-files = %d, files_fields = %d" (count added-files) (count files_fields)))
-      (save-attached-files class-id object-id value files_fields added-files)
-      (println "<<<")
-      (let [clean-value (update-files-values class-id object-id files_fields value)]
-        (systems/put-data class-id object-id clean-value))))
+          data         (json/read-str json-str)
+          added-files  (dissoc params :value)]
+      (systems/put-data class-id object-id data added-files)))
   (DELETE "/api/:class-id/:object-id" [class-id object-id]
     (println (str "[DELETE] /api/:class-id/:object-id = /api/" class-id "/" object-id))
     (systems/delete-data class-id object-id))

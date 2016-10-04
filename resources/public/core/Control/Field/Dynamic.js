@@ -234,8 +234,8 @@ define(function (require) {
       return { "id":id, "properties":properties };
     } else {
       this._value = value;
-      this._dialog_data = value.properties;
-      this._dropdown.val(value == null ? "" : value.id);
+      this._dialog_data = !value ? null : (!value.properties ? null : value.properties);
+      this._dropdown.val(!value ? "" : value.id);
       var root = $(this._selector);
       if (this._embedded)
         create_detail(this, root);
