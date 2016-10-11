@@ -64,6 +64,7 @@ define(function (require) {
     var tab_info = Contents.get_tab_info(event);
     var view = app.contents().content(tab_info.tab_id);
     view.detail().edit(true);
+    view.detail().refresh();
     edit_toolbar(view.toolbar(), true);
   };
   
@@ -107,8 +108,9 @@ define(function (require) {
       Connector.crud.create("api/" + tab_info.class_id, data, files, function(response) { object = response;})
       .then(function() {
         edit_toolbar(view.toolbar(), false);
-        detail.edit(false);
         detail.data(object);
+        detail.edit(false);
+        detail.refresh();
         var old_tab_name = tab_info.tab_id;
         var new_tab_name = Tabs.create_tab_name([tab_info.prefix, tab_info.class_id, object[key_field_name]]);
         var label = caption_field_names.map(function(name) { return object[name]; }).join(" ");
@@ -125,6 +127,7 @@ define(function (require) {
         edit_toolbar(view.toolbar(), false);
         detail.edit(false);
         detail.commit();
+        detail.refresh();
         var label = caption_field_names.map(function(name) { return data[name]; }).join(" ");
         app.contents().label(tab_info.tab_id, label);
         app.contents().broadcast(tab_info.class_id, tab_info.object_id, data);
@@ -145,6 +148,7 @@ define(function (require) {
       var detail = view.detail();
       detail.restore();
       detail.edit(false);
+      detail.refresh();
     });
   };
   

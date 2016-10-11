@@ -141,8 +141,23 @@ define(function (require) {
   };
 
   Files.prototype.commit = function() {
-    this._values.added = this._added;
-    this._values.remove = this._remove;
+    console.log("Files.commit called.");
+    
+    var current = [];
+    for (var i = 0; i < this._values.current.length; i++) {
+      var file = this._values.current[i];
+      if (this._remove[file.name]) {
+        continue;
+      }
+      current.push(file);
+    }
+    
+    for (var key in this._added) {
+      var file = this._added[key];
+      current.push(file);
+    }
+    
+    this._values.current = current;
     this._added = {};
     this._remove = {};
   };
@@ -156,25 +171,27 @@ define(function (require) {
     this._editting = on;
     if (on)
       this.restore();
-    this.refresh();
   };
 
   Files.prototype.data = function(value) {
     if (arguments.length == 0) {
-      if (!this._values)
+      if (!this._values) {
         this._values = {};
+        this._values.current = [];
+      }
       this._values.added = this._added;
       this._values.remove = this._remove;
-      this._values.current = !value ? [] : (!value.current ? [] : value.current);
       return this._values;
     } else {
       this._values = value;
-      this.refresh();
+      this._added = {};
+      this._remove = {};
     }
   };
   
   Files.prototype.update = function() {
   };
+  
   Files.prototype.get_display_size = function(real_size) {
     var size = 0.0 + real_size;
     var units = ["Byte", "KB", "MB"];
@@ -204,6 +221,7 @@ define(function (require) {
   };
   
   Files.prototype.refresh = function() {
+    console.log("Files.refresh called.");
     this._exist_list.empty();
     this._added_list.empty();
     var tag = this.get_item_tag_name();
