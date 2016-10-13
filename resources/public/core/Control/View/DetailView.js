@@ -75,8 +75,9 @@ define(function (require) {
       }
       
       var tab_info = Contents.get_tab_info(event);
+      var view = app.contents().content(tab_info.tab_id);
       var objects = null;
-      Connector.crud.delete("api/" + tab_info.class_id + "/" + tab_info.object_id, function(response) { objects = response; })
+      Connector.crud.delete("api/" + view._class_id + "/" + view._object_id, function(response) { objects = response; })
       .then(function() {
         app.contents().broadcast(tab_info.class_id, tab_info.object_id, null);
         app.contents().remove(tab_info.tab_id);
@@ -108,19 +109,21 @@ define(function (require) {
       Connector.crud.create("api/" + tab_info.class_id, data, files, function(response) { object = response;})
       .then(function() {
         edit_toolbar(view.toolbar(), false);
+        var new_object_id = object[key_field_name];
+        view._object_id = new_object_id;
         detail.data(object);
         detail.edit(false);
         detail.refresh();
         var old_tab_name = tab_info.tab_id;
-        var new_tab_name = Tabs.create_tab_name([tab_info.prefix, tab_info.class_id, object[key_field_name]]);
+        var new_tab_name = Tabs.create_tab_name([tab_info.prefix, tab_info.class_id, new_object_id]);
         var label = caption_field_names.map(function(name) { return object[name]; }).join(" ");
         app.contents().label(tab_info.tab_id, label);
-        app.contents().broadcast(tab_info.class_id, object[key_field_name], object);
+        app.contents().broadcast(tab_info.class_id, new_object_id, object);
         Dialog.show("New item was created successfully.", "Save");
       });
     } else {
       if (!data[key_field_name])
-        data[key_field_name] = tab_info.object_id;
+        data[key_field_name] = view._object_id;
       Connector.crud.update("api/" + tab_info.class_id + "/" + data[key_field_name], data, files, function(response) { object = response; })
       //Connector.crud.create("api/" + tab_info.class_id, data, files, function(response) { object = response;})
       .then(function() {

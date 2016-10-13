@@ -7,7 +7,7 @@
             [clojure.data.json :as json]
             [clojure.string :as string])
   (:import (java.io File InputStream)
-           (java.nio.file Paths Path)
+           (java.nio.file Paths Path Files)
            (java.util.jar JarFile JarEntry)
            (java.util UUID)))
 
@@ -192,21 +192,13 @@
 
 (defn get-file
   [class-id file-name content-type]
-  ;(println "  [systems/get-file]")
-  ;(println "  class-id     :" class-id)
-  ;(println "  file-name    :" file-name)
-  ;(println "  content-type :" content-type)
   (let [absolute-path (get-absolute-path (str "data/" class-id "/" file-name))
         default-path  (get-default-file file-name)
         file          (File. absolute-path)
         res           (if (. file exists)
                           (response/file-response absolute-path)
-                          ;(response/resource-response default-path)
                           (response/resource-response file-name {:root "tames/defaults"})
                           )]
-    ;(println "  absolute-path:" absolute-path)
-    ;(println "  default-path :" default-path)
-    ;(println "  exists?      :" (. file exists))
     (response-with-content-type res content-type)))
 
 (defn get-extension-file-list
@@ -353,18 +345,6 @@
     (if (= CLASS_ID class-id)
         (remove-file (File. (format "data/%s" object-id))))))
 
-;(defn post-data
-;  [class-id s-exp-data]
-;  (println "Called post-data function.")
-;  (println "----------")
-;  (pprint/pprint s-exp-data)
-;  (println "----------")
-;  (let [new-object     (create-object class-id s-exp-data)]
-;    (println "Posted OK.")
-;    (response-with-content-type
-;      (response/response (get-object-as-json class-id (new-object OBJECT_ID_NAME)))
-;      "text/json; charset=utf-8")))
-
 (defn post-data
   [class-id data added-files]
   (let [object-id    (str (UUID/randomUUID))
@@ -402,18 +382,9 @@
   [class-id object-id data added-files]
   (let [files_fields (get-files-fields class-id)]
     (remove-attached-files class-id object-id data files_fields)
-    ;(println (format ">>> added-files = %d, files_fields = %d" (count added-files) (count files_fields)))
     (save-attached-files class-id object-id data files_fields added-files)
-    ;(println "<<<")
-    ;(println "Called put-data function.")
-    ;(println "----------")
-    ;(pprint/pprint data)
-    ;(println "----------")
     (let [pure-data (update-files-values class-id object-id files_fields data)]
-      ;(pprint/pprint pure-data)
-      ;(println "----------")
       (update-object class-id object-id pure-data)
-      ;(println "Put OK.")
       (response-with-content-type
         (response/response (get-objects-as-json class-id))
         "text/json; charset=utf-8"))))
@@ -438,6 +409,7 @@
   [class-id object-id]
   (println "Called delete-data function.")
   (delete-object class-id object-id)
+  (remove-file (File. (get-absolute-path (format "data/%s/.%s" class-id, object-id))))
   (println "Delete OK.")
   (response-with-content-type
     (response/response (get-objects-as-json class-id))
