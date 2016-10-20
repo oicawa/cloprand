@@ -35,21 +35,28 @@
 
 (defn login-get
   [req]
-  (html
-    [:div {:style "width:100%; text-align:center;height:100px;"}]
-    [:h1 {:style "text-align:center;height:100px;"} "tames"]
-    [:form {:method "post"}
-      [:div {:style "width:100%; text-align:center;"}
-        [:span {:style "display:inline-block;width:100px;"} "Login ID "]
-        [:input {:type "text" :name "account_id" :style "width:200px;"}]
-        [:br]
-        [:div {:style "width:100%;height:10px;"}]
-        [:span {:style "display:inline-block;width:100px;"} "Password"]
-        [:input {:type "password" :name "password" :style "width:200px;"}]
-        [:br]
-        [:div {:style "width:100%;height:20px;"}]
-        [:input {:type "hidden" :name "__anti-forgery-token" :value *anti-forgery-token*}]
-        [:input {:type "submit" :value "Login"}]]]))
+  (let [title "tames"]
+    (html
+      [:head
+        [:title title ]
+        [:link {:rel "shortcut icon" :href "core/favicon.ico"} ]]
+      [:body
+        [:div {:style "width:100%; text-align:center;height:50px;"}]
+        [:div {:style "width:80px; height:80px; margin: 0 auto;"}
+          [:img {:src "core/logo.svg" :style "width:100%; height:100%;"}]]
+        [:h1 {:style "text-align:center;height:50px;"} title]
+        [:form {:method "post"}
+          [:div {:style "width:100%; text-align:center;"}
+            [:span {:style "display:inline-block;width:100px;"} "Login ID "]
+            [:input {:type "text" :name "account_id" :style "width:200px;"}]
+            [:br]
+            [:div {:style "width:100%;height:10px;"}]
+            [:span {:style "display:inline-block;width:100px;"} "Password"]
+            [:input {:type "password" :name "password" :style "width:200px;"}]
+            [:br]
+            [:div {:style "width:100%;height:20px;"}]
+            [:input {:type "hidden" :name "__anti-forgery-token" :value *anti-forgery-token*}]
+            [:input {:type "submit" :value "Login"}]]]])))
 
 (defn login-post
   [req]
