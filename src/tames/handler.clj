@@ -42,8 +42,7 @@
         [:link {:rel "shortcut icon" :href "core/favicon.ico"} ]]
       [:body
         [:div {:style "width:100%; text-align:center;height:50px;"}]
-        [:div {:style "width:80px; height:80px; margin: 0 auto;"}
-          [:img {:src "core/logo.svg" :style "width:100%; height:100%;"}]]
+        [:div {:style "width:100px; height:100px; background-image:url(core/logo.svg); background-size:100%;margin:auto;"} ]
         [:h1 {:style "text-align:center;height:50px;"} title]
         [:form {:method "post"}
           [:div {:style "width:100%; text-align:center;"}
