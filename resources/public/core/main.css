@@ -21,3 +21,12 @@ body {
 .ui-dialog {
   background-color: #f5f6f7
 }
+
+.image-button {
+  border: 1px solid black;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.image-button:hover {
+  background-color: #dddddd;
+}

@@ -6,6 +6,7 @@ define(function (require) {
   var Uuid = require("core/Uuid");
   var Connector = require("core/Connector");
   var Contents = require("core/Contents");
+  var Tree = require("core/Control/Tree");
 
   var LAYOUT_TEMPLATE = '<div id="layout"></div>';
   var TOP_TEMPLATE = '' +
@@ -14,9 +15,11 @@ define(function (require) {
 '  <span id="title" style="font-size:20px; vertical-align: top;"></span>' +
 '  <span style="display:inline-block; width:30px;"></span>' +
 '  <span id="sub-title"></span>' +
-'  <form method="get" action="/logout" style="display:inline-block;position:absolute; right:5px;">' +
+'  <form method="get" name="signout" action="/logout" style="display:inline-block;position:absolute; right:5px;">' +
 '    <span id="account_id"></span>' +
-'    <input type="submit" value="Logout" />' +
+'    <span class="image-button" style="height:10px;width:10px;">' +
+'      <i class="fa fa-sign-out fa-fw" onclick="document.signout.submit();"></i>' +
+'    </span>' +
 '  </form>' +
 '</div>';
   var LEFT_TEMPLATE = '<div id="left-panel"></div>';
@@ -83,8 +86,10 @@ define(function (require) {
       self._layout= w2ui[layout_name];
       self._layout.refresh();
 
-      var logo_path = "/image/" + Utils.SYSTEM_ID + "/" + config.id + "/logo/tames.svg";
-      var favicon_path = "/image/" + Utils.SYSTEM_ID + "/" + config.id + "/favicon/tames.ico";
+      //var logo_path = "/image/" + Utils.SYSTEM_ID + "/" + config.id + "/logo/tames.svg";
+      //var favicon_path = "/image/" + Utils.SYSTEM_ID + "/" + config.id + "/favicon/tames.ico";
+      var logo_path = "/core/logo.svg";
+      var favicon_path = "/core/favicon.ico";
       
       self._system_icon = $("img#system-icon");
       self._system_icon.attr("src", logo_path);
@@ -105,6 +110,9 @@ define(function (require) {
         var primitive = primitives[i];
         self._primitives[primitive.id] = primitive;
       }
+      
+      var tree = new Tree();
+      tree.init("#left-panel");
     });
   };
 
