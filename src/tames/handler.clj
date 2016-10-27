@@ -39,12 +39,16 @@
     (html
       [:head
         [:title title ]
-        [:link {:rel "shortcut icon" :href "core/favicon.ico"} ]]
+        [:link {:rel "shortcut icon" :href "core/favicon.ico"} ]
+        [:link {:rel "stylesheet" :type "text/css" :href "/lib/font-awesome-4.6.1/css/font-awesome.css" } ]
+        [:link {:rel "stylesheet" :type "text/css" :href "/core/main.css" } ]
+        ]
       [:body
         [:div {:style "width:100%; text-align:center;height:50px;"}]
         [:div {:style "width:100px; height:100px; background-image:url(core/logo.svg); background-size:100%;margin:auto;"} ]
         [:h1 {:style "text-align:center;height:50px;"} title]
-        [:form {:method "post"}
+        [:div {:style "width:100%; text-align:center;height:50px;"}]
+        [:form {:method "post" :name "singin"}
           [:div {:style "width:100%; text-align:center;"}
             [:span {:style "display:inline-block;width:100px;"} "Login ID "]
             [:input {:type "text" :name "account_id" :style "width:200px;"}]
@@ -53,9 +57,13 @@
             [:span {:style "display:inline-block;width:100px;"} "Password"]
             [:input {:type "password" :name "password" :style "width:200px;"}]
             [:br]
-            [:div {:style "width:100%;height:20px;"}]
+            [:div {:style "width:100%;height:50px;"}]
             [:input {:type "hidden" :name "__anti-forgery-token" :value *anti-forgery-token*}]
-            [:input {:type "submit" :value "Login"}]]]])))
+            [:input {:type "submit" :style "display:none;"}]
+            [:div {:class "image-button" :style "width:70px;height:70px;margin: auto;" :onclick "document.singin.submit();"}
+              [:i {:class "fa fa-sign-in fa-3x"} ]
+              "Sign In" ]
+            ]]])))
 
 (defn login-post
   [req]
