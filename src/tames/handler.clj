@@ -41,6 +41,7 @@
         [:title title ]
         [:link {:rel "shortcut icon" :href "core/favicon.ico"} ]
         [:link {:rel "stylesheet" :type "text/css" :href "/lib/font-awesome-4.6.1/css/font-awesome.css" } ]
+        [:link {:rel "stylesheet" :type "text/css" :href "/lib/w2ui-1.4.3/w2ui-1.4.3.css" } ]
         [:link {:rel "stylesheet" :type "text/css" :href "/core/main.css" } ]
         ]
       [:body
@@ -51,11 +52,11 @@
         [:form {:method "post" :name "singin"}
           [:div {:style "width:100%; text-align:center;"}
             [:span {:style "display:inline-block;width:100px;"} "Login ID "]
-            [:input {:type "text" :name "account_id" :style "width:200px;"}]
+            [:input {:type "text" :name "account_id" :style "width:200px;" :class "w2field"}]
             [:br]
             [:div {:style "width:100%;height:10px;"}]
             [:span {:style "display:inline-block;width:100px;"} "Password"]
-            [:input {:type "password" :name "password" :style "width:200px;"}]
+            [:input {:type "password" :name "password" :style "width:200px;" :class "w2field"}]
             [:br]
             [:div {:style "width:100%;height:50px;"}]
             [:input {:type "hidden" :name "__anti-forgery-token" :value *anti-forgery-token*}]

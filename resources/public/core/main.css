@@ -8,6 +8,7 @@ body {
   left:0px;
   bottom:0px;
   right:0px;
+  font-family: Verdana,Arial,sans-serif
 }
 
 .ui-front {
@@ -23,7 +24,7 @@ body {
 }
 
 .image-button {
-  border: 1px solid black;
+  border: 1px solid #999999;
   border-radius: 5px;
   cursor: pointer;
 }
