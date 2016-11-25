@@ -3,6 +3,7 @@ define(function (require) {
   require("w2ui");
   var Utils = require("core/Utils");
   var Uuid = require("core/Uuid");
+  var Class = require("core/Class");
   var Connector = require("core/Connector");
   var Dialog = require("core/Dialog");
   var Inherits = require("core/Inherits");
@@ -21,7 +22,7 @@ define(function (require) {
 '</div>';
   
   var default_toolbar = {
-    "operations" : Utils.CLASS_ID,
+    "operations" : Class.CLASS_ID,
     "items" : [
       { "name": "add",    "caption": "Add",    "description": "Add new field",               "operation": "add" },
       { "name": "edit",   "caption": "Edit",   "description": "Edit field",                  "operation": "edit" },
@@ -93,7 +94,7 @@ define(function (require) {
     var self = this;
     var class_id = field.datatype.properties.class_id;
     $.when(
-      Connector.crud.read("api/" + Utils.CLASS_ID + "/" + class_id, "json", function (data) { class_ = data; })
+      Connector.crud.read("api/" + Class.CLASS_ID + "/" + class_id, "json", function (data) { class_ = data; })
     ).always(function() {
       root.append(TEMPLATE);
       

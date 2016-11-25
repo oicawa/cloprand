@@ -4,6 +4,7 @@ define(function (require) {
   require("w2ui");
   var Utils = require("core/Utils");
   var Uuid = require("core/Uuid");
+  var Class = require("core/Class");
   var Connector = require("core/Connector");
   var Contents = require("core/Contents");
   var Tree = require("core/Control/Tree");
@@ -67,8 +68,8 @@ define(function (require) {
     var self = this;
     $.when(
       Connector.session("identity", function(data){ session = data; }, null),
-      Connector.crud.read("/api/" + Utils.SYSTEM_ID, "json", function(data){ config = data[0]; }),
-      Connector.crud.read("/api/" + Utils.PRIMITIVE_ID, "json", function(data){ primitives = data; })
+      Connector.crud.read("/api/" + Class.SYSTEM_ID, "json", function(data){ config = data[0]; }),
+      Connector.crud.read("/api/" + Class.PRIMITIVE_ID, "json", function(data){ primitives = data; })
     ).always(function() {
       $("body").append(LAYOUT_TEMPLATE);
       
@@ -86,8 +87,6 @@ define(function (require) {
       self._layout= w2ui[layout_name];
       self._layout.refresh();
 
-      //var logo_path = "/image/" + Utils.SYSTEM_ID + "/" + config.id + "/logo/tames.svg";
-      //var favicon_path = "/image/" + Utils.SYSTEM_ID + "/" + config.id + "/favicon/tames.ico";
       var logo_path = "/core/logo.svg";
       var favicon_path = "/core/favicon.ico";
       

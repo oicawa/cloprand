@@ -2,6 +2,7 @@ define(function (require) {
   require("jquery");
   var app = require("app");
   var Utils = require("core/Utils");
+  var Class = require("core/Class");
   var Connector = require("core/Connector");
   var Grid = require("core/Control/Grid");
   
@@ -36,24 +37,24 @@ define(function (require) {
   };
   
   MenuView.prototype.update = function (keys) {
-  	var target = false;
-  	for (var i = 0; i < keys.length; i++) {
-  	  var key = keys[i];
-  	  if (key.class_id == Utils.CLASS_ID) {
-  	    target = true;
-  	    break;
-  	  }
-  	}
+    var target = false;
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      if (key.class_id == Class.CLASS_ID) {
+        target = true;
+        break;
+      }
+    }
 
-  	if (!target) {
-  	  return;
-  	}
+    if (!target) {
+      return;
+    }
 
     var classes = null;
     var self = this;
-    Connector.crud.read("api/" + Utils.CLASS_ID, "json", function (data) { classes = data; })
+    Connector.crud.read("api/" + Class.CLASS_ID, "json", function (data) { classes = data; })
     .then(function () {
-    　　var menus = classes.filter(function (class_) { return class_.application == true; });
+      var menus = classes.filter(function (class_) { return class_.application == true; });
       self._grid.data(menus);
       self._grid.refresh();
     });
@@ -75,8 +76,8 @@ define(function (require) {
     var grid_selector = selector + "> div.menuview-panel > div.menu-list";
     $.when(
       Utils.load_css("/core/Control/View/MenuView.css"),
-      Connector.crud.read("api/" + Utils.CLASS_ID, "json", function (data) { classes = data; }),
-      Connector.crud.read("api/" + Utils.CLASS_ID + "/" +  Utils.CLASS_ID, "json", function (data) { class_ = data; })
+      Connector.crud.read("api/" + Class.CLASS_ID, "json", function (data) { classes = data; }),
+      Connector.crud.read("api/" + Class.CLASS_ID + "/" +  Class.CLASS_ID, "json", function (data) { class_ = data; })
     ).always(function() {
       view.append(TEMPLATE);
       var columns = Grid.create_columns(class_);

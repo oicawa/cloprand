@@ -207,7 +207,7 @@ define(function (require) {
   };
 
   Grid.prototype.update = function(object_id, item) {
-    console.assert(object_id && Utils.UUID.test(object_id) && object_id != Utils.NULL_UUID, "object_id=" + object_id);
+    console.assert(object_id && Uuid.test(object_id) && object_id != Uuid.NULL, "object_id=" + object_id);
     if (!this._data) {
       this._data = [];
     }

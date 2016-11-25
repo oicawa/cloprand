@@ -2,6 +2,8 @@ define(function (require) {
   require("jquery");
   var app = require("app");
   var Utils = require("core/Utils");
+  var Uuid = require("core/Uuid");
+  var Class = require("core/Class");
   var Contents = require("core/Contents");
   var Toolbar = require("core/Control/Toolbar");
   var Detail = require("core/Control/Detail");
@@ -35,7 +37,7 @@ define(function (require) {
   GridView.create = function (event) {
     var tab_info = Contents.get_tab_info(event);
     var view = app.contents().content(tab_info.tab_id);
-    app.contents().show_tab("New " + view._class.label, null, "DetailView", tab_info.class_id, Utils.NULL_UUID);
+    app.contents().show_tab("New " + view._class.label, null, "DetailView", tab_info.class_id, Uuid.NULL);
   };
 
   GridView.show_detail = function (event) {
@@ -89,8 +91,8 @@ define(function (require) {
   };
   
   GridView.prototype.add = function () {
-    var url = location.protocol + "//" + location.host + "/" + _class_id + "/" + Utils.NULL_UUID + "/index.html";
-    window.open(url, "object-" + _class_id + "/" + Utils.NULL_UUID);
+    var url = location.protocol + "//" + location.host + "/" + _class_id + "/" + Uuid.NULL + "/index.html";
+    window.open(url, "object-" + _class_id + "/" + Uuid.NULL);
   };
   
   GridView.prototype.list = function () {
@@ -113,7 +115,7 @@ define(function (require) {
     Utils.load_css("/core/Control/View/GridView.css");
     $.when(
       Utils.get_data(class_id, null, function (data) { classes = data; }),
-      Utils.get_data(Utils.CLASS_ID, class_id, function (data) { self._class = data; })
+      Utils.get_data(Class.CLASS_ID, class_id, function (data) { self._class = data; })
     ).then(function() {
       view.append(TEMPLATE);
 

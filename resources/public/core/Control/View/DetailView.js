@@ -3,6 +3,7 @@ define(function (require) {
   var app = require("app");
   var Utils = require("core/Utils");
   var Uuid = require("core/Uuid");
+  var Class = require("core/Class");
   var Connector = require("core/Connector");
   var Contents = require("core/Contents");
   var Toolbar = require("core/Control/Toolbar");
@@ -233,9 +234,7 @@ define(function (require) {
     }
     Utils.load_css("/core/Control/View/DetailView.css");
     $.when(
-      Connector.crud.read("api/" + Utils.CLASS_ID + "/" + class_id, "json", function (data) { class_ = data; }),
-      //Utils.get_file(class_id, "DetailView.json", "json", function (data) { basic_assist = data; }, function(data) { return true; }),
-      //Utils.get_file(class_id, "CustomAssist.json", "json", function (data) { custom_assist = data; }, function(data) { return true; }),
+      Connector.crud.read("api/" + Class.CLASS_ID + "/" + class_id, "json", function (data) { class_ = data; }),
       get_object_data(self, class_id, object_id)
     ).then(function() {
       view.append(TEMPLATE);

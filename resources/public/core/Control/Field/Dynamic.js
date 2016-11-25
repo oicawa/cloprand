@@ -1,6 +1,7 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("core/Utils");
+  var Class = require("core/Class");
   var Connector = require("core/Connector");
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
@@ -182,7 +183,7 @@ define(function (require) {
     var self = this;
     console.assert(!(!class_id), field);
     $.when(
-      Connector.crud.read("api/" + Utils.CLASS_ID + "/" + class_id, "json", function(response) { self._class = response; }),
+      Connector.crud.read("api/" + Class.CLASS_ID + "/" + class_id, "json", function(response) { self._class = response; }),
       Connector.crud.read("api/" + class_id, "json", function(response) { self._objects = response; })
     ).then(function() {
       create_dropdown(self, root, field);

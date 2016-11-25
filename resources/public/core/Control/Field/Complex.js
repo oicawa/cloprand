@@ -1,6 +1,7 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("core/Utils");
+  var Class = require("core/Class");
   var Connector = require("core/Connector");
   var Inherits = require("core/Inherits");
   var Detail = require("core/Control/Detail");
@@ -31,7 +32,7 @@ define(function (require) {
     var class_ = null;
     var self = this;
     $.when(
-      Connector.crud.read("api/" + Utils.CLASS_ID + "/" + field.datatype.class, "json", function (data) { class_ = data; })
+      Connector.crud.read("api/" + Class.CLASS_ID + "/" + field.datatype.class, "json", function (data) { class_ = data; })
     ).always(function() {
       root.append(TEMPLATE);
       

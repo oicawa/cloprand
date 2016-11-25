@@ -22,10 +22,10 @@ define(function (require) {
     var names = this.caption_names();
     var captions = objects
       .map(function(object) {
-         return names.
-           .map(function(name) { object[name]; }
+         return names
+           .map(function(name) { object[name]; })
            .join(" ");
-      };
+      });
     return captions;
   };
   

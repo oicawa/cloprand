@@ -1,6 +1,7 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("core/Utils");
+  var Class = require("core/Class");
   var Connector = require("core/Connector");
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
@@ -43,7 +44,7 @@ define(function (require) {
     var class_id = field.datatype.properties.class_id;
     var self = this;
     $.when(
-      Connector.crud.read("api/" + Utils.CLASS_ID + "/" + class_id, "json", function(response) { self._class = response; }),
+      Connector.crud.read("api/" + Class.CLASS_ID + "/" + class_id, "json", function(response) { self._class = response; }),
       Connector.crud.read("api/" + class_id, "json", function(response) { self._items = response; })
     ).always(function() {
       var key_field_name = self._class.object_fields.filter(function(field) { return !(!field.key); }).map(function(field) { return field.name; })[0];
@@ -113,14 +114,13 @@ define(function (require) {
     // refresh viewer tags
     this._viewer.empty();
     if (!(!this._values)) {
-      for (var i = 0; i < this._values.length; i++) {
-        var value = this._values[i];
-        var item = items_dictionary[value];
-        if (!item) {
-          continue;
-        }
-        var caption = Utils.get_caption(this._class, item);
-        this._viewer.append("<div>" + caption + "</div>");
+      var items = this._values
+        .map(function (value) { return items_dictionary[value]; })
+        .filter(function (item) { return !item ? false : true; });
+      var class_ = new Class(this._class);
+      var captions = class_.captions(items);
+      for (var i = 0; i < captions.length; i++) {
+        this._viewer.append("<div>" + captions[i] + "</div>");
       }
     }
   };

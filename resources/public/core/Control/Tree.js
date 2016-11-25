@@ -23,7 +23,6 @@ define(function (require) {
 
   Tree.prototype.init = function(selector) {
     var dfd = new $.Deferred;
-    debugger;
     this._uuid = Uuid.version4();
     var html = TEMPLATE.replace(/{{TREE_ID}}/, this._uuid);
     
@@ -32,7 +31,6 @@ define(function (require) {
     var self = this;
     this._tree = $("#" + this._uuid);
     this._tree.on("remove", function(event) {
-      debugger;
       delete w2ui[self._uuid];
     });
     this._tree.w2sidebar({
@@ -43,7 +41,6 @@ define(function (require) {
         console.log(event.target);
       },
       onDestroy: function(event) {
-        debugger;
         delete w2ui[self._uuid];
       }
     });
