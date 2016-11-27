@@ -23,7 +23,7 @@ define(function (require) {
     var captions = objects
       .map(function(object) {
          return names
-           .map(function(name) { object[name]; })
+           .map(function(name) { return object[name]; })
            .join(" ");
       });
     return captions;
