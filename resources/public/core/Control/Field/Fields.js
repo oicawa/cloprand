@@ -125,7 +125,12 @@ define(function (require) {
       return { "class_id" : class_id, "field_name" : field_name };
     } else {
       this._value = value;
-      var index_ = null;
+      var index_ = -1;
+      if (!this._value) {
+        this._dropdown_class.val(index);
+        this._dropdown_field.val(index);
+        return;
+      }
       
       var self = this;
       
@@ -171,4 +176,4 @@ define(function (require) {
   };
 
   return Fields;
-}); 
+});
