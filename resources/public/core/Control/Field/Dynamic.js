@@ -177,8 +177,9 @@ define(function (require) {
 
     // Create form tags
     var properties = field.datatype.properties;
-    var class_id = properties.field.class_id;
-    this._field_name = properties.field.field_name;
+    debugger;
+    var class_id = !properties.field ? properties.class_id : properties.field.class_id;
+    this._field_name = !properties.field ? properties.field_name : properties.field.field_name;
     this._embedded = properties.embedded;
     var self = this;
     console.assert(!(!class_id), field);
