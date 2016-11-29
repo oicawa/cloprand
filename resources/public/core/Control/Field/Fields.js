@@ -131,12 +131,14 @@ define(function (require) {
       
       // Class
       index_ = -1;
-      var class_ = this._classes.find(function(item, i) {
+      var class_ = null;
+      this._classes.forEach(function(item, i) {
         if (item.id != self._value.class_id) {
-          return false;
+          return;
         }
         index = i;
-        return true;
+        class_ = item;
+        return;
       });
       if (index == -1) {
         this._dropdown_class.val(index);
@@ -148,12 +150,14 @@ define(function (require) {
       // Field
       create_dropdown(this._dropdown_field, self._class_of_field, class_.object_fields);
       index_ = -1;
-      var field = class_.object_fields.find(function(item, i) {
+      var field = null;
+      class_.object_fields.forEach(function(item, i) {
         if (item.name != self._value.field_name) {
-          return false;
+          return;
         }
         index = i;
-        return true;
+        field = item;
+        return;
       });
       if (index == -1) {
         this._dropdown_field.val(index);
