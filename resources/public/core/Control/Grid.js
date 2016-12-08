@@ -152,11 +152,20 @@ define(function (require) {
   };
 
   Grid.prototype.data = function(value) {
+    // getter
     if (arguments.length == 0) {
       return this._data
-    } else {
-      this._data = !value ? [] : value;
     }
+    // setter
+    if (!value) {
+      this._data = [];
+      return;
+    }
+    if (Utils.is_object(value)) {
+      this._data = Object.keys(value).map(function(id) { return value[id]; });
+      return;
+    }
+    this._data = value;
   };
   
   Grid.prototype.refresh = function() {

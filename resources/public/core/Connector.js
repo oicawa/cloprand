@@ -2,7 +2,7 @@ define(function (require) {
   require('jquery');
   require('json2');
   
-  function send(method, url, data, files, data_type, on_succeeded, on_failed) {
+  function send(method, url, data, files, data_type) {
     var dfd = new $.Deferred;
     var formData = new FormData();
     formData.append("value", encodeURIComponent(JSON.stringify(data)));
@@ -13,66 +13,43 @@ define(function (require) {
     }
     $.ajax({
       type: method,
+      ifModified: true,
       url: url,
       contentType: false,
       processData: false,
       dataType: data_type,
       cache: false,
-      //data: { "value" : JSON.stringify(data) }
       data: formData
-    }).done(function (response, status) {
-      if (typeof on_succeeded == "function") {
-        on_succeeded(response);
-        dfd.resolve();
-      } else {
-        console.assert(false, "Function [on_succeeded] is not assigned.\n(" + url + ")");
-        console.error("status=" + status);
-        console.dir(response);
-        dfd.reject();
-      }
-    }).fail(function (response, status) {
-      console.dir(response);
-      if (response.status == 401) {
-        console.assert(false, "Unauthenticated");
-        dfd.reject();
+    }).done(function (data, text_status, jqXHR) {
+      dfd.resolve(data, text_status, jqXHR);
+    }).fail(function (jqXHR, text_status, error_thrown) {
+      if (jqXHR.status == 401) {
+        dfd.reject(jqXHR, text_status, error_thrown);
         location.href = "/login?next=/tames";
         return;
       }
-      if (typeof on_failed != "function") {
-        console.assert(false, "Function [on_failed] is not assigned.\n(" + url + ")");
-        console.error("status=" + status);
-        console.dir(response);
-        dfd.reject();
-        return;
-      }
-      if (!on_failed(response, status)) {
-        dfd.reject();
-      } else {
-        dfd.resolve();
-      }
+      dfd.reject(jqXHR, text_status, error_thrown);
     });
     return dfd.promise();
   }
   
   return {
     send : send,
-    session: function(key, on_succeeded, on_failed) {
+    post : function(url, data, files, data_type) { 
+      return send("POST", url, data, files, data_type);
+    },
+    get : function(url, data_type) {
+      return send("GET", url, null, null, data_type);
+    },
+    update : function(url, data, files, data_type) {
+      return send("PUT", url, data, files, data_type);
+    },
+    delete : function(url, data_type) {
+      return send("DELETE", url, null, null, data_type);
+    },
+    session: function(key) {
       var url = "/session/" + key;
-      return send("GET", url, null, null, "json", on_succeeded, on_failed);
-    },
-    crud : {
-      create : function(url, data, files, on_succeeded, on_failed) {
-        return send("POST", url, data, files, "json", on_succeeded, on_failed);
-      },
-      read : function(url, data_type, on_succeeded, on_failed) {
-        return send("GET", url, null, null, data_type, on_succeeded, on_failed);
-      },
-      update : function(url, data, files, on_succeeded, on_failed) {
-        return send("PUT", url, data, files, "json", on_succeeded, on_failed);
-      },
-      delete : function(url, on_succeeded, on_failed) {
-        return send("DELETE", url, null, null, "json", on_succeeded, on_failed);
-      }
-    },
+      return send("GET", url, null, null, "json");
+    }
   };
 });

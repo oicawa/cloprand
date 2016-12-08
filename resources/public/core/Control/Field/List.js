@@ -2,7 +2,7 @@ define(function (require) {
   require("jquery");
   var Utils = require("core/Utils");
   var Class = require("core/Class");
-  var Connector = require("core/Connector");
+  var Storage = require("core/Storage");
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
   
@@ -44,8 +44,8 @@ define(function (require) {
     var class_id = field.datatype.properties.class_id;
     var self = this;
     $.when(
-      Connector.crud.read("api/" + Class.CLASS_ID + "/" + class_id, "json", function(response) { self._class = response; }),
-      Connector.crud.read("api/" + class_id, "json", function(response) { self._items = response; })
+      Storage.read(Class.CLASS_ID, class_id).done(function(response) { self._class = response; }),
+      Storage.read(class_id).done(function(response) { self._items = response; })
     ).always(function() {
       var key_field_name = self._class.object_fields.filter(function(field) { return !(!field.key); }).map(function(field) { return field.name; })[0];
       var caption_field_names = self._class.object_fields.filter(function(field) { return !(!field.caption); }).map(function(field) { return field.name; });

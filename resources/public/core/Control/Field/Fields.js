@@ -2,7 +2,7 @@ define(function (require) {
   require("jquery");
   var Utils = require("core/Utils");
   var Class = require("core/Class");
-  var Connector = require("core/Connector");
+  var Storage = require("core/Storage");
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
   var Class = require("core/Class");
@@ -61,9 +61,9 @@ define(function (require) {
     this._dropdown_field = root.find("select[name='field']");
 
     var self = this;
-    $.when(
-      Connector.crud.read("api/" + Class.CLASS_ID, "json", function(response) { self._classes = response; })
-    ).then(function() {
+    Storage.read(Class.CLASS_ID)
+    .done(function(response) {
+      self._classes = response;
       // Data
       for (var i = 0; i < self._classes.length; i++) {
         var tmp_class = self._classes[i];

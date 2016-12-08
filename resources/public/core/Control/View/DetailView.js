@@ -4,7 +4,7 @@ define(function (require) {
   var Utils = require("core/Utils");
   var Uuid = require("core/Uuid");
   var Class = require("core/Class");
-  var Connector = require("core/Connector");
+  var Storage = require("core/Storage");
   var Contents = require("core/Contents");
   var Toolbar = require("core/Control/Toolbar");
   var Detail = require("core/Control/Detail");
@@ -78,8 +78,8 @@ define(function (require) {
       var tab_info = Contents.get_tab_info(event);
       var view = app.contents().content(tab_info.tab_id);
       var objects = null;
-      Connector.crud.delete("api/" + view._class_id + "/" + view._object_id, function(response) { objects = response; })
-      .then(function() {
+      Storage.delete(view._class_id, view._object_id)
+      .done(function() {
         app.contents().broadcast(tab_info.class_id, tab_info.object_id, null);
         app.contents().remove(tab_info.tab_id);
         Dialog.show("Deleted", "Delete");
@@ -107,8 +107,8 @@ define(function (require) {
     var files = get_files(fields, data);
     
     if (detail.is_new()) {
-      Connector.crud.create("api/" + tab_info.class_id, data, files, function(response) { object = response;})
-      .then(function() {
+      Storage.create(tab_info.class_id, data, files)
+      .done(function(object) {
         edit_toolbar(view.toolbar(), false);
         var new_object_id = object[key_field_name];
         view._object_id = new_object_id;
@@ -125,9 +125,8 @@ define(function (require) {
     } else {
       if (!data[key_field_name])
         data[key_field_name] = view._object_id;
-      Connector.crud.update("api/" + tab_info.class_id + "/" + data[key_field_name], data, files, function(response) { object = response; })
-      //Connector.crud.create("api/" + tab_info.class_id, data, files, function(response) { object = response;})
-      .then(function() {
+      Storage.update(tab_info.class_id, data[key_field_name], data, files)
+      .done(function(object) {
         edit_toolbar(view.toolbar(), false);
         detail.edit(false);
         detail.commit();
@@ -182,8 +181,9 @@ define(function (require) {
   	  return;
   	}
 
-    Connector.crud.read("api/" + self._class_id + "/" + self._object_id, "json", function (data) { self._object = data; })
-    .then(function () {
+    Storage.read(self._class_id, self._object_id)
+    .done(function (data) {
+      self._object = data;
       self._detail.data(self._object);
     });
   }
@@ -203,7 +203,6 @@ define(function (require) {
     this._toolbar = new Toolbar();
     this._detail = new Detail();
     var view = $(selector);
-    var class_ = null;
     var basic_assist = null;
     var custom_assist = null;
     var object = null;
@@ -222,24 +221,20 @@ define(function (require) {
     
     function get_object_data(self, class_id_, object_id_) {
       if (object_id_ == Uuid.NULL) {
-        console.log("Didn't call Connector.crud.read method to get object data.");
+        console.log("Didn't call Storage.read method to get object data.");
         var dfd = new $.Deferred;
         dfd.resolve();
         return dfd.promise();
       }
 
-      return Connector.crud.read("api/" + class_id_ + "/" + object_id_, "json", function (data) {
-        self._object = data;
-      });
+      return Storage.read(class_id_, object_id_).done(function (data) { self._object = data; });
     }
-    Utils.load_css("/core/Control/View/DetailView.css");
     $.when(
-      Connector.crud.read("api/" + Class.CLASS_ID + "/" + class_id, "json", function (data) { class_ = data; }),
+      Utils.load_css("/core/Control/View/DetailView.css"),
+      Storage.read(Class.CLASS_ID, class_id).done(function (data) { self._class = data; }),
       get_object_data(self, class_id, object_id)
     ).then(function() {
       view.append(TEMPLATE);
-
-      self._class = class_;
 
       $.when(
         self._toolbar.init(toolbar_selector, default_toolbar),

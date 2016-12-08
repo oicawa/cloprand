@@ -2,7 +2,7 @@ define(function (require) {
   require("jquery");
   var Utils = require("core/Utils");
   var Class = require("core/Class");
-  var Connector = require("core/Connector");
+  var Storage = require("core/Storage");
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
   
@@ -82,8 +82,8 @@ define(function (require) {
     var self = this;
     console.assert(!(!this._class_id), field);
     $.when(
-      Connector.crud.read("api/" + Class.CLASS_ID + "/" + this._class_id, "json", function(response) { self._class = response; }),
-      Connector.crud.read("api/" + this._class_id, "json", function(response) { self._objects = response; })
+      Storage.read(Class.CLASS_ID, this._class_id).done(function(response) { self._class = response; }),
+      Storage.read(this._class_id).done(function(response) { self._objects = response; })
     ).then(function() {
       create_control(self, root, field);
       dfd.resolve();

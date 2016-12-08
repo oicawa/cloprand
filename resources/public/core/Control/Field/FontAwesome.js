@@ -1,7 +1,7 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("core/Utils");
-  var Connector = require("core/Connector");
+  var Storage = require("core/Storage");
   var Inherits = require("core/Inherits");
   var Dialog = require("core/Dialog");
   var Grid = require("core/Control/Grid");
@@ -51,8 +51,9 @@ define(function (require) {
 
     // Create control
     var self = this;
-    Connector.crud.read("api/" + WEBFONT_ID + "/" + FONTAWESOME_ID, "json", function(data) { self._fonts = data.fonts; })
-    .then(function() {
+    Storage.read(WEBFONT_ID, FONTAWESOME_ID)
+    .done(function(data) {
+      self._fonts = data.fonts;
       create_control(self, root, field);
       dfd.resolve();
     });

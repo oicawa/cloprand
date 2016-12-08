@@ -44,6 +44,9 @@ define(function (require) {
       } else {
         console.assert(false, arguments);
       }
-    }
+    },
+    is_object : function (target) {
+      return target instanceof Object && Object.getPrototypeOf(target) === Object.prototype;
+    }    
   };
 });

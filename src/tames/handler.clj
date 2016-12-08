@@ -13,7 +13,9 @@
             [clojure.data.json :as json]
             [tames.systems :as systems])
   (:import (java.io File)
-           (java.net URLDecoder URLEncoder)))
+           (java.net URLDecoder URLEncoder)
+           (java.text SimpleDateFormat)
+           (java.util Calendar TimeZone Locale)))
 
 (def content-types {""     ""
                     "css"  "text/css"
@@ -112,6 +114,13 @@
 ;        (systems/create-authorized-result true "/index.html")
 ;        (systems/create-authorized-result false (format "/login?next=%s" (:uri req))))))
 
+(defn time-to-RFC1123
+  [time]
+  (let [f   "EEE, dd MMM yyyy HH:mm:ss z"
+        sdf (doto (SimpleDateFormat. f Locale/ENGLISH)
+              (.setTimeZone (TimeZone/getTimeZone "GMT")))]
+    (. sdf format time)))
+
 (defn copy-file
   [src-path dst-path]
   (with-open [src (io/input-stream src-path)]
@@ -134,12 +143,27 @@
         (response/header "Content-Type" (content-types "html"))))
   
   ;; REST API for CRUD
-  (GET "/api/:class-id" [class-id]
-    (println (str "[GET] /api/:class-id = /api/" class-id))
-    (systems/get-data class-id nil))
-  (GET "/api/:class-id/:object-id" [class-id object-id]
-    (println (format "[GET] /api/:class-id/:object-id = /api/%s/%s" class-id object-id))
-    (systems/get-data class-id object-id))
+  ;(GET "/api/:class-id" [class-id]
+  ;  (println (str "[GET] /api/:class-id = /api/" class-id))
+  ;  (systems/get-data class-id nil))
+  (GET "/api/:class-id" req
+    (print-request req)
+    (let [class-id      (get-in req [:route-params :class-id] nil)
+          last-modified (systems/get-last-modified class-id nil)]
+      (println (str "[GET] /api/:class-id = /api/" class-id))
+      (-> (systems/get-data class-id nil)
+          (response/header "Last-Modified" (time-to-RFC1123 last-modified)))))
+  ;(GET "/api/:class-id/:object-id" [class-id object-id]
+  ;  (println (format "[GET] /api/:class-id/:object-id = /api/%s/%s" class-id object-id))
+  ;  (systems/get-data class-id object-id))
+  (GET "/api/:class-id/:object-id" req
+    (print-request req)
+    (let [class-id      (get-in req [:route-params :class-id] nil)
+          object-id     (get-in req [:route-params :object-id] nil)
+          last-modified (systems/get-last-modified class-id object-id)]
+      (println (format "[GET] /api/:class-id/:object-id = /api/%s/%s" class-id object-id))
+      (-> (systems/get-data class-id object-id)
+          (response/header "Last-Modified" (time-to-RFC1123 last-modified)))))
   (POST "/api/:class-id" [class-id & params]	;;; https://github.com/weavejester/compojure/wiki/Destructuring-Syntax
     (println (str "[POST] /api/:class-id = /api/" class-id))
     (let [json-str     (URLDecoder/decode (params :value) "UTF-8")

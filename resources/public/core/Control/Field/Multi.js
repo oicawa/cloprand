@@ -4,7 +4,7 @@ define(function (require) {
   var Utils = require("core/Utils");
   var Uuid = require("core/Uuid");
   var Class = require("core/Class");
-  var Connector = require("core/Connector");
+  var Storage = require("core/Storage");
   var Dialog = require("core/Dialog");
   var Inherits = require("core/Inherits");
   var Toolbar = require("core/Control/Toolbar");
@@ -93,9 +93,9 @@ define(function (require) {
     var class_ = null;
     var self = this;
     var class_id = field.datatype.properties.class_id;
-    $.when(
-      Connector.crud.read("api/" + Class.CLASS_ID + "/" + class_id, "json", function (data) { class_ = data; })
-    ).always(function() {
+    Storage.read(Class.CLASS_ID, class_id)
+    .done(function (data) { class_ = data; })
+    .always(function() {
       root.append(TEMPLATE);
       
       // Create controls
@@ -103,8 +103,6 @@ define(function (require) {
       label.text(field.label);
       self._toolbar = new Toolbar();
       self._grid = new Grid();
-      //self._detail = new Detail();
-      //self._dialog = new Dialog();
 
       var toolbar = !assist ? default_toolbar : (!assist.toolbar ? default_toolbar : assist.toolbar);
 

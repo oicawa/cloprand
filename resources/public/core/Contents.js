@@ -112,7 +112,7 @@ define(function (require) {
     var self = this;
     Utils.load_css("/core/Contents.css");
     $.when(
-      Connector.crud.read("core/Contents.json", "json", function (data) { assist = data; })
+      Connector.get("core/Contents.json", "json").done(function (data) { assist = data; })
     ).always(function() {
       contents.append(TEMPLATE);
       

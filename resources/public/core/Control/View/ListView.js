@@ -4,7 +4,7 @@ define(function (require) {
   var Utils = require("core/Utils");
   var Uuid = require("core/Uuid");
   var Class = require("core/Class");
-  var Connector = require("core/Connector");
+  var Storage = require("core/Storage");
   var Contents = require("core/Contents");
   var Toolbar = require("core/Control/Toolbar");
   //var Detail = require("data/Control/Detail");
@@ -82,17 +82,16 @@ define(function (require) {
       return;
     }
 
-    var objects = null;
     var self = this;
-    Connector.crud.read("api/" + key.class_id, "json", function (data) { objects = data; })
-    .then(function () {
+    Storage.read(key.class_id)
+    .done(function (objects) {
       self._grid.data(objects);
       self._grid.refresh();
     });
   };
   
   ListView.prototype.add = function () {
-    var url = location.protocol + "//" + location.host + "/" + _class_id + "/" + Uuid.NULL + "/index.html";
+    var url = location.protocol + "//" + locatione.host + "/" + _class_id + "/" + Uuid.NULL + "/index.html";
     window.open(url, "object-" + _class_id + "/" + Uuid.NULL);
   };
   
@@ -114,10 +113,10 @@ define(function (require) {
     var self = this;
     var toolbar_selector = selector + "> div.listview-panel > div.object-operations";
     var list_selector = selector + "> div.listview-panel > div.object-list";
-    Utils.load_css("/core/Control/View/ListView.css");
     $.when(
-      Connector.crud.read("api/" + class_id, "json", function (data) { classes = data; }),
-      Connector.crud.read("api/" + Class.CLASS_ID + "/" + class_id, "json", function (data) { self._class = data; })
+      Utils.load_css("/core/Control/View/ListView.css"),
+      Storage.read(class_id).done(function (data) { classes = data; }),
+      Storage.read(Class.CLASS_ID, class_id).done(function (data) { self._class = data; })
     ).then(function() {
       view.append(TEMPLATE);
 

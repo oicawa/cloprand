@@ -4,6 +4,7 @@ define(function (require) {
   var Utils = require("core/Utils");
   var Class = require("core/Class");
   var Connector = require("core/Connector");
+  var Storage = require("core/Storage");
   var Grid = require("core/Control/Grid");
   
   var TEMPLATE = '' +
@@ -50,10 +51,9 @@ define(function (require) {
       return;
     }
 
-    var classes = null;
     var self = this;
-    Connector.crud.read("api/" + Class.CLASS_ID, "json", function (data) { classes = data; })
-    .then(function () {
+    Storage.read(Class.CLASS_ID)
+    .done(function (classes) {
       var menus = classes.filter(function (class_) { return class_.application == true; });
       self._grid.data(menus);
       self._grid.refresh();
@@ -76,17 +76,17 @@ define(function (require) {
     var grid_selector = selector + "> div.menuview-panel > div.menu-list";
     $.when(
       Utils.load_css("/core/Control/View/MenuView.css"),
-      Connector.crud.read("api/" + Class.CLASS_ID, "json", function (data) { classes = data; }),
-      Connector.crud.read("api/" + Class.CLASS_ID + "/" +  Class.CLASS_ID, "json", function (data) { class_ = data; })
+      Storage.read(Class.CLASS_ID).done(function(data) { classes = data; })
     ).always(function() {
+      class_ = classes[Class.CLASS_ID];
       view.append(TEMPLATE);
       var columns = Grid.create_columns(class_);
       self._grid.init(grid_selector, columns)
       .then(function () {
         self._grid.add_operation("click", MenuView.show_gridview);
-        var menus = classes.filter(function(class_) {
-          return class_.application == true;
-        });
+        var menus = Object.keys(classes)
+          .map(function(id) { return classes[id]; })
+          .filter(function(class_) { return class_.application == true; });
         self._grid.data(menus);
         self.refresh();
       });

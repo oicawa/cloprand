@@ -7,7 +7,7 @@
             [clojure.data.json :as json]
             [clojure.string :as string])
   (:import (java.io File InputStream)
-           (java.nio.file Paths Path Files)
+           (java.nio.file Paths Path Files StandardCopyOption)
            (java.util.jar JarFile JarEntry)
            (java.util UUID)))
 
@@ -132,12 +132,17 @@
                   (. path substring (+ start 1)))]
     ext))
 
-(defn get-object
+(defn get-json-file
   [class-id object-id]
   (let [object-path (get-absolute-path (format "data/%s/%s.json" class-id object-id))]
-    (if (not (. (File. object-path) exists))
+    (File. object-path)))
+
+(defn get-object
+  [class-id object-id]
+  (let [file (get-json-file class-id object-id)]
+    (if (not (. file exists))
         nil
-        (with-open [rdr (io/reader object-path)]
+        (with-open [rdr (io/reader (. file getAbsolutePath))]
           (json/read rdr)))))
 
 (defn get-file-contents
@@ -148,14 +153,24 @@
   [class-id object-id]
   (json/write-str (get-object class-id object-id)))
 
-(defn get-objects
+(defn get-json-files
   [class-id]
   (let [class-dir (File. (get-absolute-path (str "data/" class-id)))
-        files     (filter #(. %1 isFile) (. class-dir listFiles))
-        objects   (map #(with-open [rdr (io/reader (. %1 getAbsolutePath))]
-                          (json/read rdr))
-                       (sort files))]
-    objects))
+        files     (filter #(. %1 isFile) (. class-dir listFiles))]
+    files))
+
+(defn get-objects
+  [class-id]
+  (let [files   (get-json-files class-id)
+        objects (map #(with-open [rdr (io/reader (. %1 getAbsolutePath))]
+                        (json/read rdr))
+                     files)
+        ids     (map #(%1 "id") objects)]
+    (println ">>>>>>>>>>>>>>>>>>>>")
+    (pprint/pprint objects)
+    (println ">>>>>>>>>>>>>>>>>>>>")
+    (pprint/pprint ids)
+    (zipmap ids objects)))
 
 (defn get-objects-as-json
   [class-id]
@@ -278,10 +293,20 @@
 
 (defn get-account
   [account_id]
-  (let [accounts (filter #(= (%1 "account_id") account_id) (get-objects ACCOUNT_ID))
+  (let [accounts (filter #(= (%1 "account_id") account_id) (vals (get-objects ACCOUNT_ID)))
         account  (if (= (count accounts) 0) nil (first accounts))]
+    (pprint/pprint accounts)
     account))
 
+(defn get-last-modified
+  [class-id object-id]
+  (if (nil? object-id)
+      (let [files (sort #(- (. %2 lastModified) (. %1 lastModified))
+                        (get-json-files class-id))]
+        (pprint/pprint (map #(. %1 lastModified) files))
+        (. (first files) lastModified))
+      (. (get-json-file class-id object-id) lastModified)))
+  
 (defn get-data
   [class-id object-id]
   (response-with-content-type
@@ -428,9 +453,16 @@
       "text/json; charset=utf-8")))
 
 (defn copy-resource-file
-  [resource-path dest-path]
-  (with-open [src (io/input-stream (io/resource resource-path))]
-    (io/copy src (File. dest-path))))
+  [resource-path dst-path]
+  (let [src-url       (io/resource resource-path)
+        src-file      (File. (. src-url toURI))
+        last-modified (. src-file lastModified)
+        dst-file      (File. dst-path)
+        ]
+    (with-open [stream (io/input-stream src-url)]
+      (io/copy stream dst-file))
+    (. dst-file setLastModified last-modified)
+    ))
 
 (defn ensure-init-files
   [relative-path]
@@ -445,7 +477,7 @@
           (doseq [file files]
             (let [src-path (str "public/" relative-path "/" file)
                   dst-path (str relative-path "/" file)]
-              (println (format "[systems/ensure-init-files] %s" src-path))
+              ;(println (format "[systems/ensure-init-files] %s" src-path))
               (if (not (. (File. (get-absolute-path dst-path)) exists))
                   (copy-resource-file src-path dst-path))
                   ))))))

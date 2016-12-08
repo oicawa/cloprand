@@ -6,6 +6,7 @@ define(function (require) {
   var Uuid = require("core/Uuid");
   var Class = require("core/Class");
   var Connector = require("core/Connector");
+  var Storage = require("core/Storage");
   var Contents = require("core/Contents");
   var Tree = require("core/Control/Tree");
 
@@ -59,17 +60,16 @@ define(function (require) {
   };
   
   App.prototype.init = function() {
-    var config = null;
-    var primitives = null;
     var session = null;
     
-    Utils.load_css("core/app.css");
     
     var self = this;
+    var CONFIG_OBJECT_ID = "e71de065-9b6a-42c7-9987-ddc8e75672ca";
     $.when(
-      Connector.session("identity", function(data){ session = data; }, null),
-      Connector.crud.read("/api/" + Class.SYSTEM_ID, "json", function(data){ config = data[0]; }),
-      Connector.crud.read("/api/" + Class.PRIMITIVE_ID, "json", function(data){ primitives = data; })
+      Utils.load_css("core/app.css"),
+      Connector.session("identity").done(function(data){ session = data; }),
+      Storage.read(Class.SYSTEM_ID, CONFIG_OBJECT_ID).done(function(data){ self._config = data; }),
+      Storage.read(Class.PRIMITIVE_ID).done(function(data){ self._primitives = data; })
     ).always(function() {
       $("body").append(LAYOUT_TEMPLATE);
       
@@ -99,16 +99,9 @@ define(function (require) {
       self._contents = new Contents();
       self._contents.init("#contents-panel");
       
-      self._config = config;
-      self.title(config.system_name);
+      self.title(self._config.system_name);
       self.favicon(favicon_path);
       self._account_id.text(session.identity);
-      
-      self._primitives = {};
-      for (var i = 0; i < primitives.length; i++) {
-        var primitive = primitives[i];
-        self._primitives[primitive.id] = primitive;
-      }
       
       var tree = new Tree();
       tree.init("#left-panel");
