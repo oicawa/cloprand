@@ -19,7 +19,7 @@ define(function (require) {
       processData: false,
       dataType: data_type,
       cache: false,
-      data: formData
+      data: method == "GET" ? null : formData
     }).done(function (data, text_status, jqXHR) {
       dfd.resolve(data, text_status, jqXHR);
     }).fail(function (jqXHR, text_status, error_thrown) {

@@ -9,7 +9,7 @@
   (:import (java.io File InputStream)
            (java.nio.file Paths Path Files StandardCopyOption)
            (java.util.jar JarFile JarEntry)
-           (java.util UUID)))
+           (java.util UUID Calendar)))
 
 ;(def REGEXP_UUID #"^[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}$")
 (def REGEXP_UUID #"[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}")
@@ -303,8 +303,9 @@
   (if (nil? object-id)
       (let [files (sort #(- (. %2 lastModified) (. %1 lastModified))
                         (get-json-files class-id))]
-        (pprint/pprint (map #(. %1 lastModified) files))
-        (. (first files) lastModified))
+        (if (= (count files) 0)
+            (. (Calendar/getInstance) getTime)  ;; return current time
+            (. (first files) lastModified)))
       (. (get-json-file class-id object-id) lastModified)))
   
 (defn get-data

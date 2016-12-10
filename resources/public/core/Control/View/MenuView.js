@@ -54,7 +54,9 @@ define(function (require) {
     var self = this;
     Storage.read(Class.CLASS_ID)
     .done(function (classes) {
-      var menus = classes.filter(function (class_) { return class_.application == true; });
+      var menus = Object.keys(classes)
+                        .map(function(id) { return classes[id]; })
+                        .filter(function (class_) { return class_.application == true; });
       self._grid.data(menus);
       self._grid.refresh();
     });

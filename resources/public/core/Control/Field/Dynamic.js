@@ -185,8 +185,15 @@ define(function (require) {
     var self = this;
     console.assert(!(!class_id), field);
     $.when(
-      Storage.read(Class.CLASS_ID, class_id).done(function(response) { self._class = response; }),
-      Storage.read(class_id).done(function(response) { self._objects = response; })
+      Storage.read(Class.CLASS_ID, class_id)
+             .done(function(data) {
+               self._class = data;
+             }),
+      Storage.read(class_id)
+             .done(function(data) {
+               self._objects = Object.keys(data)
+                                     .map(function(id) { return data[id]; });
+             })
     ).then(function() {
       create_dropdown(self, root, field);
       create_button(self, root, self._class[this._field_name]);

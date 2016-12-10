@@ -82,8 +82,15 @@ define(function (require) {
     var self = this;
     console.assert(!(!this._class_id), field);
     $.when(
-      Storage.read(Class.CLASS_ID, this._class_id).done(function(response) { self._class = response; }),
-      Storage.read(this._class_id).done(function(response) { self._objects = response; })
+      Storage.read(Class.CLASS_ID, this._class_id)
+             .done(function(data) {
+               self._class = data;
+             }),
+      Storage.read(this._class_id)
+             .done(function(data) {
+               self._objects = Object.keys(data)
+                                     .map(function(id) { return data[id]; });
+             })
     ).then(function() {
       create_control(self, root, field);
       dfd.resolve();
