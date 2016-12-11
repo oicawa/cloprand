@@ -121,6 +121,14 @@ define(function (require) {
         app.contents().label(tab_info.tab_id, label);
         app.contents().broadcast(tab_info.class_id, new_object_id, object);
         Dialog.show("New item was created successfully.", "Save");
+      })
+      .fail(function(jqXHR, text_status, error_thrown) {
+        if (jqXHR.status == 410) {
+          Dialog.show("The Class of this item has already been deleted by other user.\nClosing this tab.", "Save");
+          app.contents().remove(tab_info.tab_id);
+        } else {
+          Dialog.show("Failed to create this item.", "Save");
+        }
       });
     } else {
       if (!data[key_field_name])
@@ -135,6 +143,14 @@ define(function (require) {
         app.contents().label(tab_info.tab_id, label);
         app.contents().broadcast(tab_info.class_id, tab_info.object_id, data);
         Dialog.show("Edited item was saved successfully.", "Save");
+      })
+      .fail(function(jqXHR, text_status, error_thrown) {
+        if (jqXHR.status == 410) {
+          Dialog.show("This item (or Class) has already been deleted by other user.\nClosing this tab.", "Save");
+          app.contents().remove(tab_info.tab_id);
+        } else {
+          Dialog.show("Failed to save this item.", "Save");
+        }
       });
     }
   };

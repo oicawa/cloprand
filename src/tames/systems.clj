@@ -11,7 +11,6 @@
            (java.util.jar JarFile JarEntry)
            (java.util UUID Calendar)))
 
-;(def REGEXP_UUID #"^[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}$")
 (def REGEXP_UUID #"[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}")
 (def REGEXP_OBJECT_FILE_NAME #"^[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}\.json$")
 (def OBJECT_ID_NAME "id")
@@ -24,6 +23,13 @@
 
 (def config (atom nil))
 
+(defn remove-file
+  [file]
+  (if (. file isDirectory)
+      (doseq [child (. file listFiles)]
+        (remove-file child)))
+  (. file delete))
+  
 (defn get-absolute-path
   [relative-path]
   (. (File. relative-path) getAbsolutePath))
@@ -109,20 +115,14 @@
         (. systems-dir mkdirs))))
 
 (defn exists?
-  [class-id]
-  (let [class-dir-path (get-absolute-path class-id)
-        class-dir      (File. class-dir-path)]
-    (and (. class-dir exists) (. class-dir isDirectory))))
-
-(defn is-class-only?
-  [resource-path]
-  (let [fields (string/split resource-path #"/")]
-    (= (count fields) 1)))
-
-(defn get-default-file
-  [file-name]
-  (let [resource-path (get-resource-path (str "tames/defaults/" file-name))]
-    resource-path))
+  [class-id object-id]
+  (let [dir　 (File. (get-absolute-path (str "data/" class-id)))
+        file (File. (get-absolute-path (str "data/" class-id "/" object-id ".json")))]
+    (println dir)
+    (println file)
+    (cond (not (. dir isDirectory)) false
+    　　　　  (nil? object-id) true
+          :else (. file isFile))))
 
 (defn get-file-extension
   [path]
@@ -132,10 +132,24 @@
                   (. path substring (+ start 1)))]
     ext))
 
+(defn get-file-contents
+  [path]
+  { "file_path" path "file_contents" (slurp path) })
+
+(defn get-class-directory
+  [class-id]
+  (File. (get-absolute-path (str "data/" class-id))))
+
 (defn get-json-file
   [class-id object-id]
   (let [object-path (get-absolute-path (format "data/%s/%s.json" class-id object-id))]
     (File. object-path)))
+
+(defn get-json-files
+  [class-id]
+  (let [class-dir (get-class-directory class-id)
+        files     (filter #(. %1 isFile) (. class-dir listFiles))]
+    files))
 
 (defn get-object
   [class-id object-id]
@@ -145,19 +159,9 @@
         (with-open [rdr (io/reader (. file getAbsolutePath))]
           (json/read rdr)))))
 
-(defn get-file-contents
-  [path]
-  { "file_path" path "file_contents" (slurp path) })
-
 (defn get-object-as-json
   [class-id object-id]
   (json/write-str (get-object class-id object-id)))
-
-(defn get-json-files
-  [class-id]
-  (let [class-dir (File. (get-absolute-path (str "data/" class-id)))
-        files     (filter #(. %1 isFile) (. class-dir listFiles))]
-    files))
 
 (defn get-objects
   [class-id]
@@ -166,10 +170,6 @@
                         (json/read rdr))
                      files)
         ids     (map #(%1 "id") objects)]
-    (println ">>>>>>>>>>>>>>>>>>>>")
-    (pprint/pprint objects)
-    (println ">>>>>>>>>>>>>>>>>>>>")
-    (pprint/pprint ids)
     (zipmap ids objects)))
 
 (defn get-objects-as-json
@@ -192,55 +192,11 @@
   []
   (json/write-str (get-resource-children "tames/defaults" true false)))
 
-(defn response-with-content-type
-  [resp content-type]
-  (-> resp
-      (response/header "Contents-Type" content-type)))
-
 (defn create-authorized-result
   [authorized? url]
-  (let [resp (response/response (json/write-str { "url" url }))]
-    (-> resp
-        (response/status (if authorized? 200 401))
-        (response/header "Contents-Type" "text/json; charset=utf-8")
-        )))
-
-(defn get-file
-  [class-id file-name content-type]
-  (let [absolute-path (get-absolute-path (str "data/" class-id "/" file-name))
-        default-path  (get-default-file file-name)
-        file          (File. absolute-path)
-        res           (if (. file exists)
-                          (response/file-response absolute-path)
-                          (response/resource-response file-name {:root "tames/defaults"})
-                          )]
-    (response-with-content-type res content-type)))
-
-(defn get-extension-file-list
-  [class-id object-id]
-  (println "  [systems/get-extension-file-list]")
-  (println "  class-id     :" class-id)
-  (println "  object-id    :" object-id)
-  (let [absolute-path (get-absolute-path (str "data/" class-id "/" object-id "/extension"))
-        file-list     (. (File. absolute-path) list)
-        files         (map (fn [file_name] {"file_name" file_name})
-                           file-list)
-        body          (json/write-str files)]
-    (pprint/pprint files)
-    (response-with-content-type (response/response body) "text/json; charset=utf-8")))
-
-(defn get-extension-file
-  [class-id object-id file-name]
-  (println "  [systems/get-extension-file]")
-  (println "  class-id     :" class-id)
-  (println "  object-id    :" object-id)
-  (println "  file-name    :" file-name)
-  (let [absolute-path (get-absolute-path (str "data/" class-id "/" object-id "/extension/" file-name))
-        file_contents (slurp absolute-path)
-        res           (response/file-response absolute-path)]
-    (response-with-content-type
-      (response/response (json/write-str { "file_name" file-name "file_contents" file_contents }))
-      "text/text; charset=utf-8")))
+  (-> (response/response (json/write-str { "url" url }))
+      (response/status (if authorized? 200 401))
+      (response/header "Contents-Type" "text/json; charset=utf-8")))
 
 (defn get-files-fields
   [class-id]
@@ -298,24 +254,6 @@
     (pprint/pprint accounts)
     account))
 
-(defn get-last-modified
-  [class-id object-id]
-  (if (nil? object-id)
-      (let [files (sort #(- (. %2 lastModified) (. %1 lastModified))
-                        (get-json-files class-id))]
-        (if (= (count files) 0)
-            (. (Calendar/getInstance) getTime)  ;; return current time
-            (. (first files) lastModified)))
-      (. (get-json-file class-id object-id) lastModified)))
-  
-(defn get-data
-  [class-id object-id]
-  (response-with-content-type
-    (response/response (if (nil? object-id)
-                           (get-objects-as-json class-id)
-                           (get-object-as-json class-id object-id)))
-    "text/json; charset=utf-8"))
-
 (defn is-user-in-group
   [account-id group-id]
   (let [group    (get-object GROUP_ID group-id)
@@ -325,8 +263,14 @@
             (= account-id (first rest-accounts)) true
             :else (recur (rest rest-accounts))))))
 
-;(defn is-user-accessible
-;  [account-id 
+(defn get-last-modified
+  [class-id object-id]
+  (if (nil? object-id)
+      (let [dir   (get-class-directory class-id)
+            files (sort #(- (. %2 lastModified) (. %1 lastModified))
+                        (cons dir (get-json-files class-id)))]
+        (. (first files) lastModified))
+      (. (get-json-file class-id object-id) lastModified)))
 
 (defn create-object
   [class-id object-id s-exp-data]
@@ -341,28 +285,12 @@
 (defn update-object
   [class-id object-id s-exp-data]
   (println "Called update-object function.")
-  (let [object-file (File. (get-absolute-path (str "data/" class-id "/" object-id ".json")))
-        ;; !! CAUTION !!
-        ;; Implement decode logic to decode the uploaded files data
-        ;; 1. Extract uploaded files data.
-        ;; 2. Delete the contents data only from s-exp-data.(Rest file name)
-        ;; 3. Create UUID as saved real file name, and map uploaded file name.
-        ;; 4. Save file data. (named UUID)
-        ;s-exp-data2 (save-files-data s-exp-data)
-        ]
+  (let [object-file (File. (get-absolute-path (str "data/" class-id "/" object-id ".json")))]
     ;; !! CAUTION !!
-    ;; Implement 'param' data check logic!!
-    
+    ;; Implement 's-exp-data' check logic!!
     (with-open [w (io/writer object-file)]
       (json/write s-exp-data w))))
 
-(defn remove-file
-  [file]
-  (if (. file isDirectory)
-      (doseq [child (. file listFiles)]
-        (remove-file child)))
-  (. file delete))
-  
 (defn delete-object
   [class-id object-id]
   (println "Called delete-object function.")
@@ -371,87 +299,57 @@
     (if (= CLASS_ID class-id)
         (remove-file (File. (format "data/%s" object-id))))))
 
+(defn get-data
+  [class-id object-id]
+  (-> (response/response (if (nil? object-id)
+                             (get-objects-as-json class-id)
+                             (get-object-as-json class-id object-id)))
+      (response/header "Contents-Type" "text/json; charset=utf-8")))
+
 (defn post-data
   [class-id data added-files]
-  (let [object-id    (str (UUID/randomUUID))
-        files_fields (get-files-fields class-id)
-        data-with-id (assoc data OBJECT_ID_NAME object-id)]
-    ;(println "Called post-data function.")
-    ;(println "----------")
-    ;(pprint/pprint data)
-    ;(println "----------")
-    (save-attached-files class-id object-id data-with-id files_fields added-files)
-    (let [pure-data (update-files-values class-id object-id files_fields data-with-id)]
-      (create-object class-id object-id pure-data)
-      (println "Posted OK.")
-      (response-with-content-type
-        (response/response (get-object-as-json class-id object-id))
-        "text/json; charset=utf-8"))))
-
-(defn post-extension-file
-  [class-id object-id file-name file_contents]
-  (println "Called post-extension-file function.")
-  (println "----------")
-  (pprint/pprint file_contents)
-  (println "----------")
-  (let [dir-path  (str "data/" class-id "/" object-id "/extension")
-        file-path (get-absolute-path (str dir-path "/" file-name))]
-    (ensure-directory dir-path)
-    (with-open [w (io/writer file-path)]
-      (. w write file_contents))
-    (println "Posted OK.")
-    (response-with-content-type
-      (response/response (json/write-str { "file_name" file-name }))
-      "text/json; charset=utf-8")))
+  (if (not (exists? class-id nil))
+      (-> (response/response nil)
+          (response/status 410))
+      (let [object-id    (str (UUID/randomUUID))
+            files_fields (get-files-fields class-id)
+            data-with-id (assoc data OBJECT_ID_NAME object-id)]
+        ;(println "Called post-data function.")
+        ;(println "----------")
+        ;(pprint/pprint data)
+        ;(println "----------")
+        (save-attached-files class-id object-id data-with-id files_fields added-files)
+        (let [pure-data (update-files-values class-id object-id files_fields data-with-id)]
+          (create-object class-id object-id pure-data)
+          (println "Posted OK.")
+          (-> (response/response (get-object-as-json class-id object-id))
+              (response/header "Contents-Type" "text/json; charset=utf-8"))))))
 
 (defn put-data
   [class-id object-id data added-files]
-  (let [files_fields (get-files-fields class-id)]
-    (remove-attached-files class-id object-id data files_fields)
-    (save-attached-files class-id object-id data files_fields added-files)
-    (let [pure-data (update-files-values class-id object-id files_fields data)]
-      (update-object class-id object-id pure-data)
-      (response-with-content-type
-        (response/response (get-objects-as-json class-id))
-        "text/json; charset=utf-8"))))
-
-(defn put-extension-file
-  [class-id object-id file-name file_contents]
-  (println "Called put-extension-file function.")
-  (println "----------")
-  (pprint/pprint file_contents)
-  (println "----------")
-  (let [dir-path  (str "data/" class-id "/" object-id "/extension")
-        file-path (get-absolute-path (str dir-path "/" file-name))]
-    (ensure-directory dir-path)
-    (with-open [w (io/writer file-path)]
-      (. w write file_contents))
-    (println "Put OK.")
-    (response-with-content-type
-      (response/response (json/write-str { "file_name" file-name }))
-      "text/json; charset=utf-8")))
+  (if (not (exists? class-id object-id))
+      (-> (response/response nil)
+          (response/status 410))
+      (let [files_fields (get-files-fields class-id)]
+        (remove-attached-files class-id object-id data files_fields)
+        (save-attached-files class-id object-id data files_fields added-files)
+        (let [pure-data (update-files-values class-id object-id files_fields data)]
+          (update-object class-id object-id pure-data)
+          (-> (response/response (get-objects-as-json class-id))
+              (response/header "Contents-Type" "text/json; charset=utf-8"))))))
 
 (defn delete-data
   [class-id object-id]
   (println "Called delete-data function.")
-  (delete-object class-id object-id)
-  (remove-file (File. (get-absolute-path (format "data/%s/.%s" class-id, object-id))))
-  (println "Delete OK.")
-  (response-with-content-type
-    (response/response (get-objects-as-json class-id))
-    "text/json; charset=utf-8"))
-
-(defn delete-extension-file
-  [class-id object-id file-name]
-  (println "Called delete-extension-file function.")
-  (let [dir-path  (str "data/" class-id "/" object-id "/extension")
-        file-path (get-absolute-path (str dir-path "/" file-name))]
-    (ensure-directory dir-path)
-    (remove-file (File. file-path))
-    (println "Delete OK.")
-    (response-with-content-type
-      (response/response (json/write-str { "file_name" file-name }))
-      "text/json; charset=utf-8")))
+  (if (not (exists? class-id object-id))
+      (-> (response/response nil)
+          (response/status 410))
+      (do
+        (delete-object class-id object-id)
+        (remove-file (File. (get-absolute-path (format "data/%s/.%s" class-id, object-id))))
+        (println "Delete OK.")
+        (-> (response/response (get-objects-as-json class-id))
+            (response/header "Contents-Type" "text/json; charset=utf-8")))))
 
 (defn copy-resource-file
   [resource-path dst-path]
