@@ -69,7 +69,18 @@ define(function (require) {
   var Storage = {
     create: function(class_id, object, files) {
       var url = 'api/' + class_id;
-      return Connector.post(url, object, files, "json");
+      var dfd = new $.Deferred;
+      Connector.post(url, object, files, "json")
+      .done(function (response, text_status, jqXHR) {
+        dfd.resolve(response, text_status, jqXHR);
+      })
+      .fail(function (jqXHR, text_status, error_thrown) {
+        if (jqXHR.status == 410) {
+          remove_all(class_id);
+        }
+        dfd.reject(jqXHR, text_status, error_thrown);
+      });
+      return dfd.promise();
     },
     read: function(class_id, object_id) {
       var url = 'api/' + class_id + (!object_id ? '' : '/' + object_id);
@@ -90,17 +101,47 @@ define(function (require) {
         dfd.resolve(data);
       })
       .fail(function (jqXHR, text_status, error_thrown) {
+        if (jqXHR.status == 410) {
+          if (!object_id) {
+            remove_all(class_id);
+          } else {
+            remove_one(class_id, object_id);
+          }
+        }
         dfd.reject(jqXHR, text_status, error_thrown);
       });
       return dfd.promise();
     },
     update: function(class_id, object_id, object, files) {
       var url = 'api/' + class_id + '/' + object_id;
-      return Connector.update(url, object, files, "json");
+      var dfd = new $.Deferred;
+      Connector.update(url, object, files, "json")
+      .done(function (response, text_status, jqXHR) {
+        dfd.resolve(response, text_status, jqXHR);
+      })
+      .fail(function (jqXHR, text_status, error_thrown) {
+        if (jqXHR.status == 410) {
+          remove_one(class_id, object_id);
+        }
+        dfd.reject(jqXHR, text_status, error_thrown);
+      });
+      return dfd.promise();
     },
     delete: function(class_id, object_id) {
       var url = 'api/' + class_id + '/' + object_id;
-      return Connector.delete(url, "json");
+      var dfd = new $.Deferred;
+      Connector.delete(url, "json")
+      .done(function (response, text_status, jqXHR) {
+        remove_one(class_id, object_id);
+        dfd.resolve(response, text_status, jqXHR);
+      })
+      .fail(function (jqXHR, text_status, error_thrown) {
+        if (jqXHR.status == 410) {
+          remove_one(class_id, object_id);
+        }
+        dfd.reject(jqXHR, text_status, error_thrown);
+      });
+      return dfd.promise();
     }
   };
   
