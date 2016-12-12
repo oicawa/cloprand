@@ -83,6 +83,14 @@ define(function (require) {
         app.contents().broadcast(tab_info.class_id, tab_info.object_id, null);
         app.contents().remove(tab_info.tab_id);
         Dialog.show("Deleted", "Delete");
+      })
+      .fail(function(jqXHR, text_status, error_thrown) {
+        if (jqXHR.status == 410) {
+          Dialog.show("This item (or Class) has already been deleted by other user.\nClosing this tab.", "Delete");
+          app.contents().remove(tab_info.tab_id);
+        } else {
+          Dialog.show("Failed to delete this item.", "Delete");
+        }
       });
     });
   };
