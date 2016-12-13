@@ -87,18 +87,17 @@ define(function (require) {
       var dfd = new $.Deferred;
       Connector.get(url, "json")
       .done(function (response, text_status, jqXHR) {
-        var data = null;
         if (jqXHR.status == 304) {
-          data = !object_id ? get_all(class_id) : get_one(class_id, object_id);
-        } else {
-          data = response;
+          var data = !object_id ? get_all(class_id) : get_one(class_id, object_id);
+          dfd.resolve(data);
+          return;
         }
         if (!object_id) {
-          set_all(class_id, data);
+          set_all(class_id, response);
         } else {
-          set_one(class_id, object_id, data);
+          set_one(class_id, object_id, response);
         }
-        dfd.resolve(data);
+        dfd.resolve(response);
       })
       .fail(function (jqXHR, text_status, error_thrown) {
         if (jqXHR.status == 410) {

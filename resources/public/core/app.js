@@ -61,8 +61,6 @@ define(function (require) {
   
   App.prototype.init = function() {
     var session = null;
-    
-    
     var self = this;
     var CONFIG_OBJECT_ID = "e71de065-9b6a-42c7-9987-ddc8e75672ca";
     $.when(
@@ -98,7 +96,7 @@ define(function (require) {
       
       self._contents = new Contents();
       self._contents.init("#contents-panel");
-      
+    
       self.title(self._config.system_name);
       self.favicon(favicon_path);
       self._account_id.text(session.identity);

@@ -29,11 +29,11 @@
                     "jpeg" "image/jpeg"
                     })
 
-(defn print-request
-  [req]
-  (println "--- < Display Request > ---")
-  (pprint/pprint req)
-  (println "---------------------------"))
+(defn print-s-exp
+  [s-exp]
+  (println "--- < Display s-expression > ---")
+  (pprint/pprint s-exp)
+  (println "--------------------------------"))
 
 (defn login-get
   [req]
@@ -70,7 +70,7 @@
 
 (defn login-post
   [req]
-  (print-request req)
+  (print-s-exp req)
   (let [account_id (get-in req [:form-params "account_id"])
         password   (get-in req [:form-params "password"])
         next_url   (get-in req [:query-params "next"] "/tames")
@@ -105,15 +105,6 @@
           :else
             (systems/create-authorized-result false "/login?next=/tames"))))
 
-;(defn unauthorized
-;  [req meta]
-;  (let [res (authenticated? req)]
-;    (println "[Unauthenticated] :" res)
-;    (print-request req)
-;    (if res
-;        (systems/create-authorized-result true "/index.html")
-;        (systems/create-authorized-result false (format "/login?next=%s" (:uri req))))))
-
 (defn time-to-RFC1123
   [time]
   (let [f   "EEE, dd MMM yyyy HH:mm:ss z"
@@ -143,48 +134,59 @@
         (response/header "Content-Type" (content-types "html"))))
   
   ;; REST API for CRUD
-  ;(GET "/api/:class-id" [class-id]
-  ;  (println (str "[GET] /api/:class-id = /api/" class-id))
-  ;  (systems/get-data class-id nil))
   (GET "/api/:class-id" req
-    (print-request req)
-    (let [class-id      (get-in req [:route-params :class-id] nil)
-          last-modified (systems/get-last-modified class-id nil)]
-      (println (str "[GET] /api/:class-id = /api/" class-id))
-      (-> (systems/get-data class-id nil)
-          (response/header "Last-Modified" (time-to-RFC1123 last-modified)))))
-  ;(GET "/api/:class-id/:object-id" [class-id object-id]
-  ;  (println (format "[GET] /api/:class-id/:object-id = /api/%s/%s" class-id object-id))
-  ;  (systems/get-data class-id object-id))
+    (let [class-id          (get-in req [:route-params :class-id] nil)
+          if-modified-since (get-in req [:headers "if-modified-since"] nil)
+          exists?           (systems/exists? class-id nil)
+          last-modified     (time-to-RFC1123 (systems/get-last-modified class-id nil))
+          not-modified?     (= if-modified-since last-modified)]
+      (println (format "[GET] /api/%s" class-id))
+      (cond (not exists?) (-> (response/response nil) (response/status 410))
+            not-modified? (-> (response/response nil) (response/status 304))
+            :else         (-> (systems/get-data class-id nil)
+                              (response/header "Last-Modified" last-modified)))))
   (GET "/api/:class-id/:object-id" req
-    (print-request req)
-    (let [class-id      (get-in req [:route-params :class-id] nil)
-          object-id     (get-in req [:route-params :object-id] nil)
-          last-modified (systems/get-last-modified class-id object-id)]
-      (println (format "[GET] /api/:class-id/:object-id = /api/%s/%s" class-id object-id))
-      (-> (systems/get-data class-id object-id)
-          (response/header "Last-Modified" (time-to-RFC1123 last-modified)))))
+    (let [class-id          (get-in req [:route-params :class-id] nil)
+          object-id         (get-in req [:route-params :object-id] nil)
+          if-modified-since (get-in req [:headers "if-modified-since"] nil)
+          exists?           (systems/exists? class-id object-id)
+          last-modified     (time-to-RFC1123 (systems/get-last-modified class-id object-id))
+          not-modified?     (= if-modified-since last-modified)]
+      (println (format "[GET] /api/%s/%s" class-id object-id))
+      (cond (not exists?) (-> (response/response nil) (response/status 410))
+            not-modified? (-> (response/response nil) (response/status 304))
+            :else         (-> (systems/get-data class-id object-id)
+                              (response/header "Last-Modified" last-modified)))))
   (POST "/api/:class-id" [class-id & params]	;;; https://github.com/weavejester/compojure/wiki/Destructuring-Syntax
     (println (str "[POST] /api/:class-id = /api/" class-id))
-    (let [json-str     (URLDecoder/decode (params :value) "UTF-8")
-          data         (json/read-str json-str)
-          added-files  (dissoc params :value)]
-      (systems/post-data class-id data added-files)))
+    (if (not (systems/exists? class-id nil))
+        (-> (response/response nil)
+            (response/status 410))
+        (let [json-str    (URLDecoder/decode (params :value) "UTF-8")
+              data        (json/read-str json-str)
+              added-files (dissoc params :value)]
+          (systems/post-data class-id data added-files))))
   (PUT "/api/:class-id/:object-id" [class-id object-id & params]
     (println (str "[PUT] /api/:class-id/:object-id = /api/" class-id "/" object-id))
-    (let [json-str     (URLDecoder/decode (params :value) "UTF-8")
-          data         (json/read-str json-str)
-          added-files  (dissoc params :value)]
-      (systems/put-data class-id object-id data added-files)))
+    (if (not (systems/exists? class-id object-id))
+        (-> (response/response nil)
+            (response/status 410))
+        (let [json-str     (URLDecoder/decode (params :value) "UTF-8")
+              data         (json/read-str json-str)
+              added-files  (dissoc params :value)]
+          (systems/put-data class-id object-id data added-files))))
   (DELETE "/api/:class-id/:object-id" [class-id object-id]
     (println (str "[DELETE] /api/:class-id/:object-id = /api/" class-id "/" object-id))
-    (systems/delete-data class-id object-id))
+    (if (not (systems/exists? class-id object-id))
+        (-> (response/response nil)
+            (response/status 410))
+        (systems/delete-data class-id object-id)))
   ;; Session
   (GET "/session/:session-key" req
     (let [session-key (get-in req [:route-params :session-key] nil)
           user-name   (get-in req [:session :identity] nil)]
       (println (format "[GET] /session/:session-key = /session/%s" session-key))
-      (print-request req)
+      (print-s-exp req)
       (format "{ \"%s\" : \"%s\"}" session-key user-name)))
   ;; Download
   (GET "/download/*" [& params]
