@@ -143,8 +143,20 @@ define(function (require) {
     this._grid.multiSearch = value;
   };
   
+  Grid.prototype.multi_select = function (value) {
+    this._grid.multiSelect = value;
+  };
+  
+  Grid.prototype.fixed_body = function (value) {
+    this._grid.fixedBody = value;
+  };
+  
   Grid.prototype.toolbar = function (value) {
     this._grid.show.toolbar = value;
+  };
+
+  Grid.prototype.select_column = function (value) {
+    this._grid.show.selectColumn = value;
   };
 
   Grid.prototype.header_visible = function(visible) {

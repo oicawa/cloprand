@@ -5,7 +5,10 @@ define(function (require) {
   var Uuid = require("core/Uuid");
   var Contents = require("core/Contents");
   
-  var DIALOG_TEMPLATE = '<div id="{{DIALOG_ID}}" style="display:none;"><div id="{{CONTENTS_ID}}"></div></div>';
+  var DIALOG_TEMPLATE = '' +
+'<div class="dialog" id="{{DIALOG_ID}}" style="display:none;">' +
+'  <div id="{{CONTENTS_ID}}"></div>' +
+'</div>';
   
   function Dialog() {
     this._id = null;
