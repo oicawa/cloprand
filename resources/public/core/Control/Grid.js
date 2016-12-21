@@ -15,14 +15,15 @@ define(function (require) {
     grid.w2grid({
       name:name,
       style:style,
+      recid:'id',
       columns:self._columns
     });
     
     self._grid = w2ui[name];
     
-    self._grid.on('click', function(event) {
+    self._grid.on('dblclick', function(event) {
       event.onComplete = function() {
-        var operation = self._operations["click"];
+        var operation = self._operations["dblclick"];
         if (!operation) {
           return;
         }
@@ -59,7 +60,7 @@ define(function (require) {
     if (!klass) {
       return null;
     }
-    var columns = [{ field: 'recid', caption: 'RECID', size: '50px' }];
+    var columns = [{ field: 'recid', caption: 'ID', size: '50px' }];
     var fields = klass.object_fields;
     if (!fields) {
       return columns;
@@ -181,10 +182,6 @@ define(function (require) {
   };
   
   Grid.prototype.refresh = function() {
-    this._data.map(function(currentValue, index, array) {
-      currentValue.recid = index + 1;
-      return currentValue;
-    }, null);
     this._grid.clear();
     this._grid.columns = this._columns;
     this._grid.records = this._data;

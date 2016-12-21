@@ -85,7 +85,8 @@ define(function (require) {
       var columns = Grid.create_columns(class_);
       self._grid.init(grid_selector, columns)
       .then(function () {
-        self._grid.add_operation("click", MenuView.show_gridview);
+        self._grid.add_operation("dblclick", MenuView.show_gridview);
+        self._grid.select_column(true);
         var menus = Object.keys(classes)
           .map(function(id) { return classes[id]; })
           .filter(function(class_) { return class_.application == true; });

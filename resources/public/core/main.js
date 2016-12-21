@@ -14,7 +14,7 @@ require.config({
     jquery : '/lib/jquery-2.1.3',
     jquery_ui : '/lib/jquery-ui-1.12.1',
     json2 : '/lib/json2',
-    w2ui : '/lib/w2ui-1.4.3/w2ui-1.4.3',
+    w2ui : '/lib/w2ui/w2ui-1.5.rc1',
     app : '/core/app'
   }
 });

@@ -5,6 +5,7 @@ div.selector {
   bottom:0px;
   right:0px;
 }
+/*
 div.selector > div.grid > div {
   width:100% !important;
   height:100% !important;
@@ -24,3 +25,4 @@ div.selector > div.grid > div > div.w2ui-grid-body > div.w2ui-grid-records > tab
 div.selector > div.grid > div > div.w2ui-grid-body > div.w2ui-grid-records > table > tbody > tr > td.w2ui-grid-data-last {
   width:100% !important;
 }
+*/
