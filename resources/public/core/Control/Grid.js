@@ -3,12 +3,11 @@ define(function (require) {
   require("w2ui");
   var Utils = require("core/Utils");
   var Uuid = require("core/Uuid");
-  //var Toolbar = require("data/Control/Toolbar");
   
   var TEMPLATE = '<div class="grid"></div>';
 
-  function create_control(self, template, style) {
-    self._root.append(template);
+  function create_control(self, columns, style) {
+    self._root.append(TEMPLATE);
     var grid = self._root.children("div.grid");
     var uuid = Uuid.version4();
     var name = uuid.replace(/-/g, "_");
@@ -16,41 +15,22 @@ define(function (require) {
       name:name,
       style:style,
       recid:'id',
-      columns:self._columns
-    });
-    
-    self._grid = w2ui[name];
-    
-    self._grid.on('dblclick', function(event) {
-      event.onComplete = function() {
+      columns:columns,
+      onDblClick:function(event) {
         var operation = self._operations["dblclick"];
         if (!operation) {
           return;
         }
-        //event.target = self;
         operation(event);
-      };
+      }
     });
-
-    //regist_event(self, "click");
-    //regist_event(self, "dblclick");
-  }
-
-  function assign_item(self, tr, item) {
-    for (var i = 0; i < self._columns.length; i++) {
-      var column = self._columns[i];
-      var value = column.renderer ? column.renderer(item) : item[column.name];
-      tr.children("td." + column.name).text(value);
-    }
+    
+    self._grid = w2ui[name];
   }
 
   function Grid() {
     this._selector = null;
     this._root = null;
-    this._data = [];
-    this._table = null;
-    this._columns = [];
-    this._items = [];
     this._operations = {};
     this._grid = null;
   }
@@ -80,14 +60,13 @@ define(function (require) {
     var dfd = new $.Deferred;
     this._selector = selector;
     this._root = $(selector);
-    this._columns = columns;
     var self = this;
 
     // CSS
     Utils.load_css("/core/Control/Grid.css")
     .then(function() {
       // Create form tags
-      create_control(self, TEMPLATE, style);
+      create_control(self, columns, style);
       dfd.resolve();
     });
     
@@ -99,29 +78,31 @@ define(function (require) {
   };
 
   Grid.prototype.add = function(item) {
-    this._data.push(item);
+    item.recid = item.id;
+    this._grid.add(item);
   };
 
-  Grid.prototype.get = function(recid) {
-    return this._grid.get(recid);
+  Grid.prototype.get = function(recid, returnIndex) {
+    var is_return_index = !returnIndex ? false : true;
+    return this._grid.get(recid, is_return_index);
+  };
+
+  Grid.prototype.set = function(recid, item) {
+    this._grid.set(recid, item);
   };
 
   Grid.prototype.select = function() {
-    var indexes = Array.prototype.slice.call(arguments);
-    var recids = indexes.map(function(currentValue, index, array) { return currentValue + 1; });
+    var recids = Array.prototype.slice.call(arguments);
     this._grid.select.apply(this._grid, recids);
   };
   
   Grid.prototype.selection = function() {
-    return this._grid.getSelection().map(function(currentValue, index, array) {
-      return currentValue - 1;
-    });
+    return this._grid.getSelection();
   };
 
-  Grid.prototype.delete = function(indexes) {
-    indexes.sort().reverse().forEach(function(currentValue, index, array) {
-      this._data.splice(currentValue, 1);
-    }, this);
+  Grid.prototype.remove = function(recids) {
+    var recids = Array.prototype.slice.call(arguments);
+    this._grid.remove.apply(this._grid, recids);
   };
 
   Grid.prototype.edit = function(on) {
@@ -136,10 +117,6 @@ define(function (require) {
   Grid.prototype.restore = function() {
   };
 
-  Grid.prototype.columns = function(columns_) {
-    this._columns = columns_;
-  };
-  
   Grid.prototype.multi_search = function (value) {
     this._grid.multiSearch = value;
   };
@@ -167,86 +144,55 @@ define(function (require) {
   Grid.prototype.data = function(value) {
     // getter
     if (arguments.length == 0) {
-      return this._data
+      return this._grid.records;
     }
     // setter
     if (!value) {
-      this._data = [];
+      this._grid.records = [];
       return;
     }
     if (Utils.is_object(value)) {
-      this._data = Object.keys(value).map(function(id) { return value[id]; });
+      this._grid.records = Object.keys(value).map(function(id) { return value[id]; });
       return;
     }
-    this._data = value;
+    this._grid.records = value;
   };
   
-  Grid.prototype.refresh = function() {
-    this._grid.clear();
-    this._grid.columns = this._columns;
-    this._grid.records = this._data;
-    this._grid.total = this._data.length;
+  Grid.prototype.refresh = function(reorder) {
+    if (typeof reorder === "function") {
+      this._grid.records.forEach(reorder);
+    }
     this._grid.refresh();
   };
 
-  Grid.prototype.item = function(index, value) {
-    if (arguments.length == 1) {
-      return this._data[index];
-    } else if (arguments.length == 2) {
-      this._data[index] = value;
-    } else {
-      console.assert(false, "arguments = " + arguments);
-    }
-  };
-
-  Grid.prototype.move = function(index, step) {
-  	// index check
+  Grid.prototype.move = function(recid, step) {
+    // index check
+    var index = this._grid.get(recid, true);
     if (index < 0 || step == 0 || index + step < 0) {
       return;
     }
-    var max_index = this._data.length - 1;
+    var max_index = this._grid.records.length - 1;
     if (max_index <= 0 || max_index < index || max_index < index + step) {
       return;
     }
 
     var offset = step < 0 ? index + step : index;
     var count = Math.abs(step) + 1;
-    var target = this._data[index];
+    var target = this._grid.records[index];
     var start = step < 0 ? index + step : index + 1;
     var end = start + count - 1;
-    var args = this._data.slice(start, end);
+    var args = this._grid.records.slice(start, end);
     if (step < 0) {
       args.splice(0, 0, offset, count, target);
     } else {
       args.splice(0, 0, offset, count);
       args.push(target);
     }
-    Array.prototype.splice.apply(this._data, args);
+    Array.prototype.splice.apply(this._grid.records, args);
   };
 
   Grid.prototype.update = function(object_id, item) {
-    console.assert(object_id && Uuid.test(object_id) && object_id != Uuid.NULL, "object_id=" + object_id);
-    if (!this._data) {
-      this._data = [];
-    }
-    var exists = false;
-    for (var i = 0; i < this._data.length; i++) {
-      var tmp_item = this._data[i];
-      if (tmp_item.id != object_id) {
-        continue;
-      }
-      exists = true;
-      if (!item) {
-        this._data.splice(i, 1);	// remove
-      } else {
-        this._data[i] = item;		// update
-      }
-      return;
-    }
-    // create
-    if (item) {
-      this._data.push(item);
-    }
+    console.asset(false);
   };
 
   return Grid;

@@ -137,7 +137,7 @@
   (GET "/api/:class-id" req
     (let [class-id          (get-in req [:route-params :class-id] nil)
           if-modified-since (get-in req [:headers "if-modified-since"] nil)
-          exists?           (systems/exists? class-id nil)
+          exists?           (systems/exists? systems/CLASS_ID class-id)
           last-modified     (time-to-RFC1123 (systems/get-last-modified class-id nil))
           not-modified?     (= if-modified-since last-modified)]
       (println (format "[GET] /api/%s" class-id))
@@ -159,7 +159,7 @@
                               (response/header "Last-Modified" last-modified)))))
   (POST "/api/:class-id" [class-id & params]	;;; https://github.com/weavejester/compojure/wiki/Destructuring-Syntax
     (println (str "[POST] /api/:class-id = /api/" class-id))
-    (if (not (systems/exists? class-id nil))
+    (if (not (systems/exists? systems/CLASS_ID class-id))
         (-> (response/response nil)
             (response/status 410))
         (let [json-str    (URLDecoder/decode (params :value) "UTF-8")

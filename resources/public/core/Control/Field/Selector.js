@@ -28,7 +28,7 @@ define(function (require) {
       var select_panel = "";
       dialog.init(function(panel_id) {
         var dfd = new $.Deferred;
-        // ??
+        
         var selector = "#" + panel_id;
         var panel = $(selector);
         panel.addClass("selector");
@@ -36,11 +36,11 @@ define(function (require) {
         grid.init(selector, Grid.create_columns(self._class))
         .then(function() {
           grid.multi_search(true);
-          grid.multi_select(field.datatype.properties.multi);
+          grid.multi_select(field.datatype.properties.multi_selectable);
           grid.select_column(true);
-          //grid.fixed_body(false);
           grid.toolbar(true);
-          grid.data(self._objects);
+          var data = Object.keys(self._objects).map(function(id) { return self._objects[id]; });
+          grid.data(data);
           grid.refresh();
           dfd.resolve();
         });
@@ -53,7 +53,7 @@ define(function (require) {
           click: function (event) {
             var recids = grid.selection();
             console.log("[OK] clicked. selection=" + recids);
-            self._value = recids.map(function(index) { return self._objects[index].id; });
+            self._value = recids;
             self.refresh();
             dialog.close();
           }
@@ -128,15 +128,8 @@ define(function (require) {
     console.assert(!(!class_id), field);
     $.when(
       Utils.load_css("/core/Control/Field/Selector.css"),
-      Storage.read(Class.CLASS_ID, class_id)
-             .done(function(data) {
-               self._class = data;
-             }),
-      Storage.read(class_id)
-             .done(function(data) {
-               self._objects = Object.keys(data)
-                                     .map(function(id) { return data[id]; });
-             })
+      Storage.read(Class.CLASS_ID, class_id).done(function(data) { self._class = data; }),
+      Storage.read(class_id).done(function(data) { self._objects = data; })
     ).then(function() {
       create_search(self, root, field);
       dfd.resolve();

@@ -44,7 +44,7 @@ define(function (require) {
   Inherits(Multi, Field);
   
   Multi.prototype.showDetailDialog = function (self, title, fields, data, ok_func) {
-	  var detail = new Detail();
+    var detail = new Detail();
     var dialog = new Dialog();
     dialog.init(function(id) {
   	  var dfd = new $.Deferred;
@@ -108,17 +108,6 @@ define(function (require) {
 
       var columns = Grid.create_columns(class_);
       
-      function ok_func(detail) {
-        var data = detail.data();
-        if (detail.is_new()) {
-          self._grid.add(data);
-        } else {
-          var index = self._grid.selection()[0];
-          self._grid.item(index, data);
-        }
-        self._grid.refresh();
-      }
-      
       var width = 500;
       var height = 200;
       var prop = field.datatype.properties;
@@ -135,69 +124,76 @@ define(function (require) {
         self._toolbar.bind("add", function(event) {
           self.showDetailDialog(self, class_.label, class_.object_fields, null, function (detail) {
             var data = detail.data();
+            data.id = self._grid.data().length + 1;
             self._grid.add(data);
             self._grid.refresh();
           });
         });
         self._toolbar.bind("edit", function(event) {
-          var selection = self._grid.selection();
-          if (selection.length != 1) {
+          var recids = self._grid.selection();
+          if (recids.length != 1) {
             Dialog.show("Select one item.");
             return;
           }
-          var index = selection[0];
-          var data = self._grid.data()[index];
+          var recid = recids[0];
+          var data = self._grid.get(recid);
           self.showDetailDialog(self, class_.label, class_.object_fields, data, function (detail) {
             var data = detail.data();
-            var index = self._grid.selection()[0];
-            self._grid.item(index, data);
+            data.id = recid;
+            self._grid.set(recid, data);
             self._grid.refresh();
           });
         });
+        function reorder(item, index) {
+          delete item["recid"];
+          item.id = index + 1;
+        };
         self._toolbar.bind("delete", function(event) {
-          var selection = self._grid.selection();
-          if (selection.length == 0) {
+          var recids = self._grid.selection();
+          if (recids.length == 0) {
             Dialog.show("Select one or more items.");
             return;
           }
           Dialog.confirm("Delete?", function(answer) {
             if (answer == "No")
               return;
-            self._grid.delete(selection);
-            self._grid.refresh();
+            self._grid.remove(recids);
+            self._grid.refresh(reorder);
           });
         });
         self._toolbar.bind("up", function(event) {
           var message = "Select one item. (without 1st)";
-          var selection = self._grid.selection();
-          if (selection.length != 1) {
+          var recids = self._grid.selection();
+          if (recids.length != 1) {
             Dialog.show(message);
             return;
           }
-          var index = selection[0];
+          var recid = recids[0];
+          var index = self._grid.get(recid, true);
           if (index == 0) {
             Dialog.show(message);
             return;
           }
-          self._grid.move(index, -1);
-          self._grid.refresh();
-          self._grid.select(index - 1);
+          self._grid.move(recid, -1);
+          self._grid.select(recid);
+          self._grid.refresh(reorder);
         });
         self._toolbar.bind("down", function(event) {
           var message = "Select one item. (without last)";
-          var selection = self._grid.selection();
-          if (selection.length == 0) {
+          var recids = self._grid.selection();
+          if (recids.length == 0) {
             Dialog.show(message);
             return;
           }
-          var index = selection[0];
+          var recid = recids[0];
+          var index = self._grid.get(recid, true);
           if (index == self._grid.data().length - 1) {
             Dialog.show(message);
             return;
           }
-          self._grid.move(index, 1);
-          self._grid.refresh();
-          self._grid.select(index + 1);
+          self._grid.move(recid, 1);
+          self._grid.select(recid);
+          self._grid.refresh(reorder);
         });
         dfd.resolve();
       });
@@ -225,8 +221,13 @@ define(function (require) {
     if (arguments.length == 0) {
       return this._grid.data();
     } else {
-      this._grid.data(values);
-      this._backuped = values;
+      var values_ = values.map(function(value, index) {
+        delete value["recid"];
+        value.id = index + 1;
+        return value;
+      });
+      this._grid.data(values_);
+      this._backuped = values_;
     }
   };
   

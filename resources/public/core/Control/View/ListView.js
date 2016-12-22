@@ -132,7 +132,8 @@ define(function (require) {
       var columns = Grid.create_columns(self._class);
       self._grid.init(list_selector, columns)
       .then(function () {
-        self._grid.add_operation("click", ListView.show_detail);
+        self._grid.add_operation("dblclick", ListView.show_detail);
+        self._grid.select_column(true);
         self._grid.data(classes);
         self._toolbar.visible(true);
         self.refresh();
