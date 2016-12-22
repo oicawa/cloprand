@@ -18,7 +18,7 @@ define(function (require) {
   var ITEM_TEMPLATE = '' +
 '<div class="item" style="margin:2px 0px;">' +
 '  <span style="display:inline-block;border:solid 1px gray;border-radius:3px;background-color:#f0f0f0;padding:2px 5px 2px 5px;font-family:Verdana,Arial,sans-serif;font-size:12px;min-width:300px;"></span>' +
-'  <i name="remove" class="fa fa-remove" />' +
+'  <i class="fa fa-remove" />' +
 '</div>';
 
   function create_search(self, root, field) {
@@ -81,6 +81,7 @@ define(function (require) {
     this._objects = null;
     this._fixed = null;
     this._value = null;
+    this._editting = false;
   }
   Inherits(Selector, Field);
 
@@ -106,7 +107,7 @@ define(function (require) {
     this._description.text(field.datatype.properties.description);
     // List
     this._list = root.find("div > div[name='list']");
-    this._list.on("click", "i[name=remove]", function(event) {
+    this._list.on("click", "div.item > i", function(event) {
       var i = $(event.originalEvent.target);
       var record = i.parent();
       record.remove();
@@ -132,19 +133,20 @@ define(function (require) {
       Storage.read(class_id).done(function(data) { self._objects = data; })
     ).then(function() {
       create_search(self, root, field);
+      self.edit(false);
       dfd.resolve();
     });
     return dfd.promise();
   };
   
   Selector.prototype.edit = function(on) {
-    var self = this;
+    this._editting = on;
     if (on) {
       this._search.show();
-      this._list.find("i[name=remove]").show();
+      this._list.find("div.item > i").css("display", "inline");
     } else {
       this._search.hide();
-      this._list.find("i[name=remove]").hide();
+      this._list.find("div.item > i").css("display", "none")
     }
   };
 
@@ -192,6 +194,7 @@ define(function (require) {
       record.attr("id", this._value[i]);
       record.find("span").text(captions[i]);
     }
+    this.edit(this._editting);
   };
 
   return Selector;
