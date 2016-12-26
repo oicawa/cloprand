@@ -3,7 +3,9 @@ define(function (require) {
   require("w2ui");
   var Utils = require("core/Utils");
   var Uuid = require("core/Uuid");
-  
+  var Storage = require("core/Storage");
+  var Class = require("core/Class");
+
   var TEMPLATE = '<div class="grid"></div>';
 
   function create_control(self, columns, style) {
@@ -35,25 +37,54 @@ define(function (require) {
     this._grid = null;
   }
 
-  Grid.create_columns = function (klass) {
-    console.assert(typeof assist == "undefined", "assist not undefined.");
-    if (!klass) {
-      return null;
+  Grid.create_columns = function (class_) {
+    var dfd = new $.Deferred
+    var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '50px' };
+    if (!class_ || !class_.object_fields) {
+      dfd.resolve([COLUMN_RECID])
+      return dfd.promise();
     }
-    var columns = [{ field: 'recid', caption: 'ID', size: '50px' }];
-    var fields = klass.object_fields;
-    if (!fields) {
-      return columns;
-    }
-    for (var i = 0; i < fields.length; i++) {
-      var field = fields[i];
-      if (!field.column) {
-        continue;
-      }
-      
-      columns.push({field: field.name, caption: field.label, type: "text", size: field.column + "px", resizable: true, sortable:true});
-    }
-    return columns;
+    var primitives = null;
+    Storage.read(Class.PRIMITIVE_ID)
+    .done(function (primitives) {
+      var fields = class_.object_fields.filter(function(field) { return !field.column ? false : true;});
+      var columns = [];
+      var promises = fields.map(function(field, index) {
+        // get a cell render of primitive, and assign it to column property
+        var inner_dfd = new $.Deferred;
+        var primitive = primitives[field.datatype.id];
+        if (!primitive) {
+          inner_dfd.resoleve();
+          return inner_dfd.promise();
+        }
+        require([primitive.require_path], function(Control) {
+          columns[index] = {
+            field: field.name,
+            caption: field.label,
+            type: "text",
+            size: field.column + "px",
+            render: function(record, index, column_index) {
+              if (!Control.cell_render) {
+                return record[field.name];
+              } else {
+                return Control.cell_render(field, record, index, column_index);
+              }
+            },
+            resizable: true,
+            sortable:true
+          };
+          inner_dfd.resolve();
+        });
+        return inner_dfd.promise(); 
+      });
+      $.when.apply(null, promises)
+      .then(function() {
+        columns.push(COLUMN_RECID);
+        dfd.resolve(columns);
+      });
+       
+    });
+    return dfd.promise();
   }
 
   Grid.prototype.init = function(selector, columns, style) {

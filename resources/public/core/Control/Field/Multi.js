@@ -91,10 +91,17 @@ define(function (require) {
     }
 
     var class_ = null;
+    var columns = null;
     var self = this;
     var class_id = field.datatype.properties.class_id;
     Storage.read(Class.CLASS_ID, class_id)
     .done(function (data) { class_ = data; })
+    .then(function() {
+      return Grid.create_columns(class_)
+      .done(function(columns_) {
+        columns = columns_;
+      })
+    })
     .always(function() {
       root.append(TEMPLATE);
       
@@ -106,8 +113,6 @@ define(function (require) {
 
       var toolbar = !assist ? default_toolbar : (!assist.toolbar ? default_toolbar : assist.toolbar);
 
-      var columns = Grid.create_columns(class_);
-      
       var width = 500;
       var height = 200;
       var prop = field.datatype.properties;
@@ -221,7 +226,7 @@ define(function (require) {
     if (arguments.length == 0) {
       return this._grid.data();
     } else {
-      var values_ = values.map(function(value, index) {
+      var values_ = !values ? [] : values.map(function(value, index) {
         delete value["recid"];
         value.id = index + 1;
         return value;

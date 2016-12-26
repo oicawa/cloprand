@@ -166,6 +166,11 @@ define(function (require) {
     this._icon.addClass("fa-3x");
     this._icon.addClass("fa-fw");
   }
+  
+  FontAwesome.cell_render = function(field, record, index, column_index) {
+    var value = record[field.name];
+    return '<i style="display:table-cell;text-align:center;vertical-align:middle;padding:5px;" class="fa ' + value + ' fa-fw"></i>';
+  };
 
   return FontAwesome;
 }); 

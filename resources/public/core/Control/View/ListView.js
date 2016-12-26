@@ -7,7 +7,6 @@ define(function (require) {
   var Storage = require("core/Storage");
   var Contents = require("core/Contents");
   var Toolbar = require("core/Control/Toolbar");
-  //var Detail = require("data/Control/Detail");
   var Grid = require("core/Control/Grid");
 
   var TEMPLATE = '' +
@@ -108,16 +107,24 @@ define(function (require) {
     this._toolbar = new Toolbar();
     this._grid = new Grid();
     var view = $(selector)
-    var classes = null;
+    var objects = null;
     var assist = null;
     var self = this;
     var toolbar_selector = selector + "> div.listview-panel > div.object-operations";
     var list_selector = selector + "> div.listview-panel > div.object-list";
+    var columns = null;
     $.when(
       Utils.load_css("/core/Control/View/ListView.css"),
-      Storage.read(class_id).done(function (data) { classes = data; }),
+      Storage.read(class_id).done(function (data) { objects = data; }),
       Storage.read(Class.CLASS_ID, class_id).done(function (data) { self._class = data; })
-    ).then(function() {
+    )
+    .then(function() {
+      return Grid.create_columns(self._class)
+      .done(function(columns_) {
+        columns = columns_;
+      })
+    })
+    .then(function() {
       view.append(TEMPLATE);
 
       // Toolbar
@@ -129,12 +136,11 @@ define(function (require) {
       self._toolbar.bind("create", ListView.create);
 
       // Grid
-      var columns = Grid.create_columns(self._class);
       self._grid.init(list_selector, columns)
       .then(function () {
         self._grid.add_operation("dblclick", ListView.show_detail);
         self._grid.select_column(true);
-        self._grid.data(classes);
+        self._grid.data(objects);
         self._toolbar.visible(true);
         self.refresh();
       });

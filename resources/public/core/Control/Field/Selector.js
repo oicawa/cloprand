@@ -33,7 +33,7 @@ define(function (require) {
         var panel = $(selector);
         panel.addClass("selector");
 
-        grid.init(selector, Grid.create_columns(self._class))
+        grid.init(selector, self._columns)
         .then(function() {
           grid.multi_search(true);
           grid.multi_select(field.datatype.properties.multi_selectable);
@@ -78,6 +78,7 @@ define(function (require) {
     this._description = null;
     this._list = null;
     this._class = null;
+    this._columns = null;
     this._objects = null;
     this._fixed = null;
     this._value = null;
@@ -129,7 +130,12 @@ define(function (require) {
     console.assert(!(!class_id), field);
     $.when(
       Utils.load_css("/core/Control/Field/Selector.css"),
-      Storage.read(Class.CLASS_ID, class_id).done(function(data) { self._class = data; }),
+      Storage.read(Class.CLASS_ID, class_id)
+      .done(function(data) {
+        self._class = data;
+        return Grid.create_columns(self._class)
+          .done(function (columns_) { self._columns = columns_; });
+      }),
       Storage.read(class_id).done(function(data) { self._objects = data; })
     ).then(function() {
       create_search(self, root, field);
@@ -197,5 +203,10 @@ define(function (require) {
     this.edit(this._editting);
   };
 
+  Selector.cell_render = function(field, record, index, column_index) {
+    console.log("Selector.cell_render, class_id = " + field.datatype.properties.class_id);
+    return record[field.name];
+  };
+  
   return Selector;
 }); 

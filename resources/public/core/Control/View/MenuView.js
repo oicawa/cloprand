@@ -76,13 +76,23 @@ define(function (require) {
     var classes = null;
     var self = this;
     var grid_selector = selector + "> div.menuview-panel > div.menu-list";
+    var columns = null;
     $.when(
       Utils.load_css("/core/Control/View/MenuView.css"),
-      Storage.read(Class.CLASS_ID).done(function(data) { classes = data; })
-    ).always(function() {
-      class_ = classes[Class.CLASS_ID];
+      Storage.read(Class.CLASS_ID)
+      .done(function(data) {
+        classes = data;
+        class_ = classes[Class.CLASS_ID];
+      })
+    )
+    .then(function() {
+      return Grid.create_columns(class_)
+      .done(function(columns_) {
+        columns = columns_;
+      })
+    })
+    .always(function() {
       view.append(TEMPLATE);
-      var columns = Grid.create_columns(class_);
       self._grid.init(grid_selector, columns)
       .then(function () {
         self._grid.add_operation("dblclick", MenuView.show_gridview);
