@@ -103,10 +103,15 @@ define(function (require) {
     }
   };
 
-  Boolean.cell_render = function(field, record, index, column_index) {
-    var value = record[field.name];
-    var fa = !value ? "fa-square-o" :  "fa-check-square-o";
-    return '<i style="display:table-cell;text-align:center;vertical-align:middle;padding:5px;" class="fa ' + fa + ' fa-fw"></i>';
+  Boolean.cell_render = function(field) {
+    var dfd = new $.Deferred;
+    var renderer = function(record, index, column_index) {
+      var value = record[field.name];
+      var fa = !value ? "fa-square-o" :  "fa-check-square-o";
+      return '<i style="display:table-cell;text-align:center;vertical-align:middle;padding:5px;" class="fa ' + fa + ' fa-fw"></i>';
+    };
+    dfd.resolve(renderer);
+    return dfd.promise();
   };
 
   return Boolean;

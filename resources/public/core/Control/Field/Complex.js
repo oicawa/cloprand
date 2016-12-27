@@ -31,7 +31,7 @@ define(function (require) {
     var template = null;
     var class_ = null;
     var self = this;
-    Storage.read(Class.CLASS_ID, field.datatype.class)
+    Storage.read(Class.CLASS_ID, field.datatype.properties.class_id)
     .done(function (data) { class_ = data; })
     .always(function() {
       root.append(TEMPLATE);
@@ -77,6 +77,20 @@ define(function (require) {
 
   Complex.prototype.refresh = function() {
     this._detail.refresh();
+  };
+  
+  Complex.cell_render = function(field) {
+    var dfd = new $.Deferred;
+    Storage.read(Class.CLASS_ID, field.datatype.properties.class_id, true)
+    .done(function(object) {
+      var class_ = new Class(object);
+      var renderer = function(record, index, column_index) {
+        var captions = class_.captions([record[field.name]]);
+        return captions[0];
+      };
+      dfd.resolve(renderer);
+    });
+    return dfd.promise();
   };
   
   return Complex;

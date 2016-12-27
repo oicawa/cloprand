@@ -172,11 +172,11 @@ define(function (require) {
   Selector.prototype.data = function(value) {
     if (arguments.length == 0) {
       return this._value;
-    } else {
-      this._value = value;
-      this._fixed = value;
-      this.refresh();
     }
+    
+    this._value = Array.isArray(value) ? value : [value];
+    this._fixed = this._value;
+    this.refresh();
   };
   
   Selector.prototype.update = function(keys) {
@@ -203,9 +203,25 @@ define(function (require) {
     this.edit(this._editting);
   };
 
-  Selector.cell_render = function(field, record, index, column_index) {
-    console.log("Selector.cell_render, class_id = " + field.datatype.properties.class_id);
-    return record[field.name];
+  Selector.cell_render = function(field) {
+    var dfd = new $.Deferred;
+    var class_id = field.datatype.properties.class_id;
+    var class_ = null;
+    var objects = null;
+    $.when(
+      Storage.read(Class.CLASS_ID, class_id, true).done(function(data) { class_ = data; }),
+      Storage.read(class_id, null, true).done(function(data) { objects = data; })
+    ).always(function() {
+      var renderer = function(record, index, column_index) {
+        var ids = record[field.name];
+        var targets = ids.map(function(id) { return objects[id]; });
+        var captions = (new Class(class_)).captions(targets);
+        return captions.join(",");
+      };
+      console.log("Selector.cell_render, class_id = " + field.datatype.properties.class_id);
+      dfd.resolve(renderer);
+    });
+    return dfd.promise();
   };
   
   return Selector;

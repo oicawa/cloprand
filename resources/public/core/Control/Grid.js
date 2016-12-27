@@ -57,23 +57,30 @@ define(function (require) {
           inner_dfd.resoleve();
           return inner_dfd.promise();
         }
+        
         require([primitive.require_path], function(Control) {
-          columns[index] = {
+          var column = {
             field: field.name,
             caption: field.label,
             type: "text",
             size: field.column + "px",
-            render: function(record, index, column_index) {
-              if (!Control.cell_render) {
-                return record[field.name];
-              } else {
-                return Control.cell_render(field, record, index, column_index);
-              }
-            },
             resizable: true,
             sortable:true
           };
-          inner_dfd.resolve();
+          
+          if (!Control.cell_render) {
+            column.render = function(record, row_index, column_index) { return record[field.name]; };
+            columns[index] = column;
+            inner_dfd.resolve();
+            return;
+          }
+          
+          Control.cell_render(field)
+          .done(function(renderer) {
+            column.render = renderer;
+            columns[index] = column;
+            inner_dfd.resolve();
+          });
         });
         return inner_dfd.promise(); 
       });
