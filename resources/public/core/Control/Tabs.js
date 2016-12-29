@@ -111,7 +111,7 @@ define(function (require) {
 
   Tabs.prototype.label = function (tab_name_or_id, value) {
     var tab_id = get_tab_id(this, tab_name_or_id);
-    this._tabs.set(tab_id, { caption: value });
+    this._tabs.set(tab_id, { caption: value, text: value });
     this._tabs.refresh();
   };
 
@@ -137,7 +137,7 @@ define(function (require) {
     var tab_id = this._idmap[old_name];
     delete this._idmap[old_name];
     this._idmap[new_name] = tab_id;
-    this._tabs.set(tab_id, {caption: label});
+    this._tabs.set(tab_id, {caption: label, text: label});
   };
   
   Tabs.prototype.tab_id = function(tab_name) {

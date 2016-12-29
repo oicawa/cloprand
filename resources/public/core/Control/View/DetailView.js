@@ -123,10 +123,12 @@ define(function (require) {
         detail.data(object);
         detail.edit(false);
         detail.refresh();
-        var old_tab_name = tab_info.tab_id;
+        //var old_tab_name = tab_info.tab_id;
+        var old_tab_name = Tabs.create_tab_name([tab_info.prefix, tab_info.class_id, Uuid.NULL]);
         var new_tab_name = Tabs.create_tab_name([tab_info.prefix, tab_info.class_id, new_object_id]);
         var label = caption_field_names.map(function(name) { return object[name]; }).join(" ");
-        app.contents().label(tab_info.tab_id, label);
+        //app.contents().label(tab_info.tab_id, label);
+        app.contents().change(old_tab_name, new_tab_name, label);
         app.contents().broadcast(tab_info.class_id, new_object_id, object);
         Dialog.show("New item was created successfully.", "Save");
       })
