@@ -97,6 +97,8 @@ define(function (require) {
       .then(function () {
         self._grid.add_operation("dblclick", MenuView.show_gridview);
         self._grid.select_column(true);
+        self._grid.toolbar(true);
+        self._grid.multi_search(true);
         var menus = Object.keys(classes)
           .map(function(id) { return classes[id]; })
           .filter(function(class_) { return class_.application == true; });

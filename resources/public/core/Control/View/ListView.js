@@ -140,6 +140,8 @@ define(function (require) {
       .then(function () {
         self._grid.add_operation("dblclick", ListView.show_detail);
         self._grid.select_column(true);
+        self._grid.toolbar(true);
+        self._grid.multi_search(true);
         self._grid.data(objects);
         self._toolbar.visible(true);
         self.refresh();
