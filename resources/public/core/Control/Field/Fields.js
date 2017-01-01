@@ -63,7 +63,7 @@ define(function (require) {
     var self = this;
     Storage.read(Class.CLASS_ID)
     .done(function(response) {
-      self._classes = response;
+      self._classes = Object.keys(response).map(function(id) { return response[id]; });
       // Data
       for (var i = 0; i < self._classes.length; i++) {
         var tmp_class = self._classes[i];
