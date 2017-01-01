@@ -63,7 +63,7 @@ define(function (require) {
       return;
     }
     delete objects[object_id];
-    set_all(objects);
+    set_all(class_id, objects);
   }
   
   var Storage = {
