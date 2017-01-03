@@ -36,19 +36,14 @@ define(function (require) {
   };
   
   Dialog.prototype.buttons = function (buttons) {
-    buttons.forEach(function (button) {
-      console.assert(button.text, "Specify button.text property.");
-      console.assert(button.click, "Specify button.click property.");
-      console.assert(typeof button.click == 'function', "Specify button.click handler as a function.");
-    });
     this._dialog.dialog({ buttons : buttons });
   };
   
   Dialog.prototype.size = function (width, height) {
-  　　this._dialog.dialog({
-  　　  width : width,
-  　　  height: height
-  　　});
+    this._dialog.dialog({
+      width : width,
+      height: height
+    });
   };
   
   Dialog.prototype.init = function (initializer) {

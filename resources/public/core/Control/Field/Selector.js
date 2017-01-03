@@ -3,7 +3,7 @@ define(function (require) {
   var Utils = require("core/Utils");
   var Storage = require("core/Storage");
   var Inherits = require("core/Inherits");
-  var Dialog = require("core/Dialog");
+  var GridDialog = require("core/Control/GridDialog");
   var Class = require("core/Class");
   var Grid = require("core/Control/Grid");
   var Field = require("core/Control/Field/Field");
@@ -21,54 +21,72 @@ define(function (require) {
 '  <i class="fa fa-remove" />' +
 '</div>';
 
+//  function create_search(self, root, field) {
+//    self._search.on("click", function(event) {
+//      var dialog = new Dialog();
+//      var grid = new Grid();
+//      var select_panel = "";
+//      dialog.init(function(panel_id) {
+//        var dfd = new $.Deferred;
+//        
+//        var selector = "#" + panel_id;
+//        var panel = $(selector);
+//        panel.addClass("selector");
+//
+//        grid.init(selector, self._columns)
+//        .then(function() {
+//          grid.multi_search(true);
+//          grid.multi_select(field.datatype.properties.multi_selectable);
+//          grid.select_column(true);
+//          grid.toolbar(true);
+//          var data = Object.keys(self._objects).map(function(id) { return self._objects[id]; });
+//          grid.data(data);
+//          grid.refresh();
+//          dfd.resolve();
+//        });
+//        return dfd.promise();
+//      });
+//      dialog.title("Select");
+//      dialog.buttons([
+//        {
+//          text : "OK",
+//          click: function (event) {
+//            var recids = grid.selection();
+//            console.log("[OK] clicked. selection=" + recids);
+//            self._value = recids;
+//            self.refresh();
+//            dialog.close();
+//          }
+//        },
+//        {
+//          text : "Cancel",
+//          click: function (event) {
+//            console.log("[Cancel] clicked.");
+//            dialog.close();
+//          }
+//        }
+//      ]);
+//      dialog.size(300, 400);
+//      
+//      dialog.open();
+//    });
+//  }
   function create_search(self, root, field) {
     self._search.on("click", function(event) {
-      var dialog = new Dialog();
-      var grid = new Grid();
-      var select_panel = "";
-      dialog.init(function(panel_id) {
-        var dfd = new $.Deferred;
-        
-        var selector = "#" + panel_id;
-        var panel = $(selector);
-        panel.addClass("selector");
-
-        grid.init(selector, self._columns)
-        .then(function() {
-          grid.multi_search(true);
-          grid.multi_select(field.datatype.properties.multi_selectable);
-          grid.select_column(true);
-          grid.toolbar(true);
-          var data = Object.keys(self._objects).map(function(id) { return self._objects[id]; });
-          grid.data(data);
-          grid.refresh();
-          dfd.resolve();
+      var items = Object.keys(self._objects).map(function(id) { return self._objects[id]; });
+      var dialog = new GridDialog();
+      dialog.init(self._columns, items, field.datatype.properties.multi_selectable)
+      .done(function() {
+        dialog.title("Select");
+        dialog.ok(function (recids) {
+          console.log("[OK] clicked. selection=" + recids);
+          self._value = recids;
+          self.refresh();
         });
-        return dfd.promise();
+        dialog.size(300, 400);
+        
+        dialog.open();
       });
-      dialog.title("Select");
-      dialog.buttons([
-        {
-          text : "OK",
-          click: function (event) {
-            var recids = grid.selection();
-            console.log("[OK] clicked. selection=" + recids);
-            self._value = recids;
-            self.refresh();
-            dialog.close();
-          }
-        },
-        {
-          text : "Cancel",
-          click: function (event) {
-            console.log("[Cancel] clicked.");
-            dialog.close();
-          }
-        }
-      ]);
-      dialog.size(300, 400);
-      
-      dialog.open();
     });
   }
   
