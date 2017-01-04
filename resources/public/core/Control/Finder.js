@@ -29,6 +29,8 @@ define(function (require) {
         dialog.ok(function (recids) {
           console.log("[OK] clicked. selection=" + recids);
           self._value = recids;
+          if (typeof self._ok == "function")
+            self._ok(recids);
           self.refresh();
         });
         dialog.size(300, 400);
@@ -48,9 +50,11 @@ define(function (require) {
     this._fixed = null;
     this._value = null;
     this._editting = false;
+    this._ok = null;
+    this._converter = null;
   }
 
-  Finder.prototype.init = function(selector, class_id, description, multi_selectable) {
+  Finder.prototype.init = function(selector, columns, items, description, multi_selectable, converter) {
     var dfd = new $.Deferred;
     // Set member fields
     var root = $(selector);
@@ -85,23 +89,22 @@ define(function (require) {
       var i = $(event.originalEvent.target);
       i.css("cursor", "auto");
     });
-    
+
     var self = this;
-    $.when(
-      Utils.load_css("/core/Control/Finder.css"),
-      Storage.read(Class.CLASS_ID, class_id)
-      .done(function(data) {
-        self._class = data;
-        return Grid.create_columns(self._class)
-          .done(function (columns_) { self._columns = columns_; });
-      }),
-      Storage.read(class_id).done(function(data) { self._objects = data; })
-    ).then(function() {
+    self._columns = columns;
+    self._objects = items;
+    self._converter = converter;
+    Utils.load_css("/core/Control/Finder.css")
+    .then(function() {
       create_search(self, root, multi_selectable);
       self.edit(false);
       dfd.resolve();
     });
     return dfd.promise();
+  };
+
+  Finder.prototype.ok = function(callback) {
+    this._ok = callback;
   };
   
   Finder.prototype.edit = function(on) {
@@ -135,7 +138,6 @@ define(function (require) {
     
     this._value = Array.isArray(value) ? value : [value];
     this._fixed = this._value;
-    this.refresh();
   };
   
   Finder.prototype.update = function(keys) {
@@ -150,7 +152,7 @@ define(function (require) {
     }
     var self = this;
     var objects = this._value.map(function(id) { return self._objects[id]; });
-    var captions = (new Class(this._class)).captions(objects);
+    var captions = this._converter(objects);
     for (var i = 0; i < captions.length; i++) {
       var file = this._value[i];
       this._list.append(ITEM_TEMPLATE);

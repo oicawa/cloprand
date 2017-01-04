@@ -5,50 +5,35 @@ define(function (require) {
   var Storage = require("core/Storage");
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
-  var Class = require("core/Class");
+  var Grid = require("core/Control/Grid");
+  var Finder = require("core/Control/Finder");
   
   var TEMPLATE = '' +
 '<label></label>' +
 '<div>' +
-'  <div style="display:inline-block;color:#666;">Class:</div><select name="class" style="color:black;"></select>' +
-'  <div style="display:inline-block;color:#666;">Field:</div><select name="field" style="color:black;"></select>' +
+'  <div style="display:inline-block;color:#666;">Class:</div><div name="class"></div>' +
+'  <div style="display:inline-block;color:#666;">Field:</div><div name="field"></div>' +
 '</div>';
 
-  var OPTION_TEMPLATE = '<option></option>';
-
-  function create_dropdown(dropdown, class_, objects) {
-    var captions = (new Class(class_)).captions(objects);
-    captions.unshift("");
-    dropdown.empty();
-    captions.forEach(function(caption, index) {
-      dropdown.append(OPTION_TEMPLATE);
-      var option = dropdown.find("option:last-child");
-      option.attr("value", index - 1);
-      option.text(caption);
-    });
-  }
-  
   function Fields() {
     Field.call(this, "core/Control/Field", "Fields");
     this._selector = null;
-  	this._dropdown_class = null;
-  	this._dropdown_field = null;
   	this._value = null;
     this._classes = null;
-    this._class_of_class = null;
-    this._class_of_field = null;
+  	this._class = { _class:null, columns:null, finder:null, converter:null };
+  	this._field = { _class:null, columns:null, finder:null, converter:null };
   }
   Inherits(Fields, Field);
 
   Fields.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
+    // Selector & Root
     this._selector = selector;
     var root = $(selector);
     if (0 < root.children()) {
       dfd.resolve();
       return dfd.promise();
     }
-    // root
     root.empty();
     root.append(TEMPLATE);
     
@@ -56,34 +41,47 @@ define(function (require) {
     var label = root.children("label");
     label.text(field.label);
     
-    // Dropdown controls
-    this._dropdown_class = root.find("select[name='class']");
-    this._dropdown_field = root.find("select[name='field']");
+    // Finders
+    this._class.finder = new Finder();
+    this._field.finder = new Finder();
 
     var self = this;
+    
     Storage.read(Class.CLASS_ID)
-    .done(function(response) {
-      self._classes = Object.keys(response).map(function(id) { return response[id]; });
-      // Data
-      for (var i = 0; i < self._classes.length; i++) {
-        var tmp_class = self._classes[i];
-        if (Class.CLASS_ID == tmp_class.id) {
-          self._class_of_class = tmp_class;
-        }
-        if (Class.FIELD_ID == tmp_class.id) {
-          self._class_of_field = tmp_class;
-        }
+    .then(function(classes) {
+      self._classes = classes;
+      self._class._class = self._classes[Class.CLASS_ID];
+      self._field._class = self._classes[Class.FIELD_ID];
+    })
+    .then(function () {
+      return Grid.create_columns(self._class._class).then(function (columns) { self._class.columns = columns; });
+    })
+    .then(function () {
+      return Grid.create_columns(self._field._class).then(function (columns) { self._field.columns = columns; });
+    })
+    .then(function () {
+      function converter(objects) {
+        return (new Class(self._class._class)).captions(objects);
       }
-
-      // Assgin data & behavior
-      create_dropdown(self._dropdown_class, self._class_of_class, self._classes);
-      self._dropdown_class.on("change", function(event) {
-        var index = parseInt(self._dropdown_class.val());
-        if (index < 0) {
-          return;
-        }
-        create_dropdown(self._dropdown_field, self._class_of_field, self._classes[index].object_fields);
+      return self._class.finder.init(selector + " > div[name='class']", self._class.colulmns, self._classes, "Class", false, converter);
+    })
+    .then(function () {
+      function converter(objects) {
+        return (new Class(self._field._class)).captions(objects);
+      }
+      return self._field.finder.init(selector + " > div[name='field']", self._field.colulmns, {}, "Field", false, converter);
+    })
+    .then(function () {
+      self._class.finder.ok(function (recid) {
+        var fields = {};
+        self._classes[recid].object_fields.forEarch(function (field) {
+          field.id = field.name;
+          fields[field.id] = field;
+        });
+        self._field.finder._objects = fields;
       });
+    })
+    .then(function () {
       dfd.resolve();
     });
     return dfd.promise();
@@ -91,88 +89,52 @@ define(function (require) {
 
   Fields.prototype.edit = function(on) {
     if (arguments.length == 0) {
-      return this._dropdown_class.attr("disabled") ? false : true;
+      return this._class.finder._editting;
     } else {
-      this._dropdown_class.attr("disabled", on ? false : true);
-      this._dropdown_field.attr("disabled", on ? false : true);
+      this._class.finder.edit(on);
+      this._field.finder.edit(on);
     }
   };
   
   Fields.prototype.backuped = function() {
-    return this._value;
+    var class_id = this._class.finder.backuped();
+    var field_name = this._field.finder.backuped();
+    return { "class_id" : class_id, "field_name" : field_name };
   };
 
   Fields.prototype.commit = function() {
-    this._value = this.data();
+    this._class.finder.commit();
+    this._field.finder.commit();
   };
 
   Fields.prototype.restore = function() {
-    this._dropdown_class.val(this._value == null ? "" : this._value.class_id);
-    this._dropdown_field.val(this._value == null ? "" : this._value.field_name);
+    this._class.finder.restore();
+    this._field.finder.restore();
   };
 
   Fields.prototype.data = function(value) {
     if (arguments.length == 0) {
-      var index = null;
-      // Class
-      index = this._dropdown_class.val();
-      var class_ = this._classes[index];
-      var class_id = index < 0 ? null : class_.id;
-      // Field
-      index = this._dropdown_field.val();
-      var field_name = index < 0 ? null : class_.object_fields[index].name;
-      
+      var class_id = this._class.finder.data();
+      var field_name = this._field.finder.data();
       return { "class_id" : class_id, "field_name" : field_name };
-    } else {
-      this._value = value;
-      var index_ = -1;
-      if (!this._value) {
-        this._dropdown_class.val(index);
-        this._dropdown_field.val(index);
-        return;
-      }
-      
-      var self = this;
-      
-      // Class
-      index_ = -1;
-      var class_ = null;
-      this._classes.forEach(function(item, i) {
-        if (item.id != self._value.class_id) {
-          return;
-        }
-        index = i;
-        class_ = item;
-        return;
-      });
-      if (index == -1) {
-        this._dropdown_class.val(index);
-        this._dropdown_field.val(index);
-        return;
-      }
-      this._dropdown_class.val(index);
-      
-      // Field
-      create_dropdown(this._dropdown_field, self._class_of_field, class_.object_fields);
-      index_ = -1;
-      var field = null;
-      class_.object_fields.forEach(function(item, i) {
-        if (item.name != self._value.field_name) {
-          return;
-        }
-        index = i;
-        field = item;
-        return;
-      });
-      if (index == -1) {
-        this._dropdown_field.val(index);
-        return;
-      }
-      this._dropdown_field.val(index);
     }
+    this._class.finder.data(value.class_id);
+    this._field.finder.data(value.field_name);
+    var objects = {};
+    this._classes[value.class_id].object_fields.forEach(function (field) {
+      field.id = field.name;
+      objects[field.id] = field;
+    });
+    this._field.finder._objects = objects;
+    this.refresh();
   };
   
   Fields.prototype.update = function(keys) {
+  };
+
+  Fields.prototype.refresh = function() {
+    this._class.finder.refresh();
+    this._field.finder.refresh();
   };
 
   return Fields;

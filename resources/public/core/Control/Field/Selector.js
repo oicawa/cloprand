@@ -39,10 +39,25 @@ define(function (require) {
     var class_id = field.datatype.properties.class_id;
     var description = field.datatype.properties.description;
     var multi_selectable = field.datatype.properties.multi_selectable;
+    var class_ = null;
+    var columns = null;
+    var items = null;
     console.assert(!(!class_id), field);
     Utils.load_css("/core/Control/Field/Selector.css")
+    .then(function () {
+      return Storage.read(Class.CLASS_ID, class_id).then(function(data) { class_ = data; });
+    })
+    .then(function () {
+      return Storage.read(class_id).then(function(objects) { items = objects; })
+    })
+    .then(function () {
+      return Grid.create_columns(class_).then(function (columns_) { columns = columns_; });
+    })
     .then(function() {
-      return self._finder.init(selector + " > div", class_id, description, multi_selectable);
+      function converter(objects) {
+        return (new Class(class_)).captions(objects);
+      }
+      return self._finder.init(selector + " > div", columns, items, description, multi_selectable, converter);
     })
     .then(function() {
       self.edit(false);
@@ -64,7 +79,7 @@ define(function (require) {
   };
 
   Selector.prototype.restore = function() {
-    this._finder.refresh();
+    this._finder.restore();
   };
 
   Selector.prototype.data = function(value) {
@@ -72,6 +87,7 @@ define(function (require) {
       return this._finder.data();
     }
     this._finder.data(value);
+    this.refresh();
   };
   
   Selector.prototype.update = function(keys) {
