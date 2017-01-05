@@ -18,7 +18,7 @@ define(function (require) {
 '  <span style="display:inline-block; width:30px;"></span>' +
 '  <span id="sub-title"></span>' +
 '  <form method="get" name="signout" action="/logout" style="display:inline-block;position:absolute; right:5px;">' +
-'    <span id="account_id"></span>' +
+'    <span id="login_id"></span>' +
 '    <span class="image-button" style="height:10px;width:10px;">' +
 '      <i class="fa fa-sign-out fa-fw" onclick="document.signout.submit();"></i>' +
 '    </span>' +
@@ -31,7 +31,7 @@ define(function (require) {
     this._layout = null;
     this._title = null;
     this._contents = null;
-    this._account_id = null;
+    this._login_id = null;
     this._config = null;
     this._primitives = null;
   }
@@ -92,14 +92,14 @@ define(function (require) {
       self._system_icon.attr("src", logo_path);
       
       self._title = $("span#title");
-      self._account_id = $("span#account_id");
+      self._login_id = $("span#login_id");
       
       self._contents = new Contents();
       self._contents.init("#contents-panel");
     
       self.title(self._config.system_name);
       self.favicon(favicon_path);
-      self._account_id.text(session.identity);
+      self._login_id.text(session.identity);
       
       var tree = new Tree();
       tree.init("#left-panel");

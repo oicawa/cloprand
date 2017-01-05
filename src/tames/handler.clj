@@ -54,7 +54,7 @@
         [:form {:method "post" :name "singin"}
           [:div {:style "width:100%; text-align:center;"}
             [:span {:style "display:inline-block;width:100px;"} "Login ID "]
-            [:input {:type "text" :name "account_id" :style "width:200px;" :class "w2field"}]
+            [:input {:type "text" :name "login_id" :style "width:200px;" :class "w2field"}]
             [:br]
             [:div {:style "width:100%;height:10px;"}]
             [:span {:style "display:inline-block;width:100px;"} "Password"]
@@ -71,21 +71,21 @@
 (defn login-post
   [req]
   (print-s-exp req)
-  (let [account_id (get-in req [:form-params "account_id"])
+  (let [login_id (get-in req [:form-params "login_id"])
         password   (get-in req [:form-params "password"])
         next_url   (get-in req [:query-params "next"] "/tames")
         ;; Draft Implement...
-        account    (systems/get-account account_id)
+        account    (systems/get-account login_id)
         is-ok      (cond (nil? account) false
                          (= (account "password") password) true
                          :else false)]
-    (println "[account_id] :" account_id)
+    (println "[login_id] :" login_id)
     (println "[next url]   :" next_url)
     (println "----------")
     (pprint/pprint account)
     (println "----------")
     (-> (response/redirect next_url)
-        (assoc-in [:session :identity] (if is-ok account_id nil)))))
+        (assoc-in [:session :identity] (if is-ok login_id nil)))))
 
 (defn logout
   [req]

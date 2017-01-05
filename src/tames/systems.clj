@@ -246,8 +246,8 @@
             (recur (rest names) value2))))))
 
 (defn get-account
-  [account_id]
-  (let [accounts (filter #(= (%1 "account_id") account_id) (vals (get-objects ACCOUNT_ID)))
+  [login_id]
+  (let [accounts (filter #(= (%1 "login_id") login_id) (vals (get-objects ACCOUNT_ID)))
         account  (if (= (count accounts) 0) nil (first accounts))]
     (pprint/pprint accounts)
     account))
