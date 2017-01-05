@@ -11,8 +11,8 @@ define(function (require) {
   var TEMPLATE = '' +
 '<label></label>' +
 '<div>' +
-'  <div style="display:inline-block;color:#666;">Class:</div><div name="class"></div>' +
-'  <div style="display:inline-block;color:#666;">Field:</div><div name="field"></div>' +
+'  <div name="class"></div>' +
+'  <div name="field"></div>' +
 '</div>';
 
   function Fields() {
@@ -54,7 +54,10 @@ define(function (require) {
       self._field._class = self._classes[Class.FIELD_ID];
     })
     .then(function () {
-      return Grid.create_columns(self._class._class).then(function (columns) { self._class.columns = columns; });
+      return Grid.create_columns(self._class._class)
+      .then(function (columns) {
+        self._class.columns = columns;
+      });
     })
     .then(function () {
       return Grid.create_columns(self._field._class).then(function (columns) { self._field.columns = columns; });
@@ -63,18 +66,19 @@ define(function (require) {
       function converter(objects) {
         return (new Class(self._class._class)).captions(objects);
       }
-      return self._class.finder.init(selector + " > div[name='class']", self._class.colulmns, self._classes, "Class", false, converter);
+      return self._class.finder.init(selector + " > div > div[name='class']", self._class.columns, self._classes, "Class", false, converter);
     })
     .then(function () {
       function converter(objects) {
         return (new Class(self._field._class)).captions(objects);
       }
-      return self._field.finder.init(selector + " > div[name='field']", self._field.colulmns, {}, "Field", false, converter);
+      return self._field.finder.init(selector + " > div > div[name='field']", self._field.columns, {}, "Field", false, converter);
     })
     .then(function () {
-      self._class.finder.ok(function (recid) {
+      self._class.finder.ok(function (recids) {
+        var recid = recids[0];
         var fields = {};
-        self._classes[recid].object_fields.forEarch(function (field) {
+        self._classes[recid].object_fields.forEach(function (field) {
           field.id = field.name;
           fields[field.id] = field;
         });
