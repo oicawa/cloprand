@@ -54,7 +54,7 @@ define(function (require) {
         var inner_dfd = new $.Deferred;
         var primitive = primitives[field.datatype.id];
         if (!primitive) {
-          inner_dfd.resoleve();
+          inner_dfd.resolve();
           return inner_dfd.promise();
         }
         
