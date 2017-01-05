@@ -79,10 +79,13 @@ define(function (require) {
         var recid = recids[0];
         var fields = {};
         self._classes[recid].object_fields.forEach(function (field) {
+          if (field.recid)
+            delete field.recid;
           field.id = field.name;
           fields[field.id] = field;
         });
         self._field.finder._objects = fields;
+        self._field.finder.clear();
       });
     })
     .then(function () {
@@ -126,6 +129,8 @@ define(function (require) {
     this._field.finder.data(value.field_name);
     var objects = {};
     this._classes[value.class_id].object_fields.forEach(function (field) {
+      if (field.recid)
+        delete field.recid;
       field.id = field.name;
       objects[field.id] = field;
     });

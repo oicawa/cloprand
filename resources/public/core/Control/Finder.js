@@ -143,6 +143,11 @@ define(function (require) {
   Finder.prototype.update = function(keys) {
   };
   
+  Finder.prototype.clear = function() {
+    this._value = [];
+    this.refresh();
+  };
+  
   Finder.prototype.refresh = function() {
     console.log("Selector.refresh called.");
     this._list.empty();
