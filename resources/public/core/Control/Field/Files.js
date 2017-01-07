@@ -18,8 +18,8 @@ define(function (require) {
 '</div>';
   var INPUT_TEMPLATE = '<input type="file" multiple="true" style="display:none;"></input>';
   var ITEM_TEMPLATE = '' +
-'<div class="item" style="margin:2px 0px;">' +
-'  <a style="display:inline-block;border:solid 1px gray;border-radius:3px;background-color:#f0f0f0;padding:2px 5px 2px 5px;font-family:Verdana,Arial,sans-serif;font-size:12px;min-width:300px;"></a>' +
+'<div class="item" style="display:inline-block;border:solid 1px gray;border-radius:3px;background-color:#f0f0f0;padding:2px 5px 2px 5px;margin:2px 0px;">' +
+'  <a style="display:inline-block;font-family:Verdana,Arial,sans-serif;font-size:12px;min-width:300px;"></a>' +
 '  <i class="fa fa-remove" />' +
 '</div>';
 

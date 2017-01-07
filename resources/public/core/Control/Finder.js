@@ -14,8 +14,8 @@ define(function (require) {
 '</div>';
 
   var ITEM_TEMPLATE = '' +
-'<div class="item" style="margin:2px 0px;">' +
-'  <span style="display:inline-block;border:solid 1px gray;border-radius:3px;background-color:#f0f0f0;padding:2px 5px 2px 5px;font-family:Verdana,Arial,sans-serif;font-size:12px;min-width:300px;"></span>' +
+'<div class="item" style="display:inline-block;border:solid 1px gray;border-radius:3px;background-color:#f0f0f0;padding:2px 5px 2px 5px;margin:2px 0px;">' +
+'  <span style="display:inline-block;font-family:Verdana,Arial,sans-serif;font-size:12px;min-width:300px;"></span>' +
 '  <i class="fa fa-remove" />' +
 '</div>';
 
@@ -149,7 +149,6 @@ define(function (require) {
   };
   
   Finder.prototype.refresh = function() {
-    console.log("Selector.refresh called.");
     this._list.empty();
     
     if (!this._value) {
