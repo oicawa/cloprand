@@ -29,6 +29,15 @@ define(function (require) {
     div.append(font);
     
     self._icon = div.find("i");
+    // Mouse over/out on icons.
+    self._icon.on("mouseover", function(event) {
+      var i = $(event.originalEvent.target);
+      i.css("cursor", "pointer");
+    });
+    self._icon.on("mouseout", function(event) {
+      var i = $(event.originalEvent.target);
+      i.css("cursor", "auto");
+    });
   }
   
   function FontAwesome() {
@@ -53,7 +62,11 @@ define(function (require) {
     var self = this;
     Storage.read(WEBFONT_ID, FONTAWESOME_ID)
     .done(function(data) {
-      self._fonts = data.fonts;
+      self._fonts = {};
+      data.fonts.forEach(function(font) {
+      	delete font.recid;
+      	self._fonts[font.id] = font;
+      });
       create_control(self, root, field);
       dfd.resolve();
     });
@@ -100,6 +113,7 @@ define(function (require) {
         .then(function() {
           grid.multi_search(true);
           grid.toolbar(true);
+          grid.row_height(70);
           grid.data(self._fonts);
           grid.refresh();
           dfd.resolve();
