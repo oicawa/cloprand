@@ -163,6 +163,10 @@ define(function (require) {
     this._grid.multiSelect = value;
   };
   
+  Grid.prototype.row_height = function (height) {
+    this._grid.recordHeight = height;
+  };
+  
   Grid.prototype.fixed_body = function (value) {
     this._grid.fixedBody = value;
   };

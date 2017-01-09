@@ -2,9 +2,10 @@ define(function (require) {
   require("jquery");
   var Utils = require("core/Utils");
   var Inherits = require("core/Inherits");
+  var DivButton = require("core/Control/DivButton");
   var Field = require("core/Control/Field/Field");
   
-  var TEMPLATE = '<label></label><div><input style="color:black;"/></div>';
+  var TEMPLATE = '<label></label><div><input style="color:black;"/><div name="languages" style="display:none;"/></div>';
   
   function Text() {
     Field.call(this, "core/Control/Field", "Text");
@@ -15,18 +16,43 @@ define(function (require) {
   
   Text.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
+    
     var root = $(selector);
+    root.append(TEMPLATE);
 
-    // Create form tags
+    // properties
+    var properties = field.datatype.properties;
+    var width = 200;
+    var is_require = false;
+    var default_ = "";
+    var multi_lingualization = false;
+    if (Utils.is_object(properties)) {
+      width = properties.width;
+      is_require = properties.require;
+      default_ = properties.default;
+      multi_lingualization = properties.multi_lingualization;
+    }
+
     var self = this;
     
-    root.append(TEMPLATE);
+    // Label
     var label = root.find("label");
     var caption = field.label;
     label.text(caption);
+
+    // Input
     self._input = root.find("input");
     self._input.attr("name", field.name);
+    self._input.css("width", width);
     self._input.w2field("text");
+
+    // Button
+    var button_selector = selector + " > div > div[name='languages']";
+    $(button_selector).css("display", multi_lingualization ? "inline-block" : "none");
+    self._button = new DivButton();
+    self._button.init(button_selector, "<i class='fa fa-flag'>", function (event) {
+      console.log("DivButton clicked.");
+    });
     
     dfd.resolve();
     return dfd.promise();

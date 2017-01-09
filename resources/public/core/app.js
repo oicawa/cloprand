@@ -19,9 +19,9 @@ define(function (require) {
 '  <span id="sub-title"></span>' +
 '  <form method="get" name="signout" action="/logout" style="display:inline-block;position:absolute; right:5px;">' +
 '    <span id="login_id"></span>' +
-'    <span class="image-button" style="height:10px;width:10px;">' +
+'    <div class="div-button" style="display:inline-block;">' +
 '      <i class="fa fa-sign-out fa-fw" onclick="document.signout.submit();"></i>' +
-'    </span>' +
+'    </div>' +
 '  </form>' +
 '</div>';
   var LEFT_TEMPLATE = '<div id="left-panel"></div>';

@@ -63,7 +63,7 @@
             [:div {:style "width:100%;height:50px;"}]
             [:input {:type "hidden" :name "__anti-forgery-token" :value *anti-forgery-token*}]
             [:input {:type "submit" :style "display:none;"}]
-            [:div {:class "image-button" :style "width:70px;height:70px;margin: auto;" :onclick "document.singin.submit();"}
+            [:div {:class "div-button" :style "width:70px;height:70px;margin: auto;" :onclick "document.singin.submit();"}
               [:i {:class "fa fa-sign-in fa-3x"} ]
               "Sign In" ]
             ]]])))

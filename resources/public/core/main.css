@@ -23,11 +23,13 @@ body {
   background-color: #f5f6f7
 }
 
-.image-button {
+.div-button {
   border: 1px solid #999999;
   border-radius: 5px;
+  margin:3px;
+  padding:3px;
   cursor: pointer;
 }
-.image-button:hover {
+.div-button:hover {
   background-color: #dddddd;
 }
