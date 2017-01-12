@@ -45,6 +45,21 @@ define(function (require) {
         console.assert(false, arguments);
       }
     },
+    value : function(default_value, func, nullable) {
+      try {
+        var value = func();
+        if (typeof value == "undefined") {
+          return default_value; 
+        }
+        if (value != null) {
+          return value;
+        }
+        return !nullable ? default_value : value;
+      } catch (ex) {
+        console.assert(false, ex);
+        return default_value;
+      }
+    },
     is_object : function (target) {
       return target instanceof Object && Object.getPrototypeOf(target) === Object.prototype;
     }    

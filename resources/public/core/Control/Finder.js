@@ -136,7 +136,7 @@ define(function (require) {
       return this._value;
     }
     
-    this._value = Array.isArray(value) ? value : [value];
+    this._value = !value ? [] : (Array.isArray(value) ? value : [value]);
     this._fixed = this._value;
   };
   

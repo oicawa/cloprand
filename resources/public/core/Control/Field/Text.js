@@ -48,14 +48,21 @@ define(function (require) {
 
     // Button
     var button_selector = selector + " > div > div[name='languages']";
-    $(button_selector).css("display", multi_lingualization ? "inline-block" : "none");
     self._button = new DivButton();
-    self._button.init(button_selector, "<i class='fa fa-flag'>", function (event) {
-      console.log("DivButton clicked.");
+    self._button.init(button_selector, "<i class='fa fa-flag'>")
+    .then(function () {
+      self._button.visible(multi_lingualization);
+      self._button.on("click", function (event) {
+        self.multi_lingualize();
+      });
+      dfd.resolve();
     });
     
-    dfd.resolve();
     return dfd.promise();
+  };
+
+  Text.prototype.multi_lingualize = function() {
+  　console.log("Implement showing dialog to multi-lingualize.");
   };
 
   Text.prototype.backuped = function() {
@@ -72,6 +79,7 @@ define(function (require) {
 
   Text.prototype.edit = function(on) {
     this._input.attr("readonly", !on);
+    this._button.visible(on);
   };
 
   Text.prototype.data = function(value) {

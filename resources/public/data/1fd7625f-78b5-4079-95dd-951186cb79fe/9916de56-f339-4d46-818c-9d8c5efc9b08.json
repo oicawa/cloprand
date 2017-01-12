@@ -1,7 +1,1 @@
-{
-  "name":"FontAwesome",
-  "label":"FontAwesome",
-  "require_path":"core\/Control\/Field\/FontAwesome",
-  "properties":[],
-  "id":"9916de56-f339-4d46-818c-9d8c5efc9b08"
-}
+{"name":"FontIcon","label":"FontIcon","require_path":"core\/Control\/Field\/FontIcon","properties":[{"recid":1,"label":"Font Icons","key":false,"id":1,"name":"font_icons_id","column":"","datatype":{"id":"12c5d42a-b97b-4c42-84ea-8e0ae3a379cc","properties":{"class_id":"43a28dff-bc30-452e-b748-08235443b7ce","description":"Select Font Icons Set.","multi_selectable":false}},"caption":false,"description":"Font Icons."}],"id":"9916de56-f339-4d46-818c-9d8c5efc9b08"}

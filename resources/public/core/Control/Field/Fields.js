@@ -125,6 +125,13 @@ define(function (require) {
       var field_name = this._field.finder.data();
       return { "class_id" : class_id, "field_name" : field_name };
     }
+    
+    if (!value) {
+      this._field.finder._objects = {};
+      this.refresh();
+      return;
+    }
+    
     this._class.finder.data(value.class_id);
     this._field.finder.data(value.field_name);
     var objects = {};

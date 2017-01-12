@@ -2,6 +2,7 @@ define(function (require) {
   require("jquery");
   var Utils = require("core/Utils");
   var Storage = require("core/Storage");
+  var Class = require("core/Class");
   var Inherits = require("core/Inherits");
   var Dialog = require("core/Dialog");
   var Grid = require("core/Control/Grid");
@@ -12,10 +13,8 @@ define(function (require) {
 '<div></div>';
   var FONT_TEMPLATE = '' +
 '<span style="display:table;border:1px solid gray;border-radius:5px;margin:2px;height:60px;width:60px;">' +
-'  <i style="display:table-cell;text-align:center;vertical-align:middle;padding:5px;" class="fa {{FONTAWESOME_CLASSNAME}} fa-3x fa-fw"></i>' +
+'  <i style="display:table-cell;text-align:center;vertical-align:middle;padding:5px;" class="fa {{FONT_NAME}} fa-3x fa-fw"></i>' +
 '</span>';
-  var WEBFONT_ID = '43a28dff-bc30-452e-b748-08235443b7ce';
-  var FONTAWESOME_ID = '9c103467-759b-424a-9544-7bdd81030141';
 
   function create_control(self, root, field) {
     root.empty();
@@ -25,7 +24,7 @@ define(function (require) {
     label.text(field.label);
     
     var div = root.find("div");
-    var font = FONT_TEMPLATE.replace(/{{FONTAWESOME_CLASSNAME}}/, "");
+    var font = FONT_TEMPLATE.replace(/{{FONT_NAME}}/, "");
     div.append(font);
     
     self._icon = div.find("i");
@@ -40,16 +39,16 @@ define(function (require) {
     });
   }
   
-  function FontAwesome() {
-    Field.call(this, "core/Control/Field", "FontAwesome");
+  function FontIcon() {
+    Field.call(this, "core/Control/Field", "FontIcon");
     this._fonts = null;
     this._icon = null;
     this._value = null;
     this._fixed = null;
   }
-  Inherits(FontAwesome, Field);
+  Inherits(FontIcon, Field);
 
-  FontAwesome.prototype.init = function(selector, field) {
+  FontIcon.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
     // Set member fields
     var root = $(selector);
@@ -58,9 +57,14 @@ define(function (require) {
       return dfd.promise();
     }
 
+    // Properties
+    var webfonts_id = Utils.value("9c103467-759b-424a-9544-7bdd81030141", function () {
+      return field.datatype.properties.font_icons_id[0];
+    });
+
     // Create control
     var self = this;
-    Storage.read(WEBFONT_ID, FONTAWESOME_ID)
+    Storage.read(Class.WEBFONTS_SETS_ID, webfonts_id)
     .done(function(data) {
       self._fonts = {};
       data.fonts.forEach(function(font) {
@@ -73,7 +77,7 @@ define(function (require) {
     return dfd.promise();
   };
   
-  FontAwesome.prototype.edit = function(on) {
+  FontIcon.prototype.edit = function(on) {
     if (!this._icon) {
       return;
     }
@@ -85,7 +89,6 @@ define(function (require) {
     var self = this;
     
     this._icon.on("click", function(event) {
-      console.log("Show FontAwesome font select dialog.");
       var dialog = new Dialog();
       var grid = new Grid();
       var select_panel = "";
@@ -102,7 +105,7 @@ define(function (require) {
             caption : 'Icon',
             size    : '70px',
             render  : function(record, index, column_index) {
-              var html = FONT_TEMPLATE.replace(/{{FONTAWESOME_CLASSNAME}}/, record.id);
+              var html = FONT_TEMPLATE.replace(/{{FONT_NAME}}/, record.id);
               return html;
             }},
           { field   : 'name',
@@ -126,7 +129,6 @@ define(function (require) {
           text : "OK",
           click: function (event) {
             var recid = grid.selection();
-            console.log("[OK] clicked. selection=" + recid);
             self._value = self._fonts[recid].id;
             self.refresh();
             dialog.close();
@@ -146,20 +148,20 @@ define(function (require) {
     });
   };
 
-  FontAwesome.prototype.backuped = function() {
+  FontIcon.prototype.backuped = function() {
     return this._fixed;
   };
 
-  FontAwesome.prototype.commit = function() {
+  FontIcon.prototype.commit = function() {
     this._fixed = this._value;
   };
 
-  FontAwesome.prototype.restore = function() {
+  FontIcon.prototype.restore = function() {
     this._value = this._fixed;
     this.refresh();
   };
 
-  FontAwesome.prototype.data = function(value) {
+  FontIcon.prototype.data = function(value) {
     if (arguments.length == 0) {
       return this._value;
     } else {
@@ -169,11 +171,11 @@ define(function (require) {
     }
   };
   
-  FontAwesome.prototype.update = function(keys) {
+  FontIcon.prototype.update = function(keys) {
   
   }
   
-  FontAwesome.prototype.refresh = function() {
+  FontIcon.prototype.refresh = function() {
     this._icon.attr("class", "");
     this._icon.addClass("fa");
     this._icon.addClass(this._value);
@@ -181,7 +183,7 @@ define(function (require) {
     this._icon.addClass("fa-fw");
   }
   
-  FontAwesome.cell_render = function(field) {
+  FontIcon.cell_render = function(field) {
     var dfd = new $.Deferred;
     var renderer = function(record, index, column_index) {
       var value = record[field.name];
@@ -191,5 +193,5 @@ define(function (require) {
     return dfd.promise();
   };
 
-  return FontAwesome;
+  return FontIcon;
 }); 
