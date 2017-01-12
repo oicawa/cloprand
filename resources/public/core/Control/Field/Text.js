@@ -9,6 +9,7 @@ define(function (require) {
   
   function Text() {
     Field.call(this, "core/Control/Field", "Text");
+    this._properties = null;
     this._input = null;
     this._value = null;
   };
@@ -21,18 +22,10 @@ define(function (require) {
     root.append(TEMPLATE);
 
     // properties
-    var properties = field.datatype.properties;
-    var width = 200;
-    var is_require = false;
-    var default_ = "";
-    var multi_lingualization = false;
-    if (Utils.is_object(properties)) {
-      width = properties.width;
-      is_require = properties.require;
-      default_ = properties.default;
-      multi_lingualization = properties.multi_lingualization;
-    }
-
+    this._properties = Utils.value(
+      { width : 200, is_require : false, default_ : "", multi_lingualization : false },
+      function() { return field.datatype.properties; },
+      false);
     var self = this;
     
     // Label
@@ -43,7 +36,7 @@ define(function (require) {
     // Input
     self._input = root.find("input");
     self._input.attr("name", field.name);
-    self._input.css("width", width);
+    self._input.css("width", this._properties.width);
     self._input.w2field("text");
 
     // Button
@@ -51,7 +44,7 @@ define(function (require) {
     self._button = new DivButton();
     self._button.init(button_selector, "<i class='fa fa-flag'>")
     .then(function () {
-      self._button.visible(multi_lingualization);
+      self._button.visible(self._properties.multi_lingualization);
       self._button.on("click", function (event) {
         self.multi_lingualize();
       });
@@ -79,7 +72,7 @@ define(function (require) {
 
   Text.prototype.edit = function(on) {
     this._input.attr("readonly", !on);
-    this._button.visible(on);
+    this._button.visible(!this._properties.multi_lingualization ? false : on);
   };
 
   Text.prototype.data = function(value) {

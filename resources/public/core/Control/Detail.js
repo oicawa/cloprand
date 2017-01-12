@@ -41,7 +41,8 @@ define(function (require) {
           dfd.resolve();
         });
       } catch (e) {
-        console.assert(false, "e=" + e + ", field.name=" + field.name);
+        console.assert(false, "[ERROR] field.name=" + field.name + ", control=" + control_path);
+        console.assert(false, e);
       }
     });
     return dfd.promise();
