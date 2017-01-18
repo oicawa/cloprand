@@ -9,13 +9,13 @@ define(function (require) {
   
   var TEMPLATE = '' +
 '<div class="finder">' +
-'  <i name="search" class="fa fa-search" /><span name="description"></span>' +
-'  <div name="list"></div>' +
+'  <span name="description"></span><i name="search" class="fa {{FONT_NAME}}" style="display:inline-block;vertical-align:top;"/>' +
+'  <div name="list" style="display:inline-block;"></div>' +
 '</div>';
 
   var ITEM_TEMPLATE = '' +
-'<div class="item" style="display:inline-block;border:solid 1px gray;border-radius:3px;background-color:#f0f0f0;padding:2px 5px 2px 5px;margin:2px 0px;">' +
-'  <span style="display:inline-block;font-family:Verdana,Arial,sans-serif;font-size:12px;min-width:300px;"></span>' +
+'<div class="item" style="border:solid 1px gray;border-radius:3px;background-color:#f0f0f0;padding:2px 5px 2px 5px;margin:2px 0px;">' +
+'  <span style="display:inline-block;font-family:Verdana,Arial,sans-serif;font-size:12px;"></span>' +
 '  <i class="fa fa-remove" />' +
 '</div>';
 
@@ -54,7 +54,7 @@ define(function (require) {
     this._converter = null;
   }
 
-  Finder.prototype.init = function(selector, columns, items, description, multi_selectable, converter) {
+  Finder.prototype.init = function(selector, columns, items, description, multi_selectable, converter, font_name) {
     var dfd = new $.Deferred;
     // Set member fields
     var root = $(selector);
@@ -64,8 +64,9 @@ define(function (require) {
     }
     
     // Create form tags
+    var html = TEMPLATE.replace(/{{FONT_NAME}}/, !font_name ? "fa-search" : font_name);
     root.empty();
-    root.append(TEMPLATE);
+    root.append(html);
     // Seach Icon
     this._search = root.find("div > i[name='search']");
     // Description

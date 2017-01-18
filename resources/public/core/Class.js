@@ -11,6 +11,7 @@ define(function (require) {
   Class.SYSTEM_ID = "15ab1b06-3756-48df-b045-728499aa9a6c";
   Class.FIELD_ID = "d2992e38-6190-4ca4-94bf-db44328dfd37";
   Class.WEBFONTS_SETS_ID = '43a28dff-bc30-452e-b748-08235443b7ce';
+  Class.LOCALE_ID = '917b793a-c1a9-4736-84ff-3e10c6e4a95f';
   
   Class.prototype.caption_names = function() {
     var names = this._class.object_fields

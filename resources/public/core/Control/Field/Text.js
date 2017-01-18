@@ -2,16 +2,20 @@ define(function (require) {
   require("jquery");
   var Utils = require("core/Utils");
   var Inherits = require("core/Inherits");
-  var DivButton = require("core/Control/DivButton");
+  var Class = require("core/Class");
+  var Storage = require("core/Storage");
+  var Grid = require("core/Control/Grid");
+  var Finder = require("core/Control/Finder");
   var Field = require("core/Control/Field/Field");
   
-  var TEMPLATE = '<label></label><div><input style="color:black;"/><div name="languages" style="display:none;"/></div>';
+  var TEMPLATE = '<label></label><div><input style="color:black;"/><div name="languages" style="display:inline-block;"/></div>';
   
   function Text() {
     Field.call(this, "core/Control/Field", "Text");
-    this._properties = null;
     this._input = null;
     this._value = null;
+    this._properties = null;
+    this._finder = null;
   };
   Inherits(Text, Field);
   
@@ -39,15 +43,36 @@ define(function (require) {
     self._input.css("width", this._properties.width);
     self._input.w2field("text");
 
-    // Button
-    var button_selector = selector + " > div > div[name='languages']";
-    self._button = new DivButton();
-    self._button.init(button_selector, "<i class='fa fa-flag'>")
+    // If *NOT* multi-lingualize, don't create Finder.
+    if (!self._properties.multi_lingualization) {
+      dfd.resolve();
+      return dfd.promise();
+    }
+
+    // Finder
+    var class_ = null;
+    var items = null;
+    var columns = null;
+    Storage.read(Class.CLASS_ID, Class.LOCALE_ID)
+    .then(function(data) {
+      class_ = data;
+    })
     .then(function () {
-      self._button.visible(self._properties.multi_lingualization);
-      self._button.on("click", function (event) {
-        self.multi_lingualize();
-      });
+      return Storage.read(Class.LOCALE_ID).then(function(objects) { items = objects; })
+    })
+    .then(function () {
+      return Grid.create_columns(class_).then(function (columns_) { columns = columns_; });
+    })
+    .then(function () {
+      function converter(objects) {
+        return (new Class(class_)).captions(objects);
+      }
+      var finder_selector = selector + " > div > div[name='languages']";
+      self._finder = new Finder();
+      return self._finder.init(finder_selector, columns, items, "", false, converter, "fa-flag");
+    })
+    .then(function () {
+      self.edit(false);
       dfd.resolve();
     });
     
@@ -72,7 +97,9 @@ define(function (require) {
 
   Text.prototype.edit = function(on) {
     this._input.attr("readonly", !on);
-    this._button.visible(!this._properties.multi_lingualization ? false : on);
+    if (this._finder) {
+      this._finder.edit(on)
+    }
   };
 
   Text.prototype.data = function(value) {
