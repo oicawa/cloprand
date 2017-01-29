@@ -12,6 +12,10 @@ define(function (require) {
     });
     return path.substr(0, 1) == "/" ? path : "/" + path;
   }
+
+  function is_object(target) {
+    return target instanceof Object && Object.getPrototypeOf(target) === Object.prototype;
+  }    
   
   return {
     load_css: function(path) {
@@ -45,23 +49,30 @@ define(function (require) {
         console.assert(false, arguments);
       }
     },
-    value : function(default_value, func, nullable) {
+    object : function(default_object, assign_func) {
       try {
-        var value = func();
-        if (typeof value == "undefined") {
-          return default_value; 
+        var assigned_object = assign_func();
+        if (!assigned_object) {
+          return default_object; 
         }
-        if (value != null) {
-          return value;
+        if (!is_object(assigned_object)) {
+          return default_object;
         }
-        return !nullable ? default_value : value;
+        var new_object = default_object;
+        for (var key in assigned_object) {
+          new_object[key] = assigned_object[key];
+        }
+        return new_object;
       } catch (ex) {
         console.assert(false, ex);
         return default_value;
       }
     },
     is_object : function (target) {
-      return target instanceof Object && Object.getPrototypeOf(target) === Object.prototype;
-    }    
+      return is_object(target);
+    },
+    localed : function(value) {
+      return value[""];
+    }
   };
 });

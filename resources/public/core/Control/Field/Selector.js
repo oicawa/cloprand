@@ -4,7 +4,7 @@ define(function (require) {
   var Storage = require("core/Storage");
   var Inherits = require("core/Inherits");
   var Class = require("core/Class");
-  var GridDialog = require("core/Control/GridDialog");
+  var SelectDialog = require("core/Control/SelectDialog");
   var Grid = require("core/Control/Grid");
   var Finder = require("core/Control/Finder");
   var Field = require("core/Control/Field/Field");

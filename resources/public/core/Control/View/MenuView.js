@@ -20,17 +20,10 @@ define(function (require) {
     this._grid = null;
   }
   
-  MenuView.show_gridview = function (event) {
-    // Get event source information
-    var tab = $(event.originalEvent.target).closest("div.tab-panel");
-    var index = event.recid - 1;
-    var tab_id = tab.prop("id");
-
-    // Get clicked data (from 'tab_id'->'view'->'grid'->'data'-> item of the selected index row.)
-    var view = app.contents().content(tab_id);
-    var grid = view.list();
-    var data = grid.get(event.recid);
-    app.contents().show_tab(data.label, null, "ListView", data.id, null);
+  MenuView.show_gridview = function (self, recid) {
+    var data = self._grid.get(recid);
+    var captions = (new Class(self._class)).captions([data]);
+    app.contents().show_tab(captions[0], null, "ListView", data.id, null);
   };
   
   MenuView.prototype.list = function () {
@@ -69,10 +62,10 @@ define(function (require) {
   MenuView.prototype.init= function (selector, class_id, object_id) {
     this._selector = selector;
     this._class_id = class_id;
+    this._class = null;
     this._object_id = object_id;
     this._grid = new Grid();
     var view = $(selector)
-    var class_ = null;
     var classes = null;
     var self = this;
     var grid_selector = selector + "> div.menuview-panel > div.menu-list";
@@ -82,11 +75,11 @@ define(function (require) {
       Storage.read(Class.CLASS_ID)
       .done(function(data) {
         classes = data;
-        class_ = classes[Class.CLASS_ID];
+        self._class = classes[Class.CLASS_ID];
       })
     )
     .then(function() {
-      return Grid.create_columns(class_)
+      return Grid.create_columns(self._class)
       .done(function(columns_) {
         columns = columns_;
       })
@@ -95,7 +88,9 @@ define(function (require) {
       view.append(TEMPLATE);
       self._grid.init(grid_selector, columns)
       .then(function () {
-        self._grid.add_operation("dblclick", MenuView.show_gridview);
+        self._grid.add_operation("dblclick", function(event) {
+          MenuView.show_gridview(self, event.recid);
+        });
         self._grid.select_column(true);
         self._grid.toolbar(true);
         self._grid.multi_search(true);

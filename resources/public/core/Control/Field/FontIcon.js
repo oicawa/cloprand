@@ -58,9 +58,11 @@ define(function (require) {
     }
 
     // Properties
-    var webfonts_id = Utils.value("9c103467-759b-424a-9544-7bdd81030141", function () {
-      return field.datatype.properties.font_icons_id[0];
-    });
+    var prop = Utils.object(
+      { font_icons_id : ["9c103467-759b-424a-9544-7bdd81030141"] },
+      function () { return field.datatype.properties; }
+    );
+    var webfonts_id = prop.font_icons_id[0];
 
     // Create control
     var self = this;

@@ -51,18 +51,16 @@ define(function (require) {
     var class_ = view._class;
     
     var fields = class_.object_fields;
-    var caption_field_names = fields.filter(function (field, index) { return !(!field.caption); })
-                                    .map(function (field) { return field.name; });
+    //var caption_field_names = fields.filter(function (field, index) { return !(!field.caption); })
+    //                                .map(function (field) { return field.name; });
     var key_field_names = fields.filter(function (field, index) { return !(!field.key); })
                                 .map(function (field) { return field.name; });
     key_field_names.push("id");
-    console.assert(0 < caption_field_names.length, caption_field_names);
     console.assert(0 < key_field_names.length, key_field_names);
 
-    var caption_field_name = caption_field_names[0];
     var key_field_name = key_field_names[0];
     
-    var caption = caption_field_names.map(function(name) { return data[name] }).join(" ");
+    var caption = (new Class(class_)).captions([data]);
     var key = data[key_field_name];
     app.contents().show_tab(caption, null, "DetailView", tab_info.class_id, key);
   };

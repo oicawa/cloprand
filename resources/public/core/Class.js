@@ -1,6 +1,7 @@
 define(function (require) {
   require('jquery');
   require('json2');
+  var Utils = require('core/Utils');
   
   function Class(_class) {
     this._class = _class;
@@ -12,20 +13,27 @@ define(function (require) {
   Class.FIELD_ID = "d2992e38-6190-4ca4-94bf-db44328dfd37";
   Class.WEBFONTS_SETS_ID = '43a28dff-bc30-452e-b748-08235443b7ce';
   Class.LOCALE_ID = '917b793a-c1a9-4736-84ff-3e10c6e4a95f';
+  Class.TEXT_MULTILINGUALIZATION_ID = '917b793a-c1a9-4736-84ff-3e10c6e4a95f';
+  Class.TEXTAREA_MULTILINGUALIZATION_ID = '917b793a-c1a9-4736-84ff-3e10c6e4a95f';
   
-  Class.prototype.caption_names = function() {
-    var names = this._class.object_fields
+  Class.prototype.caption_fields = function() {
+    return this._class.object_fields
       .filter(function (field) { return !(!field.caption); })
-      .map(function(field){ return field.name; });
-    return names;
   };
   
   Class.prototype.captions = function(objects) {
-    var names = this.caption_names();
+    var fields = this.caption_fields();
     var captions = objects
       .map(function(object) {
-         return names
-           .map(function(name) { return object[name]; })
+         return fields
+           .map(function(field) {
+             var value = object[field.name];
+           	 if (Utils.is_object(value) && field.datatype.properties.multi_lingualization) {
+           	   return Utils.localed(value);
+           	 } else {
+           	   return value;
+           	 }
+           })
            .join(" ");
       });
     return captions;

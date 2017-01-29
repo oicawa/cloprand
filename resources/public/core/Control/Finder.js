@@ -3,7 +3,7 @@ define(function (require) {
   var Utils = require("core/Utils");
   var Storage = require("core/Storage");
   var Inherits = require("core/Inherits");
-  var GridDialog = require("core/Control/GridDialog");
+  var SelectDialog = require("core/Control/SelectDialog");
   var Class = require("core/Class");
   var Grid = require("core/Control/Grid");
   
@@ -22,7 +22,7 @@ define(function (require) {
   function create_search(self, root, multi_selectable) {
     self._search.on("click", function(event) {
       var items = Object.keys(self._objects).map(function(id) { return self._objects[id]; });
-      var dialog = new GridDialog();
+      var dialog = new SelectDialog();
       dialog.init(self._columns, items, multi_selectable)
       .done(function() {
         dialog.title("Select");
