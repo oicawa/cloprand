@@ -1,0 +1,28 @@
+div.selectdialog {
+  position:absolute;
+  top:0px;
+  left:0px;
+  bottom:0px;
+  right:0px;
+}
+/*
+div.selector > div.grid > div {
+  width:100% !important;
+  height:100% !important;
+}
+div.selector > div.grid > div > div.w2ui-grid-body {
+  height:unset !important;
+}
+div.selector > div.grid > div > div.w2ui-grid-body > div.w2ui-grid-columns > table {
+  width:100% !important;
+}
+div.selector > div.grid > div > div.w2ui-grid-body > div.w2ui-grid-columns > table > tbody > tr > td.w2ui-head-last {
+  width:100% !important;
+}
+div.selector > div.grid > div > div.w2ui-grid-body > div.w2ui-grid-records > table {
+  width:100% !important;
+}
+div.selector > div.grid > div > div.w2ui-grid-body > div.w2ui-grid-records > table > tbody > tr > td.w2ui-grid-data-last {
+  width:100% !important;
+}
+*/
