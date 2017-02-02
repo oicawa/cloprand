@@ -33,6 +33,7 @@ define(function (require) {
     }
     
     require([control_path], function(Control) {
+      console.assert(Control, "[ERROR] constructor is undefined (control=" + control_path + ")");
       var control = new Control();
       self._controls[field.name] = control;
       try {

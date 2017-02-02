@@ -31,7 +31,7 @@ define(function (require) {
         { text: "OK",    click:function (event) { alert("Clicked OK button."); dialog.close(); } },
         { text:"Cancel", click:function (event) { dialog.close(); }}
       ]);
-      dialog.size(300, 400);
+      dialog.size(400, 300);
       dialog.open();
     });
   }
@@ -57,9 +57,9 @@ define(function (require) {
     this._input.w2field("text");
   };
 
-  var DEFAULT_PROPERTIES = { width : 200, is_require : false, default_ : "", multi_lingualization : false };
+  Text.DEFAULT_PROPERTIES = { "width" : 200, "is_require" : false, "default" : "", "multi_lingualization" : false };
   Text.prototype.default_properties = function() {
-    return DEFAULT_PROPERTIES;
+    return Text.DEFAULT_PROPERTIES;
   };
   
   Text.prototype.detail_id = function() {
@@ -73,7 +73,7 @@ define(function (require) {
     root.append(this.template());
 
     // properties
-    this._properties = Utils.object(
+    this._properties = Utils.get_as_json(
       this.default_properties(),
       function() { return field.datatype.properties; },
       false);
@@ -169,18 +169,16 @@ define(function (require) {
       }
     }
     // setter
-    if (!multi && Utils.is_object(value)) {
-      this._value = value[""];
-    } else if (multi && !Utils.is_object(value)){
-      this._value = { "" : value };
+    if (!multi) {
+      this._value = Utils.is_object(value) ? value[""] : value;
     } else {
-      this._value = value;
+      this._value = Utils.is_object(value) ? value : { "" : value };
     }
     this._input.val(!multi ? this._value : this._value[""]);
   };
   
   Text.cell_render = function(field) {
-    var props = Utils.object(DEFAULT_PROPERTIES, function() { return field.datatype.properties; });
+    var props = Utils.get_as_json(Text.DEFAULT_PROPERTIES, function() { return field.datatype.properties; });
 
     var dfd = new $.Deferred;
     var renderer = function(record, index, column_index) {

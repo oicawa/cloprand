@@ -49,23 +49,23 @@ define(function (require) {
         console.assert(false, arguments);
       }
     },
-    object : function(default_object, assign_func) {
+    get_as_json : function(default_json, assign_func) {
       try {
         var assigned_object = assign_func();
         if (!assigned_object) {
-          return default_object; 
+          return default_json;
         }
         if (!is_object(assigned_object)) {
-          return default_object;
+          return default_json;
         }
-        var new_object = default_object;
+        var new_json = JSON.parse(JSON.stringify(default_json));
         for (var key in assigned_object) {
-          new_object[key] = assigned_object[key];
+          new_json[key] = assigned_object[key];
         }
-        return new_object;
+        return new_json;
       } catch (ex) {
         console.assert(false, ex);
-        return default_value;
+        return default_json;
       }
     },
     is_object : function (target) {

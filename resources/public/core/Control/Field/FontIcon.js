@@ -58,7 +58,7 @@ define(function (require) {
     }
 
     // Properties
-    var prop = Utils.object(
+    var prop = Utils.get_as_json(
       { font_icons_id : ["9c103467-759b-424a-9544-7bdd81030141"] },
       function () { return field.datatype.properties; }
     );

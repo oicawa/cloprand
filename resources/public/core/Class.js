@@ -13,7 +13,7 @@ define(function (require) {
   Class.FIELD_ID = "d2992e38-6190-4ca4-94bf-db44328dfd37";
   Class.WEBFONTS_SETS_ID = '43a28dff-bc30-452e-b748-08235443b7ce';
   Class.LOCALE_ID = '917b793a-c1a9-4736-84ff-3e10c6e4a95f';
-  Class.TEXT_MULTILINGUALIZATION_ID = '917b793a-c1a9-4736-84ff-3e10c6e4a95f';
+  Class.TEXT_MULTILINGUALIZATION_ID = '4b6ec66f-d762-40b7-b0fa-d1bbb643b18b';
   Class.TEXTAREA_MULTILINGUALIZATION_ID = '917b793a-c1a9-4736-84ff-3e10c6e4a95f';
   
   Class.prototype.caption_fields = function() {
