@@ -1,6 +1,7 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("core/Utils");
+  var Locale = require("core/Locale");
   var Inherits = require("core/Inherits");
   var Class = require("core/Class");
   var Storage = require("core/Storage");
@@ -184,7 +185,7 @@ define(function (require) {
     var renderer = function(record, index, column_index) {
       var value = record[field.name];
       if (Utils.is_object(value) && props.multi_lingualization) {
-        return Utils.localed(value);
+        return Locale.translate(value);
       } else {
         return value;
       }

@@ -2,6 +2,7 @@ define(function (require) {
   require('jquery');
   require('json2');
   var Utils = require('core/Utils');
+  var Locale = require('core/Locale');
   
   function Class(_class) {
     this._class = _class;
@@ -29,7 +30,7 @@ define(function (require) {
            .map(function(field) {
              var value = object[field.name];
            	 if (Utils.is_object(value) && field.datatype.properties.multi_lingualization) {
-           	   return Utils.localed(value);
+           	   return Locale.translate(value);
            	 } else {
            	   return value;
            	 }
