@@ -107,10 +107,7 @@ define(function (require) {
     var key_field_names = fields.filter(function(field, index) { return !(!field.key); })
                                 .map(function(field){ return field.name; });
     key_field_names.push("id");
-    var caption_field_names = fields.filter(function(field, index) { return !(!field.caption); })
-                                    .map(function(field){ return field.name; });
     console.assert(0 < key_field_names.length, key_field_names);
-    console.assert(0 < caption_field_names.length, caption_field_names);
     var key_field_name = key_field_names[0];
     var files = get_files(fields, data);
     
@@ -123,11 +120,9 @@ define(function (require) {
         detail.data(object);
         detail.edit(false);
         detail.refresh();
-        //var old_tab_name = tab_info.tab_id;
         var old_tab_name = Tabs.create_tab_name([tab_info.prefix, tab_info.class_id, Uuid.NULL]);
         var new_tab_name = Tabs.create_tab_name([tab_info.prefix, tab_info.class_id, new_object_id]);
-        var label = caption_field_names.map(function(name) { return object[name]; }).join(" ");
-        //app.contents().label(tab_info.tab_id, label);
+        var label = (new Class(view._class)).captions([object])[0];
         app.contents().change(old_tab_name, new_tab_name, label);
         app.contents().broadcast(tab_info.class_id, new_object_id, object);
         Dialog.show("New item was created successfully.", "Save");
@@ -149,7 +144,7 @@ define(function (require) {
         detail.edit(false);
         detail.commit();
         detail.refresh();
-        var label = caption_field_names.map(function(name) { return data[name]; }).join(" ");
+        var label = (new Class(view._class)).captions([data])[0];
         app.contents().label(tab_info.tab_id, label);
         app.contents().broadcast(tab_info.class_id, tab_info.object_id, data);
         Dialog.show("Edited item was saved successfully.", "Save");

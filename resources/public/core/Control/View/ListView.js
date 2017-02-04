@@ -37,7 +37,7 @@ define(function (require) {
   ListView.create = function (event) {
     var tab_info = Contents.get_tab_info(event);
     var view = app.contents().content(tab_info.tab_id);
-    app.contents().show_tab("New " + view._class.label, null, "DetailView", tab_info.class_id, Uuid.NULL);
+    app.contents().show_tab("New " + Utils.localed(view._class.label), null, "DetailView", tab_info.class_id, Uuid.NULL);
   };
 
   ListView.show_detail = function (event) {
