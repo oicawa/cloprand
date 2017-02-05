@@ -2,6 +2,7 @@ define(function (require) {
   require("jquery");
   require("w2ui");
   var Utils = require("core/Utils");
+  var Locale = require("core/Locale");
   var Uuid = require("core/Uuid");
   var Storage = require("core/Storage");
   var Class = require("core/Class");
@@ -57,11 +58,11 @@ define(function (require) {
           inner_dfd.resolve();
           return inner_dfd.promise();
         }
-        
+
         require([primitive.require_path], function(Control) {
           var column = {
             field: field.name,
-            caption: field.label,
+            caption: Locale.translate(field.label),
             type: "text",
             size: field.column + "px",
             resizable: true,

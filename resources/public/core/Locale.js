@@ -1,4 +1,5 @@
 define(function (require) {
+  var Utils = require("core/Utils");
   function browser_locale() {
     var ua = window.navigator.userAgent.toLowerCase();
     try {
@@ -25,6 +26,9 @@ define(function (require) {
     locale : browser_locale,
     language : browser_language,
     translate : function(value) {
+      if (!Utils.is_object(value)) {
+        return value;
+      }
       var lo = browser_locale();
       if (!lo) {
         return value[""];

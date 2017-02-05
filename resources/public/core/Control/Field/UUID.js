@@ -1,16 +1,14 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("core/Utils");
+  var Locale = require("core/Locale");
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
   
-  var TEMPLATE = '' +
-'<div class="editor"></div>' +
-'<div class="viewer"></div>';
+  var TEMPLATE = '<label></label><div class="viewer"></div>';
   
   function UUID() {
     Field.call(this, "core/Control/Field", "UUID");
-    this._editor = null;
     this._viewer = null;
   }
   Inherits(UUID, Field);
@@ -21,9 +19,10 @@ define(function (require) {
     var template = $.templates(TEMPLATE);
     var self = this;
     
-    var html = template.render(field);
-    root.append(html);
-    self._editor = root.find("div.editor");
+    root.append(TEMPLATE);
+    var label = root.find("label");
+    var caption = Locale.translate(field.label);
+    label.text(caption);
     self._viewer = root.find("div.viewer");
     
     dfd.resolve();
@@ -31,13 +30,7 @@ define(function (require) {
   };
 
   UUID.prototype.edit = function(on) {
-    if (on) {
-      this._editor.show();
-      this._viewer.hide();
-    } else {
-      this._editor.hide();
-      this._viewer.show();
-    }
+    // Do Nothing. UUID can not be edit. (assinged by server side only.)
   };
 
   UUID.prototype.backuped = function() {
@@ -45,20 +38,15 @@ define(function (require) {
   };
 
   UUID.prototype.commit = function() {
-    var value = this._editor.text();
-    this._viewer.text(value);
   };
 
   UUID.prototype.restore = function() {
-    var value = this._viewer.text();
-    this._editor.text(value);
   };
 
   UUID.prototype.data = function(value) {
     if (arguments.length == 0) {
-      return this._editor.text();
+      return this._viewer.text();
     } else {
-      this._editor.text(value);
       this._viewer.text(value);
     }
   };

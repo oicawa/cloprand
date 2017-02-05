@@ -1,6 +1,7 @@
 define(function (require) {
   require("jquery");
   var Utils = require("core/Utils");
+  var Locale = require("core/Locale");
   var Uuid = require("core/Uuid");
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
@@ -72,7 +73,7 @@ define(function (require) {
    
     root.append(TEMPLATE);
     var label = root.find("label");
-    var caption = field.label;
+    var caption = Locale.translate(field.label);
     label.text(caption);
    
     this._exist_list = root.find("div.exist-list");

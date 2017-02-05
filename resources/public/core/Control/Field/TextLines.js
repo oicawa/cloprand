@@ -1,6 +1,7 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("core/Utils");
+  var Locale = require("core/Locale");
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
   
@@ -24,7 +25,7 @@ define(function (require) {
     
     self._textarea = root.find("textarea");
     var label = root.find("label");
-    var caption = field.label;
+    var caption = Locale.translate(field.label);
     label.text(caption);
       
     dfd.resolve();

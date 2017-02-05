@@ -1,6 +1,7 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("core/Utils");
+  var Locale = require("core/Locale");
   var Class = require("core/Class");
   var Storage = require("core/Storage");
   var Inherits = require("core/Inherits");
@@ -38,7 +39,8 @@ define(function (require) {
       
       // Create controls
       var label = root.find("label");
-      label.text(field.label);
+      var caption = Locale.translate(field.label);
+      label.text(caption);
       self._detail = new Detail();
       self._detail.init(selector + " > div.complex > div.detail", class_.object_fields)
       .always(function() {

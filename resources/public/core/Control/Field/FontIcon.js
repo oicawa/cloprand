@@ -1,6 +1,7 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("core/Utils");
+  var Locale = require("core/Locale");
   var Storage = require("core/Storage");
   var Class = require("core/Class");
   var Inherits = require("core/Inherits");
@@ -21,7 +22,8 @@ define(function (require) {
     root.append(TEMPLATE);
     
     var label = root.find("label");
-    label.text(field.label);
+    var caption = Locale.translate(field.label);
+    label.text(caption);
     
     var div = root.find("div");
     var font = FONT_TEMPLATE.replace(/{{FONT_NAME}}/, "");

@@ -10,12 +10,20 @@ define(function (require) {
   var List = require("core/Control/List");
   var DivButton = require("core/Control/DivButton");
   var Field = require("core/Control/Field/Field");
+
+  function save_as_draft(self, list) {
+    var data = {};
+    list.data().forEach(function (item) {
+      data[item.locale] = item.value;
+    });
+    self._draft = data;
+  }
   
   function show_languages_dialog(self, locale, locales, columns) {
     if (!self._draft) {
-      self._draft = {};
+      self._draft = self._value;
     }
-    var items = Object.keys(self._draft).map(function(locale_id) { return { "id" : locale_id, "text" : self._draft[locale_id] }; });
+    var items = Object.keys(self._draft).map(function(locale_id) { return { "id" : locale_id, "locale": locale_id, "value" : self._draft[locale_id] }; });
     var list = new List();
     var dialog = new Dialog();
     dialog.init(function(contents_id) {
@@ -29,7 +37,7 @@ define(function (require) {
     .then(function () {
       dialog.title("Locales");
       dialog.buttons([
-        { text: "OK",    click:function (event) { alert("Clicked OK button."); dialog.close(); } },
+        { text: "OK",    click:function (event) { save_as_draft(self, list); dialog.close(); } },
         { text:"Cancel", click:function (event) { dialog.close(); }}
       ]);
       dialog.size(400, 300);
@@ -82,7 +90,7 @@ define(function (require) {
     
     // Label
     var label = root.find("label");
-    var caption = field.label;
+    var caption = Locale.translate(field.label);
     label.text(caption);
 
     // Input

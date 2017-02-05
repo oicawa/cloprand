@@ -1,6 +1,7 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("core/Utils");
+  var Locale = require("core/Locale");
   var Storage = require("core/Storage");
   var Inherits = require("core/Inherits");
   var Class = require("core/Class");
@@ -31,7 +32,8 @@ define(function (require) {
     root.append(TEMPLATE);
     // Label
     var label = root.children("label");
-    label.text(field.label);
+    var caption = Locale.translate(field.label);
+    label.text(caption);
     // Finder
     this._finder = new Finder();
     

@@ -1,6 +1,7 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("core/Utils");
+  var Locale = require("core/Locale");
   var Class = require("core/Class");
   var Storage = require("core/Storage");
   var Inherits = require("core/Inherits");
@@ -17,7 +18,8 @@ define(function (require) {
     root.append(TEMPLATE);
     
     var label = root.find("label");
-    label.text(field.label);
+    var caption = Locale.translate(field.label);
+    label.text(caption);
     
     self._dropdown = root.find("select");
     

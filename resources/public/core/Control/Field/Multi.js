@@ -2,6 +2,7 @@ define(function (require) {
   require("jquery");
   require("w2ui");
   var Utils = require("core/Utils");
+  var Locale = require("core/Locale");
   var Uuid = require("core/Uuid");
   var Class = require("core/Class");
   var Storage = require("core/Storage");
@@ -37,7 +38,8 @@ define(function (require) {
     
     // Create controls
     var label = root.find("label");
-    label.text(field.label);
+    var caption = Locale.translate(field.label);
+    label.text(caption);
     this._list = new List();
     
     this._list.init(selector + " > div", options)

@@ -1,6 +1,7 @@
 define(function (require) { 
   require("jquery");
   var Utils = require("core/Utils");
+  var Locale = require("core/Locale");
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
   
@@ -41,7 +42,8 @@ define(function (require) {
     self._root.append(TEMPLATE);
     
     var label = self._root.children("label");
-    label.text(field.label);
+    var caption = Locale.translate(field.label);
+    label.text(caption);
     
     var description = self._root.find("span");
     description.text(field.description);
