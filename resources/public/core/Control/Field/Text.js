@@ -132,10 +132,6 @@ define(function (require) {
     return dfd.promise();
   };
 
-  Text.prototype.multi_lingualize = function() {
-  　console.log("Implement showing dialog to multi-lingualize.");
-  };
-
   Text.prototype.backuped = function() {
     return this._value;
   };
@@ -186,8 +182,8 @@ define(function (require) {
     this._input.val(!multi ? this._value : this._value[""]);
   };
   
-  Text.cell_render = function(field) {
-    var props = Utils.get_as_json(Text.DEFAULT_PROPERTIES, function() { return field.datatype.properties; });
+  Text.generate_renderer = function(default_properties, field) {
+    var props = Utils.get_as_json(default_properties, function() { return field.datatype.properties; });
 
     var dfd = new $.Deferred;
     var renderer = function(record, index, column_index) {
@@ -200,6 +196,10 @@ define(function (require) {
     };
     dfd.resolve(renderer);
     return dfd.promise();
+  };
+
+  Text.cell_render = function(field) {
+    return Text.generate_renderer(Text.DEFAULT_PROPERTIES, field);
   };
 
   return Text;

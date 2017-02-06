@@ -15,8 +15,8 @@ define(function (require) {
   Class.WEBFONTS_SETS_ID = '43a28dff-bc30-452e-b748-08235443b7ce';
   Class.LOCALE_ID = '917b793a-c1a9-4736-84ff-3e10c6e4a95f';
   Class.TEXT_MULTILINGUALIZATION_ID = 'f4ce98bf-27f9-4319-a112-95e529bc9ff9';
-  Class.TEXTAREA_MULTILINGUALIZATION_ID = '917b793a-c1a9-4736-84ff-3e10c6e4a95f';
-  
+  Class.TEXTLINES_MULTILINGUALIZATION_ID = '48a93daf-9829-4bb8-9760-152491ed7a72';
+
   Class.prototype.caption_fields = function() {
     return this._class.object_fields
       .filter(function (field) { return !(!field.caption); })

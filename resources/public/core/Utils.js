@@ -59,8 +59,12 @@ define(function (require) {
           return default_json;
         }
         var new_json = JSON.parse(JSON.stringify(default_json));
-        for (var key in assigned_object) {
-          new_json[key] = assigned_object[key];
+        for (var key in new_json) {
+          var v = assigned_object[key];
+          if (!v || v === "") {
+            continue;
+          }
+          new_json[key] = v;
         }
         return new_json;
       } catch (ex) {
