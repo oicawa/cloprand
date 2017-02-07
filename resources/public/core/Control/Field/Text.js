@@ -179,6 +179,7 @@ define(function (require) {
     } else {
       this._value = Utils.is_object(value) ? value : { "" : value };
     }
+    this._draft = this._value;
     this._input.val(!multi ? this._value : this._value[""]);
   };
   
