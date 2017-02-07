@@ -46,7 +46,7 @@ define(function (require) {
     label.text(caption);
     
     var description = self._root.find("span");
-    description.text(field.description);
+    description.text(Locale.translate(field.description));
     
     self._checkbox = self._root.find("input[type='checkbox']");
   }

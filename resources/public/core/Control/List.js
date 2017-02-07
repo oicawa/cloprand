@@ -112,7 +112,7 @@ define(function (require) {
         self._grid.init(selector + " > div > div.records", columns, style)
       ).always(function() {
         self._toolbar.bind("add", function(event) {
-          self.showDetailDialog(self, class_.label, class_.object_fields, null, function (detail) {
+          self.showDetailDialog(self, Locale.translate(class_.label), class_.object_fields, null, function (detail) {
             var data = detail.data();
             data.id = self._grid.data().length + 1;
             self._grid.add(data);
