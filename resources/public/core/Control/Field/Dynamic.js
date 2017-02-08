@@ -98,7 +98,7 @@ define(function (require) {
         });
         return dfd.promise();
       }).then(function () {
-        dialog.title(object.label + " Properties");
+        dialog.title(Locale.translate(object.label));
         dialog.buttons([
           {
             text : "OK",

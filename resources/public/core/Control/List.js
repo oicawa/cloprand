@@ -2,6 +2,7 @@ define(function (require) {
   require("jquery");
   require("w2ui");
   var Utils = require("core/Utils");
+  var Locale = require("core/Locale");
   var Uuid = require("core/Uuid");
   var Class = require("core/Class");
   var Storage = require("core/Storage");
@@ -127,7 +128,7 @@ define(function (require) {
           }
           var recid = recids[0];
           var data = self._grid.get(recid);
-          self.showDetailDialog(self, class_.label, class_.object_fields, data, function (detail) {
+          self.showDetailDialog(self, Locale.translate(class_.label), class_.object_fields, data, function (detail) {
             var data = detail.data();
             data.id = recid;
             self._grid.set(recid, data);
