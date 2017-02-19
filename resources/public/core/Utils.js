@@ -19,9 +19,10 @@ define(function (require) {
   
   return {
     load_css: function(path) {
-    　　var dfd = new $.Deferred;
+      var dfd = new $.Deferred;
       var head = $("head");
-      var css = head.children("link[href='" + path + "']");
+      var url = path + '?ver=' + (new Date()).getTime();
+      var css = head.children("link[href='" + url + "']");
       if (0 < css.length) {
         dfd.resolve();
         return dfd.promise();
@@ -74,9 +75,6 @@ define(function (require) {
     },
     is_object : function (target) {
       return is_object(target);
-    },
-    localed : function(value) {
-      return value[""];
     }
   };
 });

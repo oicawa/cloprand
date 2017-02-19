@@ -106,21 +106,27 @@ define(function (require) {
       self._toolbar = new Toolbar();
       self._grid = new Grid();
 
-      var style = 'width:' + options.width + 'px;height:' + options.height + 'px;';
+      //var style = 'position:absolute;';
+      //style += options.width  == null ? 'left:0px;right:0px;' : 'width:'  + options.width  + 'px;';
+      //style += options.height == null ? 'top:0px;bottom:0px;' : 'height:' + options.height + 'px;';
+      var styles = {
+        'width' : options.width,
+        'height': options.height
+      };
 
       $.when(
         self._toolbar.init(selector + " > div > div.toolbar", default_toolbar),
-        self._grid.init(selector + " > div > div.records", columns, style)
+        self._grid.init(selector + " > div > div.records", columns, styles)
       ).always(function() {
-        self._toolbar.bind("add", function(event) {
+      	function add(event) {
           self.showDetailDialog(self, Locale.translate(class_.label), class_.object_fields, null, function (detail) {
             var data = detail.data();
             data.id = self._grid.data().length + 1;
             self._grid.add(data);
             self._grid.refresh();
           });
-        });
-        self._toolbar.bind("edit", function(event) {
+      	}
+        function edit(event) {
           var recids = self._grid.selection();
           if (recids.length != 1) {
             Dialog.show("Select one item.");
@@ -134,12 +140,12 @@ define(function (require) {
             self._grid.set(recid, data);
             self._grid.refresh();
           });
-        });
+        }
         function reorder(item, index) {
           delete item["recid"];
           item.id = index + 1;
-        };
-        self._toolbar.bind("delete", function(event) {
+        }
+        function remove(event) {
           var recids = self._grid.selection();
           if (recids.length == 0) {
             Dialog.show("Select one or more items.");
@@ -151,8 +157,8 @@ define(function (require) {
             self._grid.remove(recids);
             self._grid.refresh(reorder);
           });
-        });
-        self._toolbar.bind("up", function(event) {
+        }
+        function up(event) {
           var message = "Select one item. (without 1st)";
           var recids = self._grid.selection();
           if (recids.length != 1) {
@@ -168,8 +174,8 @@ define(function (require) {
           self._grid.move(recid, -1);
           self._grid.select(recid);
           self._grid.refresh(reorder);
-        });
-        self._toolbar.bind("down", function(event) {
+        }
+        function down(event) {
           var message = "Select one item. (without last)";
           var recids = self._grid.selection();
           if (recids.length == 0) {
@@ -185,7 +191,23 @@ define(function (require) {
           self._grid.move(recid, 1);
           self._grid.select(recid);
           self._grid.refresh(reorder);
-        });
+        }
+        self._toolbar.bind("add", add);
+        self._toolbar.bind("edit", edit);
+        self._toolbar.bind("delete", remove);
+        self._toolbar.bind("up", up);
+        self._toolbar.bind("down", down);
+
+        self._grid.toolbar(true);
+        self._grid.multi_search(false);
+        self._grid.actions([
+          { id:"add",    type:"button", text:"Add",    icon:"w2ui-icon-plus", onClick: add },
+          { id:"edit",   type:"button", text:"Edit",   icon:"fa fa-pencil", onClick: edit},
+          { id:"remove", type:"button", text:"Remove", icon:"w2ui-icon-cross", onClick: remove},
+          { id:"up",     type:"button", text:"Up",     icon:"fa fa-arrow-up", onClick: up},
+          { id:"down",   type:"button", text:"Down",   icon:"fa fa-arrow-down", onClick:down} 
+        ]);
+        self._grid.refresh();
         dfd.resolve();
       });
     });

@@ -16,7 +16,7 @@ define(function (require) {
     var name = uuid.replace(/-/g, "_");
     grid.w2grid({
       name:name,
-      style:style,
+//      style:style,
       recid:'id',
       columns:columns,
       onDblClick:function(event) {
@@ -95,17 +95,26 @@ define(function (require) {
     return dfd.promise();
   }
 
-  Grid.prototype.init = function(selector, columns, style) {
+  Grid.prototype.init = function(selector, columns, options) {
     var dfd = new $.Deferred;
     this._selector = selector;
+
+    var default_styles = { "width":null, "height":null };
+    var styles = Utils.get_as_json(default_styles, function () { return options; });
     this._root = $(selector);
+    if (styles.width != null || styles.height != null) {
+      this._root.css("position", "relative");
+      this._root.css("width",  styles.width  == null ? "100%" : "" + styles.width  + "px");
+      this._root.css("height", styles.height == null ? "100%" : "" + styles.height + "px");
+    }
+    
     var self = this;
 
     // CSS
     Utils.load_css("/core/Control/Grid.css")
     .then(function() {
       // Create form tags
-      create_control(self, columns, style);
+      create_control(self, columns);
       dfd.resolve();
     });
     
@@ -184,6 +193,22 @@ define(function (require) {
     console.assert(false, "*NOT* Implemented.");
   };
 
+  Grid.prototype.actions = function(actions) {
+    var self = this;
+    this._actions = {};
+    actions.forEach(function (action) {
+      this._actions[action.id] = action.onClick;
+    }, this);
+    this._grid.toolbar.items = actions;
+    this._grid.toolbar.onClick = function (target, event) {
+      var action = self._actions[target];
+      if (!action) {
+        return;
+      }
+      action(event);
+    };
+  };
+  
   Grid.prototype.data = function(value) {
     // getter
     if (arguments.length == 0) {

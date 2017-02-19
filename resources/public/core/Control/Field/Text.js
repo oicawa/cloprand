@@ -27,7 +27,7 @@ define(function (require) {
     var list = new List();
     var dialog = new Dialog();
     dialog.init(function(contents_id) {
-      return list.init("#" + contents_id, { class_id : self.detail_id(), width : 300, height : 400});
+      return list.init("#" + contents_id, { class_id : self.detail_id(), width : null, height : null});
     })
     .then(function () {
       list.data(items);
@@ -204,4 +204,4 @@ define(function (require) {
   };
 
   return Text;
-}); 
+});
