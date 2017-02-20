@@ -148,6 +148,15 @@ define(function (require) {
     return this._grid.getSelection();
   };
 
+  Grid.prototype.unselect = function() {
+    if (arguments.length == 0) {
+      this._grid.selectNone();
+      return;
+    }
+    var recids = Array.prototype.slice.call(arguments);
+    this._grid.select.apply(this._grid, recids);
+  };
+  
   Grid.prototype.remove = function(recids) {
     var recids = Array.prototype.slice.call(arguments);
     this._grid.remove.apply(this._grid, recids);
@@ -194,20 +203,8 @@ define(function (require) {
   };
 
   Grid.prototype.actions = function(actions) {
-    var self = this;
-    this._actions = {};
-    actions.forEach(function (action) {
-      this._actions[action.id] = action.onClick;
-    }, this);
     this._grid.toolbar.items = actions;
-    this._grid.toolbar.onClick = function (target, event) {
-      var action = self._actions[target];
-      if (!action) {
-        return;
-      }
-      action(event);
-    };
-  };
+ };
   
   Grid.prototype.data = function(value) {
     // getter

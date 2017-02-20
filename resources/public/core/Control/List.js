@@ -171,6 +171,7 @@ define(function (require) {
             Dialog.show(message);
             return;
           }
+          self._grid.unselect();
           self._grid.move(recid, -1);
           self._grid.select(recid);
           self._grid.refresh(reorder);
@@ -188,15 +189,11 @@ define(function (require) {
             Dialog.show(message);
             return;
           }
+          self._grid.unselect();
           self._grid.move(recid, 1);
           self._grid.select(recid);
           self._grid.refresh(reorder);
         }
-        self._toolbar.bind("add", add);
-        self._toolbar.bind("edit", edit);
-        self._toolbar.bind("delete", remove);
-        self._toolbar.bind("up", up);
-        self._toolbar.bind("down", down);
 
         self._grid.toolbar(true);
         self._grid.multi_search(false);
