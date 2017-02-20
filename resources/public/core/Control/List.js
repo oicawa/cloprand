@@ -8,7 +8,6 @@ define(function (require) {
   var Storage = require("core/Storage");
   var Dialog = require("core/Dialog");
   var Inherits = require("core/Inherits");
-  var Toolbar = require("core/Control/Toolbar");
   var Grid = require("core/Control/Grid");
   var Detail = require("core/Control/Detail");
   var Field = require("core/Control/Field/Field");
@@ -17,20 +16,8 @@ define(function (require) {
   
   var TEMPLATE = '' +
 '<div>' +
-'  <div class="toolbar" style="display:none;"></div>' +
 '  <div class="records"></div>' +
 '</div>';
-  
-  var default_toolbar = {
-    "operations" : Class.CLASS_ID,
-    "items" : [
-      { "name": "add",    "caption": "Add",    "description": "Add new field",               "operation": "add" },
-      { "name": "edit",   "caption": "Edit",   "description": "Edit field",                  "operation": "edit" },
-      { "name": "delete", "caption": "Delete", "description": "Delete field",                "operation": "delete" },
-      { "name": "up",     "caption": "Up",     "description": "Move upward selected item",   "operation": "up" },
-      { "name": "down",   "caption": "Down",   "description": "Move downward selected item", "operation": "down" }
-    ]
-  };
   
   function List() {
     this._toolbar = null;
@@ -102,8 +89,6 @@ define(function (require) {
     .always(function() {
       root.append(TEMPLATE);
       
-      // Create controls
-      self._toolbar = new Toolbar();
       self._grid = new Grid();
 
       //var style = 'position:absolute;';
@@ -115,7 +100,6 @@ define(function (require) {
       };
 
       $.when(
-        self._toolbar.init(selector + " > div > div.toolbar", default_toolbar),
         self._grid.init(selector + " > div > div.records", columns, styles)
       ).always(function() {
       	function add(event) {
@@ -195,7 +179,7 @@ define(function (require) {
           self._grid.refresh(reorder);
         }
 
-        self._grid.toolbar(true);
+        self._grid.toolbar(false);
         self._grid.multi_search(false);
         self._grid.actions([
           { id:"add",    type:"button", text:"Add",    icon:"w2ui-icon-plus", onClick: add },
@@ -224,7 +208,7 @@ define(function (require) {
   };
 
   List.prototype.edit = function(on) {
-    this._toolbar.visible(on);
+    this._grid.toolbar(on);
   };
 
   List.prototype.data = function(values) {

@@ -18,6 +18,13 @@ define(function (require) {
       name:name,
 //      style:style,
       recid:'id',
+      show: {
+        toolbar:true,
+        toolbarReload:false,
+        toolbarColumns:false,
+        toolbarSearch:false,
+        toolbarInput:false,
+      },
       columns:columns,
       onDblClick:function(event) {
         var operation = self._operations["dblclick"];
@@ -190,7 +197,7 @@ define(function (require) {
     this._grid.fixedBody = value;
   };
   
-  Grid.prototype.toolbar = function (value) {
+  Grid.prototype.toolbar = function (value) {	
     this._grid.show.toolbar = value;
   };
 
@@ -204,6 +211,15 @@ define(function (require) {
 
   Grid.prototype.actions = function(actions) {
     this._grid.toolbar.items = actions;
+    // !!! The follow logic is dirty hack !!!
+    // <<Reason>>
+    // The added all items are not displayed at once.
+    // Calling 'refresh' method of toolbar once, only one displayed item is added in toolbar.
+    // So, I implement it temporarily to call the 'refresh' method for the number of actions.
+    // This issue have to be investigated, and be fixed...
+    for (var i = 0; i < actions.length; i++) {
+      this._grid.toolbar.refresh();
+    }
  };
   
   Grid.prototype.data = function(value) {
