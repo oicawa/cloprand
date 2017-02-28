@@ -220,6 +220,14 @@ define(function (require) {
     for (var i = 0; i < actions.length; i++) {
       this._grid.toolbar.refresh();
     }
+    for (var i = 0; i < actions.length; i++) {
+      var init = actions[i].init;
+      if (!init || typeof init != "function") {
+        continue;
+      }
+      init(actions[i]);
+    }
+    
  };
   
   Grid.prototype.data = function(value) {

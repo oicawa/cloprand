@@ -91,9 +91,6 @@ define(function (require) {
       
       self._grid = new Grid();
 
-      //var style = 'position:absolute;';
-      //style += options.width  == null ? 'left:0px;right:0px;' : 'width:'  + options.width  + 'px;';
-      //style += options.height == null ? 'top:0px;bottom:0px;' : 'height:' + options.height + 'px;';
       var styles = {
         'width' : options.width,
         'height': options.height
@@ -179,14 +176,28 @@ define(function (require) {
           self._grid.refresh(reorder);
         }
 
+        function search_generator(item) {
+          var template = "<div id={{ID}} style='margin:0px 5px 0px 5px;'><i class='{{ICON}}'style='margin:2px;'/><input type='text'/></div>";
+          var id = Uuid.version4();
+          var html = template.replace(/{{ID}}/, id)
+                             .replace(/{{ICON}}/, item.icon);
+          var selector = "#" + item.inner_id + " > input";
+          $(document).off("keyup", selector);
+          $(document).on("keyup", selector, function (event) {
+         	console.log(event);
+          });
+          return html;
+        }
+
         self._grid.toolbar(false);
         self._grid.multi_search(false);
         self._grid.actions([
-          { id:"add",    type:"button", text:"Add",    icon:"w2ui-icon-plus", onClick: add },
-          { id:"edit",   type:"button", text:"Edit",   icon:"fa fa-pencil", onClick: edit},
-          { id:"remove", type:"button", text:"Remove", icon:"w2ui-icon-cross", onClick: remove},
-          { id:"up",     type:"button", text:"Up",     icon:"fa fa-arrow-up", onClick: up},
-          { id:"down",   type:"button", text:"Down",   icon:"fa fa-arrow-down", onClick:down} 
+          { id:"add",    type:"button", text:"Add",    icon:"w2ui-icon-plus",   onClick: add },
+          { id:"edit",   type:"button", text:"Edit",   icon:"fa fa-pencil",     onClick: edit },
+          { id:"remove", type:"button", text:"Remove", icon:"w2ui-icon-cross",  onClick: remove },
+          { id:"up",     type:"button", text:"Up",     icon:"fa fa-arrow-up",   onClick: up },
+          { id:"down",   type:"button", text:"Down",   icon:"fa fa-arrow-down", onClick:down },
+          { id:"search", type:"html",   text:"Search", icon:"fa fa-search",     html:search_generator }
         ]);
         self._grid.refresh();
         dfd.resolve();
