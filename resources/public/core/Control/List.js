@@ -177,7 +177,7 @@ define(function (require) {
         }
 
         function search_generator(item) {
-          var template = "<div id={{ID}} style='margin:0px 5px 0px 5px;'><i class='{{ICON}}'style='margin:2px;'/><input type='text'/></div>";
+          var template = "<div id={{ID}} style='margin:0px 5px 0px 5px;'><i class='{{ICON}}'style='margin:2px;'/><input type='text' style='padding:0px;line-height:1.5;'/></div>";
           var id = Uuid.version4();
           var html = template.replace(/{{ID}}/, id)
                              .replace(/{{ICON}}/, item.icon);
