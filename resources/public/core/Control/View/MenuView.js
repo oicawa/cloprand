@@ -2,6 +2,7 @@ define(function (require) {
   require("jquery");
   var app = require("app");
   var Utils = require("core/Utils");
+  var Uuid = require("core/Uuid");
   var Class = require("core/Class");
   var Connector = require("core/Connector");
   var Storage = require("core/Storage");
@@ -93,7 +94,23 @@ define(function (require) {
         });
         self._grid.select_column(true);
         self._grid.toolbar(true);
-        self._grid.multi_search(true);
+        
+        function search_generator(item) {
+          var template = "<div id={{ID}} style='margin:0px 5px 0px 5px;'><i class='{{ICON}}'style='margin:2px;'/><input type='text' class='w2ui-grid w2ui-toolbar-search'/></div>";
+          var id = Uuid.version4();
+          var html = template.replace(/{{ID}}/, id)
+                             .replace(/{{ICON}}/, item.icon);
+          var selector = "#" + id + " > input";
+          console.log("search selector: [" + selector + "]");
+          $(document).off("keyup", selector);
+          $(document).on("keyup", selector, function (event) {
+            console.log("Current Text:[" + $(selector).val() + "]");
+          });
+          return html;
+        }
+        self._grid.actions([
+          { id:"search", type:"html",   text:"Search", icon:"fa fa-search",   html:search_generator }
+        ]);
         var menus = Object.keys(classes)
           .map(function(id) { return classes[id]; })
           .filter(function(class_) { return class_.application == true; });

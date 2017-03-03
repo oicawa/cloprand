@@ -96,7 +96,7 @@ define(function (require) {
     // Input
     this.create_form(root, field.name);
 
-    // If *NOT* multi-lingualize, don't create Button
+    // If *NOT* multi-lingualize, do not create Button
     if (!self._properties.multi_lingualization) {
       dfd.resolve();
       return dfd.promise();
@@ -154,15 +154,17 @@ define(function (require) {
   };
 
   Text.prototype.edit = function(on) {
-    this._input.attr("readonly", !on);
     if (!this._button) {
+      this._input.attr("readonly", !on);
       return;
+    } else {
+      this._input.attr("readonly", true);
+      this._button.visible(on);
     }
-    this._button.visible(on);
   };
 
   Text.prototype.data = function(value) {
-  	var multi = this._properties.multi_lingualization;
+    var multi = this._properties.multi_lingualization;
     // getter
     if (arguments.length == 0) {
       if (!multi) {
@@ -180,7 +182,7 @@ define(function (require) {
       this._value = Utils.is_object(value) ? value : { "" : value };
     }
     this._draft = this._value;
-    this._input.val(!multi ? this._value : this._value[""]);
+    this._input.val(!multi ? this._value : Locale.translate(this._value));
   };
   
   Text.generate_renderer = function(default_properties, field) {

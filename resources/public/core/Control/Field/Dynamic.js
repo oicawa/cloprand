@@ -47,7 +47,7 @@ define(function (require) {
       var captions = [];
       for (var j = 0; j < caption_fields.length; j++) {
         var value = item[caption_fields[j]];
-        captions.push(value);
+        captions.push(Locale.translate(value));
       }
       var value = !item.id ? item[caption_fields[0]] : item.id;
       var caption = captions.join(" ");
@@ -88,9 +88,9 @@ define(function (require) {
         });
         object = objects[0];
         
-  	    detail.init('#' + id, object[self._field_name])
-  	    .then(function () {
-  	      detail.data(self._dialog_data);
+        detail.init('#' + id, object[self._field_name])
+        .then(function () {
+          detail.data(self._dialog_data);
           detail.edit(true);
           detail.refresh();
           detail.visible(true);
@@ -156,10 +156,10 @@ define(function (require) {
     this._selector = null;
     this._field_name = null;
     this._embedded = null;
-  	this._dropdown = null;
-  	this._button = null;
-  	this._detail = null;
-  	this._value = null;
+    this._dropdown = null;
+    this._button = null;
+    this._detail = null;
+    this._value = null;
     this._class = null;
     this._objects = null;
     this._items = {};

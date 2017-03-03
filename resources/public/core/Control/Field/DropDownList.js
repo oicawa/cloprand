@@ -42,7 +42,7 @@ define(function (require) {
       var captions = [];
       for (var j = 0; j < caption_fields.length; j++) {
         var value = item[caption_fields[j]];
-        captions.push(value);
+        captions.push(Locale.translate(value));
       }
       var value = !item.id ? item[caption_fields[0]] : item.id;
       var caption = captions.join(" ");

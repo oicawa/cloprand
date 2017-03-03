@@ -21,9 +21,9 @@ define(function (require) {
   TextLines.prototype.create_form = function(root, field_name) {
     this._input = root.find('textarea');
     this._input.attr("name", field_name);
-    this._input.css("width", this._properties.width);
-    this._input.css("width", this._properties.height);
-    this._input.w2field("text");
+    this._input.css("width", this._properties.width + "px");
+    this._input.css("height", this._properties.height + "px");
+    this._input.w2field("textarea");
   };
 
   TextLines.DEFAULT_PROPERTIES = { "width" : 400, "height" : 200, "is_require" : false, "default" : "", "multi_lingualization" : false };
