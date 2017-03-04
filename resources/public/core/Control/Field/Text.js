@@ -17,6 +17,7 @@ define(function (require) {
       data[item.locale] = item.value;
     });
     self._draft = data;
+    self.refresh();
   }
   
   function show_languages_dialog(self, locale, locales, columns) {
@@ -142,7 +143,6 @@ define(function (require) {
       return;
     }
     this._value = !this._draft ? {} : this._draft;
-    this._value[""] = this._input.val();
   };
 
   Text.prototype.restore = function() {
@@ -170,9 +170,7 @@ define(function (require) {
       if (!multi) {
         return this._input.val();
       } else {
-        var v = !this._draft ? {} : this._draft;
-        v[""] = this._input.val();
-        return v;
+        return !this._draft ? {} : this._draft;
       }
     }
     // setter
@@ -183,6 +181,14 @@ define(function (require) {
     }
     this._draft = this._value;
     this._input.val(!multi ? this._value : Locale.translate(this._value));
+  };
+  
+  Text.prototype.refresh = function() {
+    var multi = this._properties.multi_lingualization;
+    if (!multi) {
+      return;
+    }
+    this._input.val(Locale.translate(this._draft));
   };
   
   Text.generate_renderer = function(default_properties, field) {
