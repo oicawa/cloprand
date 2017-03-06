@@ -43,7 +43,7 @@
         [:title title ]
         [:link {:rel "shortcut icon" :href "core/favicon.ico"} ]
         [:link {:rel "stylesheet" :type "text/css" :href "/lib/font-awesome-4.6.1/css/font-awesome.css" } ]
-        [:link {:rel "stylesheet" :type "text/css" :href "/lib/w2ui-1.4.3/w2ui-1.4.3.css" } ]
+        [:link {:rel "stylesheet" :type "text/css" :href "/lib/w2ui/w2ui-1.5.rc1.css" } ]
         [:link {:rel "stylesheet" :type "text/css" :href "/core/main.css" } ]
         ]
       [:body
