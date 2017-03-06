@@ -22,7 +22,7 @@ define(function (require) {
   
   function show_languages_dialog(self, locale, locales, columns) {
     if (!self._draft) {
-      self._draft = self._value;
+      self._draft = !self._value ? {} : self._value;
     }
     var items = Object.keys(self._draft).map(function(locale_id) { return { "id" : locale_id, "locale": locale_id, "value" : self._draft[locale_id] }; });
     var list = new List();
