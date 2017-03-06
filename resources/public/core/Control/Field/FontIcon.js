@@ -97,11 +97,7 @@ define(function (require) {
       var grid = new Grid();
       var select_panel = "";
       dialog.init(function(panel_id) {
-        var dfd = new $.Deferred;
-        var panel = $("#" + panel_id);
-        panel.append("<div name='grid'></div>");
-        var selector = "#" + panel_id +" > div[name='grid']";
-        grid.init(selector, [
+        return grid.init("#" + panel_id, [
           { field   : 'recid',
             caption : 'No.',
             size    : '30px'},
@@ -116,39 +112,38 @@ define(function (require) {
             caption : 'Name',
             size    : '200px'}
         ],
-        'height:500px;')
-        .then(function() {
-          grid.multi_search(true);
-          grid.toolbar(true);
-          grid.row_height(70);
-          grid.data(self._fonts);
-          grid.refresh();
-          dfd.resolve();
-        });
-        return dfd.promise();
+        'height:500px;');
+      })
+      .then(function() {
+        grid.multi_search(true);
+        grid.toolbar(true);
+        grid.row_height(70);
+        grid.data(self._fonts);
+        grid.refresh();
+      })
+      .then(function() {
+        dialog.title("Select Icon");
+        dialog.buttons([
+          {
+            text : "OK",
+            click: function (event) {
+              var recid = grid.selection();
+              self._value = self._fonts[recid].id;
+              self.refresh();
+              dialog.close();
+            }
+          },
+          {
+            text : "Cancel",
+            click: function (event) {
+              console.log("[Cancel] clicked.");
+              dialog.close();
+            }
+          }
+        ]);
+        dialog.size(500, 600);
+        dialog.open();
       });
-      dialog.title("Select Icon");
-      dialog.buttons([
-        {
-          text : "OK",
-          click: function (event) {
-            var recid = grid.selection();
-            self._value = self._fonts[recid].id;
-            self.refresh();
-            dialog.close();
-          }
-        },
-        {
-          text : "Cancel",
-          click: function (event) {
-            console.log("[Cancel] clicked.");
-            dialog.close();
-          }
-        }
-      ]);
-      dialog.size(500, 600);
-      
-      dialog.open();
     });
   };
 
