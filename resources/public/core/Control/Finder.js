@@ -6,10 +6,11 @@ define(function (require) {
   var SelectDialog = require("core/Control/SelectDialog");
   var Class = require("core/Class");
   var Grid = require("core/Control/Grid");
+  var DivButton = require("core/Control/DivButton");
   
   var TEMPLATE = '' +
 '<div class="finder">' +
-'  <span name="description"></span><i name="search" class="fa {{FONT_NAME}}" style="display:inline-block;vertical-align:top;"/>' +
+'  <div name="button" style="vertical-align:top;"></div>' +
 '  <div name="list" style="display:inline-block;"></div>' +
 '</div>';
 
@@ -19,8 +20,8 @@ define(function (require) {
 '  <i class="fa fa-remove" />' +
 '</div>';
 
-  function create_search(self, root, multi_selectable) {
-    self._search.on("click", function(event) {
+  function create_search(selector, self, multi_selectable) {
+    function search(event) {
       var items = Object.keys(self._objects).map(function(id) { return self._objects[id]; });
       var dialog = new SelectDialog();
       dialog.init(self._columns, items, multi_selectable)
@@ -34,15 +35,15 @@ define(function (require) {
           self.refresh();
         });
         dialog.size(300, 400);
-        
         dialog.open();
       });
-    });
+    }
+    self._search = new DivButton();
+    return self._search.init(selector, '<i class="fa fa-search" />', search);
   }
   
   function Finder() {
     this._search = null;
-    this._description = null;
     this._list = null;
     this._class = null;
     this._columns = null;
@@ -69,9 +70,6 @@ define(function (require) {
     root.append(html);
     // Seach Icon
     this._search = root.find("div > i[name='search']");
-    // Description
-    this._description = root.find("div > span[name='description']");
-    this._description.text(description);
     // List
     this._list = root.find("div > div[name='list']");
     this._list.on("click", "div.item > i", function(event) {
@@ -97,7 +95,9 @@ define(function (require) {
     self._converter = converter;
     Utils.load_css("/core/Control/Finder.css")
     .then(function() {
-      create_search(self, root, multi_selectable);
+      return create_search(selector + " > div > div[name='button']", self, multi_selectable);
+    })
+    .then(function() {
       self.edit(false);
       dfd.resolve();
     });
@@ -110,13 +110,8 @@ define(function (require) {
   
   Finder.prototype.edit = function(on) {
     this._editting = on;
-    if (on) {
-      this._search.show();
-      this._list.find("div.item > i").css("display", "inline");
-    } else {
-      this._search.hide();
-      this._list.find("div.item > i").css("display", "none")
-    }
+    this._search.visible(on);
+    this._list.find("div.item > i").css("display", on ? "inline" : "none");
   };
 
   Finder.prototype.backuped = function() {
