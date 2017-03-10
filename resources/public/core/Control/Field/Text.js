@@ -158,7 +158,7 @@ define(function (require) {
       this._input.attr("readonly", !on);
       return;
     } else {
-      this._input.attr("readonly", true);
+      this._input.attr("readonly", !on);
       this._button.visible(on);
     }
   };
@@ -167,11 +167,21 @@ define(function (require) {
     var multi = this._properties.multi_lingualization;
     // getter
     if (arguments.length == 0) {
+      // Not Multi Lingualized
       if (!multi) {
         return this._input.val();
-      } else {
-        return !this._draft ? {} : this._draft;
       }
+      // Multi Lingualized
+      var draft = !this._draft ? {} : this._draft;
+      var lang = Locale.language();
+      if (lang != "") {
+        draft[lang] = this._input.val();
+      }
+      var default_value = draft[""];
+      if (!default_value || default_value == "") {
+        draft[""] = this._input.val();
+      }
+      return draft;
     }
     // setter
     if (!multi) {
