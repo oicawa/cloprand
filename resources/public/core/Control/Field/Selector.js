@@ -102,8 +102,7 @@ define(function (require) {
 
   Selector.cell_render = function(field) {
     var dfd = new $.Deferred;
-    var class_id = field.datatype.properties.class_id;
-    Finder.cell_render(class_id)
+    Finder.cell_render(field)
     .done(function (renderer) {
       dfd.resolve(renderer);
     });

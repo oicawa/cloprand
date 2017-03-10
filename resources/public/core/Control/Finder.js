@@ -163,8 +163,9 @@ define(function (require) {
     this.edit(this._editting);
   };
 
-  Finder.cell_render = function(class_id) {
+  Finder.cell_render = function(field) {
     var dfd = new $.Deferred;
+    var class_id = field.datatype.properties.class_id;
     var class_ = null;
     var objects = null;
     $.when(
