@@ -20,7 +20,7 @@ define(function (require) {
     self.refresh();
   }
   
-  function show_languages_dialog(self, locale, locales, columns) {
+  function show_languages_dialog(self, locale, locales, columns, caption) {
     if (!self._draft) {
       self._draft = !self._value ? {} : self._value;
     }
@@ -36,7 +36,7 @@ define(function (require) {
       list.refresh();
     })
     .then(function () {
-      dialog.title("Locales");
+      dialog.title(caption);
       dialog.buttons([
         { text: "OK",    click:function (event) { save_as_draft(self, list); dialog.close(); } },
         { text:"Cancel", click:function (event) { dialog.close(); }}
@@ -122,7 +122,7 @@ define(function (require) {
       var button_selector = selector + " > div > div[name='button']";
       self._button = new DivButton();
       return self._button.init(button_selector, '<i class="fa fa-globe"/>', function (event) {
-        show_languages_dialog(self, locale, locales, columns);
+        show_languages_dialog(self, locale, locales, columns, caption);
       });
     })
     .then(function () {
