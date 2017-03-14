@@ -12,7 +12,6 @@ define(function (require) {
 
   var TEMPLATE = '' +
 '<div class="listview-panel">' +
-'  <div class="object-operations"></div>' +
 '  <div class="object-list">' +
 '    <div><a href="#"></a></div>' +
 '  </div>' +
@@ -40,30 +39,45 @@ define(function (require) {
     var view = app.contents().content(tab_info.tab_id);
     app.contents().show_tab("New " + Locale.translate(view._class.label), null, "DetailView", tab_info.class_id, Uuid.NULL);
   };
-
-  ListView.show_detail = function (event) {
-    var tab_info = Contents.get_tab_info(event);
-    var index = event.recid - 1;
-    
-    // Get clicked data (from 'tab_id'->'view'->'grid'->'data'-> item of the selected index row.)
-    var view = app.contents().content(tab_info.tab_id);
-    var grid = view.list();
-    var data = grid.get(event.recid);
-    var class_ = view._class;
-    
+  
+  function open_details(class_, grid, recids) {
     var fields = class_.object_fields;
-    //var caption_field_names = fields.filter(function (field, index) { return !(!field.caption); })
-    //                                .map(function (field) { return field.name; });
     var key_field_names = fields.filter(function (field, index) { return !(!field.key); })
                                 .map(function (field) { return field.name; });
+    
+    var objects = recids.map(function (recid) { return grid.get(recid); });
+    
     key_field_names.push("id");
     console.assert(0 < key_field_names.length, key_field_names);
 
     var key_field_name = key_field_names[0];
     
-    var caption = (new Class(class_)).captions([data]);
-    var key = data[key_field_name];
-    app.contents().show_tab(caption, null, "DetailView", tab_info.class_id, key);
+    var captions = (new Class(class_)).captions(objects);
+    
+    for (var i = 0; i < recids.length; i++) {
+      var caption = captions[i];
+      var object = objects[i];
+      var key = object[key_field_name];
+      app.contents().show_tab(caption, null, "DetailView", class_.id, key);
+    }
+  }
+
+  ListView.open1 = function (event) {
+    var tab_info = Contents.get_tab_info(event);
+    var view = app.contents().content(tab_info.tab_id);
+    var class_ = view._class;
+    var grid = view.list();
+    var recids = [event.recid];
+    open_details(class_, grid, recids);
+  };
+  
+  ListView.open = function (event) {
+    var tab_info = Contents.get_tab_info(event);
+    var view = app.contents().content(tab_info.tab_id);
+    var class_ = view._class;
+    var grid = view.list();
+    var recids = grid.selection();
+    open_details(class_, grid, recids);
   };
   
   ListView.prototype.update = function (keys) {
@@ -103,13 +117,10 @@ define(function (require) {
 
   ListView.prototype.init = function (selector, class_id, object_id) {
     this._class_id = class_id;
-    this._toolbar = new Toolbar();
     this._grid = new Grid();
     var view = $(selector)
     var objects = null;
-    var assist = null;
     var self = this;
-    var toolbar_selector = selector + "> div.listview-panel > div.object-operations";
     var list_selector = selector + "> div.listview-panel > div.object-list";
     var columns = null;
     $.when(
@@ -125,26 +136,20 @@ define(function (require) {
     })
     .then(function() {
       view.append(TEMPLATE);
-
-      // Toolbar
-      var default_toolbar = {"items": [
-        {"name": "create", "caption": "Create", "description": "Create new data"}
-      ]};
-      var assist_toolbar = !assist ? default_toolbar : (!assist.toolbar ? default_toolbar : assist.toolbar);
-      self._toolbar.init(toolbar_selector, assist_toolbar);
-      self._toolbar.bind("create", ListView.create);
-
-      // Grid
-      self._grid.init(list_selector, columns)
-      .then(function () {
-        self._grid.add_operation("dblclick", ListView.show_detail);
-        self._grid.select_column(true);
-        self._grid.toolbar(true);
-        self._grid.multi_search(true);
-        self._grid.data(objects);
-        self._toolbar.visible(true);
-        self.refresh();
-      });
+    })
+    .then(function() {
+      return self._grid.init(list_selector, columns)
+    })
+    .then(function() {
+      return (new Class(self._class)).list_actions().done(function(actions) { self._grid.actions(actions); });
+    })
+    .then(function() {
+      self._grid.add_operation("dblclick", ListView.open1);
+      self._grid.select_column(true);
+      self._grid.toolbar(true);
+      self._grid.multi_search(true);
+      self._grid.data(objects);
+      self.refresh();
     });
   };
 

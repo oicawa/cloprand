@@ -160,7 +160,7 @@ define(function (require) {
     }
   };
   
-  DetailView.cancel = function (event, li) {
+  DetailView.cancel = function (event) {
     Dialog.confirm("Canceled?", function(answer) {
       if (answer == "No") {
         return;
@@ -196,11 +196,11 @@ define(function (require) {
       }
       target = true;
       break;
-  	}
+    }
 
-  	if (!target) {
-  	  return;
-  	}
+    if (!target) {
+      return;
+    }
 
     Storage.read(self._class_id, self._object_id)
     .done(function (data) {
@@ -217,7 +217,7 @@ define(function (require) {
   DetailView.prototype.refresh = function () {
     this._detail.refresh();
   };
-  
+
   DetailView.prototype.init = function (selector, class_id, object_id) {
     this._class_id = class_id;
     this._object_id = object_id;
@@ -229,14 +229,6 @@ define(function (require) {
     var object = null;
     var self = this;
     
-    var default_toolbar = {
-      "items" : [
-        { "name": "edit",   "caption": "Edit",   "description": "Edit item data.", "operation": "edit" },
-        { "name": "delete", "caption": "Delete", "description": "Delete item data.", "operation": "delete" },
-        { "name": "save",   "caption": "Save",   "description": "Save item data.", "operation": "save" },
-        { "name": "cancel", "caption": "Cancel", "description": "Cancel item data.", "operation": "cancel" }
-      ]
-    };
     var toolbar_selector = selector + "> div.detailview-panel > div.object-operations";
     var detail_selector = selector + "> div.detailview-panel > div.object-detail";
     
@@ -247,36 +239,38 @@ define(function (require) {
         dfd.resolve();
         return dfd.promise();
       }
-
       return Storage.read(class_id_, object_id_).done(function (data) { self._object = data; });
     }
+    
     $.when(
       Utils.load_css("/core/Control/View/DetailView.css"),
       Storage.read(Class.CLASS_ID, class_id).done(function (data) { self._class = data; }),
       get_object_data(self, class_id, object_id)
-    ).then(function() {
+    )
+    .then(function() {
       view.append(TEMPLATE);
-
-      $.when(
-        self._toolbar.init(toolbar_selector, default_toolbar),
-        self._detail.init(detail_selector, self._class.object_fields, basic_assist, custom_assist)
-      ).then(function() {
-        self._toolbar.bind("edit", DetailView.edit);
-        self._toolbar.bind("delete", DetailView.delete);
-        self._toolbar.bind("save", DetailView.save);
-        self._toolbar.bind("cancel", DetailView.cancel);
-        self._detail.visible(true);
-        if (self._object_id == Uuid.NULL) {
-          edit_toolbar(self._toolbar, true);
-          self._detail.edit(true);
-        } else {
-          edit_toolbar(self._toolbar, false);
-          self._detail.edit(false);
-          self._detail.data(self._object);
-        }
-        self._toolbar.visible(true);
-        self.refresh();
-      });
+    })
+    .then(function() {
+      return self._toolbar.init(toolbar_selector);
+    })
+    .then(function() {
+      self._toolbar.visible(false);
+      return (new Class(self._class)).detail_actions().done(function (actions) { self._toolbar.actions(actions); });
+    })
+    .then(function() {
+      return self._detail.init(detail_selector, self._class.object_fields, basic_assist, custom_assist);
+    }).then(function() {
+      self._detail.visible(true);
+      if (self._object_id == Uuid.NULL) {
+        edit_toolbar(self._toolbar, true);
+        self._detail.edit(true);
+      } else {
+        edit_toolbar(self._toolbar, false);
+        self._detail.edit(false);
+        self._detail.data(self._object);
+      }
+      self._toolbar.visible(true);
+      self.refresh();
     });
   };
 

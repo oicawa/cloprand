@@ -210,6 +210,10 @@ define(function (require) {
   };
 
   Grid.prototype.actions = function(actions) {
+    if (!actions) {
+      return;
+    }
+    
     this._grid.toolbar.items = actions;
     // !!! The follow logic is dirty hack !!!
     // <<Reason>>
