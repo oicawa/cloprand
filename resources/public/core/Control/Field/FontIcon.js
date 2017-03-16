@@ -115,8 +115,8 @@ define(function (require) {
         'height:500px;');
       })
       .then(function() {
-        grid.multi_search(true);
         grid.toolbar(true);
+        grid.multi_search(true);
         grid.row_height(70);
         grid.data(self._fonts);
         grid.refresh();

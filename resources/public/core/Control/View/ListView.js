@@ -9,6 +9,7 @@ define(function (require) {
   var Contents = require("core/Contents");
   var Toolbar = require("core/Control/Toolbar");
   var Grid = require("core/Control/Grid");
+  var Action = require("core/Action");
 
   var TEMPLATE = '' +
 '<div class="listview-panel">' +
@@ -141,7 +142,7 @@ define(function (require) {
       return self._grid.init(list_selector, columns)
     })
     .then(function() {
-      return (new Class(self._class)).list_actions().done(function(actions) { self._grid.actions(actions); });
+      return Action.convert(self._class["list_actions"]).done(function(actions) { self._grid.actions(actions); });
     })
     .then(function() {
       self._grid.add_operation("dblclick", ListView.open1);

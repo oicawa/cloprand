@@ -16,14 +16,16 @@ define(function (require) {
     var name = uuid.replace(/-/g, "_");
     grid.w2grid({
       name:name,
-//      style:style,
       recid:'id',
       show: {
         toolbar:true,
         toolbarReload:false,
         toolbarColumns:false,
-        toolbarSearch:false,
-        toolbarInput:false,
+        //toolbarColumns:true,
+        //toolbarSearch:false,
+        toolbarSearch:true,
+        //toolbarInput:false,
+        toolbarInput:true,
       },
       columns:columns,
       onDblClick:function(event) {
@@ -183,6 +185,8 @@ define(function (require) {
 
   Grid.prototype.multi_search = function (value) {
     this._grid.multiSearch = value;
+    this._grid.show.toolbarSearch = value;
+    this._grid.show.toolbarInput = value;
   };
   
   Grid.prototype.multi_select = function (value) {
@@ -255,6 +259,7 @@ define(function (require) {
     if (typeof reorder === "function") {
       this._grid.records.forEach(reorder);
     }
+    this._grid.toolbar.refresh();
     this._grid.refresh();
   };
 

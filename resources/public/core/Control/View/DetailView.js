@@ -10,6 +10,7 @@ define(function (require) {
   var Detail = require("core/Control/Detail");
   var Tabs = require("core/Control/Tabs");
   var Dialog = require("core/Dialog");
+  var Action = require("core/Action");
 
   var TEMPLATE = '' +
 '<div class="detailview-panel">' +
@@ -255,7 +256,7 @@ define(function (require) {
     })
     .then(function() {
       self._toolbar.visible(false);
-      return (new Class(self._class)).detail_actions().done(function (actions) { self._toolbar.actions(actions); });
+      return Action.convert(self._class["detail_actions"]).done(function (actions) { self._toolbar.actions(actions); });
     })
     .then(function() {
       return self._detail.init(detail_selector, self._class.object_fields, basic_assist, custom_assist);
