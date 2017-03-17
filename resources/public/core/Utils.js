@@ -75,6 +75,9 @@ define(function (require) {
     },
     is_object : function (target) {
       return is_object(target);
+    },
+    clone : function(json_object) {
+      return JSON.parse(JSON.stringify(json_object));
     }
   };
 });

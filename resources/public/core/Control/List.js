@@ -13,6 +13,7 @@ define(function (require) {
   var Field = require("core/Control/Field/Field");
   var Dialog = require("core/Dialog");
   var Action = require("core/Action");
+  var SelectDialog = require("core/Control/SelectDialog");
   var app = require("app");
   
   var TEMPLATE = '' +
@@ -22,6 +23,7 @@ define(function (require) {
   
   function List() {
     this._class = null;
+    this._columns = null;
     this._toolbar = null;
     this._grid = null;
     this._detail = null;
@@ -68,7 +70,38 @@ define(function (require) {
       dialog.open();
     });
   };
-  
+
+  //List.prototype.showImportDialog = function (self, title, fields, data, ok_func) {
+  List.prototype.showImportDialog = function (title) {
+    var items = null;
+    var self = this;
+    var dialog = new SelectDialog();
+
+    Storage.read(this._class.id).done(function (data) { items = data; })
+    .then(function () {
+      var objects = Object.keys(items).map(function(id) { return items[id]; });
+      return dialog.init(self._columns, objects, true);
+    })
+    .done(function() {
+      dialog.title(title);
+      dialog.ok(function (recids) {
+        console.log("[OK] clicked. selection=" + recids);
+        for (var i = 0; i < recids.length; i++) {
+          var recid = recids[i];
+          var item = items[recid];
+          var index = self._grid.data().length + i + 1;
+          var cloned = Utils.clone(item);
+          cloned["recid"] = index;
+          cloned["id"] = index;
+          self._grid.add(cloned);
+        }
+        self.refresh();
+      });
+      dialog.size(300, 400);
+      dialog.open();
+    });
+  };
+
   List.add = function (event) {
   	var self = event.item.context;
   	if (!self) {
@@ -183,6 +216,14 @@ define(function (require) {
     });
     return html;
   }
+  
+  List.import = function (event) {
+  	var self = event.item.context;
+  	if (!self) {
+  	  return;
+  	}
+    self.showImportDialog(Locale.translate(self._class.label));
+  };
 
   List.prototype.init = function(selector, options) {
     var dfd = new $.Deferred;
@@ -202,13 +243,13 @@ define(function (require) {
 
     Storage.read(Class.CLASS_ID, options.class_id).done(function (data) { self._class = data; })
     .then(function() {
-      return Grid.create_columns(self._class).done(function(columns_) { columns = columns_; });
+      return Grid.create_columns(self._class).done(function(columns_) { self._columns = columns_; });
     })
     .then(function() {
       root.append(TEMPLATE);
     })
     .then(function() {
-      return self._grid.init(selector + " > div > div.records", columns, styles);
+      return self._grid.init(selector + " > div > div.records", self._columns, styles);
     })
     .then(function() {
       return Action.convert(options.actions, self).done(function(actions) { self._grid.actions(actions); });
