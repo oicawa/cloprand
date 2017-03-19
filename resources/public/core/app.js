@@ -18,9 +18,9 @@ define(function (require) {
 '  <span style="display:inline-block; width:30px;"></span>' +
 '  <span id="sub-title"></span>' +
 '  <form method="get" name="signout" action="/logout" style="display:inline-block;position:absolute; right:5px;">' +
-'    <span id="login_id"></span>' +
+'    <span id="login_id" style"font-size:11pt;"></span>' +
 '    <div class="div-button" style="display:inline-block;">' +
-'      <i class="fa fa-sign-out fa-fw" onclick="document.signout.submit();"></i>' +
+'      <i class="fa fa-sign-out" onclick="document.signout.submit();"></i>' +
 '    </div>' +
 '  </form>' +
 '</div>';

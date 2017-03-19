@@ -44,6 +44,7 @@
         [:link {:rel "shortcut icon" :href "core/favicon.ico"} ]
         [:link {:rel "stylesheet" :type "text/css" :href "/lib/font-awesome-4.6.1/css/font-awesome.css" } ]
         [:link {:rel "stylesheet" :type "text/css" :href "/lib/w2ui/w2ui-1.5.rc1.css" } ]
+        [:link {:rel "stylesheet" :type "text/css" :href "/core/reset-w2ui.css" } ]
         [:link {:rel "stylesheet" :type "text/css" :href "/core/main.css" } ]
         ]
       [:body
@@ -65,7 +66,7 @@
             [:input {:type "submit" :style "display:none;"}]
             [:div {:class "div-button" :style "width:70px;height:70px;margin: auto;" :onclick "document.singin.submit();"}
               [:i {:class "fa fa-sign-in fa-3x"} ]
-              "Sign In" ]
+              [:div {:style "font-size:11pt;"} "Sign In" ]]
             ]]])))
 
 (defn login-post
