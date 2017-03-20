@@ -6,6 +6,7 @@ define(function (require) {
   var Class = require("core/Class");
   var Storage = require("core/Storage");
   var Dialog = require("core/Dialog");
+  var Action = require("core/Action");
   var Grid= require("core/Control/Grid");
   var List = require("core/Control/List");
   var DivButton = require("core/Control/DivButton");
@@ -20,7 +21,7 @@ define(function (require) {
     self.refresh();
   }
   
-  function show_languages_dialog(self, locale, locales, columns, caption) {
+  function show_languages_dialog(self, locale, locales, columns, caption, actions) {
     if (!self._draft) {
       self._draft = !self._value ? {} : self._value;
     }
@@ -31,6 +32,7 @@ define(function (require) {
       return list.init("#" + contents_id, { class_id : self.detail_id(), width : null, height : null});
     })
     .then(function () {
+      list.actions(actions);
       list.data(items);
       list.edit(true);
       list.refresh();
@@ -107,22 +109,38 @@ define(function (require) {
     var locale = null;
     var locales = null;
     var columns = null;
-    Storage.read(Class.CLASS_ID, Class.LOCALE_ID)
-    .then(function(data) {
-      locale = data;
-    })
-    .then(function () {
-      return Storage.read(Class.LOCALE_ID).then(function(objects) { locales = objects; })
-    })
+    var actions = null;
+    var class_ = null;
+    $.when(
+      Storage.read(Class.CLASS_ID, Class.LOCALE_ID).done(function(data) { locale = data; }),
+      Storage.read(Class.LOCALE_ID).then(function(objects) { locales = objects; }),
+      Storage.read(Class.PRIMITIVE_ID, field.datatype.id).done(function(object) { class_ = object; })
+    )
     .then(function () {
       return Grid.create_columns(locale).then(function (columns_) { columns = columns_; });
+    })
+    .then(function () {
+      var prop_array = Utils.get_as_json(
+        [],
+        function() { return class_.static_properties; },
+        false);
+      var prop_map = {};
+      prop_array.forEach(function (prop) { prop_map[prop.name] = prop; });
+      //class_.static_properties.forEach(function (prop) { prop_map[prop.name] = prop; });
+      var actions_field = prop_map["multi_lingualization_actions"];
+      if (!actions_field) {
+        return;
+      }
+      var src_actions = actions_field.datatype.properties.actions;
+      return Action.convert(src_actions)
+                   .done(function(dst_actions) { actions = dst_actions; });
     })
     .then(function () {
       // Button
       var button_selector = selector + " > div > div[name='button']";
       self._button = new DivButton();
       return self._button.init(button_selector, '<i class="fa fa-globe"/>', function (event) {
-        show_languages_dialog(self, locale, locales, columns, caption);
+        show_languages_dialog(self, locale, locales, columns, caption, actions);
       });
     })
     .then(function () {

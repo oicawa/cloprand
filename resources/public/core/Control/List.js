@@ -305,5 +305,9 @@ define(function (require) {
     this._grid.refresh();
   };
 
+  List.prototype.actions = function(actions) {
+    this._grid.actions(actions);
+  };
+
   return List;
 }); 

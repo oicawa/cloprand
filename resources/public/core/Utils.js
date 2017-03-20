@@ -51,15 +51,22 @@ define(function (require) {
       }
     },
     get_as_json : function(default_json, assign_func) {
+      var new_json = JSON.parse(JSON.stringify(default_json));
       try {
+        
         var assigned_object = assign_func();
         if (!assigned_object) {
-          return default_json;
+          return new_json;
         }
-        if (!is_object(assigned_object)) {
-          return default_json;
+
+        if ((!is_object(assigned_object)) && (!Array.isArray(assigned_object))) {
+          return new_json;
         }
-        var new_json = JSON.parse(JSON.stringify(default_json));
+
+        if (Array.isArray(assigned_object)) {
+          return assigned_object;
+        }
+
         for (var key in new_json) {
           var v = assigned_object[key];
           if (!v || v === "") {
@@ -70,7 +77,7 @@ define(function (require) {
         return new_json;
       } catch (ex) {
         console.assert(false, ex);
-        return default_json;
+        return new_json;
       }
     },
     is_object : function (target) {
