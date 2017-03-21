@@ -145,7 +145,9 @@ define(function (require) {
   };
 
   Grid.prototype.set = function(recid, item) {
-    this._grid.set(recid, item);
+    //this._grid.set(recid, item);
+    var index = this._grid.get(recid, true);
+    this._grid.records[index] = item;
   };
 
   Grid.prototype.select = function() {
