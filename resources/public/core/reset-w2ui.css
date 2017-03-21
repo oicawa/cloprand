@@ -1,21 +1,67 @@
 .w2ui-reset {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  -o-box-sizing: border-box;
+  box-sizing: border-box;
   font-family: Verdana,"游ゴシック",YuGothic,"ヒラギノ角ゴ ProN W3","Hiragino Kaku Gothic ProN","メイリオ",Meiryo,sans-serif;
+  font-size: 11px;
 }
 .w2ui-reset table tr th,
 .w2ui-reset table tr td {
   font-family: Verdana,"游ゴシック",YuGothic,"ヒラギノ角ゴ ProN W3","Hiragino Kaku Gothic ProN","メイリオ",Meiryo,sans-serif;
+  font-size: 11px;
 }
 .w2ui-lock-msg {
+  display: none;
+  position: absolute;
+  z-index: 1400;
+  top: 45%;
+  left: 50%;
+  -webkit-transform: translateX(-50%) translateY(-50%);
+  -moz-transform: translateX(-50%) translateY(-50%);
+  -ms-transform: translateX(-50%) translateY(-50%);
+  -o-transform: translateX(-50%) translateY(-50%);
+  transform: translateX(-50%) translateY(-50%);
+  width: 200px;
+  height: 80px;
+  padding: 30px 8px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  font-size: 13px;
   font-family: Verdana,"游ゴシック",YuGothic,"ヒラギノ角ゴ ProN W3","Hiragino Kaku Gothic ProN","メイリオ",Meiryo,sans-serif;
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+  background-color: #555555;
+  color: #ffffff;
+  text-align: center;
+  border-radius: 5px;
+  border: 2px solid #444444;
 }
 .w2ui-info-bubble table {
+  font-size: 11px;
   font-family: Verdana,"游ゴシック",YuGothic,"ヒラギノ角ゴ ProN W3","Hiragino Kaku Gothic ProN","メイリオ",Meiryo,sans-serif;
+  color: white;
+  text-shadow: 1px 1px solid #999;
 }
 .w2ui-overlay .w2ui-select-field table {
+  font-size: 11px;
   font-family: Verdana,"游ゴシック",YuGothic,"ヒラギノ角ゴ ProN W3","Hiragino Kaku Gothic ProN","メイリオ",Meiryo,sans-serif;
+  border-spacing: 0px;
+  border-collapse: border-collapse;
 }
 .w2ui-popup {
+  position: fixed;
+  z-index: 1600;
+  overflow: hidden;
   font-family: Verdana,"游ゴシック",YuGothic,"ヒラギノ角ゴ ProN W3","Hiragino Kaku Gothic ProN","メイリオ",Meiryo,sans-serif;
+  border-radius: 6px;
+  padding: 0px;
+  margin: 0px;
+  border: 1px solid #777777;
+  background-color: #eeeeee;
+  box-shadow: 0px 0px 25px #555555;
 }
 .w2ui-grid .w2ui-toolbar-search {
   width:160px;
