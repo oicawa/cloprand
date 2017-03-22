@@ -65,8 +65,8 @@
             [:input {:type "hidden" :name "__anti-forgery-token" :value *anti-forgery-token*}]
             [:input {:type "submit" :style "display:none;"}]
             [:div {:class "div-button" :style "width:70px;height:70px;margin: auto;" :onclick "document.singin.submit();"}
-              [:i {:class "fa fa-sign-in fa-3x"} ]
-              [:div {:style "font-size:11pt;"} "Sign In" ]]
+              [:i {:class "fa fa-sign-in" :style "font-size:35pt;"} ]
+              [:div {:style "font-size:10pt;"} "Sign In" ]]
             ]]])))
 
 (defn login-post
