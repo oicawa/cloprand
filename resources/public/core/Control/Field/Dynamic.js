@@ -258,5 +258,29 @@ define(function (require) {
   Dynamic.prototype.update = function(keys) {
   }
 
+  Dynamic.cell_render = function(field) {
+    var dfd = new $.Deferred;
+    var class_id = field.datatype.properties.field.class_id;
+    var class_ = null;
+    var objects = null;
+    $.when(
+      Storage.read(Class.CLASS_ID, class_id).done(function(data) { class_ = data; }),
+      Storage.read(class_id).done(function(data) { objects = data; })
+    )
+    .then(function () {
+      var renderer = function(record, index, column_index) {
+        console.log(record);
+        var value = record[field.name];
+        console.log(value);
+        var object = objects[value.id];
+        var caption = (new Class(class_)).captions([object])[0];
+        console.log(caption);
+        return caption;
+      };
+      dfd.resolve(renderer);
+    })
+    return dfd.promise();
+  };
+
   return Dynamic;
 }); 
