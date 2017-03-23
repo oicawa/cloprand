@@ -21,15 +21,19 @@ define(function (require) {
     self.refresh();
   }
   
-  function show_languages_dialog(self, locale, locales, columns, caption, actions) {
+  function show_languages_dialog(self, locale, locales, columns, caption, src_actions) {
     if (!self._draft) {
       self._draft = !self._value ? {} : self._value;
     }
     var items = Object.keys(self._draft).map(function(locale_id) { return { "id" : locale_id, "locale": locale_id, "value" : self._draft[locale_id] }; });
+    var actions = null;
     var list = new List();
     var dialog = new Dialog();
     dialog.init(function(contents_id) {
       return list.init("#" + contents_id, { class_id : self.detail_id(), width : null, height : null});
+    })
+    .then(function () {
+      return Action.convert(src_actions, list).done(function(dst_actions) { actions = dst_actions; });
     })
     .then(function () {
       list.actions(actions);
@@ -109,7 +113,7 @@ define(function (require) {
     var locale = null;
     var locales = null;
     var columns = null;
-    var actions = null;
+    var src_actions = null;
     var class_ = null;
     $.when(
       Storage.read(Class.CLASS_ID, Class.LOCALE_ID).done(function(data) { locale = data; }),
@@ -131,16 +135,15 @@ define(function (require) {
       if (!actions_field) {
         return;
       }
-      var src_actions = actions_field.datatype.properties.actions;
-      return Action.convert(src_actions)
-                   .done(function(dst_actions) { actions = dst_actions; });
+      src_actions = actions_field.datatype.properties.actions;
+      return;
     })
     .then(function () {
       // Button
       var button_selector = selector + " > div > div[name='button']";
       self._button = new DivButton();
       return self._button.init(button_selector, '<i class="fa fa-globe"/>', function (event) {
-        show_languages_dialog(self, locale, locales, columns, caption, actions);
+        show_languages_dialog(self, locale, locales, columns, caption, src_actions);
       });
     })
     .then(function () {
