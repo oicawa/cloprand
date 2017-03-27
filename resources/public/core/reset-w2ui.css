@@ -63,8 +63,34 @@
   background-color: #eeeeee;
   box-shadow: 0px 0px 25px #555555;
 }
+
 .w2ui-grid .w2ui-toolbar-search {
   width:160px;
   margin-right:3px;
   margin-left:3px;
+}
+
+.w2ui-field > label {
+  display: block;
+  float: left;
+  margin-top: 7px;
+  margin-bottom: 3px;
+  /*width: 120px;*/
+  width: auto;
+  padding: 0px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+  min-height: 20px;
+  color: #666;
+}
+
+.w2ui-field > div {
+  /* do not include width */
+  margin-bottom: 3px;
+  margin-left: 128px;
+  padding: 3px;
+  min-height: 28px;
+  float: none;
 }

@@ -4,7 +4,7 @@ define(function (require) {
   var Inherits = require("core/Inherits");
   var app = require("app");
 
-  var TEMPLATE = '<div class="w2ui-field"></div>';
+  var TEMPLATE_FIELD = '<div class="w2ui-field"></div>';
 
   function get_control_assist(self, field) {
     if (!self._custom_assist) {
@@ -23,7 +23,7 @@ define(function (require) {
     return primitive.require_path;
   }
 
-  function field_func(self, field_selector, field) {
+  function create_field(self, field_selector, field) {
     var dfd = new $.Deferred;
     var assist = get_control_assist(self, field);
     var control_path = get_control_path(self, field, assist);
@@ -49,6 +49,15 @@ define(function (require) {
     return dfd.promise();
   }
 
+  function print_widthes(self, selector) {
+    for (var i = 0; i < self._fields.length; i++) {
+      var field = self._fields[i];
+      var label_selector = selector + " > div[name='" + field.name + "'] > label";
+      var label = $(label_selector);
+      console.log("field.name=[" + field.name + "] width=" + label.width());
+    }
+  }
+
   function create_form(self, selector) {
     var dfd = new $.Deferred;
     // Declare 'each_field_funcs' array to closing each require 'Controls' & callback process
@@ -59,14 +68,15 @@ define(function (require) {
     var promises = [];
     for (var i = 0; i < self._fields.length; i++) {
       var object_field = self._fields[i];
-      self._root.append(TEMPLATE);
+      self._root.append(TEMPLATE_FIELD);
       var field = self._root.find("div:last-child");
       field.attr("name", object_field.name);
       var field_selector = selector + " > div[name='" + object_field.name + "']";
-      promises[i] = field_func(self, field_selector, object_field);
+      promises[i] = create_field(self, field_selector, object_field);
     }
     $.when.apply(null, promises)
     .then(function() {
+      print_widthes(self, selector);
       dfd.resolve();
     });
     return dfd.promise();
@@ -120,17 +130,15 @@ define(function (require) {
       return dfd.promise();
     }
     this._fields = fields;
-    this._basic_assist = typeof basic_assist == "undefined" ? null : basic_assist;
-    this._custom_assist = typeof custom_assist == "undefined" ? null : custom_assist;
-    var self = this;
-    var selector_buf = selector;
+    this._basic_assist = !basic_assist ? null : basic_assist;
+    this._custom_assist = !custom_assist ? null : custom_assist;
 
-    Utils.load_css("/core/Control/Detail.css");
-    
-    this._root.append(TEMPLATE);
-    $.when(
-      create_form(self, selector_buf)
-    ).always(function() {
+    var self = this;
+    Utils.load_css("/core/Control/Detail.css")
+    .then(function () {
+      return create_form(self, selector)
+    })
+    .then(function() {
       dfd.resolve();
     });
     

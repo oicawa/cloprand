@@ -140,12 +140,12 @@ define(function (require) {
     }
     
     self._detail = new Detail();
-    $.when(
-      self._detail.init(self._selector + " > div > div.detail", object[self._field_name])
-    ).always(function() {
+    self._detail.init(self._selector + " > div > div.detail", object[self._field_name])
+    .then(function() {
       self._detail.edit(self.edit());
       self._detail.data(self._value == null ? null : self._value.properties);
       self._detail.visible(true);
+      self._detail.refresh();
       dfd.resolve();
     });
     return dfd.promise();
@@ -187,22 +187,22 @@ define(function (require) {
     var self = this;
     console.assert(!(!class_id), field);
     $.when(
-      Storage.read(Class.CLASS_ID, class_id)
-             .done(function(data) {
-               self._class = data;
-             }),
-      Storage.read(class_id)
-             .done(function(data) {
-               self._objects = Object.keys(data)
-                                     .map(function(id) { return data[id]; });
-             })
-    ).then(function() {
+      Storage.read(Class.CLASS_ID, class_id).done(function(data) { self._class = data; }),
+      Storage.read(class_id).done(function(data) { self._objects = Object.keys(data).map(function(id) { return data[id]; }); })
+    )
+    .then(function() {
       create_dropdown(self, root, field);
       create_button(self, root, self._class[this._field_name]);
-      if (self._embedded) {
-        create_detail(self, root);
-        self._button.hide();
+      return;
+    })
+    .then(function() {
+      if (!self._embedded) {
+        return;
       }
+      self._button.hide();
+      return create_detail(self, root);
+    })
+    .then(function() {
       dfd.resolve();
     });
     return dfd.promise();
