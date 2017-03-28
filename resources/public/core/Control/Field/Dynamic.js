@@ -7,12 +7,13 @@ define(function (require) {
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
   var Detail = require("core/Control/Detail");
+  var DivButton = require("core/Control/DivButton");
   var Dialog = require("core/Dialog");
   
   var TEMPLATE = '' +
 '<label></label>' +
 '<div>' +
-'  <select style="color:black;"></select><button style="width:30px;">...</button>' +
+'  <select style="color:black;"></select><span></span>' +
 '  <div class="detail"></div>' +
 '</div>';
 
@@ -73,9 +74,9 @@ define(function (require) {
     self._dropdown.val(self._value == null ? "" : self._value.id);
   }
   
-  function create_button(self, root) {
-    self._button = root.find("button");
-    self._button.on('click', function (evnet) {
+  function create_button(self, selector) {
+    self._button = new DivButton();
+    return self._button.init(selector, "<i class='fa fa-th-list'/>", function (evnet) {
       var object = null;
       var detail = new Detail();
       var dialog = new Dialog();
@@ -192,8 +193,7 @@ define(function (require) {
     )
     .then(function() {
       create_dropdown(self, root, field);
-      create_button(self, root, self._class[this._field_name]);
-      return;
+      return create_button(self, selector + " > div > span");
     })
     .then(function() {
       if (!self._embedded) {
