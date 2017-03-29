@@ -16,19 +16,18 @@ define(function (require) {
 
   var ITEM_TEMPLATE = '' +
 '<div class="item" style="border:solid 1px gray;border-radius:3px;background-color:#f0f0f0;padding:2px 5px 2px 5px;margin:2px 0px;">' +
-'  <span style="display:inline-block;font-family:Verdana,Arial,sans-serif;font-size:12px;"></span>' +
+'  <span style="display:inline-block;font-size:12px;"></span>' +
 '  <i class="fa fa-remove" />' +
 '</div>';
 
-  function create_search(selector, self, multi_selectable) {
+  function create_search(selector, self) {
     function search(event) {
       var items = Object.keys(self._objects).map(function(id) { return self._objects[id]; });
       var dialog = new SelectDialog();
-      dialog.init(self._columns, items, multi_selectable)
+      dialog.init(self._columns, items, self._multi_selectable)
       .done(function() {
         dialog.title("Select");
         dialog.ok(function (recids) {
-          console.log("[OK] clicked. selection=" + recids);
           self._value = recids;
           if (typeof self._ok == "function")
             self._ok(recids);
@@ -53,10 +52,19 @@ define(function (require) {
     this._editting = false;
     this._ok = null;
     this._converter = null;
+    this._multi_selectable = null;
+    this._min_width = null;
   }
 
-  Finder.prototype.init = function(selector, columns, items, description, multi_selectable, converter, font_name) {
+  Finder.prototype.init = function(selector, columns, items, description, multi_selectable, min_width, converter, font_name) {
     var dfd = new $.Deferred;
+    
+    this._columns = columns;
+    this._objects = items;
+    this._converter = converter;
+    this._multi_selectable = multi_selectable;
+    this._min_width = min_width;
+    
     // Set member fields
     var root = $(selector);
     if (0 < root.children()) {
@@ -77,7 +85,12 @@ define(function (require) {
       var record = i.parent();
       record.remove();
       var id = record.attr("id");
-      self._value = self._value.filter(function (_id) { return _id != id; });
+      if (self._multi_selectable) {
+        self._value = self._value.filter(function (_id) { return _id != id; });
+      } else {
+        self._value = null;
+      }
+      self.refresh();
     });
     // Mouse over/out on icons.
     root.on("mouseover", "i", function(event) {
@@ -90,12 +103,9 @@ define(function (require) {
     });
 
     var self = this;
-    self._columns = columns;
-    self._objects = items;
-    self._converter = converter;
     Utils.load_css("/core/Control/Finder.css")
     .then(function() {
-      return create_search(selector + " > div > div[name='button']", self, multi_selectable);
+      return create_search(selector + " > div > div[name='button']", self);
     })
     .then(function() {
       self.edit(false);
@@ -109,6 +119,9 @@ define(function (require) {
   };
   
   Finder.prototype.edit = function(on) {
+    if (arguments.length == 0) {
+      return this._editting;
+    }
     this._editting = on;
     this._search.visible(on);
     this._list.find("div.item > i").css("display", on ? "inline" : "none");
@@ -127,13 +140,39 @@ define(function (require) {
     this.refresh();
   };
 
-  Finder.prototype.data = function(value) {
-    if (arguments.length == 0) {
-      return this._value;
+  function getter(self, value) {
+    var multi = self._multi_selectable;
+    
+    // null or undefined
+    if (!value) {
+      return multi ? [] : null;
     }
     
-    this._value = !value ? [] : (Array.isArray(value) ? value : [value]);
-    this._fixed = this._value;
+    // *NOT* ARray
+    if (!Array.isArray(value)) {
+      return multi ? [value] : value;
+    }
+    
+    // Array
+    if (multi) {
+      return value;
+    }
+    if (value.length == 0) {
+      return null;
+    }
+    return value[0];
+  }
+  
+  function setter(self, value) {
+    self._value = getter(self, value);
+    self._fixed = self._value;
+  }
+
+  Finder.prototype.data = function(value) {
+    if (arguments.length == 0) {
+      return getter(this, this._value);
+    }
+    setter(this, value);
   };
   
   Finder.prototype.update = function(keys) {
@@ -147,20 +186,26 @@ define(function (require) {
   Finder.prototype.refresh = function() {
     this._list.empty();
     
-    if (!this._value) {
-      this._value = [];
-    }
+    var value = getter(this, this._value);
+    value = this._multi_selectable ? value : [value];
+    
     var self = this;
-    var objects = this._value.map(function(id) { return self._objects[id]; });
+    var objects = value.map(function(id) { return self._objects[id]; });
     var captions = this._converter(objects);
     for (var i = 0; i < captions.length; i++) {
-      var file = this._value[i];
+      var file = value[i];
       this._list.append(ITEM_TEMPLATE);
       var record = this._list.find("div.item:last-child");
-      record.attr("id", this._value[i]);
-      record.find("span").text(captions[i]);
+      record.attr("id", value[i]);
+      var span = record.find("span");
+      span.text(captions[i]);
+      span.css("min-width", !this._min_width ? "200px" : this._min_width);
     }
     this.edit(this._editting);
+  };
+
+  Finder.prototype.multi_selectable = function () {
+    return this._multi_selectable;
   };
 
   Finder.cell_render = function(field) {

@@ -28,6 +28,9 @@ define(function (require) {
     var fields = this.caption_fields();
     var captions = objects
       .map(function(object) {
+         if (!object) {
+           return "";
+         }
          return fields
            .map(function(field) {
              var value = object[field.name];

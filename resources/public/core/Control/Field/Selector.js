@@ -41,6 +41,7 @@ define(function (require) {
     var class_id = field.datatype.properties.class_id;
     var description = field.datatype.properties.description;
     var multi_selectable = field.datatype.properties.multi_selectable;
+    var min_width = field.datatype.properties.min_width;
     var class_ = null;
     var columns = null;
     var items = null;
@@ -59,7 +60,7 @@ define(function (require) {
       function converter(objects) {
         return (new Class(class_)).captions(objects);
       }
-      return self._finder.init(selector + " > div", columns, items, description, multi_selectable, converter);
+      return self._finder.init(selector + " > div", columns, items, description, multi_selectable, min_width, converter);
     })
     .then(function() {
       self.edit(false);

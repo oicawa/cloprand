@@ -8,70 +8,35 @@ define(function (require) {
   var Field = require("core/Control/Field/Field");
   var Detail = require("core/Control/Detail");
   var DivButton = require("core/Control/DivButton");
+  var Finder = require("core/Control/Finder");
+  var Grid = require("core/Control/Grid");
   var Dialog = require("core/Dialog");
   
   var TEMPLATE = '' +
 '<label></label>' +
 '<div>' +
-'  <select style="color:black;"></select><span></span>' +
+'  <div name="finder" style="display:inline-block;"></div><span></span>' +
 '  <div class="detail"></div>' +
 '</div>';
 
   var OPTION_TEMPLATE = '<option></option>';
 
-  function create_dropdown(self, root, field) {
+  function create_finder(self, selector, columns, items, description, min_width) {
+    console.log("create_finder called.");
+    self._finder = new Finder();
+    function converter(objects) {
+      return (new Class(self._class)).captions(objects);
+    }
+    return self._finder.init(selector, columns, items, description, false, min_width, converter);
+  }
+
+  function create_label(self, root, field) {
     root.empty();
     root.append(TEMPLATE);
     
     var label = root.find("label");
     var caption = Locale.translate(field.label);
     label.text(caption);
-    
-    self._dropdown = root.find("select");
-    
-    var caption_fields = [];
-    if (!self._class.object_fields) {
-      self._class.object_fields = [];
-    }
-    for (var i = 0; i < self._class.object_fields.length; i++) {
-      var object_field = self._class.object_fields[i];
-      if (!object_field.caption) {
-        continue;
-      }
-      caption_fields.push(object_field.name);
-    }
-
-    var items = [];
-    items.push({id: "", label: ""});
-    for (var i = 0; i < self._objects.length; i++) {
-      var item = self._objects[i];
-      var captions = [];
-      for (var j = 0; j < caption_fields.length; j++) {
-        var value = item[caption_fields[j]];
-        captions.push(Locale.translate(value));
-      }
-      var value = !item.id ? item[caption_fields[0]] : item.id;
-      var caption = captions.join(" ");
-      items.push({value : value, caption : caption });
-      self._items[value] = caption;
-    }
-    
-    self._dropdown.attr("name", field.name);
-    for (var i = 0; i < items.length; i++) {
-      self._dropdown.append(OPTION_TEMPLATE);
-      var option = self._dropdown.find("option:last-child");
-      option.attr("value", items[i].value);
-      option.text(items[i].caption);
-    }
-    
-    self._dropdown.on("change", function(event) {
-      if (!self._embedded) {
-        return;
-      }
-      create_detail(self, root);
-    });
-    
-    self._dropdown.val(self._value == null ? "" : self._value.id);
   }
   
   function create_button(self, selector) {
@@ -83,11 +48,7 @@ define(function (require) {
       dialog.init(function(id) {
         var dfd = new $.Deferred;
         
-        var objects = self._objects.filter(function (element, index, array) {
-          var value = self._dropdown.val();
-          return element.id == value;
-        });
-        object = objects[0];
+        object = self._objects[self._finder.data()];
         
         detail.init('#' + id, object[self._field_name])
         .then(function () {
@@ -126,15 +87,11 @@ define(function (require) {
   
   function create_detail(self, root) {
     var dfd = new $.Deferred;
-    var objects = self._objects.filter(function (element, index, array) {
-      var value = self._dropdown.val();
-      return element.id == value;
-    });
-    var object = objects[0];
-
+    
     var detail = root.find("div > div.detail");
     detail.empty();
     
+    var object = self._objects[self._finder.data()];
     if (!object) {
       dfd.resolve();
       return dfd.promise();
@@ -157,7 +114,7 @@ define(function (require) {
     this._selector = null;
     this._field_name = null;
     this._embedded = null;
-    this._dropdown = null;
+    this._finder = null;
     this._button = null;
     this._detail = null;
     this._value = null;
@@ -185,21 +142,37 @@ define(function (require) {
     var class_id = !properties.field ? properties.class_id : properties.field.class_id;
     this._field_name = !properties.field ? properties.field_name : properties.field.field_name;
     this._embedded = properties.embedded;
+    this._min_width = properties.min_width;
     var self = this;
     console.assert(!(!class_id), field);
+    var columns = null;
     $.when(
       Storage.read(Class.CLASS_ID, class_id).done(function(data) { self._class = data; }),
-      Storage.read(class_id).done(function(data) { self._objects = Object.keys(data).map(function(id) { return data[id]; }); })
+      Storage.read(class_id).done(function(data) { self._objects = data; })
     )
     .then(function() {
-      create_dropdown(self, root, field);
+      return Grid.create_columns(self._class).then(function (columns_) { columns = columns_; });
+    })
+    .then(function() {
+      create_label(self, root, field);
+      return create_finder(self, selector + " > div > div[name='finder']", columns, self._objects, self._field_name, self._min_width);
+    })
+    .then(function() {
+      self._finder.ok(function() {
+        if (!self._embedded) {
+          return;
+        }
+        create_detail(self, root);
+      });
+    })
+    .then(function() {
       return create_button(self, selector + " > div > span");
     })
     .then(function() {
       if (!self._embedded) {
         return;
       }
-      self._button.hide();
+      self._button.visible(false);
       return create_detail(self, root);
     })
     .then(function() {
@@ -210,9 +183,9 @@ define(function (require) {
 
   Dynamic.prototype.edit = function(on) {
     if (arguments.length == 0) {
-      return this._dropdown.attr("disabled") ? false : true;
+      return this._finder.edit();
     } else {
-      this._dropdown.attr("disabled", on ? false : true);
+      this._finder.edit(on);
       if (this._detail != null)
         this._detail.edit(on);
     }
@@ -230,13 +203,13 @@ define(function (require) {
   };
 
   Dynamic.prototype.restore = function() {
-    this._dropdown.val(this._value == null ? "" : this._value.id);
+    this._finder.data(!this._value ? "" : this._value.id);
     // set value.properties into this._detail in event handler.
   };
 
   Dynamic.prototype.data = function(value) {
     if (arguments.length == 0) {
-      var id = this._dropdown.val();
+      var id = this._finder.data();
       var properties = {};
       if (this._detail) {
         properties = this._detail.data();
@@ -247,7 +220,7 @@ define(function (require) {
     } else {
       this._value = value;
       this._dialog_data = !value ? null : (!value.properties ? null : value.properties);
-      this._dropdown.val(!value ? "" : value.id);
+      this._finder.data(!value ? "" : value.id);
       var root = $(this._selector);
       if (this._embedded)
         create_detail(this, root);
@@ -255,7 +228,8 @@ define(function (require) {
     }
   };
   
-  Dynamic.prototype.update = function(keys) {
+  Dynamic.prototype.refresh = function(keys) {
+    this._finder.refresh();
   }
 
   Dynamic.cell_render = function(field) {

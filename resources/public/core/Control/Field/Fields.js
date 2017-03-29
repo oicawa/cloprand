@@ -19,10 +19,10 @@ define(function (require) {
   function Fields() {
     Field.call(this, "core/Control/Field", "Fields");
     this._selector = null;
-  	this._value = null;
+    this._value = null;
     this._classes = null;
-  	this._class = { _class:null, columns:null, finder:null, converter:null };
-  	this._field = { _class:null, columns:null, finder:null, converter:null };
+    this._class = { _class:null, columns:null, finder:null, converter:null };
+    this._field = { _class:null, columns:null, finder:null, converter:null };
   }
   Inherits(Fields, Field);
 
@@ -46,6 +46,9 @@ define(function (require) {
     // Finders
     this._class.finder = new Finder();
     this._field.finder = new Finder();
+    
+    var properties = field.datatype.properties;
+    var min_width = !properties ? null : properties.min_width;
 
     var self = this;
     
@@ -68,13 +71,13 @@ define(function (require) {
       function converter(objects) {
         return (new Class(self._class._class)).captions(objects);
       }
-      return self._class.finder.init(selector + " > div > div[name='class']", self._class.columns, self._classes, "Class", false, converter);
+      return self._class.finder.init(selector + " > div > div[name='class']", self._class.columns, self._classes, "Class", false, min_width, converter);
     })
     .then(function () {
       function converter(objects) {
         return (new Class(self._field._class)).captions(objects);
       }
-      return self._field.finder.init(selector + " > div > div[name='field']", self._field.columns, {}, "Field", false, converter);
+      return self._field.finder.init(selector + " > div > div[name='field']", self._field.columns, {}, "Field", false, min_width, converter);
     })
     .then(function () {
       self._class.finder.ok(function (recids) {
