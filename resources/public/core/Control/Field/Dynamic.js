@@ -22,7 +22,6 @@ define(function (require) {
   var OPTION_TEMPLATE = '<option></option>';
 
   function create_finder(self, selector, columns, items, description, min_width) {
-    console.log("create_finder called.");
     self._finder = new Finder();
     function converter(objects) {
       return (new Class(self._class)).captions(objects);
@@ -65,7 +64,6 @@ define(function (require) {
           {
             text : "OK",
             click: function (event) {
-              console.log("[OK] clicked");
               self._dialog_data = detail.data();
               dialog.close();
               return false;
@@ -74,7 +72,6 @@ define(function (require) {
           {
             text : "Cancel",
             click: function (event) {
-              console.log("[Cancel] clicked");
               dialog.close();
               return false;
             }
@@ -243,12 +240,9 @@ define(function (require) {
     )
     .then(function () {
       var renderer = function(record, index, column_index) {
-        console.log(record);
         var value = record[field.name];
-        console.log(value);
         var object = objects[value.id];
         var caption = (new Class(class_)).captions([object])[0];
-        console.log(caption);
         return caption;
       };
       dfd.resolve(renderer);

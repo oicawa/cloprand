@@ -49,15 +49,6 @@ define(function (require) {
     return dfd.promise();
   }
 
-  function print_widthes(self, selector) {
-    for (var i = 0; i < self._fields.length; i++) {
-      var field = self._fields[i];
-      var label_selector = selector + " > div[name='" + field.name + "'] > label";
-      var label = $(label_selector);
-      console.log("field.name=[" + field.name + "] width=" + label.width());
-    }
-  }
-
   function create_form(self, selector) {
     var dfd = new $.Deferred;
     // Declare 'each_field_funcs' array to closing each require 'Controls' & callback process
@@ -76,7 +67,6 @@ define(function (require) {
     }
     $.when.apply(null, promises)
     .then(function() {
-      print_widthes(self, selector);
       dfd.resolve();
     });
     return dfd.promise();

@@ -2,6 +2,9 @@ define(function (require) {
   require("jquery");
   var Utils = require("core/Utils");
   var Uuid = require("core/Uuid");
+  var Class = require("core/Class");
+  var Storage = require("core/Storage");
+  var Locale = require("core/Locale");
   
   var TEMPLATE = '<div></div>';
   
@@ -66,6 +69,69 @@ define(function (require) {
 
   Toolbar.prototype.hide = function(button_name) {
     this._toolbar.hide(button_name);
+  };
+  
+  Toolbar.items = function (src_items, context) {
+    function convert(src_item, items_map, context) {
+      var inner_dfd = new $.Deferred;
+      var entry = null;
+      var menu_type = null;
+      var type_id = src_item.type.id;
+      var properties = src_item.type.properties;
+      console.log("src_item >>> ");
+      console.log(src_item);
+      // Check 'type.id' it is container. (If container, this function must be called recursively.) 
+      $.when(
+        Storage.read(Class.FUNCTION_ENTRY_ID, properties.function_entry.id).done(function (data) { entry = data; }),
+        Storage.read(Class.MENU_ITEM_TYPE_ID, type_id).done(function (data) { menu_type = data; })
+      )
+      .then(function() {
+        console.log("entry >>> ");
+        console.log(entry);
+        require([entry.require_path], function(Module) {
+          var func = Module[entry.function_name];
+          // { id:"search", type:"html",   text:"Search", icon:"fa fa-search",     html:search_generator }
+          items_map[properties.item_id] = {
+            id      : properties.item_id,
+            type    : menu_type.type,
+            text    : Locale.translate(properties.caption),
+            icon    : "fa " + properties.icon,
+            onClick : func,
+            context : context
+          }
+          inner_dfd.resolve();
+        });
+      });
+      return inner_dfd.promise();
+    }
+  
+    var dfd = new $.Deferred;
+    
+    if (!src_items) {
+      dfd.resolve();
+      return dfd.promise();
+    }
+    var promises = [];
+    var items_map = {};
+    for (var i = 0; i < src_items.length; i++) {
+      var src_item = src_items[i];
+      var promise = convert(src_item, items_map, context);
+      promises.push(promise);
+    }
+    
+    $.when.apply(null, promises)
+    .done(function() {
+      var dst_items = [];
+      for (var i = 0; i < src_items.length; i++) {
+        var src_item = src_items[i];
+        var item_id = src_item.type.properties.item_id;
+        var dst_item = items_map[item_id];
+        dst_items.push(dst_item);
+      }
+      dfd.resolve(dst_items);
+    });
+    
+    return dfd.promise();
   };
 
   return Toolbar;

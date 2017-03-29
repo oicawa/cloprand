@@ -18,6 +18,7 @@ define(function (require) {
   Class.TEXT_MULTILINGUALIZATION_ID = 'f4ce98bf-27f9-4319-a112-95e529bc9ff9';
   Class.TEXTLINES_MULTILINGUALIZATION_ID = '48a93daf-9829-4bb8-9760-152491ed7a72';
   Class.FUNCTION_ENTRY_ID = 'f447764e-45fe-425e-9b2b-6ae5e7760b2f';
+  Class.MENU_ITEM_TYPE_ID = 'c4e3e6d0-3d4d-439c-9fea-361f0afed10e';
 
   Class.prototype.caption_fields = function() {
     return this._class.object_fields
