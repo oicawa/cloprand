@@ -10,6 +10,7 @@ define(function (require) {
   var Inherits = require("core/Inherits");
   var Grid = require("core/Control/Grid");
   var Detail = require("core/Control/Detail");
+  var Toolbar = require("core/Control/Toolbar");
   var Field = require("core/Control/Field/Field");
   var Dialog = require("core/Dialog");
   var Action = require("core/Action");
@@ -251,8 +252,15 @@ define(function (require) {
     .then(function() {
       return self._grid.init(selector + " > div > div.records", self._columns, styles);
     })
+    //.then(function() {
+    //  return Action.convert(options.actions, self).done(function(items) { self._grid.items(items); });
+    //})
     .then(function() {
-      return Action.convert(options.actions, self).done(function(items) { self._grid.items(items); });
+      return Toolbar.items(options.toolbar_items, self).done(function(dst_items) { console.log(dst_items);self._grid.items(dst_items); });
+      //console.log(options);
+      //console.log(options.toolbar_items);
+      //Toolbar.items(options.toolbar_items, self).done(function(dst_items) { console.log(dst_items); });
+      //return;
     })
     .then(function() {
       self._grid.toolbar(false);

@@ -34,6 +34,9 @@ define(function (require) {
           return;
         }
         operation(event);
+      },
+      onToolbar:function(event) {
+        console.log(event);
       }
     });
     
