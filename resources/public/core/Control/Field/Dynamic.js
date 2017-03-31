@@ -181,10 +181,10 @@ define(function (require) {
   Dynamic.prototype.edit = function(on) {
     if (arguments.length == 0) {
       return this._finder.edit();
-    } else {
-      this._finder.edit(on);
-      if (this._detail != null)
-        this._detail.edit(on);
+    }
+    this._finder.edit(on);
+    if (this._detail) {
+      this._detail.edit(on);
     }
   };
   
@@ -227,6 +227,9 @@ define(function (require) {
   
   Dynamic.prototype.refresh = function(keys) {
     this._finder.refresh();
+    if (this._detail) {
+      this._detail.refresh();
+    }
   }
 
   Dynamic.cell_render = function(field) {

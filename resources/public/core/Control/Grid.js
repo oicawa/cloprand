@@ -215,27 +215,27 @@ define(function (require) {
     console.assert(false, "*NOT* Implemented.");
   };
 
-  Grid.prototype.actions = function(actions) {
-    if (!actions) {
+  Grid.prototype.items = function(items) {
+    if (!items) {
       return;
     }
     
-    this._grid.toolbar.items = actions;
+    this._grid.toolbar.items = items;
     // !!! The follow logic is dirty hack !!!
     // <<Reason>>
     // The added all items are not displayed at once.
     // Calling 'refresh' method of toolbar once, only one displayed item is added in toolbar.
-    // So, I implement it temporarily to call the 'refresh' method for the number of actions.
+    // So, I implement it temporarily to call the 'refresh' method for the number of items.
     // This issue have to be investigated, and be fixed...
-    for (var i = 0; i < actions.length; i++) {
+    for (var i = 0; i < items.length; i++) {
       this._grid.toolbar.refresh();
     }
-    for (var i = 0; i < actions.length; i++) {
-      var init = actions[i].init;
+    for (var i = 0; i < items.length; i++) {
+      var init = items[i].init;
       if (!init || typeof init != "function") {
         continue;
       }
-      init(actions[i]);
+      init(items[i]);
     }
     
  };

@@ -7,7 +7,7 @@ define(function (require) {
   
   var TEMPLATE = '' +
 '<label></label>' +
-'<div><input type="checkbox" /><span></span></div>';
+'<div><label><input type="checkbox" /><span></span></label></div>';
   
   function parse_value(value) {
     // false, 0, null, undefined

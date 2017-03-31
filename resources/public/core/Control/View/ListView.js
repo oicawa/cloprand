@@ -141,14 +141,11 @@ define(function (require) {
     .then(function() {
       return self._grid.init(list_selector, columns)
     })
-    //.then(function() {
-    //  return Action.convert(self._class["list_actions"]).done(function(actions) { self._grid.actions(actions); });
-    //})
     .then(function() {
       var src_items = Utils.get_as_json(null, function() { return self._class.list_view.properties.toolbar_items; });
       if (!src_items)
         return;
-      return Toolbar.items(src_items).done(function(dst_items) { self._grid.actions(dst_items); });
+      return Toolbar.items(src_items).done(function(dst_items) { self._grid.items(dst_items); });
     })
     .then(function() {
       self._grid.add_operation("dblclick", ListView.open1);

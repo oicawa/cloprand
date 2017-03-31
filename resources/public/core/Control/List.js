@@ -252,19 +252,11 @@ define(function (require) {
       return self._grid.init(selector + " > div > div.records", self._columns, styles);
     })
     .then(function() {
-      return Action.convert(options.actions, self).done(function(actions) { self._grid.actions(actions); });
+      return Action.convert(options.actions, self).done(function(items) { self._grid.items(items); });
     })
     .then(function() {
       self._grid.toolbar(false);
       self._grid.multi_search(false);
-      //self._grid.actions([
-      //  { id:"add",    type:"button", text:"Add",    icon:"w2ui-icon-plus",   onClick: List.add,    context: self },
-      //  { id:"edit",   type:"button", text:"Edit",   icon:"fa fa-pencil",     onClick: List.edit,   context: self },
-      //  { id:"remove", type:"button", text:"Remove", icon:"w2ui-icon-cross",  onClick: List.remove, context: self },
-      //  { id:"up",     type:"button", text:"Up",     icon:"fa fa-arrow-up",   onClick: List.up,     context: self },
-      //  { id:"down",   type:"button", text:"Down",   icon:"fa fa-arrow-down", onClick: List.down,   context: self }
-      //  //{ id:"search", type:"html",   text:"Search", icon:"fa fa-search",     html:search_generator }
-      //]);
       self._grid.refresh();
       dfd.resolve();
     });
@@ -305,8 +297,8 @@ define(function (require) {
     this._grid.refresh();
   };
 
-  List.prototype.actions = function(actions) {
-    this._grid.actions(actions);
+  List.prototype.items = function(items) {
+    this._grid.items(items);
   };
 
   return List;

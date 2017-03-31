@@ -36,7 +36,7 @@ define(function (require) {
       return Action.convert(src_actions, list).done(function(dst_actions) { actions = dst_actions; });
     })
     .then(function () {
-      list.actions(actions);
+      list.items(actions);
       list.data(items);
       list.edit(true);
       list.refresh();

@@ -38,19 +38,19 @@ define(function (require) {
     return dfd.promise();
   };
   
-  Toolbar.prototype.actions = function(actions) {
-    if (!actions) {
+  Toolbar.prototype.items = function(items) {
+    if (!items) {
       return;
     }
     
-    this._toolbar.items = actions;
+    this._toolbar.items = items;
     // !!! The follow logic is dirty hack !!!
     // <<Reason>>
     // The added all items are not displayed at once.
     // Calling 'refresh' method of toolbar once, only one displayed item is added in toolbar.
-    // So, I implement it temporarily to call the 'refresh' method for the number of actions.
+    // So, I implement it temporarily to call the 'refresh' method for the number of items.
     // This issue have to be investigated, and be fixed...
-    for (var i = 0; i < actions.length; i++) {
+    for (var i = 0; i < items.length; i++) {
       this._toolbar.refresh();
     }
   };
@@ -78,16 +78,12 @@ define(function (require) {
       var menu_type = null;
       var type_id = src_item.type.id;
       var properties = src_item.type.properties;
-      console.log("src_item >>> ");
-      console.log(src_item);
       // Check 'type.id' it is container. (If container, this function must be called recursively.) 
       $.when(
         Storage.read(Class.FUNCTION_ENTRY_ID, properties.function_entry.id).done(function (data) { entry = data; }),
         Storage.read(Class.MENU_ITEM_TYPE_ID, type_id).done(function (data) { menu_type = data; })
       )
       .then(function() {
-        console.log("entry >>> ");
-        console.log(entry);
         require([entry.require_path], function(Module) {
           var func = Module[entry.function_name];
           // { id:"search", type:"html",   text:"Search", icon:"fa fa-search",     html:search_generator }

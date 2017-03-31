@@ -103,7 +103,7 @@ define(function (require) {
         });
         return html;
       }
-      //self._grid.actions([
+      //self._grid.items([
       //  { id:"search", type:"html",   text:"Search", icon:"fa fa-search",   html:search_generator }
       //]);
       var menus = Object.keys(classes)

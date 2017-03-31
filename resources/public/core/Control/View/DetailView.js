@@ -254,9 +254,15 @@ define(function (require) {
     .then(function() {
       return self._toolbar.init(toolbar_selector);
     })
+    //.then(function() {
+    //  self._toolbar.visible(false);
+    //  return Action.convert(self._class["detail_actions"]).done(function (actions) { self._toolbar.actions(actions); });
+    //})
     .then(function() {
-      self._toolbar.visible(false);
-      return Action.convert(self._class["detail_actions"]).done(function (actions) { self._toolbar.actions(actions); });
+      var src_items = Utils.get_as_json(null, function() { return self._class.detail_view.properties.toolbar_items; });
+      if (!src_items)
+        return;
+      return Toolbar.items(src_items).done(function(dst_items) { self._toolbar.items(dst_items); });
     })
     .then(function() {
       return self._detail.init(detail_selector, self._class.object_fields, basic_assist, custom_assist);
