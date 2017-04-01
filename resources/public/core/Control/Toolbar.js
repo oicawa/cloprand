@@ -28,7 +28,7 @@ define(function (require) {
             type    : menu_type.type,
             text    : Locale.translate(properties.caption),
             icon    : "fa " + properties.icon,
-            onClick : func,
+            action  : func,
             context : context
           }
           dfd.resolve();
@@ -85,6 +85,14 @@ define(function (require) {
         name : name,
       });
       self._toolbar = w2ui[name];
+      self._toolbar.onClick = function (event) {
+        var id = event.target;
+        var item = self._toolbar.get(id);
+        if (!item.action) {
+          return;
+        }
+        item.action(event);
+      }
       self._root.hide();
       dfd.resolve();
     });

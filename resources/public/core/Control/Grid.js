@@ -35,8 +35,13 @@ define(function (require) {
         }
         operation(event);
       },
-      onToolbar:function(event) {
-        console.log(event);
+      onToolbar : function (event) {
+        var item = this.toolbar.get(event.target);
+        if (!item.action) {
+          return;
+        }
+        event.item = item;
+        item.action(event);
       }
     });
     
