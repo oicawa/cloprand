@@ -27,7 +27,7 @@ define(function (require) {
         //toolbarInput:false,
         toolbarInput:true,
       },
-      columns:columns,
+      columns: columns,
       onDblClick:function(event) {
         var operation = self._operations["dblclick"];
         if (!operation) {

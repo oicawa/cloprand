@@ -23,7 +23,9 @@ define(function (require) {
   function create_search(selector, self) {
     function search(event) {
       var items = Object.keys(self._objects).map(function(id) { return self._objects[id]; });
+      var width = self._columns.map(function(column) { return parseInt(column.size); }).reduce(function (prev, current, index, array) { return prev + current; }, 100);
       var dialog = new SelectDialog();
+      console.log(self._columns);
       dialog.init(self._columns, items, self._multi_selectable)
       .done(function() {
         dialog.title("Select");
@@ -33,7 +35,7 @@ define(function (require) {
             self._ok(recids);
           self.refresh();
         });
-        dialog.size(300, 400);
+        dialog.size(width, 500);
         dialog.open();
       });
     }

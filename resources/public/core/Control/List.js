@@ -76,6 +76,7 @@ define(function (require) {
   List.prototype.showImportDialog = function (title) {
     var items = null;
     var self = this;
+    var width = self._columns.map(function(column) { return parseInt(column.size); }).reduce(function (prev, current, index, array) { return prev + current; }, 100);
     var dialog = new SelectDialog();
 
     Storage.read(this._class.id).done(function (data) { items = data; })
@@ -98,7 +99,7 @@ define(function (require) {
         }
         self.refresh();
       });
-      dialog.size(300, 400);
+      dialog.size(width, 400);
       dialog.open();
     });
   };
