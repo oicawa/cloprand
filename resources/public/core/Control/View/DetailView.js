@@ -62,6 +62,8 @@ define(function (require) {
     this._detail = null;
   }
   
+  DetailView.id = "a9bc6cc7-e6fc-4b19-8c7e-468bc2922f25";
+  
   DetailView.edit = function (event) {
     var tab_info = Contents.get_tab_info(event);
     var view = app.contents().content(tab_info.tab_id);
@@ -76,12 +78,11 @@ define(function (require) {
         return;
       }
       
-      var tab_info = Contents.get_tab_info(event);
-      var view = app.contents().content(tab_info.tab_id);
+      var self = event.item.context;
       var objects = null;
-      Storage.delete(view._class_id, view._object_id)
+      Storage.delete(self._class_id, self._object_id)
       .done(function() {
-        app.contents().broadcast(tab_info.class_id, tab_info.object_id, null);
+        app.contents().broadcast(self._class_id, self._object_id, null);
         app.contents().remove(tab_info.tab_id);
         Dialog.show("Deleted", "Delete");
       })
@@ -98,8 +99,8 @@ define(function (require) {
 
   DetailView.save = function (event) {
     var tab_info = Contents.get_tab_info(event);
-    var view = app.contents().content(tab_info.tab_id);
-    var detail = view.detail();
+    var self = event.item.context;
+    var detail = self.detail();
     var data = detail.data();
     var object = null;
 
@@ -113,19 +114,19 @@ define(function (require) {
     var files = get_files(fields, data);
     
     if (detail.is_new()) {
-      Storage.create(tab_info.class_id, data, files)
+      Storage.create(self._class.id, data, files)
       .done(function(object) {
-        edit_toolbar(view.toolbar(), false);
+        edit_toolbar(self.toolbar(), false);
         var new_object_id = object[key_field_name];
-        view._object_id = new_object_id;
+        self._object_id = new_object_id;
         detail.data(object);
         detail.edit(false);
         detail.refresh();
-        var old_tab_name = Tabs.create_tab_name([tab_info.prefix, tab_info.class_id, Uuid.NULL]);
-        var new_tab_name = Tabs.create_tab_name([tab_info.prefix, tab_info.class_id, new_object_id]);
-        var label = (new Class(view._class)).captions([object])[0];
+        var old_tab_name = Tabs.create_tab_name([tab_info.prefix, self._class.id, Uuid.NULL]);
+        var new_tab_name = Tabs.create_tab_name([tab_info.prefix, self._class.id, new_object_id]);
+        var label = (new Class(self._class)).captions([object])[0];
         app.contents().change(old_tab_name, new_tab_name, label);
-        app.contents().broadcast(tab_info.class_id, new_object_id, object);
+        app.contents().broadcast(self._class.id, new_object_id, object);
         Dialog.show("New item was created successfully.", "Save");
       })
       .fail(function(jqXHR, text_status, error_thrown) {
@@ -138,14 +139,14 @@ define(function (require) {
       });
     } else {
       if (!data[key_field_name])
-        data[key_field_name] = view._object_id;
+        data[key_field_name] = self._object_id;
       Storage.update(tab_info.class_id, data[key_field_name], data, files)
       .done(function(object) {
-        edit_toolbar(view.toolbar(), false);
+        edit_toolbar(self.toolbar(), false);
         detail.edit(false);
         detail.commit();
         detail.refresh();
-        var label = (new Class(view._class)).captions([data])[0];
+        var label = (new Class(self._class)).captions([data])[0];
         app.contents().label(tab_info.tab_id, label);
         app.contents().broadcast(tab_info.class_id, tab_info.object_id, data);
         Dialog.show("Edited item was saved successfully.", "Save");
@@ -167,10 +168,9 @@ define(function (require) {
         return;
       }
       
-      var tab_info = Contents.get_tab_info(event);
-      var view = app.contents().content(tab_info.tab_id);
-      edit_toolbar(view.toolbar(), false);
-      var detail = view.detail();
+      var self = event.item.context;
+      edit_toolbar(self.toolbar(), false);
+      var detail = self.detail();
       detail.restore();
       detail.edit(false);
       detail.refresh();
@@ -254,15 +254,11 @@ define(function (require) {
     .then(function() {
       return self._toolbar.init(toolbar_selector);
     })
-    //.then(function() {
-    //  self._toolbar.visible(false);
-    //  return Action.convert(self._class["detail_actions"]).done(function (actions) { self._toolbar.actions(actions); });
-    //})
     .then(function() {
       var src_items = Utils.get_as_json(null, function() { return self._class.detail_view.properties.toolbar_items; });
       if (!src_items)
         return;
-      return Toolbar.items(src_items).done(function(dst_items) { self._toolbar.items(dst_items); });
+      return Toolbar.items(src_items, self).done(function(dst_items) { self._toolbar.items(dst_items); });
     })
     .then(function() {
       return self._detail.init(detail_selector, self._class.object_fields, basic_assist, custom_assist);

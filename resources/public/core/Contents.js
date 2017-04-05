@@ -2,33 +2,15 @@ define(function (require) {
   require("jquery");
   var Utils = require("core/Utils");
   var Connector = require("core/Connector");
+  var Storage = require("core/Storage");
+  var Class = require("core/Class");
   var Tabs = require("core/Control/Tabs");
 
   var TEMPLATE = '' +
 '<div id="contents-frame">' +
 '  <div id="contents-tabs"></div>' +
 '</div>';
-  
-  function create_view(self, tab_name, view_name, class_id, object_id, options) {
-    //var dfd = new $.Deferred;
-    var view_path = "core/Control/View/" + view_name;
-    require([view_path], function(View) {
-      var view = new View();
-      self._tabs.content(tab_name, view);
-      try {
-        var tab_id = self._tabs.tab_id(tab_name);
-        var selector = "#" + tab_id + " > div.tab-content-frame > div.tab-content-panel";
-        view.init(selector, class_id, object_id, options);
-        //.then(function() {
-        //  dfd.resolve();
-        //});
-      } catch (e) {
-        console.log("e=" + e + ", view_name=" + view_name + ", class_id=" + class_id + ", object_id=" + object_id);
-      }
-    });
-    //return dfd.promise();
-  }
-  
+
   // Constructor
   function Contents() {
     this._tabs = null;
@@ -66,20 +48,13 @@ define(function (require) {
     this._tabs.content(tab_id, detail);
   };
   
-  Contents.prototype.show_tab = function (label, options, view_name, class_id, object_id) {
-    console.assert(typeof view_name == "string" && 1 <= view_name.length);
-    var params = Array.prototype.slice.call(arguments, 2);
-    var tab_name = Tabs.create_tab_name(params);
-    var tab = this._tabs.get(tab_name);
-    if (tab) {
-      this._tabs.select(tab_name);
-      return;
+  Contents.prototype.show_tab = function (label, options, view_id, class_id, object_id) {
+    var tab = this._tabs.get(view_id, class_id, object_id);
+    if (!tab) {
+      this._tabs.add(view_id, class_id, object_id);
     }
-    this._tabs.add(tab_name, label, true, true);
-
-    create_view(this, tab_name, view_name, class_id, object_id, options);
-    
-    this._tabs.select(tab_name);
+    this._tabs.select(view_id, class_id, object_id);
+    this._tabs.refresh();
   };
   
   Contents.prototype.content = function (tab_id) {
@@ -110,8 +85,8 @@ define(function (require) {
     var template = null;
     var assist = null;
     var self = this;
-    Utils.load_css("/core/Contents.css");
     $.when(
+      Utils.load_css("/core/Contents.css"),
       Connector.get("core/Contents.json", "json").done(function (data) { assist = data; })
     ).always(function() {
       contents.append(TEMPLATE);
@@ -121,10 +96,9 @@ define(function (require) {
       self._tabs.init("#contents-tabs");
       for (var i = 0; i < assist.tabs.length; i++) {
         var tab = assist.tabs[i];
-        var tab_name = Tabs.create_tab_name(tab.id);
-        self._tabs.add(tab_name, tab.label, true, false);
-        create_view(self, tab_name, tab.view, tab.class_id, tab.object_id);
-        self._tabs.select(tab_name);
+        self._tabs.add(tab.view_id, tab.class_id, tab.object_id);
+        self._tabs.select(tab.view_id, tab.class_id, tab.object_id);
+        self._tabs.refresh();
       }
     });
   };

@@ -7,6 +7,7 @@ define(function (require) {
   var Connector = require("core/Connector");
   var Storage = require("core/Storage");
   var Grid = require("core/Control/Grid");
+  var ListView = require("core/Control/View/ListView");
   
   var TEMPLATE = '' +
 '<div class="menuview-panel">' +
@@ -21,14 +22,20 @@ define(function (require) {
     this._grid = null;
   }
   
+  MenuView.id = "676138ed-aee1-4d6d-a8d8-c114042b1833";
+  
   MenuView.show_gridview = function (self, recid) {
     var data = self._grid.get(recid);
     var captions = (new Class(self._class)).captions([data]);
-    app.contents().show_tab(captions[0], null, "ListView", data.id, null);
+    app.contents().show_tab(captions[0], null, ListView.id, data.id, null);
   };
   
   MenuView.prototype.list = function () {
     return this._grid;
+  };
+  
+  MenuView.prototype.caption = function () {
+    return "Menu";
   };
   
   MenuView.prototype.update = function (keys) {
@@ -61,6 +68,7 @@ define(function (require) {
   };
   
   MenuView.prototype.init= function (selector, class_id, object_id) {
+    var dfd = new $.Deferred;
     this._selector = selector;
     this._class_id = class_id;
     this._class = null;
@@ -111,7 +119,11 @@ define(function (require) {
         .filter(function(class_) { return class_.application == true; });
       self._grid.data(menus);
       self.refresh();
+    })
+    .then(function () {
+      dfd.resolve(self);
     });
+    return dfd.promise();
   };
   
   return MenuView;

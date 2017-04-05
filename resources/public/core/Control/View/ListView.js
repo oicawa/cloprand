@@ -31,14 +31,16 @@ define(function (require) {
   function ListView () {
     this._class_id = null;
     this._class = null;
+    this._base_class = null;
     this._toolbar = null;
     this._grid = null;
   }
   
+  ListView.id = "24c06c4d-a94e-4cca-9825-27fb26fcc9dc";
+  
   ListView.create = function (event) {
-    var tab_info = Contents.get_tab_info(event);
-    var view = app.contents().content(tab_info.tab_id);
-    app.contents().show_tab("New " + Locale.translate(view._class.label), null, "DetailView", tab_info.class_id, Uuid.NULL);
+    var self = event.item.context;
+    app.contents().show_tab("New " + Locale.translate(self._class.label), null, "DetailView", self._class.id, Uuid.NULL);
   };
   
   function open_details(class_, grid, recids) {
@@ -59,7 +61,7 @@ define(function (require) {
       var caption = captions[i];
       var object = objects[i];
       var key = object[key_field_name];
-      app.contents().show_tab(caption, null, "DetailView", class_.id, key);
+      app.contents().show_tab(caption, null, DetailView.id, class_.id, key);
     }
   }
 
@@ -73,10 +75,9 @@ define(function (require) {
   };
   
   ListView.open = function (event) {
-    var tab_info = Contents.get_tab_info(event);
-    var view = app.contents().content(tab_info.tab_id);
-    var class_ = view._class;
-    var grid = view.list();
+    var self = event.item.context;
+    var class_ = self._class;
+    var grid = self.list();
     var recids = grid.selection();
     open_details(class_, grid, recids);
   };
@@ -116,7 +117,13 @@ define(function (require) {
     this._grid.refresh();
   };
 
+  ListView.prototype.caption = function () {
+    var captions = (new Class(this._base_class)).captions([this._class]);
+    return captions[0];
+  };
+
   ListView.prototype.init = function (selector, class_id, object_id) {
+    var dfd = new $.Deferred;
     this._class_id = class_id;
     this._grid = new Grid();
     var view = $(selector)
@@ -127,7 +134,8 @@ define(function (require) {
     $.when(
       Utils.load_css("/core/Control/View/ListView.css"),
       Storage.read(class_id).done(function (data) { objects = data; }),
-      Storage.read(Class.CLASS_ID, class_id).done(function (data) { self._class = data; })
+      Storage.read(Class.CLASS_ID, class_id).done(function (data) { self._class = data; }),
+      Storage.read(Class.CLASS_ID, Class.CLASS_ID).done(function (data) { self._base_class = data; })
     )
     .then(function() {
       return Grid.create_columns(self._class)
@@ -145,7 +153,7 @@ define(function (require) {
       var src_items = Utils.get_as_json(null, function() { return self._class.list_view.properties.toolbar_items; });
       if (!src_items)
         return;
-      return Toolbar.items(src_items).done(function(dst_items) { self._grid.items(dst_items); });
+      return Toolbar.items(src_items, self).done(function(dst_items) { self._grid.items(dst_items); });
     })
     .then(function() {
       self._grid.add_operation("dblclick", ListView.open1);
@@ -154,7 +162,11 @@ define(function (require) {
       self._grid.multi_search(true);
       self._grid.data(objects);
       self.refresh();
+    })
+    .then(function() {
+      dfd.resolve(self);
     });
+    return dfd.promise();
   };
 
   return ListView;

@@ -46,7 +46,6 @@ define(function (require) {
   };
   
   App.prototype.favicon = function(path) {
-    // <link rel="shortcut icon" href="/image/15ab1b06-3756-48df-b045-728499aa9a6c/e71de065-9b6a-42c7-9987-ddc8e75672ca/favicon/tames.ico" />
     var icon = $("link[rel='shortcut icon']");
     icon.attr("href", path);
   };

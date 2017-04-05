@@ -1,12 +1,9 @@
 {
   "tabs": [
     {
-      "id" : ["MenuView", "Class"],
-      "class_id" : "Class",
-      "object_id" : null,
-      "name" : "menu",
-      "label" : "Menu",
-      "view" : "MenuView"
+      "view_id" : "676138ed-aee1-4d6d-a8d8-c114042b1833",
+      "class_id" : "a7b6a9e1-c95c-4e75-8f3d-f5558a264b35",
+      "object_id" : null
     }
   ]
 }
