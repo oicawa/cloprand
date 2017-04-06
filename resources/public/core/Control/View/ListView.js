@@ -61,7 +61,7 @@ define(function (require) {
       var caption = captions[i];
       var object = objects[i];
       var key = object[key_field_name];
-      app.contents().show_tab(caption, null, DetailView.id, class_.id, key);
+      app.contents().show_tab(caption, null, class_.detail_view.id, class_.id, key);
     }
   }
 

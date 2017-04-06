@@ -34,27 +34,22 @@ define(function (require) {
     };
   };
 
-  Contents.prototype.add = function () {
-    var label = "New " + def_class.label;
-    var tab_id = "object-" + (new Date()).getTime();
-    this._tabs.add(tab_id, label, true);
-
-    var detail = new Detail();
-    detail.init("#" + tab_id + " > div.tab-contents-panel > div.object_detail", def_class.object_fields, assist_class, "name")
-    .then(function() {
-      detail.edit(true);
-      detail.visible(true);
-    });
-    this._tabs.content(tab_id, detail);
-  };
-  
   Contents.prototype.show_tab = function (label, options, view_id, class_id, object_id) {
-    var tab = this._tabs.get(view_id, class_id, object_id);
-    if (!tab) {
-      this._tabs.add(view_id, class_id, object_id);
-    }
-    this._tabs.select(view_id, class_id, object_id);
-    this._tabs.refresh();
+    var self = this;
+    var dfd = new $.Deferred;
+    dfd.resolve();
+    return dfd.promise()
+    .then(function() {
+      var tab = self._tabs.get(view_id, class_id, object_id);
+      if (tab) {
+        return;
+      }
+      return self._tabs.add(view_id, class_id, object_id);
+    })
+    .then(function() {
+      self._tabs.select(view_id, class_id, object_id);
+      self._tabs.refresh(view_id, class_id, object_id);
+    });
   };
   
   Contents.prototype.content = function (tab_id) {
@@ -96,9 +91,13 @@ define(function (require) {
       self._tabs.init("#contents-tabs");
       for (var i = 0; i < assist.tabs.length; i++) {
         var tab = assist.tabs[i];
-        self._tabs.add(tab.view_id, tab.class_id, tab.object_id);
-        self._tabs.select(tab.view_id, tab.class_id, tab.object_id);
-        self._tabs.refresh();
+        self._tabs.add(tab.view_id, tab.class_id, tab.object_id)
+        .then(function() {
+          self._tabs.select(tab.view_id, tab.class_id, tab.object_id);
+        })
+        .then(function() {
+          self._tabs.refresh(tab.view_id, tab.class_id, tab.object_id);
+        });
       }
     });
   };

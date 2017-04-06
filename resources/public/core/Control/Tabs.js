@@ -64,6 +64,7 @@ define(function (require) {
   }
 
   Tabs.prototype.add = function (view_id, class_id, object_id) {
+    this._body.children(".tab-panel").hide();
     var dfd = new $.Deferred;
     var self = this;
     // Panel
@@ -71,7 +72,7 @@ define(function (require) {
     .then(function (view) {
       // Tab
       var tab_id = create_tab_id(view_id, class_id, object_id);
-      self._tabs.add({"id":tab_id, "caption":view.caption()});
+      self._tabs.add({"id":tab_id, "caption":view.caption(), "closable": true });
       dfd.resolve();
     })
     return dfd.promise();
@@ -83,11 +84,10 @@ define(function (require) {
   };
 
   Tabs.prototype.select = function (view_id, class_id, object_id) {
-    var tab = this._tabs.get(view_id, class_id, object_id);
-    this._body.children(".tab-panel").hide();
-    this._tabs.select(view_id, class_id, object_id);
-    
     var tab_id = create_tab_id(view_id, class_id, object_id);
+    var tab = this._tabs.get(tab_id);
+    this._body.children(".tab-panel").hide();
+    this._tabs.select(tab_id);
     this._body.find("#" + tab_id).show();
     var view = this._contents[tab_id];
     if (view) {
@@ -110,8 +110,7 @@ define(function (require) {
     }
   };
 
-  Tabs.prototype.remove = function (tab_name_or_id) {
-    var tab_id = get_tab_id(this, tab_name_or_id);
+  Tabs.prototype.remove = function (tab_id) {
     this._body.find("#" + tab_id).remove();
     this._tabs.remove(tab_id);
     
@@ -176,8 +175,14 @@ define(function (require) {
     this._body = this._root.find('.tabs-body');
   };
   
-  Tabs.prototype.refresh = function () {
-    this._tabs.refresh();
+  Tabs.prototype.refresh = function (view_id, class_id, object_id) {
+    if (arguments.length == 0) {
+      this._tabs.refresh();
+      return;
+    }
+    
+    var tab_id = create_tab_id(view_id, class_id, object_id);
+    this._tabs.refresh(tab_id);
   }
   
   return Tabs;

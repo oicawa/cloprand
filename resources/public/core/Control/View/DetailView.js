@@ -65,8 +65,7 @@ define(function (require) {
   DetailView.id = "a9bc6cc7-e6fc-4b19-8c7e-468bc2922f25";
   
   DetailView.edit = function (event) {
-    var tab_info = Contents.get_tab_info(event);
-    var view = app.contents().content(tab_info.tab_id);
+    var view = event.item.context;
     view.detail().edit(true);
     view.detail().refresh();
     edit_toolbar(view.toolbar(), true);
@@ -99,8 +98,8 @@ define(function (require) {
 
   DetailView.save = function (event) {
     var tab_info = Contents.get_tab_info(event);
-    var self = event.item.context;
-    var detail = self.detail();
+    var view = event.item.context;
+    var detail = view.detail();
     var data = detail.data();
     var object = null;
 
@@ -114,9 +113,9 @@ define(function (require) {
     var files = get_files(fields, data);
     
     if (detail.is_new()) {
-      Storage.create(self._class.id, data, files)
+      Storage.create(view._class.id, data, files)
       .done(function(object) {
-        edit_toolbar(self.toolbar(), false);
+        edit_toolbar(view.toolbar(), false);
         var new_object_id = object[key_field_name];
         self._object_id = new_object_id;
         detail.data(object);
@@ -219,7 +218,14 @@ define(function (require) {
     this._detail.refresh();
   };
 
+  DetailView.prototype.caption = function () {
+    var captions = (new Class(this._class)).captions([this._object]);
+    return captions[0];
+  };
+
   DetailView.prototype.init = function (selector, class_id, object_id) {
+    var dfd = new $.Deferred;
+
     this._class_id = class_id;
     this._object_id = object_id;
     this._toolbar = new Toolbar();
@@ -274,7 +280,11 @@ define(function (require) {
       }
       self._toolbar.visible(true);
       self.refresh();
+    })
+    .then(function() {
+      dfd.resolve(self);
     });
+    return dfd.promise();
   };
 
   return DetailView;
