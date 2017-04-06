@@ -34,45 +34,9 @@ define(function (require) {
     };
   };
 
-  Contents.prototype.show_tab = function (label, options, view_id, class_id, object_id) {
-    var self = this;
-    var dfd = new $.Deferred;
-    dfd.resolve();
-    return dfd.promise()
-    .then(function() {
-      var tab = self._tabs.get(view_id, class_id, object_id);
-      if (tab) {
-        return;
-      }
-      return self._tabs.add(view_id, class_id, object_id);
-    })
-    .then(function() {
-      self._tabs.select(view_id, class_id, object_id);
-      self._tabs.refresh(view_id, class_id, object_id);
-    });
+  Contents.prototype.tabs = function () {
+    return this._tabs;
   };
-  
-  Contents.prototype.content = function (tab_id) {
-    return this._tabs.content(tab_id);
-  };
-  
-  Contents.prototype.remove = function (tab_id) {
-    return this._tabs.remove(tab_id);
-  };
-  
-  Contents.prototype.change = function (old_tab_id, new_tab_id, label) {
-    return this._tabs.change(old_tab_id, new_tab_id, label);
-  };
-  
-  Contents.prototype.label = function (tab_id, value) {
-    return this._tabs.label(tab_id, value);
-  };
-
-  Contents.prototype.broadcast = function (class_id, object_id, options) {
-    var key = { "class_id" : class_id, "object_id" : object_id, "options" : options };
-    var keys = [key];
-    this._tabs.broadcast(keys);
-  }
   
   Contents.prototype.init = function (selector) {
     var contents = $(selector);

@@ -110,7 +110,26 @@ define(function (require) {
     }
   };
 
-  Tabs.prototype.remove = function (tab_id) {
+  Tabs.prototype.show_tab = function (label, options, view_id, class_id, object_id) {
+    var self = this;
+    var dfd = new $.Deferred;
+    dfd.resolve();
+    return dfd.promise()
+    .then(function() {
+      var tab = self.get(view_id, class_id, object_id);
+      if (tab) {
+        return;
+      }
+      return self.add(view_id, class_id, object_id);
+    })
+    .then(function() {
+      self.select(view_id, class_id, object_id);
+      self.refresh(view_id, class_id, object_id);
+    });
+  };
+
+  Tabs.prototype.remove = function (view_id, class_id, object_id) {
+    var tab_id = create_tab_id(view_id, class_id, object_id);
     this._body.find("#" + tab_id).remove();
     this._tabs.remove(tab_id);
     
@@ -127,13 +146,14 @@ define(function (require) {
     this.select(last_tab_id);
   };
 
-  Tabs.prototype.label = function (tab_name_or_id, value) {
-    var tab_id = get_tab_id(this, tab_name_or_id);
+  Tabs.prototype.label = function (view_id, class_id, object_id, value) {
+    var tab_id = create_tab_id(view_id, class_id, object_id);
     this._tabs.set(tab_id, { caption: value, text: value });
     this._tabs.refresh();
   };
 
-  Tabs.prototype.broadcast = function (keys) {
+  Tabs.prototype.broadcast = function (class_id, object_id, options) {
+    var keys = [{ "class_id" : class_id, "object_id" : object_id, "options" : options }];
     for (var key in this._contents) {
       var view = this._contents[key];
       view.update(keys);
@@ -141,11 +161,15 @@ define(function (require) {
     }
   };
 
-  Tabs.prototype.change = function (old_name, new_name, label) {
-    var tab_id = this._idmap[old_name];
-    delete this._idmap[old_name];
-    this._idmap[new_name] = tab_id;
-    this._tabs.set(tab_id, {caption: label, text: label});
+  Tabs.prototype.change = function (view_id, class_id, old_object_id, new_object_id, label) {
+    var old_tab_id = create_tab_id(view_id, class_id, old_object_id);
+    var new_tab_id = create_tab_id(view_id, class_id, new_object_id);
+    var view = this._contents[old_tab_id];
+    delete this._contents[old_tab_id];
+    this._contents[new_tab_id] = view;
+    this._tabs.set(old_tab_id, {id:new_tab_id, caption:label, text:label});
+    var panel = this._body.find("#" + tab_id);
+    panel.attr("id", new_tab_id);
   };
   
   Tabs.prototype.init = function (selector) {

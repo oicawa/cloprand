@@ -97,7 +97,6 @@ define(function (require) {
   };
 
   DetailView.save = function (event) {
-    var tab_info = Contents.get_tab_info(event);
     var view = event.item.context;
     var detail = view.detail();
     var data = detail.data();
@@ -121,39 +120,37 @@ define(function (require) {
         detail.data(object);
         detail.edit(false);
         detail.refresh();
-        var old_tab_name = Tabs.create_tab_name([tab_info.prefix, self._class.id, Uuid.NULL]);
-        var new_tab_name = Tabs.create_tab_name([tab_info.prefix, self._class.id, new_object_id]);
         var label = (new Class(self._class)).captions([object])[0];
-        app.contents().change(old_tab_name, new_tab_name, label);
-        app.contents().broadcast(self._class.id, new_object_id, object);
+        app.contents().tabs().change(view._class.detail_view.id, view._class.id, Uuid.NULL, new_object_id, label);
+        app.contents().tabs().broadcast(view._class.id, new_object_id, object);
         Dialog.show("New item was created successfully.", "Save");
       })
       .fail(function(jqXHR, text_status, error_thrown) {
         if (jqXHR.status == 410) {
           Dialog.show("The Class of this item has already been deleted by other user.\nClosing this tab.", "Save");
-          app.contents().remove(tab_info.tab_id);
+          app.contents().tabs().remove(view._class.detail_view.id, view._class.id, Uuid.NULL);
         } else {
           Dialog.show("Failed to create this item.", "Save");
         }
       });
     } else {
       if (!data[key_field_name])
-        data[key_field_name] = self._object_id;
-      Storage.update(tab_info.class_id, data[key_field_name], data, files)
+        data[key_field_name] = view._object_id;
+      Storage.update(view._class.id, data[key_field_name], data, files)
       .done(function(object) {
-        edit_toolbar(self.toolbar(), false);
+        edit_toolbar(view.toolbar(), false);
         detail.edit(false);
         detail.commit();
         detail.refresh();
-        var label = (new Class(self._class)).captions([data])[0];
-        app.contents().label(tab_info.tab_id, label);
-        app.contents().broadcast(tab_info.class_id, tab_info.object_id, data);
+        var label = (new Class(view._class)).captions([data])[0];
+        app.contents().tabs().label(view._class.detail_view.id, view._class.id, view._object_id, label);
+        app.contents().tabs().broadcast(view._class.id, view._object_id, data);
         Dialog.show("Edited item was saved successfully.", "Save");
       })
       .fail(function(jqXHR, text_status, error_thrown) {
         if (jqXHR.status == 410) {
           Dialog.show("This item (or Class) has already been deleted by other user.\nClosing this tab.", "Save");
-          app.contents().remove(tab_info.tab_id);
+          app.contents().remove(view._class.detail_view.id, view._class.id, view._object_id);
         } else {
           Dialog.show("Failed to save this item.", "Save");
         }

@@ -27,7 +27,7 @@ define(function (require) {
   MenuView.show_gridview = function (self, recid) {
     var data = self._grid.get(recid);
     var captions = (new Class(self._class)).captions([data]);
-    app.contents().show_tab(captions[0], null, ListView.id, data.id, null);
+    app.contents().tabs().show_tab(captions[0], null, ListView.id, data.id, null);
   };
   
   MenuView.prototype.list = function () {

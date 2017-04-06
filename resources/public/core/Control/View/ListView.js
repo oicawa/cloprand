@@ -39,8 +39,9 @@ define(function (require) {
   ListView.id = "24c06c4d-a94e-4cca-9825-27fb26fcc9dc";
   
   ListView.create = function (event) {
-    var self = event.item.context;
-    app.contents().show_tab("New " + Locale.translate(self._class.label), null, "DetailView", self._class.id, Uuid.NULL);
+    var view = event.item.context;
+    var class_ = view._class;
+    app.contents().show_tab("New " + Locale.translate(class_.label), null, class_.detail_view.id, class_.id, Uuid.NULL);
   };
   
   function open_details(class_, grid, recids) {
@@ -61,7 +62,7 @@ define(function (require) {
       var caption = captions[i];
       var object = objects[i];
       var key = object[key_field_name];
-      app.contents().show_tab(caption, null, class_.detail_view.id, class_.id, key);
+      app.contents().tabs().show_tab(caption, null, class_.detail_view.id, class_.id, key);
     }
   }
 
