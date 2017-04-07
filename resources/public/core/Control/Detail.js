@@ -88,8 +88,8 @@ define(function (require) {
   }
   
   function Detail(parent) {
-  	this._parent = parent;
-  	this._root = null;
+    this._parent = parent;
+    this._root = null;
     this._fields = null;
     this._basic_assist = null;
     this._custom_assist = null;

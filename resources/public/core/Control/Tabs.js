@@ -27,7 +27,7 @@ define(function (require) {
     var dfd = new $.Deferred;
 
     // Append View Content Area
-  	var tab_id = create_tab_id(view_id, class_id, object_id);
+    var tab_id = create_tab_id(view_id, class_id, object_id);
     self._body.append(BODY_TEMPLATE);
     var tab_panel = self._body.find(".tab-panel:last-child");
     tab_panel.attr("id", tab_id);

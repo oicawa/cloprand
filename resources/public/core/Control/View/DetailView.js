@@ -6,6 +6,7 @@ define(function (require) {
   var Class = require("core/Class");
   var Storage = require("core/Storage");
   var Contents = require("core/Contents");
+  var Locale = require("core/Locale");
   var Toolbar = require("core/Control/Toolbar");
   var Detail = require("core/Control/Detail");
   var Tabs = require("core/Control/Tabs");
@@ -77,18 +78,18 @@ define(function (require) {
         return;
       }
       
-      var self = event.item.context;
+      var view = event.item.context;
       var objects = null;
-      Storage.delete(self._class_id, self._object_id)
+      Storage.delete(view._class_id, view._object_id)
       .done(function() {
-        app.contents().broadcast(self._class_id, self._object_id, null);
-        app.contents().remove(tab_info.tab_id);
+        app.contents().tabs().broadcast(view._class_id, view._object_id, null);
+        app.contents().tabs().remove(view._class.detail_view.id, view._class_id, view._object_id);
         Dialog.show("Deleted", "Delete");
       })
       .fail(function(jqXHR, text_status, error_thrown) {
         if (jqXHR.status == 410) {
           Dialog.show("This item (or Class) has already been deleted by other user.\nClosing this tab.", "Delete");
-          app.contents().remove(tab_info.tab_id);
+          app.contents().tabs().remove(view._class.detail_view.id, view._class_id, view._object_id);
         } else {
           Dialog.show("Failed to delete this item.", "Delete");
         }
@@ -164,9 +165,16 @@ define(function (require) {
         return;
       }
       
-      var self = event.item.context;
-      edit_toolbar(self.toolbar(), false);
-      var detail = self.detail();
+      var view = event.item.context;
+      
+      if (view.is_new()) {
+        app.contents().tabs().broadcast(view._class_id, view._object_id, null);
+        app.contents().tabs().remove(view._class.detail_view.id, view._class_id, view._object_id);
+        return;
+      }
+      
+      edit_toolbar(view.toolbar(), false);
+      var detail = view.detail();
       detail.restore();
       detail.edit(false);
       detail.refresh();
@@ -216,8 +224,15 @@ define(function (require) {
   };
 
   DetailView.prototype.caption = function () {
+    if (this.is_new()) {
+      return "New " + Locale.translate(this._class.label);
+    }
     var captions = (new Class(this._class)).captions([this._object]);
     return captions[0];
+  };
+
+  DetailView.prototype.is_new = function () {
+    return this._detail.is_new();
   };
 
   DetailView.prototype.init = function (selector, class_id, object_id) {

@@ -41,7 +41,7 @@ define(function (require) {
   ListView.create = function (event) {
     var view = event.item.context;
     var class_ = view._class;
-    app.contents().show_tab("New " + Locale.translate(class_.label), null, class_.detail_view.id, class_.id, Uuid.NULL);
+    app.contents().tabs().show_tab("New " + Locale.translate(class_.label), null, class_.detail_view.id, class_.id, Uuid.NULL);
   };
   
   function open_details(class_, grid, recids) {
