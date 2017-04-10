@@ -9,6 +9,7 @@ define(function (require) {
   var Contents = require("core/Contents");
   var Toolbar = require("core/Control/Toolbar");
   var Grid = require("core/Control/Grid");
+  var Menu = require("core/Control/Menu");
   var Action = require("core/Action");
 
   var TEMPLATE = '' +
@@ -154,10 +155,13 @@ define(function (require) {
       var src_items = Utils.get_as_json(null, function() { return self._class.list_view.properties.toolbar_items; });
       if (!src_items)
         return;
-      return Toolbar.items(src_items, self).done(function(dst_items) { self._grid.items(dst_items); });
+      return Menu.convert(src_items, self).done(function(dst_items) { self._grid.items(dst_items); });
     })
     .then(function() {
-      self._grid.add_operation("dblclick", ListView.open1);
+      var items = self._class.list_view.properties.context_menu;
+      self._grid.context_menu(items);
+    })
+    .then(function() {
       self._grid.select_column(true);
       self._grid.toolbar(true);
       self._grid.multi_search(true);

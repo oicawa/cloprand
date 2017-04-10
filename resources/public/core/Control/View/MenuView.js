@@ -92,9 +92,24 @@ define(function (require) {
       return self._grid.init(grid_selector, columns);
     })
     .then(function () {
-      self._grid.add_operation("dblclick", function(event) {
+      //self._grid.context_menu([
+      //  { type : {
+      //    id:"e14d8e9f-846e-40be-8003-b7f31e6a662c",
+      //    properties: {
+      //        function_entry:{
+      //          id:""
+      //        },
+      //        caption:{
+      //          "":"Open(1 Item)",
+      //          "ja":"開く(1アイテム)",
+      //        },
+      //        icon:"fa-folder-o"
+      //      }
+      //  }
+      //]);
+      self._grid.double_click = function(event) {
         MenuView.show_gridview(self, event.recid);
-      });
+      };
       self._grid.select_column(true);
       self._grid.toolbar(true);
 

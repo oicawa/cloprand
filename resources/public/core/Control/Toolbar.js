@@ -8,59 +8,6 @@ define(function (require) {
   
   var TEMPLATE = '<div></div>';
   
-  var CONVERTERS = {
-    "e14d8e9f-846e-40be-8003-b7f31e6a662c" : function (src_item, items_map, context) {
-      var dfd = new $.Deferred;
-      var type_id = src_item.type.id;
-      var properties = src_item.type.properties;
-      var menu_type = null;
-      var entry = null;
-      $.when(
-        Storage.read(Class.MENU_ITEM_TYPE_ID, type_id).done(function (data) { menu_type = data; }),
-        Storage.read(Class.FUNCTION_ENTRY_ID, properties.function_entry.id).done(function (data) { entry = data; })
-      )
-      .then(function() {
-        require([entry.require_path], function(Module) {
-          var func = Module[entry.function_name];
-          // { id:"search", type:"html",   text:"Search", icon:"fa fa-search",     html:search_generator }
-          items_map[properties.item_id] = {
-            id      : properties.item_id,
-            type    : menu_type.type,
-            text    : Locale.translate(properties.caption),
-            icon    : "fa " + properties.icon,
-            action  : func,
-            context : context
-          }
-          dfd.resolve();
-        });
-      });
-      return dfd.promise();
-    },
-    "0d75de1d-2d9c-4f85-a313-4ab39ee6af62" : function (src_item, items_map, context) {
-      var dfd = new $.Deferred;
-      var type_id = src_item.type.id;
-      var properties = src_item.type.properties;
-      var menu_type = null;
-      var submenu_items = null;
-      $.when(
-        Storage.read(Class.MENU_ITEM_TYPE_ID, type_id).done(function (data) { menu_type = data; }),
-        Toolbar.items(properties.submenu_items, context).done(function (dst_items) { submenu_items = dst_items; })
-      )
-      .then(function() {
-        items_map[properties.item_id] = {
-          id      : properties.item_id,
-          type    : menu_type.type,
-          text    : Locale.translate(properties.caption),
-          icon    : "fa " + properties.icon,
-          items   : submenu_items,
-          context : context
-        }
-        dfd.resolve();
-      });
-      return dfd.promise();
-    }
-  };
-  
   function Toolbar() {
     this._root = null;;
     this._toolbar = null;
@@ -71,6 +18,12 @@ define(function (require) {
 
   Toolbar.prototype.init = function(selector) {
     var dfd = new $.Deferred;
+
+    if (typeof selector != "string") {
+      // Behave as a wrapper
+      
+    }
+
     this._root = $(selector);
     this._root.hide();
     
@@ -119,6 +72,7 @@ define(function (require) {
   Toolbar.prototype.visible = function(on) {
     if (on) {
       this._root.show();
+      //this._toolbar.style(button_name);
     } else {
       this._root.hide();
     }
@@ -130,45 +84,6 @@ define(function (require) {
 
   Toolbar.prototype.hide = function(button_name) {
     this._toolbar.hide(button_name);
-  };
-
-  Toolbar.converter = function (menu_type) {
-    
-  };
-  
-  Toolbar.items = function (src_items, context) {
-    var dfd = new $.Deferred;
-    
-    if (!src_items) {
-      dfd.resolve();
-      return dfd.promise();
-    }
-    var promises = [];
-    var items_map = {};
-    for (var i = 0; i < src_items.length; i++) {
-      var src_item = src_items[i];
-      var converter = CONVERTERS[src_item.type.id];
-      if (!converter) {
-        console.assert(false, "NO converter in CONVERTERS table. (src_item.type.id=[" + src_item.type.id + "])");
-        continue;
-      }
-      var promise = converter(src_item, items_map, context);
-      promises.push(promise);
-    }
-    
-    $.when.apply(null, promises)
-    .done(function() {
-      var dst_items = [];
-      for (var i = 0; i < src_items.length; i++) {
-        var src_item = src_items[i];
-        var item_id = src_item.type.properties.item_id;
-        var dst_item = items_map[item_id];
-        dst_items.push(dst_item);
-      }
-      dfd.resolve(dst_items);
-    });
-    
-    return dfd.promise();
   };
 
   return Toolbar;

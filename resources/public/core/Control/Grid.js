@@ -6,6 +6,7 @@ define(function (require) {
   var Uuid = require("core/Uuid");
   var Storage = require("core/Storage");
   var Class = require("core/Class");
+  var Menu = require("core/Control/Menu");
 
   var TEMPLATE = '<div class="grid"></div>';
 
@@ -29,11 +30,18 @@ define(function (require) {
       },
       columns: columns,
       onDblClick:function(event) {
-        var operation = self._operations["dblclick"];
-        if (!operation) {
+        console.log(event);
+        if (!self._grid.menu || (!Array.isArray(self._grid.menu)) || (self._grid.menu.length == 0)) {
+          self.double_click(event);
           return;
         }
-        operation(event);
+        
+        var menu = self._grid.menu[0];
+        if (!menu) {
+          return;
+        }
+
+        menu.action(event);
       },
       onToolbar : function (event) {
         var item = this.toolbar.get(event.target);
@@ -42,6 +50,12 @@ define(function (require) {
         }
         event.item = item;
         item.action(event);
+      },
+      onMenuClick : function (event) {
+        if (!self._grid.menu || (!Array.isArray(self._grid.menu)) || (self._grid.menu.length == 0)) {
+          return;
+        }
+        console.log(event);
       }
     });
     
@@ -51,7 +65,6 @@ define(function (require) {
   function Grid() {
     this._selector = null;
     this._root = null;
-    this._operations = {};
     this._grid = null;
   }
 
@@ -138,8 +151,12 @@ define(function (require) {
     return dfd.promise();
   };
 
-  Grid.prototype.add_operation = function(event_name, operation) {
-    this._operations[event_name] = operation;
+  Grid.prototype.context_menu = function(items) {
+    var self = this;
+    return Menu.convert(menus, this)
+    .then(function (w2ui_menus) {
+      self._grid.menus = w2ui_menus;
+    });
   };
 
   Grid.prototype.add = function(item) {
