@@ -39,12 +39,12 @@ define(function (require) {
           return;
         }
         
-        var menu = self._grid.menu[0];
-        if (!menu) {
+        var item = self._grid.menu[0];
+        if (!item) {
           return;
         }
-
-        menu.action(event);
+        event.item = item;
+        item.action(event);
       },
       onToolbar : function (event) {
         var item = this.toolbar.get(event.target);
@@ -58,7 +58,8 @@ define(function (require) {
         if (!self._grid.menu || (!Array.isArray(self._grid.menu)) || (self._grid.menu.length == 0)) {
           return;
         }
-        console.log(event);
+        event.item = event.menuItem;
+        event.item.action(event);
       }
     });
     
@@ -154,7 +155,7 @@ define(function (require) {
     return dfd.promise();
   };
 
-  Grid.prototype.context_menu = function(items) {
+  Grid.prototype.context_menu = function(items, context) {
     var dfd = new $.Deferred;
     
     var self = this;
@@ -162,7 +163,7 @@ define(function (require) {
       dfd.resolve();
       return dfd.promise();
     }
-    return Menu.convert(items, this)
+    Menu.convert(items, context)
     .then(function (w2ui_items) {
       self._grid.menu = w2ui_items;
       dfd.resolve();

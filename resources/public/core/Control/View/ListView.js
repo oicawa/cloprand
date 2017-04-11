@@ -68,8 +68,7 @@ define(function (require) {
   }
 
   ListView.open1 = function (event) {
-    var tab_info = Contents.get_tab_info(event);
-    var view = app.contents().content(tab_info.tab_id);
+    var view = event.item.context;
     var class_ = view._class;
     var grid = view.list();
     var recids = [event.recid];
@@ -159,7 +158,7 @@ define(function (require) {
     })
     .then(function() {
       var items = self._class.list_view.properties.context_items;
-      self._grid.context_menu(items);
+      self._grid.context_menu(items, self);
     })
     .then(function() {
       self._grid.select_column(true);
