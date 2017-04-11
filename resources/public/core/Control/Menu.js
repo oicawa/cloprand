@@ -23,7 +23,7 @@ define(function (require) {
       )
       .then(function() {
         require([entry.require_path], function(Module) {
-          items_map[properties.menu_id] = {
+          items_map[properties.item_id] = {
             id      : properties.item_id,
             type    : menu_item_type.type,
             text    : Locale.translate(properties.caption),

@@ -32,6 +32,9 @@ define(function (require) {
       onDblClick:function(event) {
         console.log(event);
         if (!self._grid.menu || (!Array.isArray(self._grid.menu)) || (self._grid.menu.length == 0)) {
+          if (!self.double_click) {
+            return;
+          }
           self.double_click(event);
           return;
         }
@@ -152,11 +155,19 @@ define(function (require) {
   };
 
   Grid.prototype.context_menu = function(items) {
+    var dfd = new $.Deferred;
+    
     var self = this;
-    return Menu.convert(menus, this)
-    .then(function (w2ui_menus) {
-      self._grid.menus = w2ui_menus;
+    if (!items) {
+      dfd.resolve();
+      return dfd.promise();
+    }
+    return Menu.convert(items, this)
+    .then(function (w2ui_items) {
+      self._grid.menu = w2ui_items;
+      dfd.resolve();
     });
+    return dfd.promise();
   };
 
   Grid.prototype.add = function(item) {

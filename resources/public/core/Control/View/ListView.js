@@ -158,7 +158,7 @@ define(function (require) {
       return Menu.convert(src_items, self).done(function(dst_items) { self._grid.items(dst_items); });
     })
     .then(function() {
-      var items = self._class.list_view.properties.context_menu;
+      var items = self._class.list_view.properties.context_items;
       self._grid.context_menu(items);
     })
     .then(function() {

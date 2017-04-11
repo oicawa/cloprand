@@ -10,6 +10,7 @@ define(function (require) {
   var Toolbar = require("core/Control/Toolbar");
   var Detail = require("core/Control/Detail");
   var Tabs = require("core/Control/Tabs");
+  var Menu = require("core/Control/Menu");
   var Dialog = require("core/Dialog");
   var Action = require("core/Action");
 
@@ -121,7 +122,7 @@ define(function (require) {
         detail.data(object);
         detail.edit(false);
         detail.refresh();
-        var label = (new Class(self._class)).captions([object])[0];
+        var label = (new Class(view._class)).captions([object])[0];
         app.contents().tabs().change(view._class.detail_view.id, view._class.id, Uuid.NULL, new_object_id, label);
         app.contents().tabs().broadcast(view._class.id, new_object_id, object);
         Dialog.show("New item was created successfully.", "Save");
@@ -276,7 +277,7 @@ define(function (require) {
       var src_items = Utils.get_as_json(null, function() { return self._class.detail_view.properties.toolbar_items; });
       if (!src_items)
         return;
-      return Toolbar.items(src_items, self).done(function(dst_items) { self._toolbar.items(dst_items); });
+      return Menu.convert(src_items, self).done(function(dst_items) { self._toolbar.items(dst_items); });
     })
     .then(function() {
       return self._detail.init(detail_selector, self._class.object_fields, basic_assist, custom_assist);

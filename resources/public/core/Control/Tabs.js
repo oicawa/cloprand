@@ -168,7 +168,7 @@ define(function (require) {
     delete this._contents[old_tab_id];
     this._contents[new_tab_id] = view;
     this._tabs.set(old_tab_id, {id:new_tab_id, caption:label, text:label});
-    var panel = this._body.find("#" + tab_id);
+    var panel = this._body.find("#" + old_tab_id);
     panel.attr("id", new_tab_id);
   };
   
