@@ -42,6 +42,7 @@ define(function (require) {
   ListView.create = function (event) {
     var view = event.item.context;
     var class_ = view._class;
+    console.log("[New Item Opend] view_id=" + class_.detail_view.id);
     app.contents().tabs().show_tab("New " + Locale.translate(class_.label), null, class_.detail_view.id, class_.id, Uuid.NULL);
   };
   

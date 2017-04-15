@@ -167,7 +167,16 @@ define(function (require) {
     var view = this._contents[old_tab_id];
     delete this._contents[old_tab_id];
     this._contents[new_tab_id] = view;
-    this._tabs.set(old_tab_id, {id:new_tab_id, caption:label, text:label});
+    //this._tabs.set(old_tab_id, {id:new_tab_id, caption:label, text:label});
+    this._tabs.insert(old_tab_id, {id:new_tab_id, caption:label, text:label, closable:true});
+    this._tabs.remove(old_tab_id);
+    this._tabs.select(new_tab_id);
+    // Must replace old_tab_id to new_tab_id in this._history.
+    this._history.forEach(function (tab_id, index, array) {
+      if (tab_id == old_tab_id) {
+        this._history[index] = new_tab_id;
+      }
+    }, this);
     var panel = this._body.find("#" + old_tab_id);
     panel.attr("id", new_tab_id);
   };

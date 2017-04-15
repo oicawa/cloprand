@@ -158,5 +158,23 @@ define(function (require) {
     this._field.finder.refresh();
   };
 
+  Fields.cell_render = function(field) {
+    var dfd = new $.Deferred;
+    var classes = null;
+    $.when(
+      Storage.read(Class.CLASS_ID).done(function(data) { classes = data; })
+    ).always(function() {
+      var renderer = function(record, index, column_index) {
+        var value = record[field.name];
+        var class_ = classes[value.class_id];
+        var fields = class_.object_fields.filter(function (field_) { return field_.name == value.field_name });
+        var field_ = fields[0];
+        return Locale.translate(class_.label) + "/" + Locale.translate(field_.label);
+      };
+      dfd.resolve(renderer);
+    });
+    return dfd.promise();
+  };
+
   return Fields;
 });

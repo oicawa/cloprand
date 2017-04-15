@@ -60,6 +60,18 @@ define(function (require) {
         }
         event.item = event.menuItem;
         event.item.action(event);
+      },
+      onSort : function (event) {
+        //var field = event.field;
+        //if (!self._sorters) {
+        //  return;
+        //}
+        //var sorter = self._sorters[field];
+        //if (!sorter) {
+        //  return;
+        //}
+        //sorter();
+        console.log(event);
       }
     });
     
@@ -70,8 +82,13 @@ define(function (require) {
     this._selector = null;
     this._root = null;
     this._grid = null;
+    this._sorters = null;
   }
 
+  Grid.sorters = function (class_) {
+    
+  };
+  
   Grid.create_columns = function (class_) {
     var dfd = new $.Deferred
     var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '50px' };
@@ -155,6 +172,9 @@ define(function (require) {
     return dfd.promise();
   };
 
+  Grid.prototype.sorters = function(sorters) {
+    this._sorters = sorters;
+  };
   Grid.prototype.context_menu = function(items, context) {
     var dfd = new $.Deferred;
     

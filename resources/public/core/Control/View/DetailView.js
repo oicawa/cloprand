@@ -118,11 +118,12 @@ define(function (require) {
       .done(function(object) {
         edit_toolbar(view.toolbar(), false);
         var new_object_id = object[key_field_name];
-        self._object_id = new_object_id;
+        view._object_id = new_object_id;
         detail.data(object);
         detail.edit(false);
         detail.refresh();
         var label = (new Class(view._class)).captions([object])[0];
+        console.log("[New Item Saved] view_id=" + view._class.detail_view.id);
         app.contents().tabs().change(view._class.detail_view.id, view._class.id, Uuid.NULL, new_object_id, label);
         app.contents().tabs().broadcast(view._class.id, new_object_id, object);
         Dialog.show("New item was created successfully.", "Save");
@@ -152,7 +153,7 @@ define(function (require) {
       .fail(function(jqXHR, text_status, error_thrown) {
         if (jqXHR.status == 410) {
           Dialog.show("This item (or Class) has already been deleted by other user.\nClosing this tab.", "Save");
-          app.contents().remove(view._class.detail_view.id, view._class.id, view._object_id);
+          app.contents().tabs().remove(view._class.detail_view.id, view._class.id, view._object_id);
         } else {
           Dialog.show("Failed to save this item.", "Save");
         }

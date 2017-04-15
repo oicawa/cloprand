@@ -150,7 +150,7 @@ define(function (require) {
       return multi ? [] : null;
     }
     
-    // *NOT* ARray
+    // *NOT* Array
     if (!Array.isArray(value)) {
       return multi ? [value] : value;
     }
@@ -216,16 +216,19 @@ define(function (require) {
     var class_ = null;
     var objects = null;
     $.when(
-      Storage.read(Class.CLASS_ID, class_id, true).done(function(data) { class_ = data; }),
-      Storage.read(class_id, null, true).done(function(data) { objects = data; })
+      Storage.read(Class.CLASS_ID, class_id).done(function(data) { class_ = data; }),
+      Storage.read(class_id).done(function(data) { objects = data; })
     ).always(function() {
       var renderer = function(record, index, column_index) {
-        var ids = record[field.name];
+        var value = record[field.name];
+        if (!value) {
+          return "";
+        }
+        var ids = Array.isArray(value) ? value : [value];
         var targets = ids.map(function(id) { return objects[id]; });
         var captions = (new Class(class_)).captions(targets);
         return captions.join(",");
       };
-      console.log("Finder.cell_render, class_id = " + class_id);
       dfd.resolve(renderer);
     });
     return dfd.promise();
