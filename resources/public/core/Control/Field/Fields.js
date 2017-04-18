@@ -1,5 +1,6 @@
 define(function (require) { 
   require("jquery");
+  var app = require("app");
   var Utils = require("core/Utils");
   var Locale = require("core/Locale");
   var Class = require("core/Class");
@@ -20,6 +21,7 @@ define(function (require) {
     Field.call(this, "core/Control/Field", "Fields");
     this._selector = null;
     this._value = null;
+    this._self_reference = null;
     this._classes = null;
     this._class = { _class:null, columns:null, finder:null, converter:null };
     this._field = { _class:null, columns:null, finder:null, converter:null };
@@ -49,6 +51,7 @@ define(function (require) {
     
     var properties = field.datatype.properties;
     var min_width = !properties ? null : properties.min_width;
+    this._self_reference = !properties ? false : (!properties.self_reference ? false : properties.self_reference);
 
     var self = this;
     
@@ -101,11 +104,12 @@ define(function (require) {
 
   Fields.prototype.edit = function(on) {
     if (arguments.length == 0) {
-      return this._class.finder._editting;
-    } else {
-      this._class.finder.edit(on);
-      this._field.finder.edit(on);
+      return this._field.finder._editting;
     }
+
+    if (!this._self_reference)
+      this._class.finder.edit(on);
+    this._field.finder.edit(on);
   };
   
   Fields.prototype.backuped = function() {
@@ -130,17 +134,25 @@ define(function (require) {
       var field_name = this._field.finder.data();
       return { "class_id" : class_id, "field_name" : field_name };
     }
+
+    var self_class_id = null;
+    if (this._self_reference) {
+      var tab = app.contents().tabs().current();
+      self_class_id = tab.class_id;
+    }
     
-    if (!value) {
+    if (!value && !this._self_reference) {
       this._field.finder._objects = {};
       this.refresh();
       return;
     }
-    
-    this._class.finder.data(value.class_id);
-    this._field.finder.data(value.field_name);
+
+    var class_id = !self_class_id ? value.class_id : self_class_id;
+    var field_name = !value ? null : value.field_name;
+    this._class.finder.data(class_id);
+    this._field.finder.data(field_name);
     var objects = {};
-    this._classes[value.class_id].object_fields.forEach(function (field) {
+    this._classes[class_id].object_fields.forEach(function (field) {
       if (field.recid)
         delete field.recid;
       field.id = field.name;
@@ -167,9 +179,12 @@ define(function (require) {
       var renderer = function(record, index, column_index) {
         var value = record[field.name];
         var class_ = classes[value.class_id];
+        if (!class_) {
+          return "/";
+        }
         var fields = class_.object_fields.filter(function (field_) { return field_.name == value.field_name });
         var field_ = fields[0];
-        return Locale.translate(class_.label) + "/" + Locale.translate(field_.label);
+        return Locale.translate(class_.label) + "/" + (!field_ ? "" : Locale.translate(field_.label));
       };
       dfd.resolve(renderer);
     });
