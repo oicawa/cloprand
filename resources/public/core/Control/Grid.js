@@ -6,6 +6,7 @@ define(function (require) {
   var Uuid = require("core/Uuid");
   var Storage = require("core/Storage");
   var Class = require("core/Class");
+  var Primitive = require("core/Primitive");
   var Menu = require("core/Control/Menu");
 
   var TEMPLATE = '<div class="grid"></div>';
@@ -142,6 +143,54 @@ define(function (require) {
         dfd.resolve(columns);
       });
        
+    });
+    return dfd.promise();
+  }
+
+  Grid.gueries = function (fields, src_queries) {
+    var dfd = new $.Deferred
+    var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '50px' };
+    var DEFAULT_QUERY = { label: null, columns:COLUMN_RECID, order:null, condition: null };
+    if (!fields || !src_queries) {
+      dfd.resolve([DEFAULT_QUERY])
+      return dfd.promise();
+    }
+
+    function filter_generator(condition) {
+      var filter = function (record) {
+        return true;
+      };
+      return filter;
+    }
+
+    function sorter_generator(orders) {
+      var sorter = function (record0, record1) {
+        return 0;
+      };
+      return sorter;
+    }
+
+    function column_converter(src_column) {
+      var dst_column = {};
+      return dst_column;
+    }
+
+    function query_converter(src_query, fields, controls) {
+      var dst_query = {
+        label   : src_filter.label,
+        filter  : filter_generator(src_filter.condition),
+        sorter  : sorter_generator(src_filter.order),
+        columns : src_filter.map(column_converter),
+      };
+      return dst_query;
+    }
+
+    Primitive.controls()
+    .done(function (controls) {
+      var queries = src_queries.map(function(src_query) {
+        return query_converter(src_query, fields, controls);
+      });
+      dfd.resolve(queries)
     });
     return dfd.promise();
   }
