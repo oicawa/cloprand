@@ -23,6 +23,14 @@ define(function (require) {
     return copied.join("_").replace(/\//g, "-");
   }
 
+  function parse_tab_id(tab_id) {
+    var ids = tab_id.split("_");
+    var view_id = 0 < ids.length ? ids[0] : null;
+    var class_id = 1 < ids.length ? ids[1] : null;
+    var object_id = 2 < ids.length ? ids[2] : null;
+    return { "view_id" : view_id, "class_id" : class_id, "object_id" : object_id };
+  }
+
   function create_view(self, view_id, class_id, object_id) {
     var dfd = new $.Deferred;
 
@@ -80,7 +88,24 @@ define(function (require) {
 
   Tabs.prototype.get = function (view_id, class_id, object_id) {
     var tab_id = create_tab_id(view_id, class_id, object_id);
-    return this._tabs.get(tab_id);
+    var tab = this._tabs.get(tab_id);
+    if (!tab) {
+      return null;
+    }
+    return { "view_id" : view_id, "class_id" : class_id, "object_id" : object_id, "caption" : tab.caption, "closable" : tab.closable };
+  };
+
+  Tabs.prototype.current = function () {
+    if (this._history.length == 0) {
+      return null;
+    }
+    var tab_id = this._history[this._history.length - 1];
+    var ids = parse_tab_id(tab_id);
+    var tab = this._tabs.get(tab_id);
+    if (!tab) {
+      return null;
+    }
+    return { "view_id" : ids.view_id, "class_id" : ids.class_id, "object_id" : ids.object_id, "caption" : tab.caption, "closable" : tab.closable };
   };
 
   Tabs.prototype.select = function (view_id, class_id, object_id) {
