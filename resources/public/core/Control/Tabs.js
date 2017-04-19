@@ -71,7 +71,8 @@ define(function (require) {
     this._history = [];
   }
 
-  Tabs.prototype.add = function (view_id, class_id, object_id) {
+  Tabs.prototype.add = function (view_id, class_id, object_id, closable) {
+    var count = arguments.length;
     this._body.children(".tab-panel").hide();
     var dfd = new $.Deferred;
     var self = this;
@@ -80,7 +81,7 @@ define(function (require) {
     .then(function (view) {
       // Tab
       var tab_id = create_tab_id(view_id, class_id, object_id);
-      self._tabs.add({"id":tab_id, "caption":view.caption(), "closable": true });
+      self._tabs.add({"id":tab_id, "caption":view.caption(), "closable": 4 <= count ? closable : true });
       dfd.resolve();
     })
     return dfd.promise();

@@ -171,16 +171,61 @@ define(function (require) {
     }
 
     function column_converter(src_column) {
-      var dst_column = {};
+      var dst_column = {
+        field: field.name,
+        caption: Locale.translate(field.label),
+        type: "text",
+        size: field.column + "px",
+        resizable: true,
+        sortable:true
+      };
+          if (!Control.cell_render) {
+            column.render = function(record, row_index, column_index) { return record[field.name]; };
+            columns[index] = column;
+            inner_dfd.resolve();
+            return;
+          }
+          
+          Control.cell_render(field)
+          .done(function(renderer) {
+            column.render = renderer;
+            columns[index] = column;
+            inner_dfd.resolve();
+          });
       return dst_column;
     }
 
+    function columns_converter(src_columns, field_map, controls) {
+      var dfd = new $.Deferred;
+      var promises = [];
+      src_columns.forEach(function(src_column) {
+        var field = field_map[src_column.field_name];
+        
+      });
+      
+    }
+    
     function query_converter(src_query, fields, controls) {
+      var dfd = new $.Deferred;
+
+      var field_map = {};
+      fields.forEach(function (field) {
+        field_map[field.name] = field;
+      });
+      
+      
       var dst_query = {
         label   : src_filter.label,
-        filter  : filter_generator(src_filter.condition),
-        sorter  : sorter_generator(src_filter.order),
-        columns : src_filter.map(column_converter),
+        filter  : filter_generator(src_query.condition),
+        sorter  : sorter_generator(src_query.order),
+        columns : src_query.columns.map(function(src_column) {
+          var field = fields.filter(function (field) { return field.name == src_column.field_name; })[0];
+          var control = controls[field.datatype.id];
+          control.cell_render(field)
+          .done(function(renderer) {
+            column.render = renderer;
+          column_converter(src_column, );
+        })
       };
       return dst_query;
     }

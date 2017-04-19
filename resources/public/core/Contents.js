@@ -55,7 +55,7 @@ define(function (require) {
       self._tabs.init("#contents-tabs");
       for (var i = 0; i < assist.tabs.length; i++) {
         var tab = assist.tabs[i];
-        self._tabs.add(tab.view_id, tab.class_id, tab.object_id)
+        self._tabs.add(tab.view_id, tab.class_id, tab.object_id, tab.closable)
         .then(function() {
           self._tabs.select(tab.view_id, tab.class_id, tab.object_id);
         })

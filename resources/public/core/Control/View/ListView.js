@@ -106,11 +106,6 @@ define(function (require) {
     });
   };
   
-  ListView.prototype.add = function () {
-    var url = location.protocol + "//" + locatione.host + "/" + _class_id + "/" + Uuid.NULL + "/index.html";
-    window.open(url, "object-" + _class_id + "/" + Uuid.NULL);
-  };
-  
   ListView.prototype.list = function () {
     return this._grid;
   };
@@ -133,6 +128,7 @@ define(function (require) {
     var self = this;
     var list_selector = selector + "> div.listview-panel > div.object-list";
     var columns = null;
+    var queries = null;
     $.when(
       Utils.load_css("/core/Control/View/ListView.css"),
       Storage.read(class_id).done(function (data) { objects = data; }),
@@ -145,6 +141,12 @@ define(function (require) {
         columns = columns_;
       })
     })
+    //.then(function() {
+    //  return Grid.queries(self._class.object_fields, self._class.list_view.properties.queries)
+    //  .done(function(queries_) {
+    //    queries = queries_;
+    //  })
+    //})
     .then(function() {
       view.append(TEMPLATE);
     })
