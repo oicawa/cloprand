@@ -170,7 +170,8 @@ define(function (require) {
       return sorter;
     }
 
-    function column_converter(src_column) {
+    function column_converter(src_column, field, control) {
+      var dfd = new $.Deferred;
       var dst_column = {
         field: field.name,
         caption: Locale.translate(field.label),
@@ -179,30 +180,32 @@ define(function (require) {
         resizable: true,
         sortable:true
       };
-          if (!Control.cell_render) {
-            column.render = function(record, row_index, column_index) { return record[field.name]; };
-            columns[index] = column;
-            inner_dfd.resolve();
-            return;
-          }
-          
-          Control.cell_render(field)
-          .done(function(renderer) {
-            column.render = renderer;
-            columns[index] = column;
-            inner_dfd.resolve();
-          });
-      return dst_column;
+
+      control.cell_render(field)
+      .done(function(renderer) {
+        dst_column.render = renderer;
+        dfd.resolve(dst_column);
+      });
+      return dfd.promise();
     }
 
     function columns_converter(src_columns, field_map, controls) {
       var dfd = new $.Deferred;
+      var columns = null;
       var promises = [];
       src_columns.forEach(function(src_column) {
-        var field = field_map[src_column.field_name];
-        
+        var field = field_map[src_column.field_name]
+        var control = controls[field.datatype.id];
+        var promise = column_converter(src_column, field, control)
+                      .done(function (column) { columns.push(column); });
+        promises.push(promise);
       });
       
+      $.when.apply(null, promises)
+      .then(function () {
+        return dfd.resolve(columns);
+      });
+      return dfd.promise();
     }
     
     function query_converter(src_query, fields, controls) {
@@ -212,30 +215,40 @@ define(function (require) {
       fields.forEach(function (field) {
         field_map[field.name] = field;
       });
-      
-      
-      var dst_query = {
-        label   : src_filter.label,
-        filter  : filter_generator(src_query.condition),
-        sorter  : sorter_generator(src_query.order),
-        columns : src_query.columns.map(function(src_column) {
-          var field = fields.filter(function (field) { return field.name == src_column.field_name; })[0];
-          var control = controls[field.datatype.id];
-          control.cell_render(field)
-          .done(function(renderer) {
-            column.render = renderer;
-          column_converter(src_column, );
-        })
-      };
-      return dst_query;
+
+      var query = {};
+      columns_converter(src_query.columns, field_map, controls)
+      .then(function(columns) {
+        query.columns = columns;
+        return sorter_generator(src_query.orders);
+      })
+      .then(function(sorter) {
+        query.sorter = sorter;
+        return filter_generator(src_query.filter);
+      })
+      .then(function(filter) {
+        query.filter = filter;
+        dfd.promise(query);
+      });
+
+      return dfd.promise();
     }
 
     Primitive.controls()
     .done(function (controls) {
-      var queries = src_queries.map(function(src_query) {
-        return query_converter(src_query, fields, controls);
+      var promises = [];
+      var queries = [];
+      src_queries.forEach(function(src_query) {
+        var promise = query_converter(src_query, fields, controls)
+        .done(function (query) {
+          queries.push(query);
+        });
+        promises.push(promise);
       });
-      dfd.resolve(queries)
+      $.when.apply(null, promises)
+      .then(function() {
+        dfd.resolve(queries)
+      });
     });
     return dfd.promise();
   }
