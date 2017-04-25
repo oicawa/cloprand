@@ -198,7 +198,7 @@ define(function (require) {
       var columns = [];
       var promises = [];
       src_columns.forEach(function(src_column) {
-        var field = field_map[src_column.field_name]
+        var field = field_map[src_column.field.field_name]
         var control = controls[field.datatype.id];
         var promise = column_converter(src_column, field, control)
                       .done(function (column) { columns.push(column); });
