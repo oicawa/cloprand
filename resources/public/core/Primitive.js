@@ -6,10 +6,10 @@ define(function (require) {
   var Class = require('core/Class');
 
   function get_controls() {
-    return Storage.read(Class.PRIMITIVE_ID)
+    var dfd = new $.Deferred;
+    Storage.read(Class.PRIMITIVE_ID)
     .done(function (primitives) {
       var controls = {};
-      var dfd = new $.Deferred;
       var promises = Object.keys(primitives).map(function(object_id) {
         var primitive = primitives[object_id];
         var inner_dfd = new $.Deferred;
@@ -23,12 +23,12 @@ define(function (require) {
       .then(function() {
         dfd.resolve(controls);
       });
-      return dfd.promise();
     });
+    return dfd.promise();
   }
     
   var Primitive = {
-    controls : get_controls()
+    controls : get_controls
   }
   
   return Primitive;

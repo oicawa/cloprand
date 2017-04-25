@@ -147,7 +147,7 @@ define(function (require) {
     return dfd.promise();
   }
 
-  Grid.gueries = function (fields, src_queries) {
+  Grid.queries = function (fields, src_queries) {
     var dfd = new $.Deferred
     var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '50px' };
     var DEFAULT_QUERY = { label: null, columns:COLUMN_RECID, order:null, condition: null };
@@ -157,17 +157,21 @@ define(function (require) {
     }
 
     function filter_generator(condition) {
+      var dfd = new $.Deferred;
       var filter = function (record) {
         return true;
       };
-      return filter;
+      dfd.resolve(filter);
+      return dfd.promise();
     }
 
     function sorter_generator(orders) {
+      var dfd = new $.Deferred;
       var sorter = function (record0, record1) {
         return 0;
       };
-      return sorter;
+      dfd.resolve(sorter);
+      return dfd.promise();
     }
 
     function column_converter(src_column, field, control) {
@@ -191,7 +195,7 @@ define(function (require) {
 
     function columns_converter(src_columns, field_map, controls) {
       var dfd = new $.Deferred;
-      var columns = null;
+      var columns = [];
       var promises = [];
       src_columns.forEach(function(src_column) {
         var field = field_map[src_column.field_name]
@@ -216,7 +220,7 @@ define(function (require) {
         field_map[field.name] = field;
       });
 
-      var query = {};
+      var query = {}
       columns_converter(src_query.columns, field_map, controls)
       .then(function(columns) {
         query.columns = columns;
@@ -228,7 +232,7 @@ define(function (require) {
       })
       .then(function(filter) {
         query.filter = filter;
-        dfd.promise(query);
+        dfd.resolve(query);
       });
 
       return dfd.promise();

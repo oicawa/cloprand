@@ -141,17 +141,18 @@ define(function (require) {
         columns = columns_;
       })
     })
-    //.then(function() {
-    //  return Grid.queries(self._class.object_fields, self._class.list_view.properties.queries)
-    //  .done(function(queries_) {
-    //    queries = queries_;
-    //  })
-    //})
+    .then(function() {
+      return Grid.queries(self._class.object_fields, self._class.list_view.properties.queries)
+      .done(function(queries_) {
+        queries = queries_;
+      })
+    })
     .then(function() {
       view.append(TEMPLATE);
     })
     .then(function() {
       return self._grid.init(list_selector, columns)
+      //return self._grid.init(list_selector, queries[0].columns)
     })
     .then(function() {
       var src_items = Utils.get_as_json(null, function() { return self._class.list_view.properties.toolbar_items; });
