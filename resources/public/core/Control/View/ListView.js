@@ -152,7 +152,7 @@ define(function (require) {
     })
     .then(function() {
       //return self._grid.init(list_selector, columns)
-      return self._grid.init(list_selector, queries[0].columns)
+      return self._grid.init(list_selector, null, null, queries)
     })
     .then(function() {
       var src_items = Utils.get_as_json(null, function() { return self._class.list_view.properties.toolbar_items; });

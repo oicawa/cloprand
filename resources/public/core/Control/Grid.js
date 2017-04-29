@@ -11,7 +11,24 @@ define(function (require) {
 
   var TEMPLATE = '<div class="grid"></div>';
 
-  function create_control(self, columns, style) {
+  function create_queries_item(queries) {
+    var id = Uuid.version4();
+    var item = {
+      type: 'menu-radio',
+      id: id,
+      icon: 'fa-filter',
+      text: function (item) {
+        var text = item.selected;
+        var el   = this.get(id + ':' + item.selected);
+        return !el ? "" : el.text;
+      },
+      selected: 'id1',
+      items: queries
+    };
+    return item;
+  }
+
+  function create_control(self, columns) {
     self._root.append(TEMPLATE);
     var grid = self._root.children("div.grid");
     var uuid = Uuid.version4();
@@ -29,7 +46,7 @@ define(function (require) {
         //toolbarInput:false,
         toolbarInput:true,
       },
-      columns: columns,
+      columns: !columns ? self._queries_item.items[0].columns : columns,
       onDblClick:function(event) {
         console.log(event);
         if (!self._grid.menu || (!Array.isArray(self._grid.menu)) || (self._grid.menu.length == 0)) {
@@ -49,6 +66,7 @@ define(function (require) {
       },
       onToolbar : function (event) {
         var item = this.toolbar.get(event.target);
+        console.log(item);
         if (!item.action) {
           return;
         }
@@ -83,13 +101,9 @@ define(function (require) {
     this._selector = null;
     this._root = null;
     this._grid = null;
-    this._sorters = null;
+    this._queries_item = null;
   }
 
-  Grid.sorters = function (class_) {
-    
-  };
-  
   Grid.create_columns = function (class_) {
     var dfd = new $.Deferred
     var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '50px' };
@@ -242,9 +256,11 @@ define(function (require) {
     .done(function (controls) {
       var promises = [];
       var queries = [];
-      src_queries.forEach(function(src_query) {
+      src_queries.forEach(function(src_query, index) {
         var promise = query_converter(src_query, fields, controls)
         .done(function (query) {
+          query.id = 'id' + index;
+          query.text = Locale.translate(src_query.label);
           queries.push(query);
         });
         promises.push(promise);
@@ -257,9 +273,10 @@ define(function (require) {
     return dfd.promise();
   }
 
-  Grid.prototype.init = function(selector, columns, options) {
+  Grid.prototype.init = function(selector, columns, options, queries) {
     var dfd = new $.Deferred;
     this._selector = selector;
+    this._queries_item = create_queries_item(queries);
 
     var default_styles = { "width":null, "height":null };
     var styles = Utils.get_as_json(default_styles, function () { return options; });
@@ -283,9 +300,6 @@ define(function (require) {
     return dfd.promise();
   };
 
-  Grid.prototype.sorters = function(sorters) {
-    this._sorters = sorters;
-  };
   Grid.prototype.context_menu = function(items, context) {
     var dfd = new $.Deferred;
     
@@ -384,29 +398,28 @@ define(function (require) {
   };
 
   Grid.prototype.items = function(items) {
-    if (!items) {
-      return;
-    }
+    var all_items = !items ? [] : items;
+    all_items.push({type:'spacer'});
+    all_items.push(this._queries_item);
     
-    this._grid.toolbar.items = items;
+    this._grid.toolbar.items = all_items;
     // !!! The follow logic is dirty hack !!!
     // <<Reason>>
     // The added all items are not displayed at once.
     // Calling 'refresh' method of toolbar once, only one displayed item is added in toolbar.
     // So, I implement it temporarily to call the 'refresh' method for the number of items.
     // This issue have to be investigated, and be fixed...
-    for (var i = 0; i < items.length; i++) {
+    for (var i = 0; i < all_items.length; i++) {
       this._grid.toolbar.refresh();
     }
-    for (var i = 0; i < items.length; i++) {
-      var init = items[i].init;
+    for (var i = 0; i < all_items.length; i++) {
+      var init = all_items[i].init;
       if (!init || typeof init != "function") {
         continue;
       }
-      init(items[i]);
+      init(all_items[i]);
     }
-    
- };
+  };
   
   Grid.prototype.data = function(value) {
     // getter
