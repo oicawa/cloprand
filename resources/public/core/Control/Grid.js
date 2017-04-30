@@ -164,8 +164,9 @@ define(function (require) {
   Grid.queries = function (fields, src_queries) {
     var dfd = new $.Deferred
     var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '50px' };
-    var DEFAULT_QUERY = { label: null, columns:COLUMN_RECID, order:null, condition: null };
+    var DEFAULT_QUERY = { id:"id0", text: "", columns:COLUMN_RECID, sorter:null, filter: null };
     if (!fields || !src_queries) {
+      console.log("!fields || !src_queries");
       dfd.resolve([DEFAULT_QUERY])
       return dfd.promise();
     }
@@ -235,17 +236,14 @@ define(function (require) {
       });
 
       var query = {}
-      columns_converter(src_query.columns, field_map, controls)
-      .then(function(columns) {
-        query.columns = columns;
-        return sorter_generator(src_query.orders);
+      columns_converter(src_query.columns, field_map, controls).done(function(columns) { query.columns = columns; })
+      .then(function() {
+        return sorter_generator(src_query.orders).done(function (sorter) {query.sorter = sorter; });
       })
-      .then(function(sorter) {
-        query.sorter = sorter;
-        return filter_generator(src_query.filter);
+      .then(function() {
+        return filter_generator(src_query.filter).done(function(filter) { query.filter = filter; });
       })
-      .then(function(filter) {
-        query.filter = filter;
+      .then(function() {
         dfd.resolve(query);
       });
 

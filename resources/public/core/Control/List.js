@@ -251,7 +251,7 @@ define(function (require) {
       root.append(TEMPLATE);
     })
     .then(function() {
-      return self._grid.init(selector + " > div > div.records", self._columns, styles);
+      return self._grid.init(selector + " > div > div.records", self._columns, styles, []);
     })
     .then(function() {
       return Menu.convert(options.toolbar_items, self).done(function(dst_items) { console.log(dst_items);self._grid.items(dst_items); });
