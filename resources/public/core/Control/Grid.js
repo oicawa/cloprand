@@ -11,24 +11,7 @@ define(function (require) {
 
   var TEMPLATE = '<div class="grid"></div>';
 
-  function create_queries_item(queries) {
-    var id = Uuid.version4();
-    var item = {
-      type: 'menu-radio',
-      id: id,
-      icon: 'fa-filter',
-      text: function (item) {
-        var text = item.selected;
-        var el   = this.get(id + ':' + item.selected);
-        return !el ? "" : el.text;
-      },
-      selected: 'id1',
-      items: queries
-    };
-    return item;
-  }
-
-  function create_control(self, columns) {
+  function create_control(self, columns, style) {
     self._root.append(TEMPLATE);
     var grid = self._root.children("div.grid");
     var uuid = Uuid.version4();
@@ -46,7 +29,7 @@ define(function (require) {
         //toolbarInput:false,
         toolbarInput:true,
       },
-      columns: !columns ? self._queries_item.items[0].columns : columns,
+      columns: columns,
       onDblClick:function(event) {
         console.log(event);
         if (!self._grid.menu || (!Array.isArray(self._grid.menu)) || (self._grid.menu.length == 0)) {
@@ -66,7 +49,6 @@ define(function (require) {
       },
       onToolbar : function (event) {
         var item = this.toolbar.get(event.target);
-        console.log(item);
         if (!item.action) {
           return;
         }
@@ -101,9 +83,13 @@ define(function (require) {
     this._selector = null;
     this._root = null;
     this._grid = null;
-    this._queries_item = null;
+    this._sorters = null;
   }
 
+  Grid.sorters = function (class_) {
+    
+  };
+  
   Grid.create_columns = function (class_) {
     var dfd = new $.Deferred
     var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '50px' };
@@ -112,7 +98,7 @@ define(function (require) {
       return dfd.promise();
     }
     var primitives = null;
-    Storage.read(Class.PRIMITIVE_ID)
+    Storage.read(Primitive.ID)
     .done(function (primitives) {
       var fields = class_.object_fields.filter(function(field) { return !field.column ? false : true;});
       var columns = [];
@@ -135,14 +121,14 @@ define(function (require) {
             sortable:true
           };
           
-          if (!Control.cell_render) {
+          if (!Control.renderer) {
             column.render = function(record, row_index, column_index) { return record[field.name]; };
             columns[index] = column;
             inner_dfd.resolve();
             return;
           }
           
-          Control.cell_render(field)
+          Control.renderer(field)
           .done(function(renderer) {
             column.render = renderer;
             columns[index] = column;
@@ -164,9 +150,8 @@ define(function (require) {
   Grid.queries = function (fields, src_queries) {
     var dfd = new $.Deferred
     var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '50px' };
-    var DEFAULT_QUERY = { id:"id0", text: "", columns:COLUMN_RECID, sorter:null, filter: null };
+    var DEFAULT_QUERY = { label: null, columns:COLUMN_RECID, order:null, condition: null };
     if (!fields || !src_queries) {
-      console.log("!fields || !src_queries");
       dfd.resolve([DEFAULT_QUERY])
       return dfd.promise();
     }
@@ -200,7 +185,12 @@ define(function (require) {
         sortable:true
       };
 
-      control.cell_render(field)
+      if (!control.renderer) {
+        dfd.resolve(dst_column);
+        return dfd.promise();
+      }
+
+      control.renderer(field)
       .done(function(renderer) {
         dst_column.render = renderer;
         dfd.resolve(dst_column);
@@ -236,14 +226,17 @@ define(function (require) {
       });
 
       var query = {}
-      columns_converter(src_query.columns, field_map, controls).done(function(columns) { query.columns = columns; })
-      .then(function() {
-        return sorter_generator(src_query.orders).done(function (sorter) {query.sorter = sorter; });
+      columns_converter(src_query.columns, field_map, controls)
+      .then(function(columns) {
+        query.columns = columns;
+        return sorter_generator(src_query.orders);
       })
-      .then(function() {
-        return filter_generator(src_query.filter).done(function(filter) { query.filter = filter; });
+      .then(function(sorter) {
+        query.sorter = sorter;
+        return filter_generator(src_query.filter);
       })
-      .then(function() {
+      .then(function(filter) {
+        query.filter = filter;
         dfd.resolve(query);
       });
 
@@ -254,11 +247,9 @@ define(function (require) {
     .done(function (controls) {
       var promises = [];
       var queries = [];
-      src_queries.forEach(function(src_query, index) {
+      src_queries.forEach(function(src_query) {
         var promise = query_converter(src_query, fields, controls)
         .done(function (query) {
-          query.id = 'id' + index;
-          query.text = Locale.translate(src_query.label);
           queries.push(query);
         });
         promises.push(promise);
@@ -271,10 +262,9 @@ define(function (require) {
     return dfd.promise();
   }
 
-  Grid.prototype.init = function(selector, columns, options, queries) {
+  Grid.prototype.init = function(selector, columns, options) {
     var dfd = new $.Deferred;
     this._selector = selector;
-    this._queries_item = create_queries_item(queries);
 
     var default_styles = { "width":null, "height":null };
     var styles = Utils.get_as_json(default_styles, function () { return options; });
@@ -298,6 +288,9 @@ define(function (require) {
     return dfd.promise();
   };
 
+  Grid.prototype.sorters = function(sorters) {
+    this._sorters = sorters;
+  };
   Grid.prototype.context_menu = function(items, context) {
     var dfd = new $.Deferred;
     
@@ -396,28 +389,29 @@ define(function (require) {
   };
 
   Grid.prototype.items = function(items) {
-    var all_items = !items ? [] : items;
-    all_items.push({type:'spacer'});
-    all_items.push(this._queries_item);
+    if (!items) {
+      return;
+    }
     
-    this._grid.toolbar.items = all_items;
+    this._grid.toolbar.items = items;
     // !!! The follow logic is dirty hack !!!
     // <<Reason>>
     // The added all items are not displayed at once.
     // Calling 'refresh' method of toolbar once, only one displayed item is added in toolbar.
     // So, I implement it temporarily to call the 'refresh' method for the number of items.
     // This issue have to be investigated, and be fixed...
-    for (var i = 0; i < all_items.length; i++) {
+    for (var i = 0; i < items.length; i++) {
       this._grid.toolbar.refresh();
     }
-    for (var i = 0; i < all_items.length; i++) {
-      var init = all_items[i].init;
+    for (var i = 0; i < items.length; i++) {
+      var init = items[i].init;
       if (!init || typeof init != "function") {
         continue;
       }
-      init(all_items[i]);
+      init(items[i]);
     }
-  };
+    
+ };
   
   Grid.prototype.data = function(value) {
     // getter

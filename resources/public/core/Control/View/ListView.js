@@ -46,6 +46,27 @@ define(function (require) {
     app.contents().tabs().show_tab("New " + Locale.translate(class_.label), null, class_.detail_view.id, class_.id, Uuid.NULL);
   };
   
+//  function open_details(class_, grid, recids) {
+//    var fields = class_.object_fields;
+//    var key_field_names = fields.filter(function (field, index) { return !(!field.key); })
+//                                .map(function (field) { return field.name; });
+//    
+//    var objects = recids.map(function (recid) { return grid.get(recid); });
+//    
+//    key_field_names.push("id");
+//    console.assert(0 < key_field_names.length, key_field_names);
+//
+//    var key_field_name = key_field_names[0];
+//    
+//    var captions = (new Class(class_)).captions(objects);
+//    
+//    for (var i = 0; i < recids.length; i++) {
+//      var caption = captions[i];
+//      var object = objects[i];
+//      var key = object[key_field_name];
+//      app.contents().tabs().show_tab(caption, null, class_.detail_view.id, class_.id, key);
+//    }
+//  }
   function open_details(class_, grid, recids) {
     var fields = class_.object_fields;
     var key_field_names = fields.filter(function (field, index) { return !(!field.key); })
@@ -58,14 +79,16 @@ define(function (require) {
 
     var key_field_name = key_field_names[0];
     
-    var captions = (new Class(class_)).captions(objects);
-    
-    for (var i = 0; i < recids.length; i++) {
-      var caption = captions[i];
-      var object = objects[i];
-      var key = object[key_field_name];
-      app.contents().tabs().show_tab(caption, null, class_.detail_view.id, class_.id, key);
-    }
+    (new Class(class_)).renderer()
+    .done(function (renderer) {
+      var captions = objects.map(function (object) { return renderer(object); });
+      for (var i = 0; i < recids.length; i++) {
+        var caption = captions[i];
+        var object = objects[i];
+        var key = object[key_field_name];
+        app.contents().tabs().show_tab(caption, null, class_.detail_view.id, class_.id, key);
+      }
+    });
   }
 
   ListView.open1 = function (event) {
@@ -152,7 +175,7 @@ define(function (require) {
     })
     .then(function() {
       //return self._grid.init(list_selector, columns)
-      return self._grid.init(list_selector, null, null, queries)
+      return self._grid.init(list_selector, queries[0].columns)
     })
     .then(function() {
       var src_items = Utils.get_as_json(null, function() { return self._class.list_view.properties.toolbar_items; });

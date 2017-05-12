@@ -101,9 +101,9 @@ define(function (require) {
     this._finder.refresh();
   };
 
-  Selector.cell_render = function(field) {
+  Selector.renderer = function(field) {
     var dfd = new $.Deferred;
-    Finder.cell_render(field)
+    Finder.renderer(field)
     .done(function (renderer) {
       dfd.resolve(renderer);
     });

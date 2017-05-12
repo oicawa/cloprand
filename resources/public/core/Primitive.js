@@ -3,11 +3,14 @@ define(function (require) {
   require('json2');
   var Utils = require('core/Utils');
   var Storage = require('core/Storage');
-  var Class = require('core/Class');
 
-  function get_controls() {
+  var Primitive = {};
+
+  Primitive.ID = "1fd7625f-78b5-4079-95dd-951186cb79fe";
+
+  Primitive.controls = function () {
     var dfd = new $.Deferred;
-    Storage.read(Class.PRIMITIVE_ID)
+    Storage.read(Primitive.ID)
     .done(function (primitives) {
       var controls = {};
       var promises = Object.keys(primitives).map(function(object_id) {
@@ -26,10 +29,6 @@ define(function (require) {
     });
     return dfd.promise();
   }
-    
-  var Primitive = {
-    controls : get_controls
-  }
-  
+
   return Primitive;
 });

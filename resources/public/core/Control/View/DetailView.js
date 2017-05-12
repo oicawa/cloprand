@@ -60,6 +60,7 @@ define(function (require) {
     this._object_id = null;
     this._class = null;
     this._object = null;
+    this._renderer = null;
     this._toolbar = null;
     this._detail = null;
   }
@@ -229,8 +230,8 @@ define(function (require) {
     if (this.is_new()) {
       return "New " + Locale.translate(this._class.label);
     }
-    var captions = (new Class(this._class)).captions([this._object]);
-    return captions[0];
+    var caption = this._renderer(this._object);
+    return caption;
   };
 
   DetailView.prototype.is_new = function () {
@@ -268,6 +269,9 @@ define(function (require) {
       Storage.read(Class.CLASS_ID, class_id).done(function (data) { self._class = data; }),
       get_object_data(self, class_id, object_id)
     )
+    .then(function() {
+      return (new Class(self._class)).renderer().done(function (renderer) { self._renderer = renderer; });
+    })
     .then(function() {
       view.append(TEMPLATE);
     })

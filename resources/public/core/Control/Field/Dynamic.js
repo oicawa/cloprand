@@ -232,7 +232,7 @@ define(function (require) {
     }
   }
 
-  Dynamic.cell_render = function(field) {
+  Dynamic.renderer = function(field) {
     var dfd = new $.Deferred;
     var class_id = field.datatype.properties.field.class_id;
     var class_ = null;

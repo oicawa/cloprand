@@ -4,6 +4,7 @@ define(function (require) {
   var Locale = require("core/Locale");
   var Inherits = require("core/Inherits");
   var Class = require("core/Class");
+  var Primitive = require("core/Primitive");
   var Storage = require("core/Storage");
   var Dialog = require("core/Dialog");
   var Action = require("core/Action");
@@ -118,7 +119,7 @@ define(function (require) {
     $.when(
       Storage.read(Class.CLASS_ID, Class.LOCALE_ID).done(function(data) { locale = data; }),
       Storage.read(Class.LOCALE_ID).then(function(objects) { locales = objects; }),
-      Storage.read(Class.PRIMITIVE_ID, field.datatype.id).done(function(object) { class_ = object; })
+      Storage.read(Primitive.ID, field.datatype.id).done(function(object) { class_ = object; })
     )
     .then(function () {
       return Grid.create_columns(locale).then(function (columns_) { columns = columns_; });
@@ -238,7 +239,7 @@ define(function (require) {
     return dfd.promise();
   };
 
-  Text.cell_render = function(field) {
+  Text.renderer = function(field) {
     return Text.generate_renderer(Text.DEFAULT_PROPERTIES, field);
   };
 

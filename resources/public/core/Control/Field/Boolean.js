@@ -105,7 +105,7 @@ define(function (require) {
     }
   };
 
-  Boolean.cell_render = function(field) {
+  Boolean.renderer = function(field) {
     var dfd = new $.Deferred;
     var renderer = function(record, index, column_index) {
       var value = record[field.name];

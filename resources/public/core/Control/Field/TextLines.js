@@ -35,7 +35,7 @@ define(function (require) {
     return Class.TEXTLINES_MULTILINGUALIZATION_ID;
   };
 
-  TextLines.cell_render = function(field) {
+  TextLines.renderer = function(field) {
     return Text.generate_renderer(TextLines.DEFAULT_PROPERTIES, field);
   };
   

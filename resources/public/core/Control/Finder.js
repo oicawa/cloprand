@@ -210,7 +210,7 @@ define(function (require) {
     return this._multi_selectable;
   };
 
-  Finder.cell_render = function(field) {
+  Finder.renderer = function(field) {
     var dfd = new $.Deferred;
     var class_id = field.datatype.properties.class_id;
     var class_ = null;

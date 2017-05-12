@@ -5,6 +5,7 @@ define(function (require) {
   var Utils = require("core/Utils");
   var Uuid = require("core/Uuid");
   var Class = require("core/Class");
+  var Primitive = require("core/Primitive");
   var Connector = require("core/Connector");
   var Storage = require("core/Storage");
   var Contents = require("core/Contents");
@@ -66,7 +67,7 @@ define(function (require) {
       Utils.load_css("core/app.css"),
       Connector.session("identity").done(function(data){ session = data; }),
       Storage.read(Class.SYSTEM_ID, CONFIG_OBJECT_ID).done(function(data){ self._config = data; }),
-      Storage.read(Class.PRIMITIVE_ID).done(function(data){ self._primitives = data; })
+      Storage.read(Primitive.ID).done(function(data){ self._primitives = data; })
     ).always(function() {
       $("body").append(LAYOUT_TEMPLATE);
       

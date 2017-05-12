@@ -69,23 +69,23 @@
   margin-right:3px;
   margin-left:3px;
 }
-
 .w2ui-field > label {
   display: block;
-  float: left;
+  float: none;
   margin-top: 7px;
   margin-bottom: 3px;
-  /*width: 120px;*/
+/*
+  width: 120px;
+*/
   width: auto;
   padding: 0px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-align: right;
+  text-align: left;
   min-height: 20px;
   color: #666;
 }
-
 .w2ui-field > div {
   /* do not include width */
   margin-bottom: 3px;

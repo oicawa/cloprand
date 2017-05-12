@@ -182,7 +182,7 @@ define(function (require) {
     this._icon.addClass("fa-fw");
   }
   
-  FontIcon.cell_render = function(field) {
+  FontIcon.renderer = function(field) {
     var dfd = new $.Deferred;
     var renderer = function(record, index, column_index) {
       var value = record[field.name];

@@ -81,7 +81,7 @@ define(function (require) {
     this._detail.refresh();
   };
   
-  Complex.cell_render = function(field) {
+  Complex.renderer = function(field) {
     var dfd = new $.Deferred;
     Storage.read(Class.CLASS_ID, field.datatype.properties.class_id, true)
     .done(function(object) {

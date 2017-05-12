@@ -138,7 +138,7 @@ define(function (require) {
     var self_class_id = null;
     if (this._self_reference) {
       var tab = app.contents().tabs().current();
-      self_class_id = tab.class_id;
+      self_class_id = tab.class_id == Class.CLASS_ID ? tab.object_id : tab.class_id;
     }
     
     if (!value && !this._self_reference) {
@@ -170,7 +170,7 @@ define(function (require) {
     this._field.finder.refresh();
   };
 
-  Fields.cell_render = function(field) {
+  Fields.renderer = function(field) {
     var dfd = new $.Deferred;
     var classes = null;
     $.when(
