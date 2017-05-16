@@ -58,6 +58,18 @@ define(function (require) {
       var menus = Object.keys(classes)
                         .map(function(id) { return classes[id]; })
                         .filter(function (class_) { return class_.application == true; });
+                        //.filter(function (class_) {
+                        //  console.log(class_);
+                        //  // Undefined
+                        //  if (!class_.class_type) {
+                        //    return false;
+                        //  }
+                        //  // Embedded
+                        //  if (class_.class_type.id == "949c12c1-48c5-450a-bb2c-222fdf0a0734") {
+                        //    return false;
+                        //  }
+                        //  return true;
+                        //});
       self._grid.data(menus);
       self._grid.refresh();
     });
@@ -92,21 +104,6 @@ define(function (require) {
       return self._grid.init(grid_selector, columns);
     })
     .then(function () {
-      //self._grid.context_menu([
-      //  { type : {
-      //    id:"e14d8e9f-846e-40be-8003-b7f31e6a662c",
-      //    properties: {
-      //        function_entry:{
-      //          id:""
-      //        },
-      //        caption:{
-      //          "":"Open(1 Item)",
-      //          "ja":"開く(1アイテム)",
-      //        },
-      //        icon:"fa-folder-o"
-      //      }
-      //  }
-      //]);
       self._grid.double_click = function(event) {
         MenuView.show_gridview(self, event.recid);
       };
@@ -126,12 +123,21 @@ define(function (require) {
         });
         return html;
       }
-      //self._grid.items([
-      //  { id:"search", type:"html",   text:"Search", icon:"fa fa-search",   html:search_generator }
-      //]);
+
       var menus = Object.keys(classes)
         .map(function(id) { return classes[id]; })
-        .filter(function(class_) { return class_.application == true; });
+        //.filter(function (class_) { return class_.application == true; });
+        .filter(function(class_) {
+          // Undefined
+          if (!class_.class_type) {
+            return false;
+          }
+          // Embedded
+          if (class_.class_type.id == "949c12c1-48c5-450a-bb2c-222fdf0a0734") {
+            return false;
+          }
+          return true;
+        });
       self._grid.data(menus);
       self.refresh();
     })

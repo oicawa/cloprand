@@ -46,27 +46,6 @@ define(function (require) {
     app.contents().tabs().show_tab("New " + Locale.translate(class_.label), null, class_.detail_view.id, class_.id, Uuid.NULL);
   };
   
-//  function open_details(class_, grid, recids) {
-//    var fields = class_.object_fields;
-//    var key_field_names = fields.filter(function (field, index) { return !(!field.key); })
-//                                .map(function (field) { return field.name; });
-//    
-//    var objects = recids.map(function (recid) { return grid.get(recid); });
-//    
-//    key_field_names.push("id");
-//    console.assert(0 < key_field_names.length, key_field_names);
-//
-//    var key_field_name = key_field_names[0];
-//    
-//    var captions = (new Class(class_)).captions(objects);
-//    
-//    for (var i = 0; i < recids.length; i++) {
-//      var caption = captions[i];
-//      var object = objects[i];
-//      var key = object[key_field_name];
-//      app.contents().tabs().show_tab(caption, null, class_.detail_view.id, class_.id, key);
-//    }
-//  }
   function open_details(class_, grid, recids) {
     var fields = class_.object_fields;
     var key_field_names = fields.filter(function (field, index) { return !(!field.key); })
@@ -159,16 +138,18 @@ define(function (require) {
       Storage.read(Class.CLASS_ID, Class.CLASS_ID).done(function (data) { self._base_class = data; })
     )
     .then(function() {
-      return Grid.create_columns(self._class)
-      .done(function(columns_) {
-        columns = columns_;
-      })
+      return Grid.create_columns(self._class).done(function(columns_) { columns = columns_; });
     })
     .then(function() {
-      return Grid.queries(self._class.object_fields, self._class.list_view.properties.queries)
-      .done(function(queries_) {
-        queries = queries_;
-      })
+      //return Grid.queries(self._class.object_fields, self._class.list_view.properties.queries).done(function(queries_) { queries = queries_; });
+      if (!self._class.class_type) {
+        return;
+      }
+      if (self._class.class_type.id != "b72dc321-5278-42da-8738-3503ae64bcad") {
+        return;
+      }
+      var src_queries = self._class.class_type.properties.list_view.properties.queries;
+      return Grid.queries(self._class.object_fields, src_queries).done(function(queries_) { queries = queries_; });
     })
     .then(function() {
       view.append(TEMPLATE);
@@ -178,13 +159,20 @@ define(function (require) {
       return self._grid.init(list_selector, queries[0].columns)
     })
     .then(function() {
-      var src_items = Utils.get_as_json(null, function() { return self._class.list_view.properties.toolbar_items; });
+      //var src_items = Utils.get_as_json(null, function() { return self._class.list_view.properties.toolbar_items; });
+      if (!self._class.class_type) {
+        return;
+      }
+      if (self._class.class_type.id != "b72dc321-5278-42da-8738-3503ae64bcad") {
+        return;
+      }
+      var src_items = Utils.get_as_json(null, function() { return self._class.class_type.properties.list_view.properties.toolbar_items; });
       if (!src_items)
         return;
       return Menu.convert(src_items, self).done(function(dst_items) { self._grid.items(dst_items); });
     })
     .then(function() {
-      var items = self._class.list_view.properties.context_items;
+      var items = self._class.class_type.properties.list_view.properties.context_items;
       self._grid.context_menu(items, self);
     })
     .then(function() {
