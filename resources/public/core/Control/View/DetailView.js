@@ -85,7 +85,7 @@ define(function (require) {
       Storage.delete(view._class_id, view._object_id)
       .done(function() {
         app.contents().tabs().broadcast(view._class_id, view._object_id, null);
-        app.contents().tabs().remove(view._class.detail_view.id, view._class_id, view._object_id);
+        app.contents().tabs().remove(view._class.class_type.properties.detail_view.id, view._class_id, view._object_id);
         Dialog.show("Deleted", "Delete");
       })
       .fail(function(jqXHR, text_status, error_thrown) {
