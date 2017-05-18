@@ -43,7 +43,7 @@ define(function (require) {
     var view = event.item.context;
     var class_ = view._class;
     console.log("[New Item Opend] view_id=" + class_.detail_view.id);
-    app.contents().tabs().show_tab("New " + Locale.translate(class_.label), null, class_.detail_view.id, class_.id, Uuid.NULL);
+    app.contents().tabs().show_tab("New " + Locale.translate(class_.label), null, class_.class_type.properties.detail_view.id, class_.id, Uuid.NULL);
   };
   
   function open_details(class_, grid, recids) {
@@ -65,7 +65,7 @@ define(function (require) {
         var caption = captions[i];
         var object = objects[i];
         var key = object[key_field_name];
-        app.contents().tabs().show_tab(caption, null, class_.detail_view.id, class_.id, key);
+        app.contents().tabs().show_tab(caption, null, class_.class_type.properties.detail_view.id, class_.id, key);
       }
     });
   }
