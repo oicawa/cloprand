@@ -37,6 +37,16 @@ define(function (require) {
   MenuView.prototype.caption = function () {
     return "Menu";
   };
+
+  function menu_filter(class_) {
+    if (!class_.class_type) {
+      return false;
+    }
+    if (class_.class_type.id == "949c12c1-48c5-450a-bb2c-222fdf0a0734") {
+      return false;
+    }
+    return true;
+  }
   
   MenuView.prototype.update = function (keys) {
     var target = false;
@@ -55,21 +65,7 @@ define(function (require) {
     var self = this;
     Storage.read(Class.CLASS_ID)
     .done(function (classes) {
-      var menus = Object.keys(classes)
-                        .map(function(id) { return classes[id]; })
-                        .filter(function (class_) { return class_.application == true; });
-                        //.filter(function (class_) {
-                        //  console.log(class_);
-                        //  // Undefined
-                        //  if (!class_.class_type) {
-                        //    return false;
-                        //  }
-                        //  // Embedded
-                        //  if (class_.class_type.id == "949c12c1-48c5-450a-bb2c-222fdf0a0734") {
-                        //    return false;
-                        //  }
-                        //  return true;
-                        //});
+      var menus = Object.keys(classes).map(function(id) { return classes[id]; }).filter(menu_filter);
       self._grid.data(menus);
       self._grid.refresh();
     });
@@ -124,20 +120,7 @@ define(function (require) {
         return html;
       }
 
-      var menus = Object.keys(classes)
-        .map(function(id) { return classes[id]; })
-        //.filter(function (class_) { return class_.application == true; });
-        .filter(function(class_) {
-          // Undefined
-          if (!class_.class_type) {
-            return false;
-          }
-          // Embedded
-          if (class_.class_type.id == "949c12c1-48c5-450a-bb2c-222fdf0a0734") {
-            return false;
-          }
-          return true;
-        });
+      var menus = Object.keys(classes).map(function(id) { return classes[id]; }).filter(menu_filter);
       self._grid.data(menus);
       self.refresh();
     })

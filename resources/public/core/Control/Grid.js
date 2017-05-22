@@ -291,6 +291,7 @@ define(function (require) {
   Grid.prototype.sorters = function(sorters) {
     this._sorters = sorters;
   };
+
   Grid.prototype.context_menu = function(items, context) {
     var dfd = new $.Deferred;
     
