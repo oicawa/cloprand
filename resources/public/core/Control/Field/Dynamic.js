@@ -148,7 +148,7 @@ define(function (require) {
       Storage.read(class_id).done(function(data) { self._objects = data; })
     )
     .then(function() {
-      return Grid.create_columns(self._class).then(function (columns_) { columns = columns_; });
+      return Grid.columns(self._class).then(function (columns_) { columns = columns_; });
     })
     .then(function() {
       create_label(self, root, field);

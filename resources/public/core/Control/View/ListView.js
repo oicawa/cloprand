@@ -138,7 +138,7 @@ define(function (require) {
       Storage.read(Class.CLASS_ID, Class.CLASS_ID).done(function (data) { self._base_class = data; })
     )
     .then(function() {
-      return Grid.create_columns(self._class).done(function(columns_) { columns = columns_; });
+      return Grid.columns(self._class).done(function(columns_) { columns = columns_; });
     })
     .then(function() {
       //return Grid.queries(self._class.object_fields, self._class.list_view.properties.queries).done(function(queries_) { queries = queries_; });

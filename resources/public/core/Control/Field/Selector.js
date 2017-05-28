@@ -54,7 +54,7 @@ define(function (require) {
       return Storage.read(class_id).then(function(objects) { items = objects; })
     })
     .then(function () {
-      return Grid.create_columns(class_).then(function (columns_) { columns = columns_; });
+      return Grid.columns(class_).then(function (columns_) { columns = columns_; });
     })
     .then(function() {
       function converter(objects) {

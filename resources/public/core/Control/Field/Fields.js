@@ -62,13 +62,13 @@ define(function (require) {
       self._field._class = self._classes[Class.FIELD_ID];
     })
     .then(function () {
-      return Grid.create_columns(self._class._class)
+      return Grid.columns(self._class._class)
       .then(function (columns) {
         self._class.columns = columns;
       });
     })
     .then(function () {
-      return Grid.create_columns(self._field._class).then(function (columns) { self._field.columns = columns; });
+      return Grid.columns(self._field._class).then(function (columns) { self._field.columns = columns; });
     })
     .then(function () {
       function converter(objects) {

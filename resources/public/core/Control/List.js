@@ -245,7 +245,7 @@ define(function (require) {
 
     Storage.read(Class.CLASS_ID, options.class_id).done(function (data) { self._class = data; })
     .then(function() {
-      return Grid.create_columns(self._class).done(function(columns_) { self._columns = columns_; });
+      return Grid.columns(self._class).done(function(columns_) { self._columns = columns_; });
     })
     .then(function() {
       root.append(TEMPLATE);

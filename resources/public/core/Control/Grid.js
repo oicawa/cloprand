@@ -62,7 +62,12 @@ define(function (require) {
         event.item = event.menuItem;
         event.item.action(event);
       },
+      //onColumnClick : function (event) {
       onSort : function (event) {
+        // over ride sort logic...
+        //event.preventDefault();
+        
+      	//event.stopPropagetion();
         //var field = event.field;
         //if (!self._sorters) {
         //  return;
@@ -72,6 +77,13 @@ define(function (require) {
         //  return;
         //}
         //sorter();
+        if (event.direction == "asc") {
+          event.direction = "desc";
+        } else if (event.direction == "desc") {
+          event.direction = null;
+        } else {
+          event.direction = "asc";
+        }
         console.log(event);
       }
     });
@@ -86,11 +98,50 @@ define(function (require) {
     this._sorters = null;
   }
 
-  Grid.sorters = function (class_) {
-    
-  };
+  Grid.comparers = function (class_) {
+    var comparers = {};
+    var dfd = new $.Deferred
+    function compare_recid(rec1, rec2) {
+      if (rec1.recid == rec2.recid) {
+        return 0;
+      }
+      return rec1.recid < rec2.recid ? -1 : 1;
+    };
+    comparers["recid"] = compare_recid;
+    if (!class_ || !class_.object_fields) {
+      dfd.resolve(comparers);
+      return dfd.promise();
+    }
+    var primitives = null;
+    Storage.read(Primitive.ID)
+    .done(function (primitives) {
+      var fields = class_.object_fields.filter(function(field) { return !field.sort_direction || field.sort_direction != ''; });
+      var promises = fields.map(function(field, index) {
+        // get a cell render of primitive, and assign it to column property
+        var inner_dfd = new $.Deferred;
+        var primitive = primitives[field.datatype.id];
+        if (!primitive) {
+          inner_dfd.resolve();
+          return inner_dfd.promise();
+        }
+
+        require([primitive.require_path], function(Control) {
+          if (Control.comparer) {
+            comparers[field.name] = Control.comparer(field);
+          }
+          inner_dfd.resolve();
+        });
+        return inner_dfd.promise(); 
+      });
+      $.when.apply(null, promises)
+      .then(function() {
+        dfd.resolve(comparers);
+      });
+    });
+    return dfd.promise();
+  }
   
-  Grid.create_columns = function (class_) {
+  Grid.columns = function (class_) {
     var dfd = new $.Deferred
     var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '50px' };
     if (!class_ || !class_.object_fields) {
@@ -430,7 +481,7 @@ define(function (require) {
     }
     this._grid.records = value;
   };
-  
+
   Grid.prototype.refresh = function(reorder) {
     if (typeof reorder === "function") {
       this._grid.records.forEach(reorder);

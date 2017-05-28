@@ -93,7 +93,7 @@ define(function (require) {
     )
     .then(function() {
       self._class = classes[Class.CLASS_ID];
-      return Grid.create_columns(self._class).done(function(columns_) { columns = columns_; });
+      return Grid.columns(self._class).done(function(columns_) { columns = columns_; });
     })
     .then(function() {
       view.append(TEMPLATE);

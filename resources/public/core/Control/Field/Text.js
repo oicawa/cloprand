@@ -122,7 +122,7 @@ define(function (require) {
       Storage.read(Primitive.ID, field.datatype.id).done(function(object) { class_ = object; })
     )
     .then(function () {
-      return Grid.create_columns(locale).then(function (columns_) { columns = columns_; });
+      return Grid.columns(locale).then(function (columns_) { columns = columns_; });
     })
     .then(function () {
       var prop_array = Utils.get_as_json(
@@ -243,5 +243,16 @@ define(function (require) {
     return Text.generate_renderer(Text.DEFAULT_PROPERTIES, field);
   };
 
+  Text.comparer = function(filed) {
+    function compare(rec1, rec2) {
+      var value1 = Locale.translate(rec1[field.name]);
+      var value2 = Locale.translate(rec2[field.name]);
+      if (value1 === value2) {
+        return 0;
+      }
+      return value1 < value2 ? -1 : 1;
+    }
+    return compare;
+  };
   return Text;
 });
