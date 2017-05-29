@@ -97,22 +97,25 @@ define(function (require) {
       var grid = new Grid();
       var select_panel = "";
       dialog.init(function(panel_id) {
-        return grid.init("#" + panel_id, [
-          { field   : 'recid',
-            caption : 'No.',
-            size    : '30px'},
-          { field   : 'id',
-            caption : 'Icon',
-            size    : '70px',
-            render  : function(record, index, column_index) {
-              var html = FONT_TEMPLATE.replace(/{{FONT_NAME}}/, record.id);
-              return html;
-            }},
-          { field   : 'name',
-            caption : 'Name',
-            size    : '200px'}
-        ],
-        'height:500px;');
+        return grid.init("#" + panel_id, {
+          "columns" : [
+            { field   : 'recid',
+              caption : 'No.',
+              size    : '30px'},
+            { field   : 'id',
+              caption : 'Icon',
+              size    : '70px',
+              render  : function(record, index, column_index) {
+                var html = FONT_TEMPLATE.replace(/{{FONT_NAME}}/, record.id);
+                return html;
+              }},
+            { field   : 'name',
+              caption : 'Name',
+              size    : '200px'}
+          ],
+          "comparers":[],
+          "styles" : {height:"500px;"}
+        });
       })
       .then(function() {
         grid.toolbar(true);

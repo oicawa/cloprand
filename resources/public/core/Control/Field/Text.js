@@ -243,7 +243,7 @@ define(function (require) {
     return Text.generate_renderer(Text.DEFAULT_PROPERTIES, field);
   };
 
-  Text.comparer = function(filed) {
+  Text.comparer = function(field) {
     function compare(rec1, rec2) {
       var value1 = Locale.translate(rec1[field.name]);
       var value2 = Locale.translate(rec2[field.name]);

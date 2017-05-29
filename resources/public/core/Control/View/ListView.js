@@ -129,7 +129,7 @@ define(function (require) {
     var objects = null;
     var self = this;
     var list_selector = selector + "> div.listview-panel > div.object-list";
-    var columns = null;
+    var options = {};
     var queries = null;
     $.when(
       Utils.load_css("/core/Control/View/ListView.css"),
@@ -138,7 +138,10 @@ define(function (require) {
       Storage.read(Class.CLASS_ID, Class.CLASS_ID).done(function (data) { self._base_class = data; })
     )
     .then(function() {
-      return Grid.columns(self._class).done(function(columns_) { columns = columns_; });
+      return Grid.columns(self._class).done(function(columns_) { options.columns = columns_; });
+    })
+    .then(function() {
+      return Grid.comparers(self._class).done(function(comparers_) { options.comparers = comparers_; });
     })
     .then(function() {
       //return Grid.queries(self._class.object_fields, self._class.list_view.properties.queries).done(function(queries_) { queries = queries_; });
@@ -155,8 +158,7 @@ define(function (require) {
       view.append(TEMPLATE);
     })
     .then(function() {
-      return self._grid.init(list_selector, columns)
-      //return self._grid.init(list_selector, queries[0].columns)
+      return self._grid.init(list_selector, options)
     })
     .then(function() {
       //var src_items = Utils.get_as_json(null, function() { return self._class.list_view.properties.toolbar_items; });

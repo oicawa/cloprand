@@ -242,16 +242,20 @@ define(function (require) {
       'width' : options.width,
       'height': options.height
     };
+    var options_ = {"styles":styles};
 
     Storage.read(Class.CLASS_ID, options.class_id).done(function (data) { self._class = data; })
     .then(function() {
-      return Grid.columns(self._class).done(function(columns_) { self._columns = columns_; });
+      return Grid.columns(self._class).done(function(columns_) { options_.columns = columns_; });
+    })
+    .then(function() {
+      return Grid.comparers(self._class).done(function(comparers_) { options_.comparers = comparers_; });
     })
     .then(function() {
       root.append(TEMPLATE);
     })
     .then(function() {
-      return self._grid.init(selector + " > div > div.records", self._columns, styles);
+      return self._grid.init(selector + " > div > div.records", options_);
     })
     .then(function() {
       return Menu.convert(options.toolbar_items, self).done(function(dst_items) { console.log(dst_items);self._grid.items(dst_items); });

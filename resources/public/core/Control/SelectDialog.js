@@ -18,12 +18,15 @@ define(function (require) {
     this._items = null;
   }
 
-  SelectDialog.prototype.init = function(columns, items, multi_selectable) {
+  SelectDialog.prototype.init = function(options) {
+    console.assert(Array.isArray(options.items), "'option.items' not Array");
+    console.assert(options.columns, "'option.columns' is null or undefined");
+    console.assert(options.comparers, "'option.comparers' is null or undefined");
+    console.assert(typeof options.multi_selectable == "undefined", "'option.multi_selectable' is undefined");
+    
     var dfd = new $.Deferred;
     
-    console.assert(Array.isArray(items), "'items' not Array");
-    
-    this._items = items;
+    this._items = options.items;
     this._dialog = new Dialog();
     this._grid = new Grid();
     
@@ -54,14 +57,14 @@ define(function (require) {
       });
     })
     .then(function() {
-      return self._grid.init(selector, columns);
+      return self._grid.init(selector, options);
     })
     .then(function() {
       self._grid.multi_search(true);
-      self._grid.multi_select(multi_selectable);
+      self._grid.multi_select(options.multi_selectable);
       self._grid.select_column(true);
       self._grid.toolbar(true);
-      self._grid.data(items);
+      self._grid.data(options.items);
       self._grid.refresh();
       dfd.resolve();
     });

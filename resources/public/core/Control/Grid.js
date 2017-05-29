@@ -11,7 +11,7 @@ define(function (require) {
 
   var TEMPLATE = '<div class="grid"></div>';
 
-  function create_control(self, columns, style) {
+  function create_control(self) {
     self._root.append(TEMPLATE);
     var grid = self._root.children("div.grid");
     var uuid = Uuid.version4();
@@ -29,7 +29,7 @@ define(function (require) {
         //toolbarInput:false,
         toolbarInput:true,
       },
-      columns: columns,
+      columns: self._columns,
       onDblClick:function(event) {
         console.log(event);
         if (!self._grid.menu || (!Array.isArray(self._grid.menu)) || (self._grid.menu.length == 0)) {
@@ -95,7 +95,7 @@ define(function (require) {
     this._selector = null;
     this._root = null;
     this._grid = null;
-    this._sorters = null;
+    this._comparers = null;
   }
 
   Grid.comparers = function (class_) {
@@ -313,12 +313,14 @@ define(function (require) {
     return dfd.promise();
   }
 
-  Grid.prototype.init = function(selector, columns, options) {
+  Grid.prototype.init = function(selector, options) {
     var dfd = new $.Deferred;
     this._selector = selector;
+    this._columns = options.columns;
+    this._comparers = options.comparers;
 
     var default_styles = { "width":null, "height":null };
-    var styles = Utils.get_as_json(default_styles, function () { return options; });
+    var styles = Utils.get_as_json(default_styles, function () { return options.styles; });
     this._root = $(selector);
     if (styles.width != null || styles.height != null) {
       this._root.css("position", "relative");
@@ -332,7 +334,7 @@ define(function (require) {
     Utils.load_css("/core/Control/Grid.css")
     .then(function() {
       // Create form tags
-      create_control(self, columns);
+      create_control(self);
       dfd.resolve();
     });
     
@@ -482,10 +484,23 @@ define(function (require) {
     this._grid.records = value;
   };
 
+  Grid.prototype.sort = function() {
+    for (var i = this._columns.length - 1; 0 <= i; i--) {
+      var column = this._columns[i];
+      var comparer = this._comparers[column.field];
+      if (!comparer) {
+        continue;
+      }
+      this._grid.records.sort(comparer);
+    }
+  };
+
   Grid.prototype.refresh = function(reorder) {
     if (typeof reorder === "function") {
       this._grid.records.forEach(reorder);
     }
+    this.sort();
+    
     this._grid.toolbar.refresh();
     this._grid.refresh();
   };

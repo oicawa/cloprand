@@ -86,18 +86,21 @@ define(function (require) {
     var classes = null;
     var self = this;
     var grid_selector = selector + "> div.menuview-panel > div.menu-list";
-    var columns = null;
+    var options = {};
     $.when(
       Utils.load_css("/core/Control/View/MenuView.css"),
       Storage.read(Class.CLASS_ID).done(function(data) { classes = data; })
     )
     .then(function() {
       self._class = classes[Class.CLASS_ID];
-      return Grid.columns(self._class).done(function(columns_) { columns = columns_; });
+      return Grid.columns(self._class).done(function(columns_) { options.columns = columns_; });
+    })
+    .then(function() {
+      return Grid.comparers(self._class).done(function(comparers_) { options.comparers = comparers_; });
     })
     .then(function() {
       view.append(TEMPLATE);
-      return self._grid.init(grid_selector, columns);
+      return self._grid.init(grid_selector, options);
     })
     .then(function () {
       self._grid.double_click = function(event) {
