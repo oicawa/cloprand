@@ -98,6 +98,10 @@ define(function (require) {
     this._comparers = null;
   }
 
+  // *** NOTE ***
+  // I have to implement 'fields' static method which creates Map object.
+  // It is used as a original data source to create 'columns' which is set to Grid object...
+
   Grid.comparers = function (class_) {
     var comparers = {};
     var dfd = new $.Deferred
@@ -143,7 +147,13 @@ define(function (require) {
   
   Grid.columns = function (class_) {
     var dfd = new $.Deferred
-    var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '50px' };
+    function compare_recid(rec1, rec2) {
+      if (rec1.recid == rec2.recid) {
+        return 0;
+      }
+      return rec1.recid < rec2.recid ? -1 : 1;
+    };
+    var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '50px', comparer: compare_recid };
     if (!class_ || !class_.object_fields) {
       dfd.resolve([COLUMN_RECID])
       return dfd.promise();
@@ -154,7 +164,7 @@ define(function (require) {
       var fields = class_.object_fields.filter(function(field) { return !field.column ? false : true;});
       var columns = [];
       var promises = fields.map(function(field, index) {
-        // get a cell render of primitive, and assign it to column property
+        // get a render & compare function of primitive, and assign it to column property
         var inner_dfd = new $.Deferred;
         var primitive = primitives[field.datatype.id];
         if (!primitive) {
@@ -171,14 +181,17 @@ define(function (require) {
             resizable: true,
             sortable:true
           };
-          
+          // Comparer
+          if (Control.comparer) {
+            column.compare = Control.comparer(field);
+          }
+          // Renderer
           if (!Control.renderer) {
             column.render = function(record, row_index, column_index) { return record[field.name]; };
             columns[index] = column;
             inner_dfd.resolve();
             return;
           }
-          
           Control.renderer(field)
           .done(function(renderer) {
             column.render = renderer;
@@ -193,12 +206,11 @@ define(function (require) {
         columns.push(COLUMN_RECID);
         dfd.resolve(columns);
       });
-       
     });
     return dfd.promise();
   }
 
-  Grid.queries = function (fields, src_queries) {
+  Grid.queries_ = function (fields, src_queries) {
     var dfd = new $.Deferred
     var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '50px' };
     var DEFAULT_QUERY = { label: null, columns:COLUMN_RECID, order:null, condition: null };
@@ -317,7 +329,7 @@ define(function (require) {
     var dfd = new $.Deferred;
     this._selector = selector;
     this._columns = options.columns;
-    this._comparers = options.comparers;
+    //this._comparers = options.comparers;
 
     var default_styles = { "width":null, "height":null };
     var styles = Utils.get_as_json(default_styles, function () { return options.styles; });
@@ -486,12 +498,11 @@ define(function (require) {
 
   Grid.prototype.sort = function() {
     for (var i = this._columns.length - 1; 0 <= i; i--) {
-      var column = this._columns[i];
-      var comparer = this._comparers[column.field];
-      if (!comparer) {
+      var compare = this._columns[i].compare;
+      if (!compare) {
         continue;
       }
-      this._grid.records.sort(comparer);
+      this._grid.records.sort(compare);
     }
   };
 
