@@ -68,7 +68,7 @@ define(function (require) {
         //event.preventDefault();
         
       	//event.stopPropagetion();
-        //var field = event.field;
+        //var field = ev.field;
         //if (!self._sorters) {
         //  return;
         //}
@@ -499,8 +499,6 @@ define(function (require) {
     if (typeof reorder === "function") {
       this._grid.records.forEach(reorder);
     }
-    this.sort();
-    
     this._grid.toolbar.refresh();
     this._grid.refresh();
   };

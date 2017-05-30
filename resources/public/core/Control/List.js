@@ -76,13 +76,13 @@ define(function (require) {
   List.prototype.showImportDialog = function (title) {
     var items = null;
     var self = this;
-    var width = self._columns.map(function(column) { return parseInt(column.size); }).reduce(function (prev, current, index, array) { return prev + current; }, 100);
+    var width = self._grid._columns.map(function(column) { return parseInt(column.size); }).reduce(function (prev, current, index, array) { return prev + current; }, 100);
     var dialog = new SelectDialog();
 
     Storage.read(this._class.id).done(function (data) { items = data; })
     .then(function () {
       var objects = Object.keys(items).map(function(id) { return items[id]; });
-      return dialog.init(self._columns, objects, true);
+      return dialog.init({columns:self._grid._columns, comparers:self._grid._comparers, items:objects, multi_selectable:true});
     })
     .done(function() {
       dialog.title(title);

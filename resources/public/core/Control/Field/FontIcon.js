@@ -113,8 +113,7 @@ define(function (require) {
               caption : 'Name',
               size    : '200px'}
           ],
-          "comparers":[],
-          "styles" : {height:"500px;"}
+          "comparers":{}
         });
       })
       .then(function() {

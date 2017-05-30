@@ -42,7 +42,7 @@ define(function (require) {
   ListView.create = function (event) {
     var view = event.item.context;
     var class_ = view._class;
-    console.log("[New Item Opend] view_id=" + class_.detail_view.id);
+    console.log("[New Item Opend] view_id=" + class_.class_type.properties.detail_view.id);
     app.contents().tabs().show_tab("New " + Locale.translate(class_.label), null, class_.class_type.properties.detail_view.id, class_.id, Uuid.NULL);
   };
   
@@ -182,6 +182,7 @@ define(function (require) {
       self._grid.toolbar(true);
       self._grid.multi_search(true);
       self._grid.data(objects);
+      self._grid.sort();
       self.refresh();
     })
     .then(function() {
