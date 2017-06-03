@@ -96,6 +96,65 @@ define(function (require) {
     return dfd.promise();
   };
   
+  Class.field_map = function(class_) {
+    function generate_operator(field, generator_name, control) {
+      console.assert(control, "'control' argument is null or undefined...");
+      var dfd = new $.Deferred;
+      var generator = control[generator_name];
+      if (!generator) {
+        dfd.resolve(null);
+        return dfd.promise();
+      }
+      console.log("field.name=" + field.name + ", generator_name=" + generator_name);
+      generator(field)
+      .done(function (operator) {
+        console.log("field.name=" + field.name + ", generator_name=" + generator_name);
+        dfd.resolve(operator);
+      });
+      return dfd.promise();
+    }
+
+    function generate_operators(field, controls) {
+      var value = { field : field };
+      var dfd = new $.Deferred;
+      var control = controls[field.datatype.id];
+      if (!control) {
+        dfd.resolve(value);
+        return dfd.promise();
+      }
+      $.when(
+       generate_operator(field, "renderer", control).done(function (render) { value.render = render; }),
+       generate_operator(field, "comparer", control).done(function (compare) { value.compare = compare; })
+      )
+      .then(function () {
+        dfd.resolve(value);
+      });
+      return dfd.promise();
+    }
+    
+    var dfd = new $.Deferred;
+    var promises = [];
+
+    Primitive.controls()
+    .done(function (controls) {
+      class_.object_fields.forEach(function (field, index) {
+        promises[index] = generate_operators(field, controls);
+      });
+    })
+    .then(function () {
+      $.when.apply(null, promises)
+      .then(function () {
+        var field_map = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var value = arguments[i];
+          field_map[value.field.name] = value;
+        }
+        dfd.resolve(field_map);
+      });
+    });
+    return dfd.promise();
+  };
+  
   Class.prototype.detail_actions = function() {
     return get_actions(this, "detail_actions");
   };
