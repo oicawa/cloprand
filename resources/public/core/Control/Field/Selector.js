@@ -43,6 +43,7 @@ define(function (require) {
     var multi_selectable = field.datatype.properties.multi_selectable;
     var min_width = field.datatype.properties.min_width;
     var class_ = null;
+    var field_map = null;
     var columns = null;
     var items = null;
     console.assert(!(!class_id), field);
@@ -54,7 +55,10 @@ define(function (require) {
       return Storage.read(class_id).then(function(objects) { items = objects; })
     })
     .then(function () {
-      return Grid.columns(class_).then(function (columns_) { columns = columns_; });
+      return Class.field_map(class_).then(function (field_map_) { field_map = field_map_; });
+    })
+    .then(function () {
+      columns = Grid.columns(class_, field_map);
     })
     .then(function() {
       function converter(objects) {

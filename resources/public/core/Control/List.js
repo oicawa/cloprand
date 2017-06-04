@@ -246,7 +246,10 @@ define(function (require) {
 
     Storage.read(Class.CLASS_ID, options.class_id).done(function (data) { self._class = data; })
     .then(function() {
-      return Grid.columns(self._class).done(function(columns_) { options_.columns = columns_; });
+      return Class.field_map(self._class).done(function(field_map) { options_.field_map = field_map; });
+    })
+    .then(function() {
+      options_.columns = Grid.columns(self._class, options_.field_map);
     })
     .then(function() {
       return Grid.comparers(self._class).done(function(comparers_) { options_.comparers = comparers_; });

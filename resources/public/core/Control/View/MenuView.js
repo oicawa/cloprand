@@ -93,10 +93,10 @@ define(function (require) {
     )
     .then(function() {
       self._class = classes[Class.CLASS_ID];
-      return Grid.columns(self._class).done(function(columns_) { options.columns = columns_; });
+      return Class.field_map(self._class).done(function(field_map) { options.field_map = field_map; });
     })
     .then(function() {
-      return Grid.comparers(self._class).done(function(comparers_) { options.comparers = comparers_; });
+      options.columns = Grid.columns(self._class, options.field_map);
     })
     .then(function() {
       view.append(TEMPLATE);

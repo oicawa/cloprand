@@ -62,13 +62,16 @@ define(function (require) {
       self._field._class = self._classes[Class.FIELD_ID];
     })
     .then(function () {
-      return Grid.columns(self._class._class)
-      .then(function (columns) {
-        self._class.columns = columns;
-      });
+      return Class.field_map(self._class._class).then(function (field_map) { self._class.field_map = field_map; });
     })
     .then(function () {
-      return Grid.columns(self._field._class).then(function (columns) { self._field.columns = columns; });
+      return Class.field_map(self._field._class).then(function (field_map) { self._field.field_map = field_map; });
+    })
+    .then(function () {
+      self._class.columns = Grid.columns(self._class._class, self._class.field_map);
+    })
+    .then(function () {
+      self._field.columns = Grid.columns(self._field._class, self._field.field_map);
     })
     .then(function () {
       function converter(objects) {

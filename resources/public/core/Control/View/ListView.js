@@ -138,7 +138,10 @@ define(function (require) {
       Storage.read(Class.CLASS_ID, Class.CLASS_ID).done(function (data) { self._base_class = data; })
     )
     .then(function() {
-      return Grid.columns(self._class).done(function(columns_) { options.columns = columns_; });
+      return Class.field_map(self._class).done(function(field_map) { options.field_map = field_map; });
+    })
+    .then(function() {
+      options.columns = Grid.columns(self._class, options.field_map);
     })
     .then(function() {
       return Grid.comparers(self._class).done(function(comparers_) { options.comparers = comparers_; });

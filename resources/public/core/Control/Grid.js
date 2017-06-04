@@ -98,10 +98,6 @@ define(function (require) {
     this._comparers = null;
   }
 
-  // *** NOTE ***
-  // I have to implement 'fields' static method which creates Map object.
-  // It is used as a original data source to create 'columns' which is set to Grid object...
-
   Grid.comparers = function (class_) {
     var comparers = {};
     var dfd = new $.Deferred
@@ -145,7 +141,42 @@ define(function (require) {
     return dfd.promise();
   }
   
-  Grid.columns = function (class_) {
+  Grid.columns = function (class_, field_map) {
+    // ID column
+    var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '100px', hidden:true };
+    if (!class_ || !class_.object_fields) {
+      return [COLUMN_RECID];
+    }
+
+	// All field columns
+    var columns = class_.object_fields.map(function(field) {
+      // Calculate column width
+      var width = parseInt(field.column, 10);
+      width = isNaN(width) ? 100 : width;
+      
+      // Create column parameters
+      var column = {
+        field: field.name,
+        caption: Locale.translate(field.label),
+        type: "text",
+        size: width + "px",
+        hidden: isNaN(width) ? true : false,
+        resizable: true,
+        sortable:true
+      };
+
+      // set render
+      var value = field_map[field.name];
+      column.render = value.render;
+      
+      return column;
+    });
+    columns.push(COLUMN_RECID);
+
+    return columns;
+  }
+  
+  Grid.columns_old = function (class_) {
     var dfd = new $.Deferred
     function compare_recid(rec1, rec2) {
       if (rec1.recid == rec2.recid) {
@@ -210,7 +241,7 @@ define(function (require) {
     return dfd.promise();
   }
 
-  Grid.queries_ = function (fields, src_queries) {
+  Grid.queries = function (fields, src_queries) {
     var dfd = new $.Deferred
     var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '50px' };
     var DEFAULT_QUERY = { label: null, columns:COLUMN_RECID, order:null, condition: null };
@@ -351,10 +382,6 @@ define(function (require) {
     });
     
     return dfd.promise();
-  };
-
-  Grid.prototype.sorters = function(sorters) {
-    this._sorters = sorters;
   };
 
   Grid.prototype.context_menu = function(items, context) {

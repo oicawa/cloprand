@@ -97,6 +97,12 @@ define(function (require) {
   };
   
   Class.field_map = function(class_) {
+    function compare_recid(rec1, rec2) {
+      if (rec1.recid == rec2.recid) {
+        return 0;
+      }
+      return rec1.recid < rec2.recid ? -1 : 1;
+    }
     function generate_operator(field, generator_name, control) {
       console.assert(control, "'control' argument is null or undefined...");
       var dfd = new $.Deferred;
@@ -149,6 +155,7 @@ define(function (require) {
           var value = arguments[i];
           field_map[value.field.name] = value;
         }
+        field_map["recid"] = { compare: compare_recid }
         dfd.resolve(field_map);
       });
     });

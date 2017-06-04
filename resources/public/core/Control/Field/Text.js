@@ -113,6 +113,7 @@ define(function (require) {
     // Get Locale data
     var locale = null;
     var locales = null;
+    var field_map = null;
     var columns = null;
     var src_actions = null;
     var class_ = null;
@@ -122,7 +123,10 @@ define(function (require) {
       Storage.read(Primitive.ID, field.datatype.id).done(function(object) { class_ = object; })
     )
     .then(function () {
-      return Grid.columns(locale).then(function (columns_) { columns = columns_; });
+      return Class.field_map(class_).then(function (field_map_) { field_map = field_map_; });
+    })
+    .then(function () {
+      columns = Grid.columns(class_, field_map);
     })
     .then(function () {
       var prop_array = Utils.get_as_json(
@@ -252,7 +256,9 @@ define(function (require) {
       }
       return value1 < value2 ? -1 : 1;
     }
-    return compare;
+    var dfd = new $.Deferred;
+    dfd.resolve(compare);
+    return dfd.promise();
   };
   return Text;
 });
