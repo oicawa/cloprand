@@ -22,8 +22,8 @@ define(function (require) {
       show: {
         toolbar:true,
         toolbarReload:false,
-        toolbarColumns:false,
-        //toolbarColumns:true,
+        //toolbarColumns:false,
+        toolbarColumns:true,
         //toolbarSearch:false,
         toolbarSearch:true,
         //toolbarInput:false,
@@ -360,7 +360,7 @@ define(function (require) {
     var dfd = new $.Deferred;
     this._selector = selector;
     this._columns = options.columns;
-    //this._comparers = options.comparers;
+    this._field_map = options.field_map;
 
     var default_styles = { "width":null, "height":null };
     var styles = Utils.get_as_json(default_styles, function () { return options.styles; });
@@ -525,7 +525,8 @@ define(function (require) {
 
   Grid.prototype.sort = function() {
     for (var i = this._columns.length - 1; 0 <= i; i--) {
-      var compare = this._columns[i].compare;
+      var name = this._columns[i].field;
+      var compare = this._field_map[name].compare;
       if (!compare) {
         continue;
       }

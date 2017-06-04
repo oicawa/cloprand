@@ -111,10 +111,8 @@ define(function (require) {
         dfd.resolve(null);
         return dfd.promise();
       }
-      console.log("field.name=" + field.name + ", generator_name=" + generator_name);
       generator(field)
       .done(function (operator) {
-        console.log("field.name=" + field.name + ", generator_name=" + generator_name);
         dfd.resolve(operator);
       });
       return dfd.promise();
