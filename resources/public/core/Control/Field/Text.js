@@ -123,10 +123,10 @@ define(function (require) {
       Storage.read(Primitive.ID, field.datatype.id).done(function(object) { class_ = object; })
     )
     .then(function () {
-      return Class.field_map(class_).then(function (field_map_) { field_map = field_map_; });
+      return Class.field_map(locale).then(function (field_map_) { field_map = field_map_; });
     })
     .then(function () {
-      columns = Grid.columns(class_, field_map);
+      columns = Grid.columns(locale, field_map);
     })
     .then(function () {
       var prop_array = Utils.get_as_json(

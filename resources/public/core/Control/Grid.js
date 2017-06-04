@@ -166,6 +166,8 @@ define(function (require) {
       };
 
       // set render
+      if (!field_map)
+        debugger;
       var value = field_map[field.name];
       column.render = value.render;
       

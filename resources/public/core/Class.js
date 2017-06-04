@@ -97,6 +97,7 @@ define(function (require) {
   };
   
   Class.field_map = function(class_) {
+      if (!class_.object_fields) debugger;
     function compare_recid(rec1, rec2) {
       if (rec1.recid == rec2.recid) {
         return 0;

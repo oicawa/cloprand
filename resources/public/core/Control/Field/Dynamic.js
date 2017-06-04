@@ -142,13 +142,17 @@ define(function (require) {
     this._min_width = properties.min_width;
     var self = this;
     console.assert(!(!class_id), field);
+    var field_map = null;
     var columns = null;
     $.when(
       Storage.read(Class.CLASS_ID, class_id).done(function(data) { self._class = data; }),
       Storage.read(class_id).done(function(data) { self._objects = data; })
     )
-    .then(function() {
-      return Grid.columns(self._class).then(function (columns_) { columns = columns_; });
+    .then(function () {
+      return Class.field_map(self._class).then(function (field_map_) { field_map = field_map_; });
+    })
+    .then(function () {
+      columns = Grid.columns(self._class, field_map);
     })
     .then(function() {
       create_label(self, root, field);
