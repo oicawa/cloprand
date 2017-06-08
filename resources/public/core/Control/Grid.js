@@ -152,6 +152,7 @@ define(function (require) {
     var columns = class_.object_fields.map(function(field) {
       // Calculate column width
       var width = parseInt(field.column, 10);
+      var is_hidden = isNaN(width) ? true : false;
       width = isNaN(width) ? 100 : width;
       
       // Create column parameters
@@ -160,7 +161,7 @@ define(function (require) {
         caption: Locale.translate(field.label),
         type: "text",
         size: width + "px",
-        hidden: isNaN(width) ? true : false,
+        hidden: is_hidden,
         resizable: true,
         sortable:true
       };
