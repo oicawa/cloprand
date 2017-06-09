@@ -143,9 +143,9 @@ define(function (require) {
     .then(function() {
       options.columns = Grid.columns(self._class, options.field_map);
     })
-    .then(function() {
-      return Grid.comparers(self._class).done(function(comparers_) { options.comparers = comparers_; });
-    })
+    //.then(function() {
+    //  return Grid.comparers(self._class).done(function(comparers_) { options.comparers = comparers_; });
+    //})
     .then(function() {
       //return Grid.queries(self._class.object_fields, self._class.list_view.properties.queries).done(function(queries_) { queries = queries_; });
       if (!self._class.class_type) {
@@ -183,7 +183,7 @@ define(function (require) {
     .then(function() {
       self._grid.select_column(true);
       self._grid.toolbar(true);
-      self._grid.multi_search(true);
+      //self._grid.multi_search(true);
       self._grid.data(objects);
       self._grid.sort();
       self.refresh();

@@ -11,6 +11,18 @@ define(function (require) {
 
   var TEMPLATE = '<div class="grid"></div>';
 
+  function direction(direction_id) {
+  	var ASC = "607ce339-8517-4271-8ba6-f4dd35a2b940";
+    var DSC = "5d15314e-4952-4310-b410-4dd8a388177e";
+    if (direction_id == ASC) {
+      return "asc";
+    }
+    if (direction_id == DSC) {
+      return "desc";
+    }
+    return null;
+  }
+
   function create_control(self) {
     self._root.append(TEMPLATE);
     var grid = self._root.children("div.grid");
@@ -64,27 +76,46 @@ define(function (require) {
       },
       //onColumnClick : function (event) {
       onSort : function (event) {
-        // over ride sort logic...
-        //event.preventDefault();
-        
-      	//event.stopPropagetion();
-        //var field = ev.field;
-        //if (!self._sorters) {
-        //  return;
-        //}
-        //var sorter = self._sorters[field];
-        //if (!sorter) {
-        //  return;
-        //}
-        //sorter();
-        if (event.direction == "asc") {
-          event.direction = "desc";
-        } else if (event.direction == "desc") {
-          event.direction = null;
-        } else {
-          event.direction = "asc";
+        event.preventDefault();
+
+        var name = event.field;;
+
+        if (!self._field_map) {
+          return;
         }
-        console.log(event);
+        var value = self._field_map[name];
+        if (!value) {
+          return;
+        }
+        var compare = value.compare;
+        if (!compare) {
+          return;
+        }
+
+        var columns = this.columns.filter(function (column) { return column.field == event.field; });
+        if (!columns || columns.length == 0) {
+          return;
+        }
+        var column = columns[0];
+
+        var direction = 0;
+        if (column.direction == "asc") {
+          column.direction = "desc";
+          direction = -1;
+        } else if (column.direction == "desc") {
+          column.direction = "asc";
+          direction = 1;
+        } else {
+          column.direction = "asc";
+          direction = 1;
+        }
+
+        function compare_with_direction(record0, record1) {
+          return compare(record0, record1) * direction;
+        }
+
+        this.records.sort(compare_with_direction);
+        this.refresh();
       }
     });
     
@@ -98,52 +129,9 @@ define(function (require) {
     this._comparers = null;
   }
 
-  Grid.comparers = function (class_) {
-    var comparers = {};
-    var dfd = new $.Deferred
-    function compare_recid(rec1, rec2) {
-      if (rec1.recid == rec2.recid) {
-        return 0;
-      }
-      return rec1.recid < rec2.recid ? -1 : 1;
-    };
-    comparers["recid"] = compare_recid;
-    if (!class_ || !class_.object_fields) {
-      dfd.resolve(comparers);
-      return dfd.promise();
-    }
-    var primitives = null;
-    Storage.read(Primitive.ID)
-    .done(function (primitives) {
-      var fields = class_.object_fields.filter(function(field) { return !field.sort_direction || field.sort_direction != ''; });
-      var promises = fields.map(function(field, index) {
-        // get a cell render of primitive, and assign it to column property
-        var inner_dfd = new $.Deferred;
-        var primitive = primitives[field.datatype.id];
-        if (!primitive) {
-          inner_dfd.resolve();
-          return inner_dfd.promise();
-        }
-
-        require([primitive.require_path], function(Control) {
-          if (Control.comparer) {
-            comparers[field.name] = Control.comparer(field);
-          }
-          inner_dfd.resolve();
-        });
-        return inner_dfd.promise(); 
-      });
-      $.when.apply(null, promises)
-      .then(function() {
-        dfd.resolve(comparers);
-      });
-    });
-    return dfd.promise();
-  }
-  
   Grid.columns = function (class_, field_map) {
     // ID column
-    var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '100px', hidden:true };
+    var COLUMN_RECID = { field: 'recid', caption: 'ID', size: '100px', hidden:false };
     if (!class_ || !class_.object_fields) {
       return [COLUMN_RECID];
     }
@@ -163,7 +151,7 @@ define(function (require) {
         size: width + "px",
         hidden: is_hidden,
         resizable: true,
-        sortable:true
+        sortable:true,
       };
 
       // set render
@@ -171,7 +159,10 @@ define(function (require) {
         debugger;
       var value = field_map[field.name];
       column.render = value.render;
-      
+
+      // set direction
+      column.direction = direction(value.field.sort_direction);
+     
       return column;
     });
     columns.push(COLUMN_RECID);

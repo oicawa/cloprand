@@ -103,11 +103,6 @@ define(function (require) {
       return self._grid.init(grid_selector, options);
     })
     .then(function () {
-      self._grid.double_click = function(event) {
-        MenuView.show_gridview(self, event.recid);
-      };
-      self._grid.select_column(true);
-      self._grid.toolbar(true);
 
       function search_generator(item) {
         var template = "<div id={{ID}} style='margin:0px 5px 0px 5px;'><i class='{{ICON}}'style='margin:2px;'/><input type='text' class='w2ui-grid w2ui-toolbar-search'/></div>";
@@ -122,8 +117,13 @@ define(function (require) {
         });
         return html;
       }
-
+      
       var menus = Object.keys(classes).map(function(id) { return classes[id]; }).filter(menu_filter);
+
+      self._grid.double_click = function(event) { MenuView.show_gridview(self, event.recid); };
+      self._grid.select_column(true);
+      self._grid.toolbar(true);
+      
       self._grid.data(menus);
       self._grid.sort();
       self.refresh();

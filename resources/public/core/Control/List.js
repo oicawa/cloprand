@@ -251,9 +251,9 @@ define(function (require) {
     .then(function() {
       options_.columns = Grid.columns(self._class, options_.field_map);
     })
-    .then(function() {
-      return Grid.comparers(self._class).done(function(comparers_) { options_.comparers = comparers_; });
-    })
+    //.then(function() {
+    //  return Grid.comparers(self._class).done(function(comparers_) { options_.comparers = comparers_; });
+    //})
     .then(function() {
       root.append(TEMPLATE);
     })
