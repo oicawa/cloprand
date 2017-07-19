@@ -5,6 +5,12 @@ define(function (require) {
   var app = require("app");
 
   var TEMPLATE_FIELD = '<div class="w2ui-field"></div>';
+  
+  var TEMPLATE_FRAME = '<table class="tames-detail-frame"></table>';
+  var TEMPLATE_ROW = '<tr class="tames-detail-row"></tr>';
+  var TEMPLATE_CELL= '<td></td>';
+  var CELL_LABEL = 'tames-detail-cell-label';
+  var CELL_VALUE = 'tames-detail-cell-value';
 
   function get_control_assist(self, field) {
     if (!self._custom_assist) {
@@ -72,6 +78,84 @@ define(function (require) {
     return dfd.promise();
   }
 
+  function get_max_index(max_index, default_index, target) {
+    if (!target) {
+       return default_index < max_index ? max_index : default_index;
+    }
+
+    // Index
+    var index = !target.index ? default_index : target.index;
+    index = index < max_index ? max_index : index;
+    
+    // Span
+    var span = !target.span ? 1 : target.span;
+    index = index + (1 <= span ? span - 1 : 0);
+    
+    return index;
+  }
+
+  function create_frame(self, selector) {
+    var dfd = new $.Deferred;
+    if (!self._fields) {
+      dfd.resolve();
+      return dfd.promise();
+    }
+
+    // Get max index of row and column
+    var max_row_index = 0;
+    var max_col_count = 0;
+    for (var i = 0; i < self._fields.length; i++) {
+      var layout = self._fields[i].layout;
+      if (!layout) {
+        row_count++;
+        continue;
+      }
+
+      var tmp_col_index = 0;
+      
+      // Label      
+      max_row_index = get_max_index(max_row_index, i + 1, layout.label.row);
+      tmp_col_index = get_max_index(tmp_col_index, tmp_col_index, layout.label.col);
+      // Value      
+      max_row_index = get_max_index(max_row_index, i + 1, layout.value.row);
+      tmp_col_index = get_max_index(tmp_col_index, tmp_col_index + 1, layout.value.col);
+
+      max_col_index = max_col_index < tmp_col_inidex ? tmp_col_index : max_col_index;
+    }
+
+	// Generate table
+    self._root.append(TEMPLATE_FRAME);
+    var table = self._root.children("table.tames-detail-frame");
+    // Generate rows
+    for (var row_index = 0; row_index < max_row_index; row_index++) {
+      table.append(TEMPLATE_ROW);
+      var row = table.children("tr.tames-detail-row");
+      // Generate columns
+      for (var col_index = 0; col_index < max_col_index; col_index++) {
+        row.append(TEMPLATE_CELL);
+      }
+    }
+
+    // Assign labels & fields
+    for (var i = 0; i < self._fields.length; i++) {
+    }
+    
+    var promises = [];
+    for (var i = 0; i < self._fields.length; i++) {
+      var object_field = self._fields[i];
+      self._root.append(TEMPLATE_FIELD);
+      var field = self._root.find("div:last-child");
+      field.attr("name", object_field.name);
+      var field_selector = selector + " > div[name='" + object_field.name + "']";
+      promises[i] = create_field(self, field_selector, object_field);
+    }
+    $.when.apply(null, promises)
+    .then(function() {
+      dfd.resolve();
+    });
+    return dfd.promise();
+  }
+
   function get_value(control) {
     var type = control.prop("type");
     alert(control.prop("name"));
@@ -112,7 +196,6 @@ define(function (require) {
 
   Detail.prototype.init = function(selector, fields, basic_assist, custom_assist) {
     var dfd = new $.Deferred;
-    // Set member fields
     this._root = $(selector);
     this._root.hide();
     if (0 < this._root.children()) {
@@ -126,6 +209,7 @@ define(function (require) {
     var self = this;
     Utils.load_css("/core/Control/Detail.css")
     .then(function () {
+      create_frame(self, selector);
       return create_form(self, selector)
     })
     .then(function() {
