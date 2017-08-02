@@ -64,7 +64,7 @@ define(function (require) {
   Inherits(Text, Field);
 
   Text.prototype.template = function() {
-    return '<label></label><div><input style="color:black;"/><div name="button"/></div>';
+    return '<div><input style="color:black;"/><div name="button"/></div>';
   };
 
   Text.prototype.create_form = function(root, field_name) {
@@ -95,11 +95,6 @@ define(function (require) {
       function() { return field.datatype.properties; },
       false);
     var self = this;
-    
-    // Label
-    var label = root.find("label");
-    var caption = Locale.translate(field.label);
-    label.text(caption);
 
     // Input
     this.create_form(root, field.name);
@@ -148,7 +143,7 @@ define(function (require) {
       var button_selector = selector + " > div > div[name='button']";
       self._button = new DivButton();
       return self._button.init(button_selector, '<i class="fa fa-globe"/>', function (event) {
-        show_languages_dialog(self, locale, locales, columns, caption, src_actions);
+        show_languages_dialog(self, locale, locales, columns, Locale.translate(field.label), src_actions);
       });
     })
     .then(function () {

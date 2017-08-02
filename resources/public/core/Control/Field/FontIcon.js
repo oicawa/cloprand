@@ -9,9 +9,7 @@ define(function (require) {
   var Grid = require("core/Control/Grid");
   var Field = require("core/Control/Field/Field");
   
-  var TEMPLATE = '' +
-'<label></label>' +
-'<div></div>';
+  var TEMPLATE = '<div></div>';
   var FONT_TEMPLATE = '' +
 '<span style="display:table;border:1px solid gray;border-radius:5px;margin:2px;height:60px;width:60px;">' +
 '  <i style="display:table-cell;text-align:center;vertical-align:middle;padding:5px;" class="fa {{FONT_NAME}} fa-3x fa-fw"></i>' +
@@ -20,10 +18,6 @@ define(function (require) {
   function create_control(self, root, field) {
     root.empty();
     root.append(TEMPLATE);
-    
-    var label = root.find("label");
-    var caption = Locale.translate(field.label);
-    label.text(caption);
     
     var div = root.find("div");
     var font = FONT_TEMPLATE.replace(/{{FONT_NAME}}/, "");

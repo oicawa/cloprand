@@ -5,7 +5,7 @@ define(function (require) {
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
   
-  var TEMPLATE = '<label></label><div><input style="color:black;" type="password"/></div>';
+  var TEMPLATE = '<div><input style="color:black;" type="password"/></div>';
   
   function Password() {
     Field.call(this, "core/Control/Field", "Password");
@@ -22,9 +22,6 @@ define(function (require) {
     var self = this;
     
     root.append(TEMPLATE);
-    var label = root.find("label");
-    var caption = Locale.translate(field.label);
-    label.text(caption);
     self._input = root.find("input");
     self._input.attr("name", field.name);
     self._input.w2field("text");

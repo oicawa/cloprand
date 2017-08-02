@@ -11,7 +11,6 @@ define(function (require) {
   var Finder = require("core/Control/Finder");
   
   var TEMPLATE = '' +
-'<label></label>' +
 '<div>' +
 '  <div name="class"></div>' +
 '  <div name="field"></div>' +
@@ -39,12 +38,7 @@ define(function (require) {
     }
     root.empty();
     root.append(TEMPLATE);
-    
-    // Label
-    var label = root.children("label");
-    var caption = Locale.translate(field.label);
-    label.text(caption);
-    
+
     // Finders
     this._class.finder = new Finder();
     this._field.finder = new Finder();

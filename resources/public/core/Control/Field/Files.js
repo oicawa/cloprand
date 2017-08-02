@@ -7,7 +7,6 @@ define(function (require) {
   var Field = require("core/Control/Field/Field");
  
   var TEMPLATE = '' +
-'<label></label>' +
 '<div>' +
 '  <div class="exist-list"></div>' +
 '  <div class="added-list"></div>' +
@@ -72,9 +71,6 @@ define(function (require) {
     var self = this;
    
     root.append(TEMPLATE);
-    var label = root.find("label");
-    var caption = Locale.translate(field.label);
-    label.text(caption);
    
     this._exist_list = root.find("div.exist-list");
     this._exist_list.on("click", this.get_item_tag_name(), function(event) {

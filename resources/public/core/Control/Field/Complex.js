@@ -8,11 +8,7 @@ define(function (require) {
   var Detail = require("core/Control/Detail");
   var Field = require("core/Control/Field/Field");
   
-  var TEMPLATE = '' +
-'<label></label>' +
-'<div class="complex">' +
-'  <div class="detail"></div>' +
-'</div>';
+  var TEMPLATE = '<div class="complex"><div class="detail"></div></div>';
 
   function Complex() {
     Field.call(this, "core/Control/Field", "Complex");
@@ -20,7 +16,7 @@ define(function (require) {
   };
   Inherits(Complex, Field);
   
-  Complex.prototype.init = function(selector, field, assist) {
+  Complex.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
     var root = $(selector);
     if (0 < root.children()) {
@@ -38,9 +34,6 @@ define(function (require) {
       root.append(TEMPLATE);
       
       // Create controls
-      var label = root.find("label");
-      var caption = Locale.translate(field.label);
-      label.text(caption);
       self._detail = new Detail();
       self._detail.init(selector + " > div.complex > div.detail", class_.object_fields)
       .always(function() {

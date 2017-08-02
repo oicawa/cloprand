@@ -21,8 +21,7 @@ define(function (require) {
   SelectDialog.prototype.init = function(options) {
     console.assert(Array.isArray(options.items), "'option.items' not Array");
     console.assert(options.columns, "'option.columns' is null or undefined");
-    console.assert(options.comparers, "'option.comparers' is null or undefined");
-    console.assert(typeof options.multi_selectable == "undefined", "'option.multi_selectable' is undefined");
+    console.assert(typeof options.multi_selectable != "undefined", "'option.multi_selectable' is undefined");
     
     var dfd = new $.Deferred;
     

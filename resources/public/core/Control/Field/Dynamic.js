@@ -13,7 +13,6 @@ define(function (require) {
   var Dialog = require("core/Dialog");
   
   var TEMPLATE = '' +
-'<label></label>' +
 '<div>' +
 '  <div name="finder" style="display:inline-block;"></div><span></span>' +
 '  <div class="detail"></div>' +
@@ -29,15 +28,6 @@ define(function (require) {
     return self._finder.init(selector, columns, items, description, false, min_width, converter);
   }
 
-  function create_label(self, root, field) {
-    root.empty();
-    root.append(TEMPLATE);
-    
-    var label = root.find("label");
-    var caption = Locale.translate(field.label);
-    label.text(caption);
-  }
-  
   function create_button(self, selector) {
     self._button = new DivButton();
     return self._button.init(selector, "<i class='fa fa-th-list'/>", function (evnet) {
@@ -155,7 +145,8 @@ define(function (require) {
       columns = Grid.columns(self._class, field_map);
     })
     .then(function() {
-      create_label(self, root, field);
+      root.empty();
+      root.append(TEMPLATE);
       return create_finder(self, selector + " > div > div[name='finder']", columns, self._objects, self._field_name, self._min_width);
     })
     .then(function() {

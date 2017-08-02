@@ -5,7 +5,7 @@ define(function (require) {
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
   
-  var TEMPLATE = '<label></label><div class="viewer"></div>';
+  var TEMPLATE = '<div class="viewer"></div>';
   
   function UUID() {
     Field.call(this, "core/Control/Field", "UUID");
@@ -20,9 +20,6 @@ define(function (require) {
     var self = this;
     
     root.append(TEMPLATE);
-    var label = root.find("label");
-    var caption = Locale.translate(field.label);
-    label.text(caption);
     self._viewer = root.find("div.viewer");
     
     dfd.resolve();

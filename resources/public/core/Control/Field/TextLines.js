@@ -15,7 +15,7 @@ define(function (require) {
   Inherits(TextLines, Text);
 
   TextLines.prototype.template = function() {
-    return '<label></label><div><textarea style="color:black;width:400px;height:100px;"/><div name="button"/></div>';
+    return '<div><textarea style="color:black;width:400px;height:100px;"/><div name="button"/></div>';
   };
 
   TextLines.prototype.create_form = function(root, field_name) {

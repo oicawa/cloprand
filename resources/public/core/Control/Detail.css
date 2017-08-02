@@ -18,3 +18,15 @@ div.detail_panel {
     margin: 10px 0px 0px 0px;
     padding: 10px;
 }
+
+table.tames-detail-frame {
+  border-collapse:collapse;
+}
+
+tr.tames-detail-row {
+  border-bottom: 1px gray solid;
+}
+
+tr.tames-detail-row > td {
+  padding : 10px 10px 10px 10px;
+}

@@ -7,19 +7,13 @@ define(function (require) {
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
   
-  var TEMPLATE = '' +
-'<label></label>' +
-'<div><select style="color:black;"></select></div>';
+  var TEMPLATE = '<div><select style="color:black;"></select></div>';
 
   var OPTION_TEMPLATE = '<option></option>';
 
   function create_control(self, root, field) {
     root.empty();
     root.append(TEMPLATE);
-    
-    var label = root.find("label");
-    var caption = Locale.translate(field.label);
-    label.text(caption);
     
     self._dropdown = root.find("select");
     

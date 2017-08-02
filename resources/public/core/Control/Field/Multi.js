@@ -12,7 +12,7 @@ define(function (require) {
   var Field = require("core/Control/Field/Field");
   var app = require("app");
 
-  var TEMPLATE = '<label></label><div></div>';
+  var TEMPLATE = '<div></div>';
 
   function Multi() {
     Field.call(this, "core/Control/Field", "Multi");
@@ -37,9 +37,6 @@ define(function (require) {
     );
     
     // Create controls
-    var label = root.find("label");
-    var caption = Locale.translate(field.label);
-    label.text(caption);
     this._list = new List();
     
     this._list.init(selector + " > div", options)

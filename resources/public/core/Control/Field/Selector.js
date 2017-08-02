@@ -10,7 +10,7 @@ define(function (require) {
   var Finder = require("core/Control/Finder");
   var Field = require("core/Control/Field/Field");
   
-  var TEMPLATE = '<label></label><div></div>';
+  var TEMPLATE = '<div></div>';
 
   function Selector() {
     Field.call(this, "core/Control/Field", "Selector");
@@ -30,10 +30,6 @@ define(function (require) {
     // Create form tags
     root.empty();
     root.append(TEMPLATE);
-    // Label
-    var label = root.children("label");
-    var caption = Locale.translate(field.label);
-    label.text(caption);
     // Finder
     this._finder = new Finder();
     

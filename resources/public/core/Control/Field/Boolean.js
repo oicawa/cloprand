@@ -5,9 +5,7 @@ define(function (require) {
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
   
-  var TEMPLATE = '' +
-'<label></label>' +
-'<div><label><input type="checkbox" /><span></span></label></div>';
+  var TEMPLATE = '<div><label><input type="checkbox" /><span></span></label></div>';
   
   function parse_value(value) {
     // false, 0, null, undefined
@@ -40,10 +38,6 @@ define(function (require) {
 
   function create_control(self, field) {
     self._root.append(TEMPLATE);
-    
-    var label = self._root.children("label");
-    var caption = Locale.translate(field.label);
-    label.text(caption);
     
     var description = self._root.find("span");
     description.text(Locale.translate(field.description));

@@ -2,6 +2,8 @@ define(function (require) {
   require("jquery");
   var Utils = require("core/Utils");
   var Inherits = require("core/Inherits");
+  var Locale = require("core/Locale");
+  var Uuid = require("core/Uuid");
   var app = require("app");
 
   var TEMPLATE_FIELD = '<div class="w2ui-field"></div>';
@@ -22,7 +24,7 @@ define(function (require) {
     return self._custom_assist[field.name];
   }
 
-  function get_control_path(self, field, assist) {
+  function get_control_path(self, field) {
     var datatype = field.datatype;
     var id = datatype.id;
     var primitive = app._primitives[id];
@@ -31,8 +33,7 @@ define(function (require) {
 
   function create_field(self, field_selector, field) {
     var dfd = new $.Deferred;
-    var assist = get_control_assist(self, field);
-    var control_path = get_control_path(self, field, assist);
+    var control_path = get_control_path(self, field);
     if (!control_path) {
       dfd.resolve();
       return dfd.promise();
@@ -44,6 +45,41 @@ define(function (require) {
       self._controls[field.name] = control;
       try {
         control.init(field_selector, field, assist)
+        .then(function() {
+          dfd.resolve();
+        });
+      } catch (e) {
+        console.assert(false, "[ERROR] field.name=" + field.name + ", control=" + control_path);
+        console.assert(false, e);
+      }
+    });
+    return dfd.promise();
+  }
+
+  function create_field2(self, table, field) {
+    var dfd = new $.Deferred;
+    var control_path = get_control_path(self, field);
+    if (!control_path) {
+      dfd.resolve();
+      return dfd.promise();
+    }
+    
+    var label_layout = field.layout.label;
+    var value_layout = field.layout.value;
+    
+    require([control_path], function(Control) {
+      console.assert(Control, "[ERROR] constructor is undefined (control=" + control_path + ")");
+      var control = new Control();
+      self._controls[field.name] = control;
+      try {
+        var label_selector = "tr:eq(" + label_layout.row.index + ") > td:eq(" + label_layout.col.index + ")";
+        var label_cell = table.find(label_selector);
+        var caption = Locale.translate(field.label);
+        label_cell.text(caption);
+        console.log("label_selector = " + label_selector + ", text = " + caption + ", label_cell.length = " + label_cell.length);
+        var value_selector = "#" + table.attr("id") + " > tbody > tr:eq(" + value_layout.row.index + ") > td:eq(" + value_layout.col.index + ")";
+        console.log("value_selector = " + value_selector);
+        control.init(value_selector, field)
         .then(function() {
           dfd.resolve();
         });
@@ -103,11 +139,17 @@ define(function (require) {
 
     // Get max index of row and column
     var max_row_index = 0;
-    var max_col_count = 0;
+    var max_col_index = 0;
     for (var i = 0; i < self._fields.length; i++) {
       var layout = self._fields[i].layout;
       if (!layout) {
-        row_count++;
+        console.log("[" + i + "] layout is null");
+        max_row_index++;
+        max_col_index = max_col_index < 2 ? 2 : max_col_index;
+        self._fields[i].layout = {
+          label : { row : { index : i, span : 1 }, col : { index : 0, span : 1 } },
+          value : { row : { index : i, span : 1 }, col : { index : 1, span : 1 } }
+        }
         continue;
       }
 
@@ -116,39 +158,39 @@ define(function (require) {
       // Label      
       max_row_index = get_max_index(max_row_index, i + 1, layout.label.row);
       tmp_col_index = get_max_index(tmp_col_index, tmp_col_index, layout.label.col);
+      console.log("[" + i + "] Label : tmp_col_index=" + tmp_col_index);
+      
       // Value      
       max_row_index = get_max_index(max_row_index, i + 1, layout.value.row);
       tmp_col_index = get_max_index(tmp_col_index, tmp_col_index + 1, layout.value.col);
+      console.log("[" + i + "] Value : tmp_col_index=" + tmp_col_index);
 
-      max_col_index = max_col_index < tmp_col_inidex ? tmp_col_index : max_col_index;
+      max_col_index = max_col_index < tmp_col_index ? tmp_col_index : max_col_index;
     }
+    
+    console.log("max_row_index=" + max_row_index + ", max_col_index=" + max_col_index);
 
-	// Generate table
+    // Generate table
     self._root.append(TEMPLATE_FRAME);
+    var table_id = Uuid.version4();
     var table = self._root.children("table.tames-detail-frame");
+    table.attr("id", table_id);
     // Generate rows
     for (var row_index = 0; row_index < max_row_index; row_index++) {
       table.append(TEMPLATE_ROW);
-      var row = table.children("tr.tames-detail-row");
+      var row = table.find("tr.tames-detail-row:last-child");
       // Generate columns
       for (var col_index = 0; col_index < max_col_index; col_index++) {
         row.append(TEMPLATE_CELL);
       }
     }
 
+    var promises = [];
     // Assign labels & fields
     for (var i = 0; i < self._fields.length; i++) {
+      promises[i] = create_field2(self, table, self._fields[i]);
     }
     
-    var promises = [];
-    for (var i = 0; i < self._fields.length; i++) {
-      var object_field = self._fields[i];
-      self._root.append(TEMPLATE_FIELD);
-      var field = self._root.find("div:last-child");
-      field.attr("name", object_field.name);
-      var field_selector = selector + " > div[name='" + object_field.name + "']";
-      promises[i] = create_field(self, field_selector, object_field);
-    }
     $.when.apply(null, promises)
     .then(function() {
       dfd.resolve();
@@ -209,8 +251,8 @@ define(function (require) {
     var self = this;
     Utils.load_css("/core/Control/Detail.css")
     .then(function () {
-      create_frame(self, selector);
-      return create_form(self, selector)
+      //return create_form(self, selector)
+      return create_frame(self, selector);
     })
     .then(function() {
       dfd.resolve();
