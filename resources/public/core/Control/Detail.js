@@ -56,7 +56,7 @@ define(function (require) {
     return dfd.promise();
   }
 
-  function create_field2(self, table, field) {
+  function create_field2(self, table_id, field) {
     var dfd = new $.Deferred;
     var control_path = get_control_path(self, field);
     if (!control_path) {
@@ -72,12 +72,12 @@ define(function (require) {
       var control = new Control();
       self._controls[field.name] = control;
       try {
-        var label_selector = "tr:eq(" + label_layout.row.index + ") > td:eq(" + label_layout.col.index + ")";
-        var label_cell = table.find(label_selector);
+        var label_selector = "#" + table_id + " > tbody > tr:eq(" + label_layout.row.index + ") > td:eq(" + label_layout.column.index + ")";
+        var label_cell = $(label_selector);
         var caption = Locale.translate(field.label);
         label_cell.text(caption);
         console.log("label_selector = " + label_selector + ", text = " + caption + ", label_cell.length = " + label_cell.length);
-        var value_selector = "#" + table.attr("id") + " > tbody > tr:eq(" + value_layout.row.index + ") > td:eq(" + value_layout.col.index + ")";
+        var value_selector = "#" + table_id + " > tbody > tr:eq(" + value_layout.row.index + ") > td:eq(" + value_layout.column.index + ")";
         console.log("value_selector = " + value_selector);
         control.init(value_selector, field)
         .then(function() {
@@ -116,15 +116,16 @@ define(function (require) {
 
   function get_max_index(max_index, default_index, target) {
     if (!target) {
-       return default_index < max_index ? max_index : default_index;
+      target = { index : default_index, span : 1 };
+      return default_index < max_index ? max_index : default_index;
     }
 
     // Index
-    var index = !target.index ? default_index : target.index;
+    var index = !target.index ? default_index : parseInt(target.index);
     index = index < max_index ? max_index : index;
     
     // Span
-    var span = !target.span ? 1 : target.span;
+    var span = !target.span ? 1 : parseInt(target.span);
     index = index + (1 <= span ? span - 1 : 0);
     
     return index;
@@ -144,25 +145,25 @@ define(function (require) {
       var layout = self._fields[i].layout;
       if (!layout) {
         console.log("[" + i + "] layout is null");
-        max_row_index++;
-        max_col_index = max_col_index < 2 ? 2 : max_col_index;
+        max_row_index += (i == 0) ? 0 : 1;
+        max_col_index = max_col_index < 1 ? 1 : max_col_index;
         self._fields[i].layout = {
-          label : { row : { index : i, span : 1 }, col : { index : 0, span : 1 } },
-          value : { row : { index : i, span : 1 }, col : { index : 1, span : 1 } }
+          label : { row : { index : i, span : 1 }, column : { index : 0, span : 1 } },
+          value : { row : { index : i, span : 1 }, column : { index : 1, span : 1 } }
         }
         continue;
       }
 
       var tmp_col_index = 0;
       
-      // Label      
-      max_row_index = get_max_index(max_row_index, i + 1, layout.label.row);
-      tmp_col_index = get_max_index(tmp_col_index, tmp_col_index, layout.label.col);
+      // Label
+      max_row_index = get_max_index(max_row_index, i, layout.label.row);
+      tmp_col_index = get_max_index(tmp_col_index, tmp_col_index, layout.label.column);
       console.log("[" + i + "] Label : tmp_col_index=" + tmp_col_index);
       
-      // Value      
-      max_row_index = get_max_index(max_row_index, i + 1, layout.value.row);
-      tmp_col_index = get_max_index(tmp_col_index, tmp_col_index + 1, layout.value.col);
+      // Value
+      max_row_index = get_max_index(max_row_index, i, layout.value.row);
+      tmp_col_index = get_max_index(tmp_col_index, tmp_col_index + 1, layout.value.column);
       console.log("[" + i + "] Value : tmp_col_index=" + tmp_col_index);
 
       max_col_index = max_col_index < tmp_col_index ? tmp_col_index : max_col_index;
@@ -173,14 +174,15 @@ define(function (require) {
     // Generate table
     self._root.append(TEMPLATE_FRAME);
     var table_id = Uuid.version4();
+    console.log("table_id=#" + table_id);
     var table = self._root.children("table.tames-detail-frame");
     table.attr("id", table_id);
     // Generate rows
-    for (var row_index = 0; row_index < max_row_index; row_index++) {
+    for (var row_index = 0; row_index <= max_row_index; row_index++) {
       table.append(TEMPLATE_ROW);
       var row = table.find("tr.tames-detail-row:last-child");
       // Generate columns
-      for (var col_index = 0; col_index < max_col_index; col_index++) {
+      for (var col_index = 0; col_index <= max_col_index; col_index++) {
         row.append(TEMPLATE_CELL);
       }
     }
@@ -188,7 +190,7 @@ define(function (require) {
     var promises = [];
     // Assign labels & fields
     for (var i = 0; i < self._fields.length; i++) {
-      promises[i] = create_field2(self, table, self._fields[i]);
+      promises[i] = create_field2(self, table_id, self._fields[i]);
     }
     
     $.when.apply(null, promises)
