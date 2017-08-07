@@ -72,13 +72,11 @@ define(function (require) {
       var control = new Control();
       self._controls[field.name] = control;
       try {
-        var label_selector = "#" + table_id + " > tbody > tr:eq(" + label_layout.row.index + ") > td:eq(" + label_layout.column.index + ")";
+        var label_selector = create_cell_selector(table_id, label_layout.row.index, label_layout.column.index);
         var label_cell = $(label_selector);
         var caption = Locale.translate(field.label);
         label_cell.text(caption);
-        console.log("label_selector = " + label_selector + ", text = " + caption + ", label_cell.length = " + label_cell.length);
-        var value_selector = "#" + table_id + " > tbody > tr:eq(" + value_layout.row.index + ") > td:eq(" + value_layout.column.index + ")";
-        console.log("value_selector = " + value_selector);
+        var value_selector = create_cell_selector(table_id, value_layout.row.index, value_layout.column.index);
         control.init(value_selector, field)
         .then(function() {
           dfd.resolve();
@@ -121,14 +119,59 @@ define(function (require) {
     }
 
     // Index
-    var index = !target.index ? default_index : parseInt(target.index);
+    var index = (!target.index || isNaN(target.index)) ? default_index : parseInt(target.index);
+    target.index = index;
     index = index < max_index ? max_index : index;
-    
+
     // Span
-    var span = !target.span ? 1 : parseInt(target.span);
+    var span = (!target.span || isNaN(target.span)) ? 1 : parseInt(target.span);
+    target.span = span;
     index = index + (1 <= span ? span - 1 : 0);
-    
+
     return index;
+  }
+
+  function create_cell_selector(table_id, row_index, col_index) {
+    return "#" + table_id + " > tbody > tr:eq(" + row_index + ") > td:eq(" + col_index + ")";
+  }
+
+  function erase_table_elements(fields, table_id) {
+    var layout_pairs = fields.map(function (field) { return [ field.layout.label, field.layout.value ]; });
+    var layouts = Array.prototype.concat.apply([], layout_pairs);
+
+    function sorter(layout0, layout1) {
+      // Compare row index
+      var row_diff = layout0.row.index - layout1.row.index;
+      if (row_diff != 0) {
+        return row_diff;
+      }
+      
+      // Compare column index
+      var col_diff = layout0.column.index - layout1.column.index;
+      return col_diff;
+    }
+    var sorted_layouts = layouts.sort(sorter).reverse();
+    console.log("--- remove cell selectors ---");
+    for (var i = 0; i < sorted_layouts.length; i++) {
+      var l = sorted_layouts[i];
+      var selector = create_cell_selector(table_id, l.row.index, l.column.index);
+      if (1 < l.row.span) {
+        $(selector).attr("rowspan", l.row.span);
+      }
+      if (1 < l.column.span) {
+        $(selector).attr("colspan", l.column.span);
+      }
+      for (var row_index = l.row.index; row_index < l.row.index + l.row.span; row_index++) {
+        for (var col_index = l.column.index; col_index < l.column.index + l.column.span; col_index++) {
+          if (row_index == l.row.index && col_index == l.column.index) {
+            continue;
+          }
+          var remove_selector = create_cell_selector(table_id, row_index, col_index);
+          console.log(remove_selector);
+          $(remove_selector).remove();
+        }
+      }
+    }
   }
 
   function create_frame(self, selector) {
@@ -195,6 +238,7 @@ define(function (require) {
     
     $.when.apply(null, promises)
     .then(function() {
+      erase_table_elements(self._fields, table_id);
       dfd.resolve();
     });
     return dfd.promise();
