@@ -31,32 +31,7 @@ define(function (require) {
     return primitive.require_path;
   }
 
-  function create_field(self, field_selector, field) {
-    var dfd = new $.Deferred;
-    var control_path = get_control_path(self, field);
-    if (!control_path) {
-      dfd.resolve();
-      return dfd.promise();
-    }
-    
-    require([control_path], function(Control) {
-      console.assert(Control, "[ERROR] constructor is undefined (control=" + control_path + ")");
-      var control = new Control();
-      self._controls[field.name] = control;
-      try {
-        control.init(field_selector, field, assist)
-        .then(function() {
-          dfd.resolve();
-        });
-      } catch (e) {
-        console.assert(false, "[ERROR] field.name=" + field.name + ", control=" + control_path);
-        console.assert(false, e);
-      }
-    });
-    return dfd.promise();
-  }
-
-  function create_field2(self, table_id, field) {
+  function create_field(self, table_id, field) {
     var dfd = new $.Deferred;
     var control_path = get_control_path(self, field);
     if (!control_path) {
@@ -89,29 +64,6 @@ define(function (require) {
     return dfd.promise();
   }
 
-  function create_form(self, selector) {
-    var dfd = new $.Deferred;
-    // Declare 'each_field_funcs' array to closing each require 'Controls' & callback process
-    if (!self._fields) {
-      dfd.resolve();
-      return dfd.promise();
-    }
-    var promises = [];
-    for (var i = 0; i < self._fields.length; i++) {
-      var object_field = self._fields[i];
-      self._root.append(TEMPLATE_FIELD);
-      var field = self._root.find("div:last-child");
-      field.attr("name", object_field.name);
-      var field_selector = selector + " > div[name='" + object_field.name + "']";
-      promises[i] = create_field(self, field_selector, object_field);
-    }
-    $.when.apply(null, promises)
-    .then(function() {
-      dfd.resolve();
-    });
-    return dfd.promise();
-  }
-
   function get_max_index(max_index, default_index, target) {
     if (!target) {
       target = { index : default_index, span : 1 };
@@ -132,10 +84,11 @@ define(function (require) {
   }
 
   function create_cell_selector(table_id, row_index, col_index) {
-    return "#" + table_id + " > tbody > tr:eq(" + row_index + ") > td:eq(" + col_index + ")";
+    return "#" + table_id + " > tbody > tr:eq(" + row_index + ") > td[name='c" + col_index + "']";
   }
 
   function erase_table_elements(fields, table_id) {
+    var table = $("#" + table_id);
     var layout_pairs = fields.map(function (field) { return [ field.layout.label, field.layout.value ]; });
     var layouts = Array.prototype.concat.apply([], layout_pairs);
 
@@ -151,7 +104,6 @@ define(function (require) {
       return col_diff;
     }
     var sorted_layouts = layouts.sort(sorter).reverse();
-    console.log("--- remove cell selectors ---");
     for (var i = 0; i < sorted_layouts.length; i++) {
       var l = sorted_layouts[i];
       var selector = create_cell_selector(table_id, l.row.index, l.column.index);
@@ -166,9 +118,8 @@ define(function (require) {
           if (row_index == l.row.index && col_index == l.column.index) {
             continue;
           }
-          var remove_selector = create_cell_selector(table_id, row_index, col_index);
-          console.log(remove_selector);
-          $(remove_selector).remove();
+          var selector = create_cell_selector(table_id, row_index, col_index);
+          $(selector).remove();
         }
       }
     }
@@ -187,7 +138,6 @@ define(function (require) {
     for (var i = 0; i < self._fields.length; i++) {
       var layout = self._fields[i].layout;
       if (!layout) {
-        console.log("[" + i + "] layout is null");
         max_row_index += (i == 0) ? 0 : 1;
         max_col_index = max_col_index < 1 ? 1 : max_col_index;
         self._fields[i].layout = {
@@ -202,22 +152,17 @@ define(function (require) {
       // Label
       max_row_index = get_max_index(max_row_index, i, layout.label.row);
       tmp_col_index = get_max_index(tmp_col_index, tmp_col_index, layout.label.column);
-      console.log("[" + i + "] Label : tmp_col_index=" + tmp_col_index);
       
       // Value
       max_row_index = get_max_index(max_row_index, i, layout.value.row);
       tmp_col_index = get_max_index(tmp_col_index, tmp_col_index + 1, layout.value.column);
-      console.log("[" + i + "] Value : tmp_col_index=" + tmp_col_index);
 
       max_col_index = max_col_index < tmp_col_index ? tmp_col_index : max_col_index;
     }
     
-    console.log("max_row_index=" + max_row_index + ", max_col_index=" + max_col_index);
-
     // Generate table
     self._root.append(TEMPLATE_FRAME);
     var table_id = Uuid.version4();
-    console.log("table_id=#" + table_id);
     var table = self._root.children("table.tames-detail-frame");
     table.attr("id", table_id);
     // Generate rows
@@ -227,18 +172,21 @@ define(function (require) {
       // Generate columns
       for (var col_index = 0; col_index <= max_col_index; col_index++) {
         row.append(TEMPLATE_CELL);
+        var cell = row.find("td:last-child");
+        cell.attr("name", "c" + col_index);
       }
     }
+
+    erase_table_elements(self._fields, table_id);
 
     var promises = [];
     // Assign labels & fields
     for (var i = 0; i < self._fields.length; i++) {
-      promises[i] = create_field2(self, table_id, self._fields[i]);
+      promises[i] = create_field(self, table_id, self._fields[i]);
     }
     
     $.when.apply(null, promises)
     .then(function() {
-      erase_table_elements(self._fields, table_id);
       dfd.resolve();
     });
     return dfd.promise();
