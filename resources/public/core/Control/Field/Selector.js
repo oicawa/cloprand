@@ -73,8 +73,8 @@ define(function (require) {
     this._finder.edit(on);
   };
 
-  Selector.prototype.backuped = function() {
-    return this._finder.backuped();
+  Selector.prototype.backup = function() {
+    return this._finder.backup();
   };
 
   Selector.prototype.commit = function() {

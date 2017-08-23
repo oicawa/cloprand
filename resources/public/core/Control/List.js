@@ -30,7 +30,7 @@ define(function (require) {
     this._detail = null;
     this._dialog = null;
     this._data = null;
-    this._backuped = null;
+    this._backup = null;
   };
   
   List.prototype.showDetailDialog = function (self, title, fields, data, ok_func) {
@@ -272,16 +272,16 @@ define(function (require) {
     return dfd.promise();
   };
 
-  List.prototype.backuped = function() {
-    return this._backuped;
+  List.prototype.backup = function() {
+    return this._backup;
   };
 
   List.prototype.commit = function() {
-    this._backuped = this._grid.data();
+    this._backup = this._grid.data();
   };
 
   List.prototype.restore = function() {
-    this._grid.data(this._backuped);
+    this._grid.data(this._backup);
   };
 
   List.prototype.edit = function(on) {
@@ -298,7 +298,7 @@ define(function (require) {
         return value;
       });
       this._grid.data(values_);
-      this._backuped = values_;
+      this._backup = values_;
     }
   };
   

@@ -98,7 +98,7 @@ define(function (require) {
     this._dropdown.attr("disabled", on ? false : true);
   };
 
-  DropDownList.prototype.backuped = function() {
+  DropDownList.prototype.backup = function() {
     return this._value;
   };
 

@@ -143,7 +143,7 @@ define(function (require) {
     });
   };
 
-  FontIcon.prototype.backuped = function() {
+  FontIcon.prototype.backup = function() {
     return this._fixed;
   };
 

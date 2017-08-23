@@ -45,17 +45,18 @@ define(function (require) {
     return dfd.promise();
   };
 
-  Complex.prototype.backuped = function() {
-    return this._backuped;
+  Complex.prototype.backup = function() {
+    return this._backup;
   };
 
   Complex.prototype.commit = function() {
-    this._backuped = this._detail.data();
+    //this._backup = this._detail.data();
     this._detail.commit();
   };
 
   Complex.prototype.restore = function() {
-    this._detail.data(this._backuped);
+    //this._detail.data(this._backup);
+    this._detail.restore();
   };
 
   Complex.prototype.edit = function(on) {

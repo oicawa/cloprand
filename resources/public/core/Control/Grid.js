@@ -436,7 +436,7 @@ define(function (require) {
   Grid.prototype.edit = function(on) {
   };
 
-  Grid.prototype.backuped = function() {
+  Grid.prototype.backup = function() {
   };
 
   Grid.prototype.commit = function() {

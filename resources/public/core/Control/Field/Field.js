@@ -11,6 +11,10 @@ define(function (require) {
   Field.prototype.init = function(selector, field) {
   };
 
+  Field.prototype.backup = function() {
+    return null;
+  };
+
   Field.prototype.update = function(keys) {
   };
 

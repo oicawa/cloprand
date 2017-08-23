@@ -30,7 +30,7 @@ define(function (require) {
     return dfd.promise();
   };
 
-  Password.prototype.backuped = function() {
+  Password.prototype.backup = function() {
     return this._value;
   };
 

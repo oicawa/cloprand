@@ -129,7 +129,7 @@ define(function (require) {
     this._list.find("div.item > i").css("display", on ? "inline" : "none");
   };
 
-  Finder.prototype.backuped = function() {
+  Finder.prototype.backup = function() {
     return this._fixed;
   };
 

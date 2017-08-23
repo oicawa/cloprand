@@ -78,7 +78,7 @@ define(function (require) {
     }
   };
 
-  Boolean.prototype.backuped = function() {
+  Boolean.prototype.backup = function() {
     return this._value;
   };
 

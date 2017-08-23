@@ -133,7 +133,7 @@ define(function (require) {
     return dfd.promise();
   };
  
-  Files.prototype.backuped = function() {
+  Files.prototype.backup = function() {
     return this._values;
   };
 

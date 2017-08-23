@@ -30,7 +30,7 @@ define(function (require) {
     return dfd.promise();
   };
 
-  DateTime.prototype.backuped = function() {
+  DateTime.prototype.backup = function() {
     return this._value;
   };
 

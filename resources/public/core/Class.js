@@ -36,13 +36,14 @@ define(function (require) {
          return fields
            .map(function(field) {
              var value = object[field.name];
-             if (Utils.is_object(value) && field.datatype.properties.multi_lingualization) {
-               return Locale.translate(value);
-             }
-             if (Uuid.is_uuid(value)) {
+             if (!Utils.is_object(value)) {
                return value;
              }
-             return value;
+             
+             if (!field.datatype.properties.multi_lingualization) {
+               return value;
+             }
+             return Locale.translate(value);
            })
            .join(" ");
       });

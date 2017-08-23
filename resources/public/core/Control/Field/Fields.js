@@ -109,9 +109,9 @@ define(function (require) {
     this._field.finder.edit(on);
   };
   
-  Fields.prototype.backuped = function() {
-    var class_id = this._class.finder.backuped();
-    var field_name = this._field.finder.backuped();
+  Fields.prototype.backup = function() {
+    var class_id = this._class.finder.backup();
+    var field_name = this._field.finder.backup();
     return { "class_id" : class_id, "field_name" : field_name };
   };
 

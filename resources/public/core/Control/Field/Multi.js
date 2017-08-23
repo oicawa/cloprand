@@ -46,8 +46,8 @@ define(function (require) {
     return dfd.promise();
   };
 
-  Multi.prototype.backuped = function() {
-    return this._list.backuped();
+  Multi.prototype.backup = function() {
+    return this._list.backup();
   };
 
   Multi.prototype.commit = function() {

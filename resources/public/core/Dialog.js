@@ -47,16 +47,19 @@ define(function (require) {
   };
   
   Dialog.prototype.init = function (initializer) {
-  	var dfd = new $.Deferred;
-  	
+    var dfd = new $.Deferred;
+    
     this._id = Uuid.version4();
     var contents_id = Uuid.version4();
     var html = DIALOG_TEMPLATE.replace(/{{DIALOG_ID}}/, this._id).replace(/{{CONTENTS_ID}}/, contents_id);
     $('body').append(html);
     
     this._dialog = $('#' + this._id);
+    console.log("Dialog ID = " + this._id);
     
     var self = this;
+    
+    var body = $("body");
     
     initializer(contents_id)
     .then(function() {
@@ -64,6 +67,8 @@ define(function (require) {
         modal : true,
         width : 'auto',
         height : 'auto',
+        maxHeight : body.height() - 20,
+        maxWidth : body.width() - 20,
         close : function (event, ui) {
           self._dialog.remove();
         },

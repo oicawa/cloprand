@@ -30,7 +30,7 @@ define(function (require) {
     // Do Nothing. UUID can not be edit. (assinged by server side only.)
   };
 
-  UUID.prototype.backuped = function() {
+  UUID.prototype.backup = function() {
     return this._viewer.text();
   };
 

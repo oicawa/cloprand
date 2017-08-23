@@ -103,6 +103,26 @@ define(function (require) {
       
       var tree = new Tree();
       tree.init("#left-panel");
+      
+      var timer = false;
+      $(window).on("resize", function () {
+        if (timer !== false) {
+            clearTimeout(timer);
+        }
+        timer = setTimeout(function() {
+            console.log('window resized');
+            var body = $("body");
+            var divs = body.find("div[role='dialog'] > div.dialog");
+            for (var i = 0; i < divs.length; i++) {
+              var dialog = $("#" + divs[i].id);
+              dialog.dialog({
+                maxHeight : body.height() - 20,
+                maxWidth : body.width() - 20
+              });
+            }
+        }, 200);
+      });
+      
     });
   };
 

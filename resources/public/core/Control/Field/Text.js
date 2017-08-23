@@ -154,7 +154,7 @@ define(function (require) {
     return dfd.promise();
   };
 
-  Text.prototype.backuped = function() {
+  Text.prototype.backup = function() {
     return this._value;
   };
 

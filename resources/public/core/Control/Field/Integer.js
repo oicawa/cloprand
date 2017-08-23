@@ -32,7 +32,7 @@ define(function (require) {
     return dfd.promise();
   };
 
-  Integer.prototype.backuped = function() {
+  Integer.prototype.backup = function() {
     return this._value;
   };
 

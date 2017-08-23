@@ -276,6 +276,24 @@ define(function (require) {
     }
   };
 
+  Detail.prototype.backup = function() {
+    if (!this._fields) {
+      return data;
+    }
+    
+    var data = {};
+    for (var i = 0; i < this._fields.length; i++) {
+      var object_field = this._fields[i];
+      var name = object_field.name;
+      var control = this._controls[name];
+      if (!control) {
+        continue;
+      }
+      data[name] = control.backup();
+    }
+    return data;
+  };
+
   Detail.prototype.commit = function() {
     for (var i = 0; i < this._fields.length; i++) {
       var object_field = this._fields[i];

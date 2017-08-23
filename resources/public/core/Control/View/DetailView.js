@@ -123,11 +123,13 @@ define(function (require) {
         detail.data(object);
         detail.edit(false);
         detail.refresh();
-        var label = (new Class(view._class)).captions([object])[0];
-        console.log("[New Item Saved] view_id=" + view._class.class_type.properties.detail_view.id);
-        app.contents().tabs().change(view._class.class_type.properties.detail_view.id, view._class.id, Uuid.NULL, new_object_id, label);
-        app.contents().tabs().broadcast(view._class.id, new_object_id, object);
-        Dialog.show("New item was created successfully.", "Save");
+        (new Class(view._class)).renderer()
+        .done(function (renderer) {
+          var label = renderer(object);
+          app.contents().tabs().change(view._class.class_type.properties.detail_view.id, view._class.id, Uuid.NULL, new_object_id, label);
+          app.contents().tabs().broadcast(view._class.id, new_object_id, object);
+          Dialog.show("New item was created successfully.", "Save");
+        });
       })
       .fail(function(jqXHR, text_status, error_thrown) {
         if (jqXHR.status == 410) {
@@ -146,10 +148,13 @@ define(function (require) {
         detail.edit(false);
         detail.commit();
         detail.refresh();
-        var label = (new Class(view._class)).captions([data])[0];
-        app.contents().tabs().label(view._class.class_type.properties.detail_view.id, view._class.id, view._object_id, label);
-        app.contents().tabs().broadcast(view._class.id, view._object_id, data);
-        Dialog.show("Edited item was saved successfully.", "Save");
+        (new Class(view._class)).renderer()
+        .done(function (renderer) {
+          var label = renderer(data);
+          app.contents().tabs().label(view._class.class_type.properties.detail_view.id, view._class.id, view._object_id, label);
+          app.contents().tabs().broadcast(view._class.id, view._object_id, data);
+          Dialog.show("Edited item was saved successfully.", "Save");
+        });
       })
       .fail(function(jqXHR, text_status, error_thrown) {
         if (jqXHR.status == 410) {

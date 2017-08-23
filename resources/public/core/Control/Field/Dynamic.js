@@ -183,7 +183,7 @@ define(function (require) {
     }
   };
   
-  Dynamic.prototype.backuped = function() {
+  Dynamic.prototype.backup = function() {
     return this._value;
   };
 
