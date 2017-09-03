@@ -8,13 +8,26 @@ define(function (require) {
   var Detail = require("core/Control/Detail");
   var Field = require("core/Control/Field/Field");
   
-  var TEMPLATE = '<div class="complex"><div class="detail"></div></div>';
+  var TEMPLATE = '<div class="complex"><i></i><div class="detail"></div></div>';
 
   function Complex() {
     Field.call(this, "core/Control/Field", "Complex");
     this._detail = null;
   };
   Inherits(Complex, Field);
+
+
+  function create_collapse(self, selector) {
+    self._collapse = $(selector);
+    // caret-right, caret-down
+    self._collapse.addClass("fa-caret-right");
+    self._collapse.on("click", function (event) {
+      var old_class = self._collapse.attr("class");
+      new_class = (old_class == "fa-caret-right") ? "fa-caret-down" : "fa-caret-right";
+      self._collapse.removeClass(old_class);
+      self._collapse.addClass(new_class);
+    });
+  }
   
   Complex.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
@@ -34,6 +47,10 @@ define(function (require) {
       root.append(TEMPLATE);
       
       // Create controls
+      if (field.datatype.properties.collapsable == true) {
+        create_collapse(self, selector + " > div.complex > i");
+      }
+      
       self._detail = new Detail();
       self._detail.init(selector + " > div.complex > div.detail", class_.object_fields)
       .always(function() {
