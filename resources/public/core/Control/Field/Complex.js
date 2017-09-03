@@ -19,13 +19,17 @@ define(function (require) {
 
   function create_collapse(self, selector) {
     self._collapse = $(selector);
+    self._collapse.collapse = true;
     // caret-right, caret-down
+    self._collapse.addClass("fa");
     self._collapse.addClass("fa-caret-right");
     self._collapse.on("click", function (event) {
-      var old_class = self._collapse.attr("class");
-      new_class = (old_class == "fa-caret-right") ? "fa-caret-down" : "fa-caret-right";
+      self._collapse.collapse = !self._collapse.collapse;
+      var old_class = self._collapse.collapse ? "fa-caret-down" : "fa-caret-right";
+      var new_class = self._collapse.collapse ? "fa-caret-right" : "fa-caret-down";
       self._collapse.removeClass(old_class);
       self._collapse.addClass(new_class);
+      self._detail.visible(self._collapse.collapse ? false : true);
     });
   }
   
@@ -54,7 +58,7 @@ define(function (require) {
       self._detail = new Detail();
       self._detail.init(selector + " > div.complex > div.detail", class_.object_fields)
       .always(function() {
-        self._detail.visible(true);
+        self._detail.visible(field.datatype.properties.collapsable == true ? false : true);
         self._detail.edit(false);
         dfd.resolve();
       });
