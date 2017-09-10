@@ -104,7 +104,8 @@ define(function (require) {
     Storage.read(key.class_id)
     .done(function (objects) {
       self._grid.data(objects);
-      self._grid.refresh();
+      self._grid.sort();
+      self.refresh();
     });
   };
   

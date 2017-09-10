@@ -67,6 +67,7 @@ define(function (require) {
     .done(function (classes) {
       var menus = Object.keys(classes).map(function(id) { return classes[id]; }).filter(menu_filter);
       self._grid.data(menus);
+      self._grid.sort();
       self._grid.refresh();
     });
   };
