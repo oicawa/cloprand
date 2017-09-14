@@ -21,6 +21,7 @@ define(function (require) {
   Class.FUNCTION_ENTRY_ID = "f447764e-45fe-425e-9b2b-6ae5e7760b2f";
   Class.MENU_ITEM_TYPE_ID = "c4e3e6d0-3d4d-439c-9fea-361f0afed10e";
   Class.VIEW_ID = "afb017dd-1ec8-4dfb-8e0c-df77a4925461";
+  Class.COMPLEX_TYPE_ID = "eb05e181-7ef0-4355-898f-6381f8c867a9";
 
   Class.prototype.caption_fields = function() {
     return this._class.object_fields.filter(function (field) { return !(!field.caption); })

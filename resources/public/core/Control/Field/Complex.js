@@ -7,6 +7,7 @@ define(function (require) {
   var Inherits = require("core/Inherits");
   var Detail = require("core/Control/Detail");
   var Field = require("core/Control/Field/Field");
+  var Dialog = require("core/Dialog");
   
   var TEMPLATE = '<div class="complex"></div>';
   var BUTTON_TEMPLATE = "<i></i>";
@@ -21,7 +22,7 @@ define(function (require) {
   Inherits(Complex, Field);
 
 
-  function create_collapse(self, selector) {
+  Complex.create_as_folded = function(self, selector) {
     var complex = $(selector);
     complex.append(BUTTON_TEMPLATE);
     self._button = $(selector + " > i");
@@ -29,30 +30,33 @@ define(function (require) {
     self._button.addClass("fa");
     self._button.addClass("fa-caret-right");
     self._button.on("click", function (event) {
+      function switch_detail() {
+        var visible = !self._detail.visible();
+        var remove_class = visible ? "fa-caret-right" : "fa-caret-down";
+        var add_class = visible ? "fa-caret-down" : "fa-caret-right";
+        self._button.removeClass(remove_class);
+        self._button.addClass(add_class);
+        self._detail.edit(self._edit);
+        self._detail.visible(!visible);
+      }
       if (self._detail == null) {
         // Create
         complex.append(DETAIL_TEMPLATE);
         self._detail = new Detail();
         self._detail.init(selector + " > div.detail", self._class.object_fields)
         .always(function() {
-          self._button.removeClass("fa-caret-right");
-          self._button.addClass("fa-caret-down");
-          self._detail.visible(true);
-          self._detail.edit(self._edit);
           self._detail.data(self._data);
+          self._detail.refresh();
+          self._detail.visible(false);
+          switch_detail();
         });
         return;
       }
-      
-      var old_class = self._detail.visible() ? "fa-caret-right" : "fa-caret-down";
-      var new_class = self._detail.visible() ? "fa-caret-down" : "fa-caret-right";
-      self._button.removeClass(old_class);
-      self._button.addClass(new_class);
-      self._detail.visible(self._collapse.collapse ? false : true);
+      switch_detail();
     });
-  }
+  };
 
-  function create_popup(self, selector) {
+  Complex.create_as_popup = function(self, selector) {
     var complex = $(selector);
     complex.append(BUTTON_TEMPLATE);
     self._button = $(selector + " > i");
@@ -95,7 +99,18 @@ define(function (require) {
         dialog.open();
       });
     });
-  }
+  };
+  
+  Complex.create_as_fixed = function(self, selector) {
+    var complex = $(selector);
+    complex.append(DETAIL_TEMPLATE);
+    self._detail = new Detail();
+    self._detail.init(selector + " > div.detail", self._class.object_fields)
+    .always(function() {
+      self._detail.visible(true);
+      self._detail.edit(self._edit);
+    });
+  };
   
   Complex.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
@@ -108,41 +123,37 @@ define(function (require) {
     // Load template data & Create form tags
     var template = null;
     var self = this;
-    Storage.read(Class.CLASS_ID, field.datatype.properties.class_id)
-    .done(function (data) { self._class = data; })
+    var types = null;
+    $.when(
+      Storage.read(Class.CLASS_ID, field.datatype.properties.class_id).done(function (data) { self._class = data; }),
+      Storage.read(Class.COMPLEX_TYPE_ID).done(function (data) { types = data; })
+    )
     .always(function() {
       root.append(TEMPLATE);
 
-      var this_selector = selector + " > div.complex";
-      
-      // Collapse
-      if (field.datatype.properties.collapse == true) {
-        console.log("Collapse");
-        create_collapse(self, this_selector);
-        dfd.resolve();
-        return;
-      }
-      
-      // Popup
-      if (field.datatype.properties.mode == true) {
-        console.log("Popup");
-        create_popup(self, this_selector);
-        dfd.resolve();
-        return;
-      }
+      var DEFAULT_TYPE_ID = "7cc4270b-cb00-4e84-ae7f-6138330f58f3"; // Folded
+      var type_id = field.datatype.properties.type_id;
+      type_id = !type_id ? DEFAULT_TYPE_ID : type_id;
 
-      // Embedded
-      console.log("Embedded");
-      var complex = $(this_selector);
-      complex.append(DETAIL_TEMPLATE);
-      self._detail = new Detail();
-      self._detail.init(this_selector + " > div.detail", self._class.object_fields)
-      .always(function() {
-        self._detail.visible(true);
-        self._detail.edit(false);
-        dfd.resolve();
-      });
+      var type = types[type_id];
+      if (!type || !type.id) {
+        console.assert(false, "type is not exist, or type does not have 'id' property.");
+        dfd.reject();
+        return;
+      }
+      
+      var generator = Complex[type.generator];
+      if (typeof generator != "function") {
+        console.assert(false, "'generator' is not function. (type.generator=[" + type.generator + "])");
+        dfd.reject();
+        return;
+      }
+      
+      console.log("generator is [" + type.generator + "]");
+      generator(self, selector + " > div.complex");
+      dfd.resolve();
     });
+    
     return dfd.promise();
   };
 
@@ -179,7 +190,11 @@ define(function (require) {
   };
 
   Complex.prototype.refresh = function() {
-    //this._detail.refresh();
+    if (!this._detail) {
+      return;
+    }
+    this._detail.edit(this._edit);
+    this._detail.refresh();
   };
   
   Complex.renderer = function(field) {
