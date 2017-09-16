@@ -13,3 +13,22 @@ div.menuview-panel > div.menu-list {
   right:0px;
   /*overflow-y: scroll;*/
 }
+div.menuview-item {
+  display:inline-block;
+  width:120px;
+  height:120px;
+}
+div.menuview-item > div > i {
+  width:100px;
+  height:70px;
+}
+span.menuview-item-caption {
+  text-align:center;
+  font-size: 8pt;
+  width:100px;
+  /*white-space:nowrap;*/
+  overflow:hidden;
+  text-overflow:ellipsis;
+  height:30px;
+  display:table-cell;
+}

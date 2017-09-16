@@ -70,6 +70,7 @@ define(function (require) {
         var dfd = new $.Deferred;
         detail.init('#' + id, self._class.object_fields)
         .then(function () {
+          debugger;
           detail.data(self._data);
           detail.edit(self._edit);
           detail.refresh();
