@@ -8,9 +8,10 @@ define(function (require) {
   var Detail = require("core/Control/Detail");
   var Field = require("core/Control/Field/Field");
   var Dialog = require("core/Dialog");
+  var DivButton = require("core/Control/DivButton");
   
   var TEMPLATE = '<div class="complex"></div>';
-  var BUTTON_TEMPLATE = "<i></i>";
+  var BUTTON_TEMPLATE = "<div name='button'></div>";
   var DETAIL_TEMPLATE = "<div class='detail'></div>";
 
   function Complex() {
@@ -25,17 +26,15 @@ define(function (require) {
   Complex.create_as_folded = function(self, selector) {
     var complex = $(selector);
     complex.append(BUTTON_TEMPLATE);
-    self._button = $(selector + " > i");
-    // caret-right, caret-down
-    self._button.addClass("fa");
-    self._button.addClass("fa-caret-right");
-    self._button.on("click", function (event) {
+    self._button = new DivButton();
+    return self._button.init(selector + " > div[name='button']", "<i class='fa fa-caret-right'></i>", function (event) {
       function switch_detail() {
         var visible = !self._detail.visible();
         var remove_class = visible ? "fa-caret-right" : "fa-caret-down";
         var add_class = visible ? "fa-caret-down" : "fa-caret-right";
-        self._button.removeClass(remove_class);
-        self._button.addClass(add_class);
+        var i = $(selector + " > div[name='button'] > i");
+        i.removeClass(remove_class);
+        i.addClass(add_class);
         self._detail.edit(self._edit);
         self._detail.visible(!visible);
       }
@@ -59,25 +58,22 @@ define(function (require) {
   Complex.create_as_popup = function(self, selector) {
     var complex = $(selector);
     complex.append(BUTTON_TEMPLATE);
-    self._button = $(selector + " > i");
-    // caret-right, caret-down
-    self._button.addClass("fa");
-    self._button.addClass("fa-ellipsis-h");
-    self._button.on("click", function (event) {
+    self._button = new DivButton();
+    return self._button.init(selector + " > div[name='button']", "<i class='fa fa-ellipsis-h'></i>", function(event) {
+      // caret-right, caret-down
       var detail = new Detail();
       var dialog = new Dialog();
-      dialog.init(function(id) {
-        var dfd = new $.Deferred;
+      return dialog.init(function(id) {
+        var inner_dfd = new $.Deferred;
         detail.init('#' + id, self._class.object_fields)
         .then(function () {
-          debugger;
           detail.data(self._data);
           detail.edit(self._edit);
           detail.refresh();
           detail.visible(true);
-          dfd.resolve();
+          inner_dfd.resolve();
         });
-        return dfd.promise();
+        return inner_dfd.promise();
       }).then(function () {
         dialog.title(Locale.translate(self._class.label));
         dialog.buttons([
@@ -106,10 +102,12 @@ define(function (require) {
     var complex = $(selector);
     complex.append(DETAIL_TEMPLATE);
     self._detail = new Detail();
-    self._detail.init(selector + " > div.detail", self._class.object_fields)
+    return self._detail.init(selector + " > div.detail", self._class.object_fields)
     .always(function() {
-      self._detail.visible(true);
+      self._detail.data(self._data);
       self._detail.edit(self._edit);
+      self._detail.refresh();
+      self._detail.visible(true);
     });
   };
   
@@ -151,7 +149,9 @@ define(function (require) {
       }
       
       console.log("generator is [" + type.generator + "]");
-      generator(self, selector + " > div.complex");
+      return generator(self, selector + " > div.complex");
+    })
+    .then(function () {
       dfd.resolve();
     });
     
