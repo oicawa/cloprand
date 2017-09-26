@@ -55,60 +55,74 @@ define(function (require) {
     });
   };
 
+  function init_popup(self, id, detail) {
+    var dfd = new $.Deferred;
+    detail.init('#' + id, self._class.object_fields)
+    .then(function () {
+      detail.data(self._data);
+      detail.edit(self._edit);
+      detail.refresh();
+      detail.visible(true);
+      dfd.resolve();
+    });
+    return dfd.promise();
+  }
+  
+  function open_popup(self) {
+    var detail = new Detail();
+    var dialog = new Dialog();
+    dialog.init(function(id) {
+      return init_popup(self, id, detail);
+    }).then(function () {
+      dialog.title(Locale.translate(self._class.label));
+      dialog.buttons([
+        {
+          text : "OK",
+          click: function (event) {
+            self._data = detail.data();
+            dialog.close();
+            return false;
+          }
+        },
+        {
+          text : "Cancel",
+          click: function (event) {
+            dialog.close();
+            return false;
+          }
+        }
+      ]);
+      debugger;
+      dialog.open();
+    });
+  }
+
   Complex.create_as_popup = function(self, selector) {
+    var dfd = new $.Deferred;
     var complex = $(selector);
     complex.append(BUTTON_TEMPLATE);
     self._button = new DivButton();
-    return self._button.init(selector + " > div[name='button']", "<i class='fa fa-ellipsis-h'></i>", function(event) {
-      // caret-right, caret-down
-      var detail = new Detail();
-      var dialog = new Dialog();
-      return dialog.init(function(id) {
-        var inner_dfd = new $.Deferred;
-        detail.init('#' + id, self._class.object_fields)
-        .then(function () {
-          detail.data(self._data);
-          detail.edit(self._edit);
-          detail.refresh();
-          detail.visible(true);
-          inner_dfd.resolve();
-        });
-        return inner_dfd.promise();
-      }).then(function () {
-        dialog.title(Locale.translate(self._class.label));
-        dialog.buttons([
-          {
-            text : "OK",
-            click: function (event) {
-              self._data = detail.data();
-              dialog.close();
-              return false;
-            }
-          },
-          {
-            text : "Cancel",
-            click: function (event) {
-              dialog.close();
-              return false;
-            }
-          }
-        ]);
-        dialog.open();
-      });
+    self._button.init(selector + " > div[name='button']", "<i class='fa fa-ellipsis-h'></i>", function(event) {
+      open_popup(self);
     });
+    dfd.resolve();
+    return dfd.promise();
   };
   
   Complex.create_as_fixed = function(self, selector) {
+    var dfd = new $.Deferred;
     var complex = $(selector);
     complex.append(DETAIL_TEMPLATE);
     self._detail = new Detail();
-    return self._detail.init(selector + " > div.detail", self._class.object_fields)
-    .always(function() {
+    self._detail.init(selector + " > div.detail", self._class.object_fields)
+    .then(function() {
       self._detail.data(self._data);
       self._detail.edit(self._edit);
       self._detail.refresh();
       self._detail.visible(true);
+      dfd.resolve();
     });
+    return dfd.promise();
   };
   
   Complex.prototype.init = function(selector, field) {
@@ -123,11 +137,14 @@ define(function (require) {
     var template = null;
     var self = this;
     var types = null;
+    var type4log = null;
     $.when(
       Storage.read(Class.CLASS_ID, field.datatype.properties.class_id).done(function (data) { self._class = data; }),
       Storage.read(Class.COMPLEX_TYPE_ID).done(function (data) { types = data; })
     )
-    .always(function() {
+    .then(function() {
+      var inner_dfd = new $.Deferred;
+
       root.append(TEMPLATE);
 
       var DEFAULT_TYPE_ID = "7cc4270b-cb00-4e84-ae7f-6138330f58f3"; // Folded
@@ -137,19 +154,23 @@ define(function (require) {
       var type = types[type_id];
       if (!type || !type.id) {
         console.assert(false, "type is not exist, or type does not have 'id' property.");
-        dfd.reject();
-        return;
+        inner_dfd.reject();
+        return inner_dfd.promise();
       }
+      type4log = type;
       
       var generator = Complex[type.generator];
       if (typeof generator != "function") {
         console.assert(false, "'generator' is not function. (type.generator=[" + type.generator + "])");
-        dfd.reject();
-        return;
+        inner_dfd.reject();
+        return inner_dfd.promise();
       }
       
-      console.log("generator is [" + type.generator + "]");
-      return generator(self, selector + " > div.complex");
+      generator(self, selector + " > div.complex")
+      .then(function () {
+        inner_dfd.resolve();
+      });
+      return inner_dfd.promise();
     })
     .then(function () {
       dfd.resolve();

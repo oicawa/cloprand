@@ -49,17 +49,15 @@ define(function (require) {
   Dialog.prototype.init = function (initializer) {
     var dfd = new $.Deferred;
     
-    this._id = Uuid.version4();
+    var dialog_id = Uuid.version4();
     var contents_id = Uuid.version4();
-    var html = DIALOG_TEMPLATE.replace(/{{DIALOG_ID}}/, this._id).replace(/{{CONTENTS_ID}}/, contents_id);
-    $('body').append(html);
-    
-    this._dialog = $('#' + this._id);
-    console.log("Dialog ID = " + this._id);
-    
+    var html = DIALOG_TEMPLATE.replace(/{{DIALOG_ID}}/, dialog_id).replace(/{{CONTENTS_ID}}/, contents_id);
+    var body = $("body");
+    body.append(html);
     var self = this;
     
-    var body = $("body");
+    this._id = dialog_id;
+    this._dialog = $('#' + this._id);
     
     initializer(contents_id)
     .then(function() {
@@ -67,13 +65,14 @@ define(function (require) {
         modal : true,
         width : 'auto',
         height : 'auto',
+        autoOpen : false,
         maxHeight : body.height() - 20,
         maxWidth : body.width() - 20,
         close : function (event, ui) {
           self._dialog.remove();
         },
         resize : function (event) {
-          console.log("Dialog (ID:" + this._id + ") resize.");
+          console.log("Dialog (ID:" + self._id + ") resize.");
         }
       });
       dfd.resolve();

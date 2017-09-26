@@ -245,7 +245,6 @@ define(function (require) {
     var self = this;
     Utils.load_css("/core/Control/Detail.css")
     .then(function () {
-      //return create_form(self, selector)
       return create_frame(self, selector);
     })
     .then(function() {
@@ -318,7 +317,7 @@ define(function (require) {
     if (!this._fields) {
       return;
     }
-    
+
     for (var i = 0; i < this._fields.length; i++) {
       var object_field = this._fields[i];
       var name = object_field.name;
