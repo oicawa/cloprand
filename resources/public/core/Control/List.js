@@ -82,7 +82,7 @@ define(function (require) {
     Storage.read(this._class.id).done(function (data) { items = data; })
     .then(function () {
       var objects = Object.keys(items).map(function(id) { return items[id]; });
-      return dialog.init({columns:self._grid._columns, comparers:self._grid._comparers, items:objects, multi_selectable:true});
+      return dialog.init({columns:self._grid._columns, comparers:self._grid._comparers, items:objects, multi_selectable:true, field_map:self._grid._field_map});
     })
     .done(function() {
       dialog.title(title);
