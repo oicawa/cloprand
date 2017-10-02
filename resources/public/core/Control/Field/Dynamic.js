@@ -20,12 +20,12 @@ define(function (require) {
 
   var OPTION_TEMPLATE = '<option></option>';
 
-  function create_finder(self, selector, columns, items, description, min_width) {
+  function create_finder(self, selector, columns, field_map, items, description, min_width) {
     self._finder = new Finder();
     function converter(objects) {
       return (new Class(self._class)).captions(objects);
     }
-    return self._finder.init(selector, columns, items, description, false, min_width, converter);
+    return self._finder.init(selector, columns, field_map, items, description, false, min_width, converter);
   }
 
   function create_button(self, selector) {
@@ -147,7 +147,7 @@ define(function (require) {
     .then(function() {
       root.empty();
       root.append(TEMPLATE);
-      return create_finder(self, selector + " > div > div[name='finder']", columns, self._objects, self._field_name, self._min_width);
+      return create_finder(self, selector + " > div > div[name='finder']", columns, field_map, self._objects, self._field_name, self._min_width);
     })
     .then(function() {
       self._finder.ok(function() {

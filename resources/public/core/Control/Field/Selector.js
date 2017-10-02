@@ -60,7 +60,7 @@ define(function (require) {
       function converter(objects) {
         return (new Class(class_)).captions(objects);
       }
-      return self._finder.init(selector + " > div", columns, items, description, multi_selectable, min_width, converter);
+      return self._finder.init(selector + " > div", columns, field_map, items, description, multi_selectable, min_width, converter);
     })
     .then(function() {
       self.edit(false);

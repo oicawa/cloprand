@@ -71,13 +71,13 @@ define(function (require) {
       function converter(objects) {
         return (new Class(self._class._class)).captions(objects);
       }
-      return self._class.finder.init(selector + " > div > div[name='class']", self._class.columns, self._classes, "Class", false, min_width, converter);
+      return self._class.finder.init(selector + " > div > div[name='class']", self._class.columns, self._class.field_map, self._classes, "Class", false, min_width, converter);
     })
     .then(function () {
       function converter(objects) {
         return (new Class(self._field._class)).captions(objects);
       }
-      return self._field.finder.init(selector + " > div > div[name='field']", self._field.columns, {}, "Field", false, min_width, converter);
+      return self._field.finder.init(selector + " > div > div[name='field']", self._field.columns, self._field.field_map, {}, "Field", false, min_width, converter);
     })
     .then(function () {
       self._class.finder.ok(function (recids) {

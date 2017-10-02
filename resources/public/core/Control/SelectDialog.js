@@ -64,6 +64,7 @@ define(function (require) {
       self._grid.select_column(true);
       self._grid.toolbar(true);
       self._grid.data(options.items);
+      self._grid.sort();
       self._grid.refresh();
       dfd.resolve();
     });

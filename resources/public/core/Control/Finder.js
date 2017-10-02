@@ -26,7 +26,7 @@ define(function (require) {
       var width = self._columns.map(function(column) { return parseInt(column.size); }).reduce(function (prev, current, index, array) { return prev + current; }, 100);
       var dialog = new SelectDialog();
       console.log(self._columns);
-      dialog.init({ items : items, columns : self._columns, multi_selectable : self._multi_selectable })
+      dialog.init({ items : items, columns : self._columns, multi_selectable : self._multi_selectable, field_map : self._field_map })
       .done(function() {
         dialog.title("Select");
         dialog.ok(function (recids) {
@@ -58,10 +58,11 @@ define(function (require) {
     this._min_width = null;
   }
 
-  Finder.prototype.init = function(selector, columns, items, description, multi_selectable, min_width, converter, font_name) {
+  Finder.prototype.init = function(selector, columns, field_map, items, description, multi_selectable, min_width, converter, font_name) {
     var dfd = new $.Deferred;
     
     this._columns = columns;
+    this._field_map = field_map;
     this._objects = items;
     this._converter = converter;
     this._multi_selectable = multi_selectable;
