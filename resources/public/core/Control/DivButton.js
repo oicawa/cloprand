@@ -27,6 +27,9 @@ define(function (require) {
     var self = this;
     this._button = this._root.find("#" + uuid);
     this._button.on("click", callback);
+    this._button.on("keyup", function (event) {
+      console.log(event);
+    });
     
     dfd.resolve();
     return dfd.promise();

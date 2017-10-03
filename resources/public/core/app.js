@@ -58,71 +58,78 @@ define(function (require) {
   App.prototype.config = function() {
     return this._config;
   };
+
+  function create_frame(self) {
+    $("body").append(LAYOUT_TEMPLATE);
+    // Create Layout Panel
+    var layout_name = Uuid.version4();
+    var pstyle='border: 3px solid #dfdfdf; padding: 5px;';
+    $("#layout").w2layout({
+      name:layout_name,
+      panels:[
+        {type:'top', size:42, resizable:false, style:pstyle, content:TOP_TEMPLATE},
+        {type:'left',size:200,resizable:true,hidden:true,style:pstyle,content:LEFT_TEMPLATE},
+        {type:'main',style:pstyle,content:MAIN_TEMPLATE}
+      ]
+    });
+    self._layout= w2ui[layout_name];
+    self._layout.refresh();
+
+    var logo_path = "/core/logo.svg";
+    var favicon_path = "/core/favicon.ico";
+
+    self._system_icon = $("img#system-icon");
+    self._system_icon.attr("src", logo_path);
+
+    self._title = $("span#title");
+    self._login_id = $("span#login_id");
+
+    self._contents = new Contents();
+    self._contents.init("#contents-panel");
+
+    self.title(self._config.system_name);
+    self.favicon(favicon_path);
+    self._login_id.text(self.session.identity);
+
+    var tree = new Tree();
+    tree.init("#left-panel");
+
+    var timer = false;
+    $(window).on("resize", function () {
+      if (timer !== false) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        console.log('window resized');
+        var body = $("body");
+        var divs = body.find("div[role='dialog'] > div.dialog");
+        for (var i = 0; i < divs.length; i++) {
+          var dialog = $("#" + divs[i].id);
+          dialog.dialog({
+            maxHeight : body.height() - 20,
+            maxWidth : body.width() - 20
+          });
+        }
+      }, 200);
+    });
+  }
   
   App.prototype.init = function() {
-    var session = null;
     var self = this;
     var CONFIG_OBJECT_ID = "e71de065-9b6a-42c7-9987-ddc8e75672ca";
-    $.when(
-      Utils.load_css("core/app.css"),
-      Connector.session("identity").done(function(data){ session = data; }),
-      Storage.read(Class.SYSTEM_ID, CONFIG_OBJECT_ID).done(function(data){ self._config = data; }),
-      Storage.read(Primitive.ID).done(function(data){ self._primitives = data; })
-    ).always(function() {
-      $("body").append(LAYOUT_TEMPLATE);
-      
-      // Create Layout Panel
-      var layout_name = Uuid.version4();
-      var pstyle='border: 3px solid #dfdfdf; padding: 5px;';
-      $("#layout").w2layout({
-        name:layout_name,
-        panels:[
-          {type:'top', size:42, resizable:false, style:pstyle, content:TOP_TEMPLATE},
-          {type:'left',size:200,resizable:true,hidden:true,style:pstyle,content:LEFT_TEMPLATE},
-          {type:'main',style:pstyle,content:MAIN_TEMPLATE}
-        ]
+    Connector.session("identity")
+    .done(function(data){
+      self.session = data;
+      $.when(
+        Utils.load_css("core/app.css"),
+        Storage.read(Class.SYSTEM_ID, CONFIG_OBJECT_ID).done(function(data){ self._config = data; }),
+        Storage.read(Primitive.ID).done(function(data){ self._primitives = data; })
+      ).then(function() {
+        create_frame(self);
       });
-      self._layout= w2ui[layout_name];
-      self._layout.refresh();
-
-      var logo_path = "/core/logo.svg";
-      var favicon_path = "/core/favicon.ico";
-      
-      self._system_icon = $("img#system-icon");
-      self._system_icon.attr("src", logo_path);
-      
-      self._title = $("span#title");
-      self._login_id = $("span#login_id");
-      
-      self._contents = new Contents();
-      self._contents.init("#contents-panel");
-    
-      self.title(self._config.system_name);
-      self.favicon(favicon_path);
-      self._login_id.text(session.identity);
-      
-      var tree = new Tree();
-      tree.init("#left-panel");
-      
-      var timer = false;
-      $(window).on("resize", function () {
-        if (timer !== false) {
-            clearTimeout(timer);
-        }
-        timer = setTimeout(function() {
-            console.log('window resized');
-            var body = $("body");
-            var divs = body.find("div[role='dialog'] > div.dialog");
-            for (var i = 0; i < divs.length; i++) {
-              var dialog = $("#" + divs[i].id);
-              dialog.dialog({
-                maxHeight : body.height() - 20,
-                maxWidth : body.width() - 20
-              });
-            }
-        }, 200);
-      });
-      
+    })
+    .fail(function () {
+      console.log("Failed to get session identity");
     });
   };
 

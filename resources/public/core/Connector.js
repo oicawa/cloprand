@@ -25,7 +25,7 @@ define(function (require) {
     }).fail(function (jqXHR, text_status, error_thrown) {
       if (jqXHR.status == 401) {
         dfd.reject(jqXHR, text_status, error_thrown);
-        location.href = "/login?next=/tames";
+        location.href = jqXHR.responseJSON.url;
         return;
       }
       dfd.reject(jqXHR, text_status, error_thrown);

@@ -46,32 +46,33 @@
         [:link {:rel "stylesheet" :type "text/css" :href "/lib/w2ui/w2ui-1.5.rc1.css" } ]
         [:link {:rel "stylesheet" :type "text/css" :href "/core/reset-w2ui.css" } ]
         [:link {:rel "stylesheet" :type "text/css" :href "/core/main.css" } ]
+        [:script {:data-main "/core/login.js?version=0.0.15" :src "/lib/require.js"} ]
         ]
       [:body
         [:div {:style "width:100%; text-align:center;height:50px;"}]
         [:div {:style "width:100px; height:100px; background-image:url(core/logo.svg); background-size:100%;margin:auto;"} ]
         [:h1 {:style "text-align:center;height:50px;"} title]
         [:div {:style "width:100%; text-align:center;height:50px;"}]
-        [:form {:method "post" :name "singin"}
+        [:form {:method "post" :name "login"}
           [:div {:style "width:100%; text-align:center;"}
             [:span {:style "display:inline-block;width:100px;"} "Login ID "]
-            [:input {:type "text" :name "login_id" :style "width:200px;" :class "w2field"}]
+            [:input {:type "text" :name "login_id" :style "width:200px;" :class "w2field" :tabindex "1"}]
             [:br]
             [:div {:style "width:100%;height:10px;"}]
             [:span {:style "display:inline-block;width:100px;"} "Password"]
-            [:input {:type "password" :name "password" :style "width:200px;" :class "w2field"}]
+            [:input {:type "password" :name "password" :style "width:200px;" :class "w2field" :tabindex "2"}]
             [:br]
             [:div {:style "width:100%;height:50px;"}]
             [:input {:type "hidden" :name "__anti-forgery-token" :value *anti-forgery-token*}]
             [:input {:type "submit" :style "display:none;"}]
-            [:div {:class "div-button" :style "width:70px;height:70px;margin: auto;" :onclick "document.singin.submit();"}
+            [:div {:id "login-button" :class "div-button" :style "width:70px;height:70px;margin: auto;" :tabindex "3"}
               [:i {:class "fa fa-sign-in" :style "font-size:35pt;"} ]
-              [:div {:style "font-size:10pt;"} "Sign In" ]]
+              [:div {:style "font-size:10pt;"} "Login" ]]
             ]]])))
 
 (defn login-post
   [req]
-  (print-s-exp req)
+  ;(print-s-exp req)
   (let [login_id (get-in req [:form-params "login_id"])
         password   (get-in req [:form-params "password"])
         next_url   (get-in req [:query-params "next"] "/tames")
@@ -81,30 +82,37 @@
                          (= (account "password") password) true
                          :else false)]
     (println "[login_id] :" login_id)
-    (println "[next url]   :" next_url)
-    (println "----------")
-    (pprint/pprint account)
-    (println "----------")
+    (println "[next url] :" next_url)
+    ;(println "----------")
+    ;(pprint/pprint account)
+    ;(println "----------")
     (-> (response/redirect next_url)
         (assoc-in [:session :identity] (if is-ok login_id nil)))))
 
 (defn logout
   [req]
-  (-> (response/redirect "/login?next=/tames")
+  (-> (response/redirect "/login?next=/tames&mode=logout")
       (assoc :session {})))
 
 (defn unauthorized
   [req meta]
-  (let [result (authenticated? req)
-        uri    (req :uri)]
-    (println (format "*** Unauthenticated: [%s], URI: [%s]" result, uri))
+  (let [result  (authenticated? req)
+        uri     (req :uri)
+        referer ((req :headers) "referer")]
+    (println (format "*** Unauthenticated: [%s], URI: [%s], referer: [%s]" result uri referer))
+    (pprint/pprint req)
     (cond result
             (response/redirect "/tames")
-          (or (= uri "/tames")
-              (= uri "/logout"))
-            (response/redirect "/login?next=/tames")
+          (= uri "/tames")
+            (if (nil? referer)
+                (response/redirect "/login?next=/tames")
+                (response/redirect "/login?next=/tames&mode=failed"))
+          (= uri "/logout")
+            (response/redirect "/login?next=/tames&mode=logout")
+          (= uri "/session/identity")
+            (systems/create-authorized-result false "/login?next=/tames")
           :else
-            (systems/create-authorized-result false "/login?next=/tames"))))
+            (systems/create-authorized-result false "/login?next=/tames&mode=timeout"))))
 
 (defn time-to-RFC1123
   [time]
@@ -187,7 +195,7 @@
     (let [session-key (get-in req [:route-params :session-key] nil)
           user-name   (get-in req [:session :identity] nil)]
       (println (format "[GET] /session/:session-key = /session/%s" session-key))
-      (print-s-exp req)
+      ;(print-s-exp req)
       (format "{ \"%s\" : \"%s\"}" session-key user-name)))
   ;; Download
   (GET "/download/*" [& params]
