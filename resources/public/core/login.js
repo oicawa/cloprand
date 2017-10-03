@@ -18,8 +18,16 @@ require.config({
 });
 
 define(['jquery'], function ($) {
-  var login_button = $("#login-button");
-  login_button.on("keyup", function (event) {
+  $("#login-password").on("keyup", function (event) {
+    var KEYCODE_ENTER = 13;
+    if (event.keyCode != KEYCODE_ENTER) {
+      return;
+    }
+    document.login.submit();
+  });
+  
+  $("#login-button")
+  .on("keyup", function (event) {
     var KEYCODE_ENTER = 13;
     var KEYCODE_SPACE = 32;
     if (event.keyCode != KEYCODE_ENTER && event.keyCode != KEYCODE_SPACE) {
@@ -27,10 +35,11 @@ define(['jquery'], function ($) {
     }
     console.log("Submit login by keyup");
     document.login.submit();
-  });
-  login_button.on("click", function (event) {
+  })
+  .on("click", function (event) {
     console.log("Submit login by click");
     document.login.submit();
   });
   console.log("location.href=" + location.href);
+  $("#login-id").focus();
 });

@@ -56,11 +56,11 @@
         [:form {:method "post" :name "login"}
           [:div {:style "width:100%; text-align:center;"}
             [:span {:style "display:inline-block;width:100px;"} "Login ID "]
-            [:input {:type "text" :name "login_id" :style "width:200px;" :class "w2field" :tabindex "1"}]
+            [:input {:id "login-id" :type "text" :name "login_id" :style "width:200px;" :class "w2field" :tabindex "1"}]
             [:br]
             [:div {:style "width:100%;height:10px;"}]
             [:span {:style "display:inline-block;width:100px;"} "Password"]
-            [:input {:type "password" :name "password" :style "width:200px;" :class "w2field" :tabindex "2"}]
+            [:input {:id "login-password":type "password" :name "password" :style "width:200px;" :class "w2field" :tabindex "2"}]
             [:br]
             [:div {:style "width:100%;height:50px;"}]
             [:input {:type "hidden" :name "__anti-forgery-token" :value *anti-forgery-token*}]
