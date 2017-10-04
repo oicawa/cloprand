@@ -66,6 +66,7 @@ define(function (require) {
       dfd.resolve();
     });
     return dfd.promise();
+    //return detail.init('#' + id, self._class.object_fields);
   }
   
   function open_popup(self) {
@@ -73,6 +74,7 @@ define(function (require) {
     var dialog = new Dialog();
     dialog.init(function(id) {
       return init_popup(self, id, detail);
+      //return detail.init('#' + id, self._class.object_fields);
     }).then(function () {
       dialog.title(Locale.translate(self._class.label));
       dialog.buttons([
@@ -92,7 +94,6 @@ define(function (require) {
           }
         }
       ]);
-      debugger;
       dialog.open();
     });
   }
@@ -110,23 +111,25 @@ define(function (require) {
   };
   
   Complex.create_as_fixed = function(self, selector) {
-    var dfd = new $.Deferred;
+    //var dfd = new $.Deferred;
     var complex = $(selector);
     complex.append(DETAIL_TEMPLATE);
     self._detail = new Detail();
-    self._detail.init(selector + " > div.detail", self._class.object_fields)
-    .then(function() {
-      self._detail.data(self._data);
-      self._detail.edit(self._edit);
-      self._detail.refresh();
-      self._detail.visible(true);
-      dfd.resolve();
-    });
-    return dfd.promise();
+    //self._detail.init(selector + " > div.detail", self._class.object_fields)
+    //.then(function() {
+    //  self._detail.data(self._data);
+    //  self._detail.edit(self._edit);
+    //  self._detail.refresh();
+    //  self._detail.visible(true);
+    //  dfd.resolve();
+    //});
+    //return dfd.promise();
+    return self._detail.init(selector + " > div.detail", self._class.object_fields);
   };
   
   Complex.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
+    this._field = field;
     var root = $(selector);
     if (0 < root.children()) {
       dfd.resolve();
@@ -168,6 +171,8 @@ define(function (require) {
       
       generator(self, selector + " > div.complex")
       .then(function () {
+        self.visible(true);
+        self.refresh();
         inner_dfd.resolve();
       });
       return inner_dfd.promise();
@@ -184,41 +189,60 @@ define(function (require) {
   };
 
   Complex.prototype.commit = function() {
-    //this._backup = this._detail.data();
-    //this._detail.commit();
     this._backup = JSON.parse(JSON.stringify(this._data));
+    if (this._detail) {
+      this._detail.commit();
+    }
   };
 
   Complex.prototype.restore = function() {
-    //this._detail.data(this._backup);
-    //this._detail.restore();
     this._data = JSON.parse(JSON.stringify(this._backup));
+    if (this._detail) {
+      this._detail.restore();
+    }
   };
 
   Complex.prototype.edit = function(on) {
-    //this._detail.edit(on);
     this._edit = on;
+    if (this._detail) {
+      this._detail.edit(this._edit);
+    }
   };
 
   Complex.prototype.data = function(values) {
     if (arguments.length == 0) {
-      //return this._detail.data();
+      if (this._detail) {
+        this._data = this._detail.data();
+      }
       return this._data;
     } else {
-      //this._detail.data(values);
       this._backup = values;
       this._data = values;
+      if (this._detail) {
+      	this._detail.data(this._data);
+      }
     }
   };
 
   Complex.prototype.refresh = function() {
-    if (!this._detail) {
-      return;
+    if (this._detail) {
+      this._detail.edit(this._edit);
+      this._detail.visible(this._visible);
+      this._detail.refresh();
     }
-    this._detail.edit(this._edit);
-    this._detail.refresh();
   };
-  
+
+  Complex.prototype.visible = function(_visible) {
+    if (arguments.length == 0) {
+      this._visible = this._detail.visible();
+      return this._visible;
+    }
+    this._visible = _visible;
+    if (this._detail) {
+      this._detail.visible(this._visible);
+    }
+  };
+
   Complex.renderer = function(field) {
     var dfd = new $.Deferred;
     Storage.read(Class.CLASS_ID, field.datatype.properties.class_id, true)
