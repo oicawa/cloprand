@@ -53,7 +53,7 @@ define(function (require) {
         {
           text : "OK",
           click: function (event) {
-            console.log("[OK] clicked");
+            //console.log("[OK] clicked");
             ok_func(detail);
             dialog.close();
             return false;
@@ -62,7 +62,7 @@ define(function (require) {
         {
           text : "Cancel",
           click: function (event) {
-            console.log("[Cancel] clicked");
+            //console.log("[Cancel] clicked");
             dialog.close();
             return false;
           }
@@ -87,7 +87,7 @@ define(function (require) {
     .done(function() {
       dialog.title(title);
       dialog.ok(function (recids) {
-        console.log("[OK] clicked. selection=" + recids);
+        //console.log("[OK] clicked. selection=" + recids);
         for (var i = 0; i < recids.length; i++) {
           var recid = recids[i];
           var item = items[recid];
@@ -214,7 +214,7 @@ define(function (require) {
     var selector = "#" + item.inner_id + " > input";
     $(document).off("keyup", selector);
     $(document).on("keyup", selector, function (event) {
-      console.log(event);
+      //console.log(event);
     });
     return html;
   }
@@ -261,7 +261,7 @@ define(function (require) {
       return self._grid.init(selector + " > div > div.records", options_);
     })
     .then(function() {
-      return Menu.convert(options.toolbar_items, self).done(function(dst_items) { console.log(dst_items);self._grid.items(dst_items); });
+      return Menu.convert(options.toolbar_items, self).done(function(dst_items) { self._grid.items(dst_items); });
     })
     .then(function() {
       self._grid.toolbar(false);

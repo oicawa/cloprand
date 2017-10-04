@@ -43,7 +43,7 @@ define(function (require) {
       },
       columns: self._columns,
       onDblClick:function(event) {
-        console.log(event);
+        //console.log(event);
         if (!self._grid.menu || (!Array.isArray(self._grid.menu)) || (self._grid.menu.length == 0)) {
           if (!self.double_click) {
             return;

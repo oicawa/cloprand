@@ -47,7 +47,7 @@ define(function (require) {
   }
   
   MenuView.open = function (class_) {
-    console.log(class_);
+    //console.log(class_);
     if (class_.class_type.id == CLASS_TYPE_ID_MULTI) {
       open_list_view(class_);
     } else if (class_.class_type.id == CLASS_TYPE_ID_SINGLE) {
@@ -102,7 +102,7 @@ define(function (require) {
   
   MenuView.prototype.refresh = function () {
     // this._grid.refresh();
-    console.log("Called MenuView.prototype.refresh()");
+    //console.log("Called MenuView.prototype.refresh()");
   };
   
   function create_item(selector, menu_box, class_) {

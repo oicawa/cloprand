@@ -45,7 +45,7 @@ define(function (require) {
     .done(function (object) {
       require([object.require_path], function(View) {
         var selector = "#" + tab_id + " > div.tab-content-frame > div.tab-content-panel";
-        console.log("object.require_path=" + object.require_path);
+        //console.log("object.require_path=" + object.require_path);
         var view = new View();
         self._contents[tab_id] = view;
         view.init(selector, class_id, object_id)
