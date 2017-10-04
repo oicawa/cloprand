@@ -111,19 +111,9 @@ define(function (require) {
   };
   
   Complex.create_as_fixed = function(self, selector) {
-    //var dfd = new $.Deferred;
     var complex = $(selector);
     complex.append(DETAIL_TEMPLATE);
     self._detail = new Detail();
-    //self._detail.init(selector + " > div.detail", self._class.object_fields)
-    //.then(function() {
-    //  self._detail.data(self._data);
-    //  self._detail.edit(self._edit);
-    //  self._detail.refresh();
-    //  self._detail.visible(true);
-    //  dfd.resolve();
-    //});
-    //return dfd.promise();
     return self._detail.init(selector + " > div.detail", self._class.object_fields);
   };
   
