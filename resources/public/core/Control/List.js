@@ -152,9 +152,8 @@ define(function (require) {
       Dialog.show("Select one or more items.");
       return;
     }
-    Dialog.confirm("Delete?", function(answer) {
-      if (answer == "No")
-        return;
+    Dialog.confirm("Delete?", "Delete")
+    .yes(function(answer) {
       self._grid.remove(recids);
       self._grid.refresh(reorder);
     });

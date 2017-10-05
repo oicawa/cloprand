@@ -75,11 +75,8 @@ define(function (require) {
   };
   
   DetailView.delete = function (event) {
-    Dialog.confirm("Delete this class?", function(answer) {
-      if (answer == "No") {
-        return;
-      }
-      
+    Dialog.confirm("Delete this class?", "Delete")
+    .yes(function() {
       var view = event.item.context;
       var objects = null;
       Storage.delete(view._class_id, view._object_id)
@@ -168,11 +165,8 @@ define(function (require) {
   };
   
   DetailView.cancel = function (event) {
-    Dialog.confirm("Canceled?", function(answer) {
-      if (answer == "No") {
-        return;
-      }
-      
+    Dialog.confirm("Canceled?", "Cancel")
+    .yes(function() {
       var view = event.item.context;
       
       if (view.is_new()) {

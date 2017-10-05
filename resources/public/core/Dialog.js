@@ -16,11 +16,50 @@ define(function (require) {
   };
   
   Dialog.show = function (message, title) {
-    w2alert(message, title);
+    var dialog = new Dialog();
+    dialog.init(function (id) {
+      var dfd = new $.Deferred;
+      var div = $("#" + id);
+      div.append("<p>" + message + "</p>");
+      div.css("min-height", "100px");
+      div.css("min-width", "400px");
+      dfd.resolve();
+      return dfd.promise();
+    })
+    .then(function () {
+      dialog.title(title);
+      dialog.buttons([{ text:"OK", click:function(event){dialog.close();}}]);
+      dialog.open();
+    });
   };
   
   Dialog.confirm = function (message, title) {
-    return w2confirm(message, title);
+    //return w2confirm(message, title);
+    var proc_yes = null;
+    var proc_no = null;
+    var procs = {
+      yes:function (func) { proc_yes = func; return procs; },
+      no:function (func) { proc_no = func; return procs; }
+    }
+    var dialog = new Dialog();
+    dialog.init(function (id) {
+      var dfd = new $.Deferred;
+      var div = $("#" + id);
+      div.append("<p>" + message + "</p>");
+      div.css("min-height", "100px");
+      div.css("min-width", "400px");
+      dfd.resolve();
+      return dfd.promise();
+    })
+    .then(function () {
+      dialog.title(title);
+      dialog.buttons([
+        { text:"Yes", click:function(event){dialog.close(); if (typeof proc_yes == "function") proc_yes();}},
+        { text:"No", click:function(event){dialog.close(); if (typeof proc_no == "function") proc_no();}}
+      ]);
+      dialog.open();
+    });
+    return procs;
   };
 
   Dialog.prototype.close = function () {
@@ -66,7 +105,7 @@ define(function (require) {
         width : 'auto',
         height : 'auto',
         autoOpen : false,
-        maxHeight : body.height() - 20,
+       	maxHeight : body.height() - 20,
         maxWidth : body.width() - 20,
         close : function (event, ui) {
           self._dialog.remove();
