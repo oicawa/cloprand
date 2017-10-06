@@ -520,6 +520,10 @@ define(function (require) {
   Grid.prototype.sort = function() {
     for (var i = this._columns.length - 1; 0 <= i; i--) {
       var name = this._columns[i].field;
+      var field = this._field_map[name].field;
+      if (!field || !field.sort_direction) {
+        continue;
+      }
       var compare = this._field_map[name].compare;
       if (!compare) {
         continue;

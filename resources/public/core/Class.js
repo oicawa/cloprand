@@ -99,7 +99,7 @@ define(function (require) {
   };
   
   Class.field_map = function(class_) {
-      if (!class_.object_fields) debugger;
+    console.assert(class_.object_fields, "class_.object_fields is false/null/undefined");
     function compare_recid(rec1, rec2) {
       if (rec1.recid == rec2.recid) {
         return 0;
