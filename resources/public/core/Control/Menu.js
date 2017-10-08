@@ -24,12 +24,13 @@ define(function (require) {
       .then(function() {
         require([entry.require_path], function(Module) {
           items_map[properties.item_id] = {
-            id      : properties.item_id,
-            type    : menu_item_type.type,
-            text    : Locale.translate(properties.caption),
-            icon    : "fa " + properties.icon,
-            action  : Module[entry.function_name],
-            context : context
+            id             : properties.item_id,
+            type           : menu_item_type.type,
+            text           : Locale.translate(properties.caption),
+            icon           : "fa " + properties.icon,
+            action         : Module[entry.function_name],
+            context        : context,
+            function_entry : properties.function_entry
           }
           dfd.resolve();
         });

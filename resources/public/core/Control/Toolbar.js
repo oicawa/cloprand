@@ -44,6 +44,7 @@ define(function (require) {
         if (!item.action) {
           return;
         }
+        //debugger;
         item.action(event);
       }
       self._root.hide();

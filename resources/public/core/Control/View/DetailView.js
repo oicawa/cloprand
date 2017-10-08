@@ -75,7 +75,11 @@ define(function (require) {
   };
   
   DetailView.delete = function (event) {
-    Dialog.confirm("Delete this class?", "Delete")
+  	var item = event.item;
+    var entry_props = !item.function_entry ? null : item.function_entry.properties;
+    
+    var message = !entry_props ? "Do you want to delete?" : Locale.translate(entry_props.confirm_message);
+    Dialog.confirm(message, item.text)
     .yes(function() {
       var view = event.item.context;
       var objects = null;
@@ -83,21 +87,27 @@ define(function (require) {
       .done(function() {
         app.contents().tabs().broadcast(view._class_id, view._object_id, null);
         app.contents().tabs().remove(view._class.class_type.properties.detail_view.id, view._class_id, view._object_id);
-        Dialog.show("Deleted", "Delete");
+        var message = !entry_props ? "Deleted" : Locale.translate(entry_props.deleted_message);
+        Dialog.show(message, item.text);
       })
       .fail(function(jqXHR, text_status, error_thrown) {
+        var message = !entry_props ? "Failed to delete." : Locale.translate(entry_props.deleted_failed_message);
         if (jqXHR.status == 410) {
-          Dialog.show("This item (or Class) has already been deleted by other user.\nClosing this tab.", "Delete");
+          Dialog.show(message, item.text);
+          console.log("[Delete] This item (or Class) has already been deleted by other user.Closing this tab.");
           app.contents().tabs().remove(view._class.class_type.properties.detail_view.id, view._class_id, view._object_id);
         } else {
-          Dialog.show("Failed to delete this item.", "Delete");
+          Dialog.show(message, item.text);
         }
       });
     });
   };
 
   DetailView.save = function (event) {
-    var view = event.item.context;
+  	var item = event.item;
+    var entry_props = !item.function_entry ? null : item.function_entry.properties;
+    
+    var view = item.context;
     var detail = view.detail();
     var data = detail.data();
     var object = null;
@@ -125,20 +135,24 @@ define(function (require) {
           var label = renderer(object);
           app.contents().tabs().change(view._class.class_type.properties.detail_view.id, view._class.id, Uuid.NULL, new_object_id, label);
           app.contents().tabs().broadcast(view._class.id, new_object_id, object);
-          Dialog.show("New item was created successfully.", "Save");
+          var message = !entry_props ? "Created" : Locale.translate(entry_props.created_message);
+          Dialog.show(message, item.text);
         });
       })
       .fail(function(jqXHR, text_status, error_thrown) {
+        var message = !entry_props ? "Failed to create" : Locale.translate(entry_props.created_failed_message);
         if (jqXHR.status == 410) {
-          Dialog.show("The Class of this item has already been deleted by other user.\nClosing this tab.", "Save");
+          Dialog.show(message, item.text);
+          console.log("[Save] The Class of this item has already been deleted by other user. Closing this tab.");
           app.contents().tabs().remove(view._class.class_type.properties.detail_view.id, view._class.id, Uuid.NULL);
         } else {
-          Dialog.show("Failed to create this item.", "Save");
+          Dialog.show(message, item.text);
         }
       });
     } else {
-      if (!data[key_field_name])
+      if (!data[key_field_name]) {
         data[key_field_name] = view._object_id;
+      }
       Storage.update(view._class.id, data[key_field_name], data, files)
       .done(function(object) {
         edit_toolbar(view.toolbar(), false);
@@ -150,22 +164,31 @@ define(function (require) {
           var label = renderer(data);
           app.contents().tabs().label(view._class.class_type.properties.detail_view.id, view._class.id, view._object_id, label);
           app.contents().tabs().broadcast(view._class.id, view._object_id, data);
-          Dialog.show("Edited item was saved successfully.", "Save");
+          var message = !entry_props ? "Updated" : Locale.translate(entry_props.updated_message);
+          Dialog.show(message, item.text);
         });
       })
       .fail(function(jqXHR, text_status, error_thrown) {
+        var message = !entry_props ? "Failed to update" : Locale.translate(entry_props.updated_failed_message);
         if (jqXHR.status == 410) {
-          Dialog.show("This item (or Class) has already been deleted by other user.\nClosing this tab.", "Save");
+          Dialog.show(message, item.text);
+          console.log("[Save] This item (or Class) has already been deleted by other user. Closing this tab.");
           app.contents().tabs().remove(view._class.class_type.properties.detail_view.id, view._class.id, view._object_id);
         } else {
-          Dialog.show("Failed to save this item.", "Save");
+          Dialog.show(message, item.text);
         }
       });
     }
   };
   
   DetailView.cancel = function (event) {
-    Dialog.confirm("Canceled?", "Cancel")
+  	var item = event.item;
+    var entry = item.function_entry;
+    var message = "Do you want to cancel the current editing?";
+    if (entry && entry.properties && entry.properties.confirm_message) {
+      message = Locale.translate(entry.properties.confirm_message);
+    }
+    Dialog.confirm(message, item.text)
     .yes(function() {
       var view = event.item.context;
       
