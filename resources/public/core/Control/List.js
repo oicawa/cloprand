@@ -118,13 +118,16 @@ define(function (require) {
   };
   
   List.edit = function (event) {
-  	var self = event.item.context;
+  	var item = event.item;
+  	var self = item.context;
   	if (!self) {
   	  return;
   	}
     var recids = self._grid.selection();
     if (recids.length != 1) {
-      Dialog.show("Select one item.");
+      var entry_props = !item.function_entry ? null : item.function_entry.properties;
+      var message = !entry_props ? "Select one item." : Locale.translate(entry_props.select_message);
+      Dialog.show(message, item.text);
       return;
     }
     var recid = recids[0];
@@ -143,16 +146,21 @@ define(function (require) {
   }
   
   List.remove = function (event) {
-  	var self = event.item.context;
+  	var item = event.item;
+  	var self = item.context;
   	if (!self) {
   	  return;
   	}
+
+    var entry_props = !item.function_entry ? null : item.function_entry.properties;
     var recids = self._grid.selection();
     if (recids.length == 0) {
-      Dialog.show("Select one or more items.");
+      var message = !entry_props ? "Select one or more items." : Locale.translate(entry_props.select_message);
+      Dialog.show(message, item.text);
       return;
     }
-    Dialog.confirm("Delete?", "Delete")
+    var message = !entry_props ? "Do you want to remove." : Locale.translate(entry_props.confirm_message);
+    Dialog.confirm(message, item.text)
     .yes(function(answer) {
       self._grid.remove(recids);
       self._grid.refresh(reorder);
@@ -160,20 +168,23 @@ define(function (require) {
   };
   
   List.up = function (event) {
-  	var self = event.item.context;
+  	var item = event.item;
+  	var self = item.context;
   	if (!self) {
   	  return;
   	}
-    var message = "Select one item. (without 1st)";
+    var entry_props = !item.function_entry ? null : item.function_entry.properties;
     var recids = self._grid.selection();
     if (recids.length != 1) {
-      Dialog.show(message);
+      var message = !entry_props ? "Select one item without top." : Locale.translate(entry_props.select_message);
+      Dialog.show(message, item.text);
       return;
     }
     var recid = recids[0];
     var index = self._grid.get(recid, true);
     if (index == 0) {
-      Dialog.show(message);
+      var message = !entry_props ? "Selected item is top." : Locale.translate(entry_props.top_message);
+      Dialog.show(message, item.text);
       return;
     }
     self._grid.unselect();
@@ -183,20 +194,23 @@ define(function (require) {
   };
   
   List.down = function (event) {
-  	var self = event.item.context;
+  	var item = event.item;
+  	var self = item.context;
   	if (!self) {
   	  return;
   	}
-    var message = "Select one item. (without last)";
+    var entry_props = !item.function_entry ? null : item.function_entry.properties;
     var recids = self._grid.selection();
     if (recids.length == 0) {
-      Dialog.show(message);
+      var message = !entry_props ? "Select one item without bottom." : Locale.translate(entry_props.select_message);
+      Dialog.show(message, item.text);
       return;
     }
     var recid = recids[0];
     var index = self._grid.get(recid, true);
     if (index == self._grid.data().length - 1) {
-      Dialog.show(message);
+      var message = !entry_props ? "Selected item is bottom." : Locale.translate(entry_props.bottom_message);
+      Dialog.show(message, item.text);
       return;
     }
     self._grid.unselect();
