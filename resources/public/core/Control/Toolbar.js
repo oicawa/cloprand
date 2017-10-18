@@ -59,13 +59,17 @@ define(function (require) {
     }
     
     this._toolbar.items = items;
+    this.refresh();
+  };
+  
+  Toolbar.prototype.refresh = function() {
     // !!! The follow logic is dirty hack !!!
     // <<Reason>>
     // The added all items are not displayed at once.
     // Calling 'refresh' method of toolbar once, only one displayed item is added in toolbar.
     // So, I implement it temporarily to call the 'refresh' method for the number of items.
     // This issue have to be investigated, and be fixed...
-    for (var i = 0; i < items.length; i++) {
+    for (var i = 0; i < this._toolbar.items.length; i++) {
       this._toolbar.refresh();
     }
   };

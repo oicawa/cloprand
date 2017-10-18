@@ -22,6 +22,13 @@ define(function (require) {
 '  <div class="records"></div>' +
 '</div>';
   
+  function edit_toolbar(toolbar, on) {
+    var WRITING = ["add", "import", "edit", "remove", "move", "up", "down"]; 
+    var READING = ["display"]; 
+    toolbar.show.apply(toolbar, on ? WRITING : READING);
+    toolbar.hide.apply(toolbar, on ? READING : WRITING);
+  };
+  
   function List() {
     this._class = null;
     this._columns = null;
@@ -72,7 +79,6 @@ define(function (require) {
     });
   };
 
-  //List.prototype.showImportDialog = function (self, title, fields, data, ok_func) {
   List.prototype.showImportDialog = function (title) {
     var items = null;
     var self = this;
@@ -239,6 +245,29 @@ define(function (require) {
     }
     self.showImportDialog(Locale.translate(self._class.label));
   };
+  
+  List.display = function (event) {
+  	var item = event.item;
+  	var self = item.context;
+  	if (!self) {
+  	  return;
+  	}
+    var recids = self._grid.selection();
+    if (recids.length != 1) {
+      var entry_props = !item.function_entry ? null : item.function_entry.properties;
+      var message = !entry_props ? "Select one item." : Locale.translate(entry_props.select_message);
+      Dialog.show(message, item.text);
+      return;
+    }
+    var recid = recids[0];
+    var data = self._grid.get(recid);
+    self.showDetailDialog(self, Locale.translate(self._class.label), self._class.object_fields, data, function (detail) {
+      var data = detail.data();
+      data.id = recid;
+      self._grid.set(recid, data);
+      self._grid.refresh();
+    });
+  };
 
   List.prototype.init = function(selector, options) {
     var dfd = new $.Deferred;
@@ -264,9 +293,6 @@ define(function (require) {
     .then(function() {
       options_.columns = Grid.columns(self._class, options_.field_map);
     })
-    //.then(function() {
-    //  return Grid.comparers(self._class).done(function(comparers_) { options_.comparers = comparers_; });
-    //})
     .then(function() {
       root.append(TEMPLATE);
     })
@@ -277,7 +303,8 @@ define(function (require) {
       return Menu.convert(options.toolbar_items, self).done(function(dst_items) { self._grid.items(dst_items); });
     })
     .then(function() {
-      self._grid.toolbar(false);
+      self._grid.toolbar(true);
+      self._grid.numbers(true);
       self._grid.multi_search(false);
       self._grid.refresh();
       dfd.resolve();
@@ -286,32 +313,33 @@ define(function (require) {
   };
 
   List.prototype.backup = function() {
-    return this._backup;
+    return Utils.clone(this._backup);
   };
 
   List.prototype.commit = function() {
-    this._backup = this._grid.data();
+    this._backup = Utils.clone(this._grid.data());
   };
 
   List.prototype.restore = function() {
-    this._grid.data(this._backup);
+    this._grid.data(Utils.clone(this._backup));
   };
 
   List.prototype.edit = function(on) {
-    this._grid.toolbar(on);
+    this._grid.draggable(on);
+    edit_toolbar(this._grid._grid.toolbar, on);
   };
 
   List.prototype.data = function(values) {
     if (arguments.length == 0) {
-      return this._grid.data();
+      return Utils.clone(this._grid.data());
     } else {
       var values_ = !values ? [] : values.map(function(value, index) {
         delete value["recid"];
         value.id = index + 1;
         return value;
       });
-      this._grid.data(values_);
-      this._backup = values_;
+      this._grid.data(Utils.clone(values_));
+      this._backup = Utils.clone(values_);
     }
   };
   

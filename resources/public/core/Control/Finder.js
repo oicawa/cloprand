@@ -7,6 +7,7 @@ define(function (require) {
   var Class = require("core/Class");
   var Grid = require("core/Control/Grid");
   var DivButton = require("core/Control/DivButton");
+  var Uuid = require("core/Uuid");
   
   var TEMPLATE = '' +
 '<div class="finder">' +
@@ -83,6 +84,7 @@ define(function (require) {
     this._search = root.find("div > i[name='search']");
     // List
     this._list = root.find("div > div[name='list']");
+    this._list.attr("id", Uuid.version4());
     this._list.on("click", "div.item > i", function(event) {
       var i = $(event.originalEvent.target);
       var record = i.parent();
@@ -95,6 +97,15 @@ define(function (require) {
       }
       self.refresh();
     });
+    this._list.droppable({
+      accept : "div.item",
+      drop : function(event , ui){
+        console.log("Dropped");
+        console.log(event);
+        console.log(ui);
+      }
+    });
+        
     // Mouse over/out on icons.
     root.on("mouseover", "i", function(event) {
       var i = $(event.originalEvent.target);
@@ -204,6 +215,9 @@ define(function (require) {
       span.text(captions[i]);
       span.css("min-width", !this._min_width ? "200px" : this._min_width);
     }
+    var id = this._list.attr("id");
+    //this._list.children("div.item").draggable({ axis: "y", containment: "#" + id, snap: "#" + id });
+    this._list.children("div.item").draggable({ axis: "y", containment: "#" + id });
     this.edit(this._editting);
   };
 
@@ -236,4 +250,4 @@ define(function (require) {
   };
   
   return Finder;
-}); 
+});

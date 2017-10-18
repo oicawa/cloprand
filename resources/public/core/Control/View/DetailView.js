@@ -21,6 +21,11 @@ define(function (require) {
 '</div>';
 
   function edit_toolbar(toolbar, on) {
+    //var READING = ["edit", "delete"];
+    //var WRITING = ["save", "cancel"];
+    //toolbar.show.apply(toolbar, on ? WRITING : READING);
+    //toolbar.hide.apply(toolbar, on ? READING : WRITING);
+    //toolbar.refresh();
     if (on) {
       toolbar.hide("edit");
       toolbar.hide("delete");

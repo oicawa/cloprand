@@ -53,7 +53,6 @@ define(function (require) {
     get_as_json : function(default_json, assign_func) {
       var new_json = JSON.parse(JSON.stringify(default_json));
       try {
-        
         var assigned_object = assign_func();
         if (!assigned_object) {
           return new_json;
