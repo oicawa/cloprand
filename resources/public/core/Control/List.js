@@ -110,6 +110,37 @@ define(function (require) {
     });
   };
 
+  List.prototype.showSelectDialog = function (title) {
+    var items = null;
+    var self = this;
+    var width = self._grid._columns.map(function(column) { return parseInt(column.size); }).reduce(function (prev, current, index, array) { return prev + current; }, 100);
+    var dialog = new SelectDialog();
+
+    Storage.read(this._class.id).done(function (data) { items = data; })
+    .then(function () {
+      var objects = Object.keys(items).map(function(id) { return items[id]; });
+      return dialog.init({columns:self._grid._columns, comparers:self._grid._comparers, items:objects, multi_selectable:true, field_map:self._grid._field_map});
+    })
+    .done(function() {
+      dialog.title(title);
+      dialog.ok(function (recids) {
+        //console.log("[OK] clicked. selection=" + recids);
+        for (var i = 0; i < recids.length; i++) {
+          var recid = recids[i];
+          var item = items[recid];
+          var index = self._grid.data().length + i + 1;
+          var cloned = Utils.clone(item);
+          cloned["recid"] = index;
+          cloned["id"] = index;
+          self._grid.add(cloned);
+        }
+        self.refresh();
+      });
+      dialog.size(width, 400);
+      dialog.open();
+    });
+  };
+
   List.add = function (event) {
   	var self = event.item.context;
   	if (!self) {
@@ -244,6 +275,14 @@ define(function (require) {
       return;
     }
     self.showImportDialog(Locale.translate(self._class.label));
+  };
+  
+  List.search = function (event) {
+    var self = event.item.context;
+    if (!self) {
+      return;
+    }
+    self.showSelectDialog(Locale.translate(self._class.label));
   };
   
   List.display = function (event) {
