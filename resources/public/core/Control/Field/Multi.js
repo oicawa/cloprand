@@ -32,7 +32,7 @@ define(function (require) {
     root.append(TEMPLATE);
 
     var options = Utils.get_as_json(
-      { "class_id" : null, "width" : 500, "height" : 200, "actions" : [], "toolbar_items" : [] },
+      { "class_id" : null, "embedded" : true, "width" : 500, "height" : 200, "actions" : [], "toolbar_items" : [] },
       function() { return field.datatype.properties; }
     );
     

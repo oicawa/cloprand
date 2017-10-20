@@ -23,7 +23,7 @@ define(function (require) {
 '</div>';
   
   function edit_toolbar(toolbar, on) {
-    var WRITING = ["add", "import", "edit", "remove", "move", "up", "down"]; 
+    var WRITING = ["add", "import", "edit", "remove", "move", "up", "down", "search"]; 
     var READING = ["display"]; 
     toolbar.show.apply(toolbar, on ? WRITING : READING);
     toolbar.hide.apply(toolbar, on ? READING : WRITING);
@@ -31,8 +31,10 @@ define(function (require) {
   
   function List() {
     this._class = null;
+    this._objects = null;
     this._columns = null;
     this._toolbar = null;
+    this._options = false;
     this._grid = null;
     this._detail = null;
     this._dialog = null;
@@ -130,8 +132,10 @@ define(function (require) {
           var item = items[recid];
           var index = self._grid.data().length + i + 1;
           var cloned = Utils.clone(item);
-          cloned["recid"] = index;
-          cloned["id"] = index;
+          if (self._options.embedded) {
+            cloned["recid"] = index;
+            cloned["id"] = index;
+          }
           self._grid.add(cloned);
         }
         self.refresh();
@@ -286,11 +290,11 @@ define(function (require) {
   };
   
   List.display = function (event) {
-  	var item = event.item;
-  	var self = item.context;
-  	if (!self) {
-  	  return;
-  	}
+    var item = event.item;
+    var self = item.context;
+    if (!self) {
+      return;
+    }
     var recids = self._grid.selection();
     if (recids.length != 1) {
       var entry_props = !item.function_entry ? null : item.function_entry.properties;
@@ -315,7 +319,9 @@ define(function (require) {
       dfd.resolve();
       return dfd.promise();
     }
-
+    
+    this._options = options;
+    
     var columns = null;
     var self = this;
     self._grid = new Grid();
@@ -340,6 +346,12 @@ define(function (require) {
     })
     .then(function() {
       return Menu.convert(options.toolbar_items, self).done(function(dst_items) { self._grid.items(dst_items); });
+    })
+    .then(function() {
+      if (self._options.embedded) {
+        return;
+      }
+      return Storage.read(options.class_id).done(function (data) { self._objects = data; })
     })
     .then(function() {
       self._grid.toolbar(true);
@@ -369,17 +381,24 @@ define(function (require) {
   };
 
   List.prototype.data = function(values) {
+    // getter
     if (arguments.length == 0) {
-      return Utils.clone(this._grid.data());
-    } else {
-      var values_ = !values ? [] : values.map(function(value, index) {
-        delete value["recid"];
-        value.id = index + 1;
-        return value;
-      });
-      this._grid.data(Utils.clone(values_));
-      this._backup = Utils.clone(values_);
+      var data = this._options.embedded ? this._grid.data() : this._grid.data().map(function (item) { return item.id; });
+      return Utils.clone(data);
     }
+    
+    // setter
+    var self = this;
+    var items = !values ? [] : values.map(function(value, index) {
+      if (Utils.is_object(value)) {
+        delete value["recid"];
+        value.id = index;
+      }
+      var item = self._options.embedded ? value : self._objects[value];
+      return item;
+    });
+    this._grid.data(Utils.clone(items));
+    this._backup = Utils.clone(items);
   };
   
   List.prototype.refresh = function(on) {
