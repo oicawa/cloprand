@@ -321,6 +321,9 @@ define(function (require) {
     }
     
     this._options = options;
+    if (!this._options.toolbar_items) {
+      this._options.toolbar_items = [];
+    }
     
     var columns = null;
     var self = this;
@@ -345,13 +348,14 @@ define(function (require) {
       return self._grid.init(selector + " > div > div.records", options_);
     })
     .then(function() {
-      return Menu.convert(options.toolbar_items, self).done(function(dst_items) { self._grid.items(dst_items); });
+      if (!self._options.embedded) {
+        return Storage.read(options.class_id).done(function (data) { self._objects = data; })
+      }
     })
     .then(function() {
-      if (self._options.embedded) {
-        return;
-      }
-      return Storage.read(options.class_id).done(function (data) { self._objects = data; })
+      var src_items = !self._options.embedded ? options.toolbar_items.map(function (id) { return self._objects[id]; }) : options.toolbar_items;
+      console.log(src_items);
+      return Menu.convert(src_items, self).done(function(dst_items) { console.log(dst_items); self._grid.items(dst_items); });
     })
     .then(function() {
       self._grid.toolbar(true);
