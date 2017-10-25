@@ -355,7 +355,7 @@ define(function (require) {
     .then(function() {
       var src_items = !self._options.embedded ? options.toolbar_items.map(function (id) { return self._objects[id]; }) : options.toolbar_items;
       console.log(src_items);
-      return Menu.convert(src_items, self).done(function(dst_items) { console.log(dst_items); self._grid.items(dst_items); });
+      return Menu.convert(src_items, self).done(function(dst_items) { self._grid.items(dst_items); });
     })
     .then(function() {
       self._grid.toolbar(true);

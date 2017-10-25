@@ -7,7 +7,7 @@ define(function (require) {
   var Primitive = require("core/Primitive");
   var Storage = require("core/Storage");
   var Dialog = require("core/Dialog");
-  var Action = require("core/Action");
+  var Menu = require("core/Control/Menu");
   var Grid= require("core/Control/Grid");
   var List = require("core/Control/List");
   var DivButton = require("core/Control/DivButton");
@@ -22,22 +22,22 @@ define(function (require) {
     self.refresh();
   }
   
-  function show_languages_dialog(self, locale, locales, columns, caption, src_actions) {
+  function show_languages_dialog(self, locale, locales, columns, caption, src_items) {
     if (!self._draft) {
       self._draft = !self._value ? {} : self._value;
     }
     var items = Object.keys(self._draft).map(function(locale_id) { return { "id" : locale_id, "locale": locale_id, "value" : self._draft[locale_id] }; });
-    var actions = null;
+    var menu_items = null;
     var list = new List();
     var dialog = new Dialog();
     dialog.init(function(contents_id) {
-      return list.init("#" + contents_id, { class_id : self.detail_id(), width : null, height : null});
+      return list.init("#" + contents_id, { class_id : self.detail_id(), embedded : true, width : null, height : null});
     })
     .then(function () {
-      return Action.convert(src_actions, list).done(function(dst_actions) { actions = dst_actions; });
+      return Menu.convert(src_items, list).done(function(dst_items) { menu_items = dst_items; });
     })
     .then(function () {
-      list.items(actions);
+      list.items(menu_items);
       list.data(items);
       list.edit(true);
       list.refresh();
@@ -135,7 +135,7 @@ define(function (require) {
       if (!actions_field) {
         return;
       }
-      src_actions = actions_field.datatype.properties.actions;
+      src_items = actions_field.datatype.properties.toolbar_items;
       return;
     })
     .then(function () {
@@ -143,7 +143,7 @@ define(function (require) {
       var button_selector = selector + " > div > div[name='button']";
       self._button = new DivButton();
       return self._button.init(button_selector, '<i class="fa fa-globe"/>', function (event) {
-        show_languages_dialog(self, locale, locales, columns, Locale.translate(field.label), src_actions);
+        show_languages_dialog(self, locale, locales, columns, Locale.translate(field.label), src_items);
       });
     })
     .then(function () {
