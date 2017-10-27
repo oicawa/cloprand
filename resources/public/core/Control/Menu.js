@@ -10,6 +10,8 @@ define(function (require) {
 
   var Menu = {};
   
+  var MENU_ITEM_ID = "bdd98949-5829-4a41-91bf-d1680fb473d2";
+  
   var CONVERTERS = {
     "e14d8e9f-846e-40be-8003-b7f31e6a662c" : function (src_item, items_map, context) {
       var dfd = new $.Deferred;
@@ -69,29 +71,35 @@ define(function (require) {
       dfd.resolve();
       return dfd.promise();
     }
-    var promises = [];
-    var items_map = {};
-    for (var i = 0; i < src_items.length; i++) {
-      var src_item = src_items[i];
-      var converter = CONVERTERS[src_item.type.id];
-      if (!converter) {
-        console.assert(false, "NO converter in CONVERTERS table. (src_item.type.id=[" + src_item.type.id + "])");
-        continue;
-      }
-      var promise = converter(src_item, items_map, context);
-      promises.push(promise);
-    }
     
-    $.when.apply(null, promises)
-    .done(function() {
-      var dst_items = [];
-      for (var i = 0; i < src_items.length; i++) {
-        var src_item = src_items[i];
-        var item_id = src_item.type.properties.item_id;
-        var dst_item = items_map[item_id];
-        dst_items.push(dst_item);
+    var all_menus = null;
+    var promises = [];
+    Storage.read(MENU_ITEM_ID).done(function (data) { all_menus = data; })
+    .then(function() {
+      var src_menus = src_items.map(function(src_item) { return Uuid.is_uuid(src_item) ? all_menus[src_item] : src_item; });
+      var items_map = {};
+      for (var i = 0; i < src_menus.length; i++) {
+        var src_menu = src_menus[i];
+        var converter = CONVERTERS[src_menu.type.id];
+        if (!converter) {
+          console.assert(false, "NO converter in CONVERTERS table. (The target menu item type id=[" + src_menu.type.id + "])");
+          continue;
+        }
+        var promise = converter(src_menu, items_map, context);
+        promises.push(promise);
       }
-      dfd.resolve(dst_items);
+      
+      $.when.apply(null, promises)
+      .done(function() {
+        var dst_menus = [];
+        for (var i = 0; i < src_menus.length; i++) {
+          var src_menu = src_menus[i];
+          var item_id = src_menu.type.properties.item_id;
+          var dst_menu = items_map[item_id];
+          dst_menus.push(dst_menu);
+        }
+        dfd.resolve(dst_menus);
+      });
     });
     
     return dfd.promise();

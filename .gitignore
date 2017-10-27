@@ -1,8 +1,6 @@
 target/
 class/
-data/
-controls/
-lib/
-core/
+./data/
+./lib/
+./core/
 .lein-repl-history
-*~

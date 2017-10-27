@@ -394,12 +394,19 @@ define(function (require) {
     // setter
     var self = this;
     var items = !values ? [] : values.map(function(value, index) {
-      if (Utils.is_object(value)) {
+      if (self._options.embedded && Utils.is_object(value)) {
         delete value["recid"];
         value.id = index;
+        return value;
       }
-      var item = self._options.embedded ? value : self._objects[value];
-      return item;
+      
+      if (!self._options.embedded && Uuid.is_uuid(value)) {
+        return self._objects[value];
+      }
+      
+      return null;
+    }).filter(function(value) {
+      return !value ? false : true;
     });
     this._grid.data(Utils.clone(items));
     this._backup = Utils.clone(items);

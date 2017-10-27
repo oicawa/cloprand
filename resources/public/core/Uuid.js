@@ -43,6 +43,9 @@ define(function (require) {
   return {
     NULL : "00000000-0000-0000-0000-000000000000",
     is_uuid : function (value) {
+      if (typeof value != "string") {
+        return false;
+      }
       var REGEXP = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
       return REGEXP.test(value.toLowerCase());
     },

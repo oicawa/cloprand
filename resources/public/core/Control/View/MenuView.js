@@ -125,7 +125,13 @@ define(function (require) {
     var menu_box = $(selector);
     menu_box.empty();
     
-    var classes = Object.keys(class_map).map(function(id) { return class_map[id]; });
+    var classes = Object.keys(class_map).map(function(id) {
+      return class_map[id];
+    }).filter(function (class_) {
+      return class_.class_type.id == "949c12c1-48c5-450a-bb2c-222fdf0a0734" ? false : true;
+    }).sort(function (class0, class1) {
+      return 0;
+    });
     for (var i = 0; i < classes.length; i++) {
       var class_ = classes[i];
       create_item(selector, menu_box, class_);
