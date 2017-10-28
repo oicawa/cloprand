@@ -1,4 +1,4 @@
-define(function (require) { 
+define(function (require) {
   require("jquery");
   var app = require("app");
   var Utils = require("core/Utils");
@@ -16,8 +16,8 @@ define(function (require) {
 '  <div name="field"></div>' +
 '</div>';
 
-  function Fields() {
-    Field.call(this, "core/Control/Field", "Fields");
+  function FieldSelector() {
+    Field.call(this, "core/Control/Field", "FieldSelector");
     this._selector = null;
     this._value = null;
     this._self_reference = null;
@@ -25,9 +25,9 @@ define(function (require) {
     this._class = { _class:null, columns:null, finder:null, converter:null };
     this._field = { _class:null, columns:null, finder:null, converter:null };
   }
-  Inherits(Fields, Field);
+  Inherits(FieldSelector, Field);
 
-  Fields.prototype.init = function(selector, field) {
+  FieldSelector.prototype.init = function(selector, field) {
     var dfd = new $.Deferred;
     // Selector & Root
     this._selector = selector;
@@ -99,7 +99,7 @@ define(function (require) {
     return dfd.promise();
   };
 
-  Fields.prototype.edit = function(on) {
+  FieldSelector.prototype.edit = function(on) {
     if (arguments.length == 0) {
       return this._field.finder._editting;
     }
@@ -109,23 +109,23 @@ define(function (require) {
     this._field.finder.edit(on);
   };
   
-  Fields.prototype.backup = function() {
+  FieldSelector.prototype.backup = function() {
     var class_id = this._class.finder.backup();
     var field_name = this._field.finder.backup();
     return { "class_id" : class_id, "field_name" : field_name };
   };
 
-  Fields.prototype.commit = function() {
+  FieldSelector.prototype.commit = function() {
     this._class.finder.commit();
     this._field.finder.commit();
   };
 
-  Fields.prototype.restore = function() {
+  FieldSelector.prototype.restore = function() {
     this._class.finder.restore();
     this._field.finder.restore();
   };
 
-  Fields.prototype.data = function(value) {
+  FieldSelector.prototype.data = function(value) {
     if (arguments.length == 0) {
       var class_id = this._class.finder.data();
       var field_name = this._field.finder.data();
@@ -159,15 +159,15 @@ define(function (require) {
     this.refresh();
   };
   
-  Fields.prototype.update = function(keys) {
+  FieldSelector.prototype.update = function(keys) {
   };
 
-  Fields.prototype.refresh = function() {
+  FieldSelector.prototype.refresh = function() {
     this._class.finder.refresh();
     this._field.finder.refresh();
   };
 
-  Fields.renderer = function(field) {
+  FieldSelector.renderer = function(field) {
     var dfd = new $.Deferred;
     var classes = null;
     $.when(
@@ -188,5 +188,5 @@ define(function (require) {
     return dfd.promise();
   };
 
-  return Fields;
+  return FieldSelector;
 });
