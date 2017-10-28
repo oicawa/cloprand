@@ -23,7 +23,7 @@ define(function (require) {
 '</div>';
   
   function edit_toolbar(toolbar, on) {
-    var WRITING = ["add", "import", "edit", "remove", "move", "up", "down", "search"]; 
+    var WRITING = ["add", "copy", "edit", "remove", "move", "up", "down", "search"]; 
     var READING = ["display"]; 
     toolbar.show.apply(toolbar, on ? WRITING : READING);
     toolbar.hide.apply(toolbar, on ? READING : WRITING);
@@ -81,7 +81,7 @@ define(function (require) {
     });
   };
 
-  List.prototype.showImportDialog = function (title) {
+  List.prototype.showSelectorDialog = function (title) {
     var items = null;
     var self = this;
     var width = self._grid._columns.map(function(column) { return parseInt(column.size); }).reduce(function (prev, current, index, array) { return prev + current; }, 100);
@@ -273,12 +273,12 @@ define(function (require) {
     return html;
   }
   
-  List.import = function (event) {
+  List.copy = function (event) {
     var self = event.item.context;
     if (!self) {
       return;
     }
-    self.showImportDialog(Locale.translate(self._class.label));
+    self.showSelectorDialog(Locale.translate(self._class.label));
   };
   
   List.search = function (event) {
