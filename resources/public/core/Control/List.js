@@ -204,7 +204,7 @@ define(function (require) {
     Dialog.confirm(message, item.text)
     .yes(function(answer) {
       self._grid.remove(recids);
-      self._grid.refresh(reorder);
+      self._grid.refresh(self._options.embedded ? reorder : null);
     });
   };
   

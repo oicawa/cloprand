@@ -364,7 +364,6 @@ define(function (require) {
   };
   
   Grid.prototype.remove = function(recids) {
-    var recids = Array.prototype.slice.call(arguments);
     this._grid.remove.apply(this._grid, recids);
   };
 
