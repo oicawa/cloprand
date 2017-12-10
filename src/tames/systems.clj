@@ -48,6 +48,23 @@
         jar-path (. path substring start end)]
     jar-path))
 
+(defn extract-resource-path
+  [resource-url]
+  (assert (not (nil? resource-url)))
+  (assert (= "jar" (. resource-url getProtocol)))
+  (let [path          (. resource-url getPath)
+        start         (+ (. path indexOf "!") 2)
+        resource-path (. path substring start)]
+    resource-path))
+
+(defn get-jar-resource-entry
+  [jar-url]
+  (let [jar-path   (get-jar-path jar-url)
+        jar-file   (JarFile. (File. jar-path))
+        path       (extract-resource-path jar-url)
+        jar-entry  (. jar-file getJarEntry path)]
+    jar-entry))
+
 (defn get-jar-resource-children
   [jar-path relative-path dir? file?]
   (let [jar-file   (JarFile. (File. jar-path))
@@ -82,28 +99,26 @@
 
 
 (defn get-resource-type
-  [relative-dir-path dir? file?]
-  (let [resource (io/resource relative-dir-path)
-        protocol (if (nil? resource) nil (. resource getProtocol))]
+  [resource-url]
+  (let [protocol (if (nil? resource-url) nil (. resource-url getProtocol))]
     (cond (= "file" protocol) :file
           (= "jar" protocol)  :jar
           :else               :none)))
 
 (defn get-resource-children
   [relative-dir-path dir? file?]
-  (let [resource (io/resource relative-dir-path)
-        protocol (if (nil? resource) nil (. resource getProtocol))]
-    (cond (nil? protocol)     nil
-          (= "file" protocol) (let [file     (io/as-file resource)
-                                    children (filter #(cond (and dir? file?) true
-                                                            (and dir? (not file?)) (. %1 isDirectory)
-                                                            (and (not dir?) file?) (not (. %1 isDirectory))
-                                                            :else                  false)
-                                                     (. file listFiles))]
-                                (map #(. %1 getName) children))
-          (= "jar" protocol)  (let [jar-path (get-jar-path resource)]
-                                (get-jar-resource-children jar-path relative-dir-path dir? file?))
-          :else               nil)))
+  (let [resource-url (io/resource relative-dir-path)
+        type         (get-resource-type resource-url)]
+    (cond (= :file type) (let [file     (io/as-file resource-url)
+                               children (filter #(cond (and dir? file?) true
+                                                       (and dir? (not file?)) (. %1 isDirectory)
+                                                       (and (not dir?) file?) (not (. %1 isDirectory))
+                                                       :else                  false)
+                                                (. file listFiles))]
+                           (map #(. %1 getName) children))
+          (= :jar type)  (let [jar-path (get-jar-path resource-url)]
+                           (get-jar-resource-children jar-path relative-dir-path dir? file?))
+          :else          nil)))
 
 (defn ensure-directory
   [relative-dir-path]
@@ -337,8 +352,12 @@
 (defn copy-resource-file
   [resource-path dst-path]
   (let [src-url       (io/resource resource-path)
-        src-file      (File. (. src-url toURI))
-        last-modified (. src-file lastModified)
+        type          (get-resource-type src-url)
+        last-modified (cond (= :file type) (let [file (File. (. src-url toURI))]
+                                             (. file lastModified))
+                            (= :jar  type) (let [entry    (get-jar-resource-entry src-url)
+                                                 filetime (. entry getLastModifiedTime)]
+                                             (. filetime toMillis)))
         dst-file      (File. dst-path)
         ]
     (with-open [stream (io/input-stream src-url)]
