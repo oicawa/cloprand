@@ -59,30 +59,38 @@ define(function (require) {
   }
 
   Tree.prototype.add = function(parent_id, items) {
-    var nodes = this.convert(items);
+    //var nodes = this.convert(items);
+    var nodes = items;
+    //debugger;
     if (!parent_id) {
-      w2ui[self._uuid].add(nodes);
+      w2ui[this._uuid].add(nodes);
     } else {
-      w2ui[self._uuid].add(parent_id, nodes);
+      w2ui[this._uuid].add(parent_id, nodes);
     }
   };
 
-  Tree.prototype.insert = function(parent_id, items) {
-    var nodes = this.convert(items);
-    w2ui[self._uuid].insert(parent_id, before_id, nodes);
-    w2ui[self._uuid].expand(parent_id);
+  Tree.prototype.insert = function(parent_id, before_id, items) {
+    //var nodes = this.convert(items);
+    var nodes = items;
+    w2ui[this._uuid].insert(parent_id, before_id, nodes);
+    w2ui[this._uuid].expand(parent_id);
   };
 
   Tree.prototype.remove = function(ids) {
-    w2ui[self._uuid].remove.apply(w2ui[self._uuid], ids);
+    w2ui[this._uuid].remove.apply(w2ui[self._uuid], ids);
   };
 
   Tree.prototype.refresh = function(target_id) {
-    var target_item = this._data[!target_id ? "" : target_id];
+    //debugger;
+    //var target_item = this._data[!target_id ? "" : target_id];
     //{ "data" : data, "order" : ["id-1", "id-2", "id-3"] },
-    var data = target_item["data"];
-    var order = target_item["order"];
-    
+    //var data = target_item["data"];
+    //var order = target_item["order"];
+    if (!target_id) {
+      w2ui[this._uuid].refresh();
+    } else {
+      w2ui[this._uuid].refresh(target_id);
+    }
   };
 
   Tree.prototype.data = function(value) {

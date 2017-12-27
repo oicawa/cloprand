@@ -68,7 +68,7 @@ define(function (require) {
       name:layout_name,
       panels:[
         {type:'top', size:42, resizable:false, style:pstyle, content:TOP_TEMPLATE},
-        {type:'left',size:200,resizable:true,hidden:true,style:pstyle,content:LEFT_TEMPLATE},
+        {type:'left',size:200,resizable:true,hidden:false,style:pstyle,content:LEFT_TEMPLATE},
         {type:'main',style:pstyle,content:MAIN_TEMPLATE}
       ]
     });
@@ -93,6 +93,17 @@ define(function (require) {
 
     var tree = new Tree();
     tree.init("#left-panel");
+    tree.add(null, [
+      //{ id: 'id-1', text: 'Item 1', img: 'icon-folder', expanded: false, group: true, nodes: [] },
+      //{ id: 'id-2', text: 'Item 2', img: 'icon-folder', expanded: false, group: true, nodes: [] }
+      { id: 'id-1', text: 'Item 1', icon: 'w2ui-icon-check' },
+      { id: 'id-2', text: 'Item 2', icon: 'w2ui-icon-check' }
+    ]);
+    tree.insert('id-1', null, [
+      { id: 'id-1-1', text: 'Item 1-1', icon: 'fa-star-empty' },
+      { id: 'id-1-2', text: 'Item 1-2', icon: 'w2ui-icon-check' }
+    ]);
+    tree.refresh();
 
     var timer = false;
     $(window).on("resize", function () {
