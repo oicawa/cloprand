@@ -28,6 +28,14 @@ define(function (require) {
     
     this._root = $(selector);
     this._root.append(html);
+    this._menu = [
+      {id:1, text:"Add", img:null, icon:null, type:"folder"},
+      {id:2, text:"Insert", img:null, icon:null, type:"folder"},
+      {id:3, text:"Remove", img:null, icon:null, type:"folder"},
+      {id:4, text:"Append", img:null, icon:null, type:"item"},
+      {id:5, text:"Insert", img:null, icon:null, type:"item"},
+      {id:6, text:"Remove", img:null, icon:null, type:"item"}
+    ];
     var self = this;
     this._tree = $("#" + this._uuid);
     this._tree.on("remove", function(event) {
@@ -35,10 +43,32 @@ define(function (require) {
     });
     this._tree.w2sidebar({
       name:this._uuid,
+      menu:[],
       nodes:[],
       style: "height:300px;",
       onClick: function(event) {
         console.log(event.target);
+      },
+      onContextMenu: function(event) {
+        console.log(event.target);
+        var node = w2ui[self._uuid].get(event.target);
+        var is_folder = true;
+        if (!node.img) {
+          is_folder = false;
+        }
+        if (node.img != 'icon-folder') {
+          is_folder = false;
+        }
+        w2ui[self._uuid].menu = self._menu.filter(function (item) {
+          if (is_folder) {
+            return item.type == 'folder';
+          } else {
+            return item.type == 'item';
+          }
+        });
+      },
+      onMenuClick: function(event) {
+        console.log(event);
       },
       onDestroy: function(event) {
         delete w2ui[self._uuid];
@@ -73,7 +103,7 @@ define(function (require) {
     //var nodes = this.convert(items);
     var nodes = items;
     w2ui[this._uuid].insert(parent_id, before_id, nodes);
-    w2ui[this._uuid].expand(parent_id);
+    //w2ui[this._uuid].expand(parent_id);
   };
 
   Tree.prototype.remove = function(ids) {

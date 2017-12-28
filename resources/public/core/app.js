@@ -96,7 +96,7 @@ define(function (require) {
     tree.add(null, [
       //{ id: 'id-1', text: 'Item 1', img: 'icon-folder', expanded: false, group: true, nodes: [] },
       //{ id: 'id-2', text: 'Item 2', img: 'icon-folder', expanded: false, group: true, nodes: [] }
-      { id: 'id-1', text: 'Item 1', icon: 'w2ui-icon-check' },
+      { id: 'id-1', text: 'Item 1', img: 'icon-folder' },
       { id: 'id-2', text: 'Item 2', icon: 'w2ui-icon-check' }
     ]);
     tree.insert('id-1', null, [
