@@ -21,6 +21,38 @@ define(function (require) {
     //};
   }
 
+  Tree.eq = function (source, condition) {
+    var src_value = source[condition.field];
+    if (!src_value) {
+      console.log("source doesn't have [" + condition.field + "] field");
+      return false;
+    }
+    console.log("src_value = [" + src_value + "], condition.value = [" + condition.value + "]");
+    return (src_value == condition.value) ? true : false;
+  };
+
+  Tree.neq = function (source, condition) {
+    var src_value = source[condition.field];
+    if (!src_value) {
+      console.log("source doesn't have [" + condition.field + "] field");
+      return true;
+    }
+    console.log("src_value = [" + src_value + "], condition.value = [" + condition.value + "]");
+    return (src_value != condition.value) ? true : false;
+  };
+
+  Tree.append = function (sidebar, id) {
+    console.log("Tree.append() id:" + id);
+  };
+
+  Tree.insert = function (sidebar, id) {
+    console.log("Tree.insert() id:" + id);
+  };
+
+  Tree.remove = function (sidebar, id) {
+    console.log("Tree.remove() id:" + id);
+  };
+
   Tree.prototype.init = function(selector) {
     var dfd = new $.Deferred;
     this._uuid = Uuid.version4();
@@ -28,13 +60,11 @@ define(function (require) {
     
     this._root = $(selector);
     this._root.append(html);
-    this._menu = [
-      {id:1, text:"Add", img:null, icon:null, type:"folder"},
-      {id:2, text:"Insert", img:null, icon:null, type:"folder"},
-      {id:3, text:"Remove", img:null, icon:null, type:"folder"},
-      {id:4, text:"Append", img:null, icon:null, type:"item"},
-      {id:5, text:"Insert", img:null, icon:null, type:"item"},
-      {id:6, text:"Remove", img:null, icon:null, type:"item"}
+    this._menus = [
+      {id:1, text:"Append", img:null, icon:null, filter:{op:"eq",  field:"img", value:"icon-folder"}, run:Tree.append },
+      {id:2, text:"Remove", img:null, icon:null, filter:{op:"eq",  field:"img", value:"icon-folder"}, run:Tree.remove },
+      {id:3, text:"Insert", img:null, icon:null, filter:{op:"neq", field:"img", value:"icon-folder"}, run:Tree.insert },
+      {id:4, text:"Remove", img:null, icon:null, filter:{op:"neq", field:"img", value:"icon-folder"}, run:Tree.remove },
     ];
     var self = this;
     this._tree = $("#" + this._uuid);
@@ -50,25 +80,18 @@ define(function (require) {
         console.log(event.target);
       },
       onContextMenu: function(event) {
-        console.log(event.target);
         var node = w2ui[self._uuid].get(event.target);
-        var is_folder = true;
-        if (!node.img) {
-          is_folder = false;
-        }
-        if (node.img != 'icon-folder') {
-          is_folder = false;
-        }
-        w2ui[self._uuid].menu = self._menu.filter(function (item) {
-          if (is_folder) {
-            return item.type == 'folder';
-          } else {
-            return item.type == 'item';
-          }
+        w2ui[self._uuid].menu = self._menus.filter(function (menu) {
+          return Tree[menu.filter.op](node, menu.filter);
         });
       },
       onMenuClick: function(event) {
-        console.log(event);
+        var menu = event.menuItem;
+        if (!menu.run) {
+          console.log("onMenuClick:[" + menu.text + "]");
+          return;
+        }
+        menu.run(w2ui[self._uuid], event.target);
       },
       onDestroy: function(event) {
         delete w2ui[self._uuid];
