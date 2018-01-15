@@ -5,6 +5,7 @@ define(function (require) {
   var Uuid = require("core/Uuid");
   var Class = require("core/Class");
   var Storage = require("core/Storage");
+  var Connector = require("core/Connector");
   var Contents = require("core/Contents");
   var Locale = require("core/Locale");
   var Toolbar = require("core/Control/Toolbar");
@@ -209,6 +210,16 @@ define(function (require) {
       detail.edit(false);
       detail.refresh();
     });
+  };
+  
+  DetailView.create_pdf = function (event) {
+  	var item = event.item;
+    var entry = item.function_entry;
+    var pdf_data = {
+      "page_size":entry.properties.page_size,
+      "pdf_objects":entry.properties.pdf_objects
+    };
+    Connector.pdf(pdf_data);
   };
   
   DetailView.prototype.detail = function () {

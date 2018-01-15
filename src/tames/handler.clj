@@ -11,7 +11,8 @@
             [ring.util.response :as response]
             [hiccup.core :refer [html]]
             [clojure.data.json :as json]
-            [tames.systems :as systems])
+            [tames.systems :as systems]
+            [tames.pdf :as pdf])
   (:import (java.io File)
            (java.net URLDecoder URLEncoder)
            (java.text SimpleDateFormat)
@@ -27,6 +28,7 @@
                     "png"  "image/png"
                     "jpg"  "image/jpg"
                     "jpeg" "image/jpeg"
+                    "pdf"  "application/pdf"
                     })
 
 (defn print-s-exp
@@ -100,7 +102,7 @@
         uri     (req :uri)
         referer ((req :headers) "referer")]
     (println (format "*** Unauthenticated: [%s], URI: [%s], referer: [%s]" result uri referer))
-    (pprint/pprint req)
+    ;(pprint/pprint req)
     (cond result
             (response/redirect "/tames")
           (= uri "/tames")
@@ -138,7 +140,7 @@
 
   ;; Portal Top
   (GET "/tames" []
-    (println "[GET] /tames")
+    ;(println "[GET] /tames")
     (-> (response/file-response "core/tames.html")
         (response/header "Content-Type" (content-types "html"))))
   
@@ -149,7 +151,7 @@
           exists?           (systems/exists? systems/CLASS_ID class-id)
           last-modified     (time-to-RFC1123 (systems/get-last-modified class-id nil))
           not-modified?     (= if-modified-since last-modified)]
-      (println (format "[GET] /api/%s" class-id))
+      ;(println (format "[GET] /api/%s" class-id))
       (cond (not exists?) (-> (response/response nil) (response/status 410))
             not-modified? (-> (response/response nil) (response/status 304))
             :else         (-> (systems/get-data class-id nil)
@@ -161,13 +163,13 @@
           exists?           (systems/exists? class-id object-id)
           last-modified     (time-to-RFC1123 (systems/get-last-modified class-id object-id))
           not-modified?     (= if-modified-since last-modified)]
-      (println (format "[GET] /api/%s/%s" class-id object-id))
+      ;(println (format "[GET] /api/%s/%s" class-id object-id))
       (cond (not exists?) (-> (response/response nil) (response/status 410))
             not-modified? (-> (response/response nil) (response/status 304))
             :else         (-> (systems/get-data class-id object-id)
                               (response/header "Last-Modified" last-modified)))))
   (POST "/api/:class-id" [class-id & params]	;;; https://github.com/weavejester/compojure/wiki/Destructuring-Syntax
-    (println (str "[POST] /api/:class-id = /api/" class-id))
+    ;(println (str "[POST] /api/:class-id = /api/" class-id))
     (if (not (systems/exists? systems/CLASS_ID class-id))
         (-> (response/response nil)
             (response/status 410))
@@ -176,7 +178,7 @@
               added-files (dissoc params :value)]
           (systems/post-data class-id data added-files))))
   (PUT "/api/:class-id/:object-id" [class-id object-id & params]
-    (println (str "[PUT] /api/:class-id/:object-id = /api/" class-id "/" object-id))
+    ;(println (str "[PUT] /api/:class-id/:object-id = /api/" class-id "/" object-id))
     (if (not (systems/exists? class-id object-id))
         (-> (response/response nil)
             (response/status 410))
@@ -185,7 +187,7 @@
               added-files  (dissoc params :value)]
           (systems/put-data class-id object-id data added-files))))
   (DELETE "/api/:class-id/:object-id" [class-id object-id]
-    (println (str "[DELETE] /api/:class-id/:object-id = /api/" class-id "/" object-id))
+    ;(println (str "[DELETE] /api/:class-id/:object-id = /api/" class-id "/" object-id))
     (if (not (systems/exists? class-id object-id))
         (-> (response/response nil)
             (response/status 410))
@@ -194,12 +196,12 @@
   (GET "/session/:session-key" req
     (let [session-key (get-in req [:route-params :session-key] nil)
           user-name   (get-in req [:session :identity] nil)]
-      (println (format "[GET] /session/:session-key = /session/%s" session-key))
+      ;(println (format "[GET] /session/:session-key = /session/%s" session-key))
       ;(print-s-exp req)
       (format "{ \"%s\" : \"%s\"}" session-key user-name)))
   ;; Download
   (GET "/download/*" [& params]
-    (println (format "[GET] /download/* = /download/%s" (params :*)))
+    ;(println (format "[GET] /download/* = /download/%s" (params :*)))
     (let [file        (File. (systems/get-absolute-path (format "data/%s" (params :*))))
           file-name   (. file getName)
           encoded-file-name (. (URLEncoder/encode file-name "UTF-8") replace "+" "%20")
@@ -209,16 +211,31 @@
           (response/header "Content-Type" "application/octet-stream")
           (response/header "Content-Disposition" disposition))))
   (GET "/image/:class-id/:object-id/*" [class-id object-id & params]
-    (println (format "[GET] /image/:class-id/:object-id/* = /image/%s/%s/%s" class-id object-id (params :*)))
+    ;(println (format "[GET] /image/:class-id/:object-id/* = /image/%s/%s/%s" class-id object-id (params :*)))
     (let [path (systems/get-absolute-path (format "data/%s/.%s/%s" class-id object-id (params :*)))
           ext  (systems/get-file-extension path)
           mime (content-types ext)]
       (-> (response/file-response path)
           (response/header "Content-Type" mime))))
+  (POST "/pdf" req
+    (println "[POST] /pdf")
+    ;(print-s-exp req)
+    
+    (let [json-str (URLDecoder/decode (get-in req [:params :value] nil) "UTF-8")
+          data     (json/read-str json-str)
+          path     (pdf/create data)
+          ;ext      (systems/get-file-extension path)
+          ;mime     (content-types ext)
+          ]
+      (print-s-exp data)
+      ;(-> (response/file-response path)
+      ;    (response/header "Content-Type" mime))
+      )
+    )
   
   ;; Other resources
   (GET "/*" [& params]
-    (println (format "[GET] /* (path=%s)" (params :*)))
+    ;(println (format "[GET] /* (path=%s)" (params :*)))
     (let [relative-path (params :*)
           absolute-path (systems/get-absolute-path relative-path)
           offset        (. relative-path lastIndexOf ".")

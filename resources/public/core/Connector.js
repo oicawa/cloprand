@@ -50,6 +50,9 @@ define(function (require) {
     session: function(key) {
       var url = "/session/" + key;
       return send("GET", url, null, null, "json");
+    },
+    pdf : function(data) { 
+      return send("POST", "/pdf", data, null, "json");
     }
   };
 });
