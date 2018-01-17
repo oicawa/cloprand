@@ -211,13 +211,53 @@ define(function (require) {
       detail.refresh();
     });
   };
+
+  function convert_pdf_field(properties) {
+  	return {
+      "type" : "text",
+  	  "text" : "[" + properties.field.field_name + "]",
+  	  "font" : properties.font,
+  	  "font_size" : parseFloat(properties.font_size),
+  	  "x" : parseFloat(properties.x),
+  	  "y" : parseFloat(properties.y)
+  	};
+  }
+  
+  function convert_pdf_line(properties) {
+  	return {
+      //"type" : "line",
+      "type" : "text",
+  	  "text" : "[x1=" + properties.x1 + ",y1=" + properties.y1 + ",x2=" + properties.x2 + ",y2=" + properties.y2 + "]",
+  	  "font" : properties.font,
+  	  "font_size" : 12,
+  	  "x" : parseFloat(properties.x1),
+  	  "y" : parseFloat(properties.y1)
+  	};
+  }
   
   DetailView.create_pdf = function (event) {
   	var item = event.item;
     var entry = item.function_entry;
+    var print_objects = entry.properties.pdf_objects.map(function (pdf_object) {
+      var type_id = pdf_object.type.id;
+      var properties = pdf_object.type.properties;
+      var print_object = null;
+      if (type_id == "fe5cd94a-93c6-41eb-a16f-6628a915f05a") {
+        print_object = Utils.clone(properties);
+        print_object.type = "text";
+        print_object.font_size = parseFloat(print_object.font_size);
+        print_object.x = parseFloat(print_object.x);
+        print_object.y = parseFloat(print_object.y);
+      } else if (type_id == "778cb434-c527-4350-911d-59902ee7aa45") {
+        print_object = convert_pdf_field(properties);
+      } else if (type_id == "9ca65e40-bd09-46c2-955a-e19e07be9a17") {
+        print_object = convert_pdf_line(properties);
+      }
+      return print_object;
+    });
     var pdf_data = {
       "page_size":entry.properties.page_size,
-      "pdf_objects":entry.properties.pdf_objects
+      "pdf_objects":print_objects
     };
     Connector.pdf(pdf_data);
   };

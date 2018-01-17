@@ -223,11 +223,12 @@
     
     (let [json-str (URLDecoder/decode (get-in req [:params :value] nil) "UTF-8")
           data     (json/read-str json-str)
-          path     (pdf/create data)
+          ;path     (pdf/create data)
           ;ext      (systems/get-file-extension path)
           ;mime     (content-types ext)
           ]
       (print-s-exp data)
+      (pdf/create data)
       ;(-> (response/file-response path)
       ;    (response/header "Content-Type" mime))
       )

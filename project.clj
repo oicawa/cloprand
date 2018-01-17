@@ -3,6 +3,7 @@
   :url "http://example.com/FIXME"
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/java.jdbc "0.3.4"]
+                 [org.clojure/data.json "0.2.3"]
                  [compojure "1.1.8"]
                  [ring/ring-core "1.2.1"]
                  [ring/ring-jetty-adapter "1.2.1"]
@@ -11,7 +12,9 @@
                  [buddy "0.6.1"]
                  [hiccup "1.0.5"]
                  [com.h2database/h2 "1.4.180"]
-                 [org.clojure/data.json "0.2.3"]]
+                 [com.itextpdf/itextpdf "5.4.4"]
+                 [com.itextpdf/itext-asian "5.2.0"]
+                 ]
   :plugins [[lein-ring "0.8.11"]]
   :ring {:handler tames.core/app
          :main tames.core
