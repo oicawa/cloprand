@@ -224,14 +224,12 @@ define(function (require) {
   }
   
   function convert_pdf_line(properties) {
-  	return {
-      //"type" : "line",
-      "type" : "text",
-  	  "text" : "[x1=" + properties.x1 + ",y1=" + properties.y1 + ",x2=" + properties.x2 + ",y2=" + properties.y2 + "]",
-  	  "font" : properties.font,
-  	  "font_size" : 12,
-  	  "x" : parseFloat(properties.x1),
-  	  "y" : parseFloat(properties.y1)
+    return {
+      "type" : "line",
+  	  "x1" : parseInt(properties.x1),
+  	  "y1" : parseInt(properties.y1),
+  	  "x2" : parseInt(properties.x2),
+  	  "y2" : parseInt(properties.y2)
   	};
   }
   
