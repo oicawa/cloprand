@@ -23,11 +23,17 @@
 
 (def config (atom nil))
 
-(defn remove-file
+(declare remove-file)
+
+(defn empty-directory
   [file]
   (if (. file isDirectory)
       (doseq [child (. file listFiles)]
-        (remove-file child)))
+        (remove-file child))))
+
+(defn remove-file
+  [file]
+  (empty-directory file)
   (. file delete))
   
 (defn get-absolute-path
@@ -387,7 +393,9 @@
   []
   (ensure-init-files "lib")
   (ensure-init-files "core")
-  (ensure-init-files "data"))
+  (ensure-init-files "data")
+  (ensure-directory "tmp")
+  (empty-directory (File. (get-absolute-path "tmp"))))
 
 
 

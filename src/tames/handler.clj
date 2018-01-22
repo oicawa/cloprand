@@ -219,12 +219,10 @@
           (response/header "Content-Type" mime))))
   (POST "/pdf" req
     (println "[POST] /pdf")
-    ;(print-s-exp req)
-    
     (let [json-str (URLDecoder/decode (get-in req [:params :value] nil) "UTF-8")
           data     (json/read-str json-str)
           title    "Tames-PDF-Sample" ;(data "title")
-          tmp-file (File/createTempFile title ".pdf")
+          tmp-file (File/createTempFile title ".pdf" (File. (systems/get-absolute-path "tmp")))
           ;file-name (format "%s.pdf" title)
           file-name (. tmp-file getName)
           encoded-file-name (. (URLEncoder/encode file-name "UTF-8") replace "+" "%20")
