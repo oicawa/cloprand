@@ -1,0 +1,1 @@
+{"type":"phrase","label":{"ja":"\u30c6\u30ad\u30b9\u30c8(Phrase)","":"Text(Phrase)"},"java_class":"com.itextpdf.text.Phrase","parameters":[{"name":"text","label":{"":"Text","ja":"\u30c6\u30ad\u30b9\u30c8"},"setter":"add","datatype":{"id":"0c408fba-4224-4426-a0fc-0b7553c6b0ca","properties":null},"id":0,"recid":0}],"id":"bff15667-03ad-40be-aa21-c556ae35ce7b"}

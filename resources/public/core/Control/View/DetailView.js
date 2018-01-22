@@ -213,24 +213,31 @@ define(function (require) {
   };
 
   function convert_pdf_field(properties) {
-  	return {
+    return {
       "type" : "text",
-  	  "text" : "[" + properties.field.field_name + "]",
-  	  "font" : properties.font,
-  	  "font_size" : parseFloat(properties.font_size),
-  	  "x" : parseFloat(properties.x),
-  	  "y" : parseFloat(properties.y)
-  	};
+      "text" : "[" + properties.field.field_name + "]",
+      "font" : properties.font,
+      "font_size" : parseFloat(properties.font_size),
+      "x" : parseFloat(properties.x),
+      "y" : parseFloat(properties.y)
+    };
   }
   
   function convert_pdf_line(properties) {
     return {
       "type" : "line",
-  	  "x1" : parseInt(properties.x1),
-  	  "y1" : parseInt(properties.y1),
-  	  "x2" : parseInt(properties.x2),
-  	  "y2" : parseInt(properties.y2)
-  	};
+      "x1" : parseInt(properties.x1),
+      "y1" : parseInt(properties.y1),
+      "x2" : parseInt(properties.x2),
+      "y2" : parseInt(properties.y2)
+    };
+  }
+  
+  function convert_pdf_phrase(properties) {
+    return {
+      "type" : "phrase",
+      "text" : properties.text
+    };
   }
   
   DetailView.create_pdf = function (event) {
@@ -250,6 +257,8 @@ define(function (require) {
         print_object = convert_pdf_field(properties);
       } else if (type_id == "9ca65e40-bd09-46c2-955a-e19e07be9a17") {
         print_object = convert_pdf_line(properties);
+      } else if (type_id == "bff15667-03ad-40be-aa21-c556ae35ce7b") {
+        print_object = convert_pdf_phrase(properties);
       }
       return print_object;
     });

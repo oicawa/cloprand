@@ -223,16 +223,22 @@
     
     (let [json-str (URLDecoder/decode (get-in req [:params :value] nil) "UTF-8")
           data     (json/read-str json-str)
+          title    "Tames-PDF-Sample" ;(data "title")
+          tmp-file (File/createTempFile title ".pdf")
+          ;file-name (format "%s.pdf" title)
+          file-name (. tmp-file getName)
+          encoded-file-name (. (URLEncoder/encode file-name "UTF-8") replace "+" "%20")
+          disposition (format "attachment;filename=\"%s\";filename*=UTF-8''%s" file-name encoded-file-name)
           ;path     (pdf/create data)
           ;ext      (systems/get-file-extension path)
           ;mime     (content-types ext)
           ]
       (print-s-exp data)
-      (pdf/create data)
-      ;(-> (response/file-response path)
-      ;    (response/header "Content-Type" mime))
-      )
-    )
+      (pdf/create tmp-file data)
+      (println (. tmp-file getAbsolutePath))
+      (-> (response/file-response (. tmp-file getAbsolutePath))
+          (response/header "Content-Type" "application/octet-stream")
+          (response/header "Content-Disposition" disposition))))
   
   ;; Other resources
   (GET "/*" [& params]
