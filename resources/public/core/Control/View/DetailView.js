@@ -262,10 +262,8 @@ define(function (require) {
       }
       return print_object;
     });
-    var pdf_data = {
-      "page_size":entry.properties.page_size,
-      "pdf_objects":print_objects
-    };
+    var pdf_data = Utils.clone(entry.properties);
+    pdf_data.pdf_objects = print_objects;
     Connector.pdf(pdf_data);
   };
   

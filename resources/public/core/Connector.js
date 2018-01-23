@@ -52,7 +52,17 @@ define(function (require) {
       return send("GET", url, null, null, "json");
     },
     pdf : function(data) { 
-      return send("POST", "/pdf", data, null, "json");
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/pdf');
+      xhr.responseType = 'arraybuffer';
+      xhr.onload = function() {
+        var blob = new Blob([this.response], {type: "application/pdf"});
+        var pdfURL = window.URL.createObjectURL(blob);
+        window.open(pdfURL, '_blank');
+      };
+      var formData = new FormData();
+      formData.append("value", encodeURIComponent(JSON.stringify(data)));
+      xhr.send(formData);
     }
   };
 });
