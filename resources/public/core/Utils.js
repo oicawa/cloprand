@@ -85,6 +85,34 @@ define(function (require) {
     clone : function(json_object) {
       return JSON.parse(JSON.stringify(json_object));
     },
+    merge : function(base_object, default_object) {
+      var main_object = JSON.parse(JSON.stringify(base_object));
+      for (var key in default_object) {
+        var main_value = main_object[key];
+        var default_value = default_object[key];
+        if (!main_value) {
+          main_object[key] = JSON.parse(JSON.stringify(default_value));
+          continue;
+        }
+        
+        // Type check
+        var type_of_main_value = typeof main_value;
+        var type_of_default_value = typeof default_value;
+        if (type_of_main_value != type_of_default_value) {
+          console.assert(false, "The types of main & default values are different. (main:'" + type_of_main_value + "', default:'" + type_of_default_value + "')");
+          console.assert(false, main_value);
+          console.assert(false, default_value);
+          //main_object[key] = JSON.parse(JSON.stringify(default_value));
+          continue;
+        }
+        
+        // if object, merge recursively.
+        if (is_object(main_value)) {
+          main_object[key] = Utils.merge(main_value, default_value);
+        }
+      }
+      return JSON.parse(JSON.stringify(main_object));
+    },
     is_asc : function(sort_direction_id) {
       var ASC = "607ce339-8517-4271-8ba6-f4dd35a2b940";
       var DESC = "5d15314e-4952-4310-b410-4dd8a388177e";
