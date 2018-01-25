@@ -463,18 +463,29 @@ define(function (require) {
   };
 
   Grid.prototype.sort = function() {
-    for (var i = this._columns.length - 1; 0 <= i; i--) {
-      var name = this._columns[i].field;
-      var field = this._field_map[name].field;
+    var self = this;
+    var compares = this._columns.map(function (column) {
+      var name = column.field;
+      var field = self._field_map[name].field;
       if (!field || !field.sort_direction) {
-        continue;
+        return null;
       }
-      var compare = this._field_map[name].compare;
-      if (!compare) {
-        continue;
+      return self._field_map[name].compare;
+    }).filter(function (compare) {
+      return compare == null ? false : true;
+    });
+    
+    var result = null;
+    function compare(record1, record2) {
+      for (var i = 0; i < compares.length; i++) {
+        var result = compares[i](record1, record2);
+        if (result != 0) {
+          return result;
+        }
       }
-      this._grid.records.sort(compare);
-    }
+      return 0;
+    };
+    this._grid.records.sort(compare);
   };
 
   Grid.prototype.refresh = function(reorder) {
