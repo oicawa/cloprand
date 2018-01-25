@@ -72,13 +72,13 @@ define(function (require) {
 
     // Index
     //var index = (!target.index || isNaN(target.index)) ? default_index : parseInt(target.index);
-    var index = (target.index == null) ? default_index : target.index;
+    var index = (target.index === null || target.index === "") ? default_index : parseInt(target.index);
     target.index = index;
     index = index < max_index ? max_index : index;
 
     // Span
     //var span = (!target.span || isNaN(target.span)) ? 1 : parseInt(target.span);
-    var span = (target.span == null) ? 1 : target.span;
+    var span = (target.span === null || target.span === "") ? 1 : parseInt(target.span);
     target.span = span;
     index = index + (1 <= span ? span - 1 : 0);
 
