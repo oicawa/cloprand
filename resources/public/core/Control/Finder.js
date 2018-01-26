@@ -163,7 +163,7 @@ define(function (require) {
     }
     
     // *NOT* Array
-    if (!Array.isArray(value)) {
+    if (!is_array(value)) {
       return multi ? [value] : value;
     }
     
@@ -239,7 +239,7 @@ define(function (require) {
         if (!value) {
           return "";
         }
-        var ids = Array.isArray(value) ? value : [value];
+        var ids = is_array(value) ? value : [value];
         var targets = ids.map(function(id) { return objects[id]; });
         var captions = (new Class(class_)).captions(targets);
         return captions.join(",");

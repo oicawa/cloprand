@@ -42,10 +42,11 @@ define(function (require) {
       "text" : properties.text
     };
   }
-
+  
   var Pdf = {
     "create" : function (event) {
-      var item = event.item;
+      var ids = event.target.split(":");
+      var item = Utils.find(event.item, "id", "items", ids);
       var entry = item.function_entry;
       var view = item.context;
       var detail = view.detail();

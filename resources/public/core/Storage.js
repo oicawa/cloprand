@@ -29,8 +29,8 @@ define(function (require) {
   }
   
   function set_all(class_id, objects) {
-    console.assert(Utils.is_object(objects), objects);
-    if (!Utils.is_object(objects)) {
+    console.assert(is_object(objects), objects);
+    if (!is_object(objects)) {
       console.error("'objects' argument is not [Object].");
       console.dir(objects);
       return;
@@ -39,8 +39,8 @@ define(function (require) {
   }
   
   function set_one(class_id, object_id, object) {
-    console.assert(Utils.is_object(object), object);
-    if (!Utils.is_object(object)) {
+    console.assert(is_object(object), object);
+    if (!is_object(object)) {
       console.error("'object' argument is not [Object].");
       console.dir(object);
       return;

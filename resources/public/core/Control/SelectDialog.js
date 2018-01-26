@@ -19,7 +19,7 @@ define(function (require) {
   }
 
   SelectDialog.prototype.init = function(options) {
-    console.assert(Array.isArray(options.items), "'option.items' not Array");
+    console.assert(is_array(options.items), "'option.items' not Array");
     console.assert(options.columns, "'option.columns' is null or undefined");
     console.assert(typeof options.multi_selectable != "undefined", "'option.multi_selectable' is undefined");
     

@@ -51,7 +51,7 @@ define(function (require) {
       var url = "/session/" + key;
       return send("GET", url, null, null, "json");
     },
-    pdf : function(data) { 
+    pdf : function(data) {
       var xhr = new XMLHttpRequest();
       xhr.open('POST', '/pdf');
       xhr.responseType = 'arraybuffer';

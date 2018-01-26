@@ -26,7 +26,7 @@ define(function (require) {
     locale : browser_locale,
     language : browser_language,
     translate : function(value) {
-      if (!Utils.is_object(value)) {
+      if (!is_object(value)) {
         return value;
       }
       var lo = browser_locale();

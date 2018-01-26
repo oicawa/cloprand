@@ -37,7 +37,7 @@ define(function (require) {
          return fields
            .map(function(field) {
              var value = object[field.name];
-             if (!Utils.is_object(value)) {
+             if (!is_object(value)) {
                return value;
              }
              

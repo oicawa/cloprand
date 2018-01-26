@@ -393,7 +393,7 @@ define(function (require) {
     // setter
     var self = this;
     var items = !values ? [] : values.map(function(value, index) {
-      if (self._options.embedded && Utils.is_object(value)) {
+      if (self._options.embedded && is_object(value)) {
         delete value["recid"];
         value.id = index;
         return value;

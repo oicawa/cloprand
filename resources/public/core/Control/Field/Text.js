@@ -206,9 +206,9 @@ define(function (require) {
     }
     // setter
     if (!multi) {
-      this._value = Utils.is_object(value) ? value[""] : value;
+      this._value = is_object(value) ? value[""] : value;
     } else {
-      this._value = Utils.is_object(value) ? value : { "" : value };
+      this._value = is_object(value) ? value : { "" : value };
     }
     this._draft = this._value;
     this._input.val(!multi ? this._value : Locale.translate(this._value));
@@ -228,7 +228,7 @@ define(function (require) {
     var dfd = new $.Deferred;
     var renderer = function(record, index, column_index) {
       var value = record[field.name];
-      if (Utils.is_object(value) && props.multi_lingualization) {
+      if (is_object(value) && props.multi_lingualization) {
         return Locale.translate(value);
       } else {
         return value;

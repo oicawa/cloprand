@@ -455,7 +455,7 @@ define(function (require) {
       this._grid.records = [];
       return;
     }
-    if (Utils.is_object(value)) {
+    if (is_object(value)) {
       this._grid.records = Object.keys(value).map(function(id) { return value[id]; });
       return;
     }
