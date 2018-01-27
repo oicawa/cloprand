@@ -1,11 +1,14 @@
-(ns tames.pdf
-  ;(:require [clojure.java.jdbc :as jdbc])
+(ns tames.generators.pdf
   (:import (java.io File FileOutputStream IOException)
            (java.util ArrayList)
            (java.awt Color)
            (com.itextpdf.text Rectangle Document Paragraph PageSize Phrase Font FontFactory Element)
            (com.itextpdf.text.pdf PdfWriter BaseFont PdfContentByte PdfPTable)
            (com.itextpdf.awt PdfGraphics2D)))
+
+(defn get-content-type
+  []
+  "application/pdf")
 
 (defn print-text!
   [context-byte font pdf-object]
@@ -57,8 +60,8 @@
       (doseq [name-col name-row]
         (println name-col)))))
 
-(defn create
-  "Create a PDF file"
+(defn generate
+  "Generate a PDF file"
   [file data]
   (let [document     (Document. (. PageSize A4) 20 20 20 20)
         page-size    (. document getPageSize)

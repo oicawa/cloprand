@@ -217,21 +217,25 @@
           mime (content-types ext)]
       (-> (response/file-response path)
           (response/header "Content-Type" mime))))
-  (POST "/pdf" req
-    (println "[POST] /pdf")
-    (let [json-str  (URLDecoder/decode (get-in req [:params :value] nil) "UTF-8")
-          data      (json/read-str json-str)
-          title     (data "title")
-          tmp-file  (File/createTempFile title ".pdf")
-          file-name (format "%s.pdf" title)
+  (POST "/generate/:generator-name" [generator-name & params]
+    (println (format "[POST] /generate/%s" generator-name))
+    (let [namespace-name    (format "tames.generators.%s" generator-name)
+          generate-symbol   (symbol namespace-name "generate")
+          get-content-type-symbol (symbol namespace-name "get-content-type")
+          json-str          (URLDecoder/decode (params :value) "UTF-8")
+          data              (json/read-str json-str)
+          title             (data "title")
+          tmp-file          (File/createTempFile title (format ".%s" generator-name))
+          file-name         (format "%s.%s" title generator-name)
           encoded-file-name (. (URLEncoder/encode file-name "UTF-8") replace "+" "%20")
-          disposition (format "attachment;filename=\"%s\";filename*=UTF-8''%s" file-name encoded-file-name)
+          disposition       (format "attachment;filename=\"%s\";filename*=UTF-8''%s" file-name encoded-file-name)
           ]
       (print-s-exp data)
-      (pdf/create tmp-file data)
+      (require (symbol namespace-name))
+      (apply (find-var generate-symbol) [tmp-file data])
       (println (. tmp-file getAbsolutePath))
       (-> (response/file-response (. tmp-file getAbsolutePath))
-          (response/header "Content-Type" "application/pdf")
+          (response/header "Content-Type" (apply (find-var get-content-type-symbol) []))
           (response/header "Content-Disposition" disposition))))
   
   ;; Other resources

@@ -33,7 +33,7 @@ define(function (require) {
     return dfd.promise();
   }
   
-  return {
+  var Connector = {
     send : send,
     post : function(url, data, files, data_type) { 
       return send("POST", url, data, files, data_type);
@@ -51,18 +51,22 @@ define(function (require) {
       var url = "/session/" + key;
       return send("GET", url, null, null, "json");
     },
-    pdf : function(data) {
+    generate : function(generator_name, content_type, data) {
       var xhr = new XMLHttpRequest();
-      xhr.open('POST', '/pdf');
+      xhr.open('POST', '/generate/' + generator_name);
       xhr.responseType = 'arraybuffer';
       xhr.onload = function() {
-        var blob = new Blob([this.response], {type: "application/pdf"});
+        var blob = new Blob([this.response], {type: content_type});
         var pdfURL = window.URL.createObjectURL(blob);
         window.open(pdfURL, '_blank');
       };
       var formData = new FormData();
       formData.append("value", encodeURIComponent(JSON.stringify(data)));
       xhr.send(formData);
+    },
+    pdf : function(data) {
+      Connector.generate("pdf", "application/pdf", data);
     }
   };
+  return Connector;
 });
