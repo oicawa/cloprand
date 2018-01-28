@@ -237,6 +237,15 @@
       (-> (response/file-response (. tmp-file getAbsolutePath))
           (response/header "Content-Type" (apply (find-var get-content-type-symbol) []))
           (response/header "Content-Disposition" disposition))))
+  (POST "/operation/:operator-name/:operation-name" [operator-name operation-name & params]
+    (println (format "[POST] /opearations/%s/%s" operator-name operation-name))
+    (let [namespace-name          (format "tames.operations.%s" operator-name)
+          operation-symbol        (symbol namespace-name operation-name)
+          json-str                (URLDecoder/decode (params :value) "UTF-8")
+          data                    (json/read-str json-str)
+          ]
+      (require (symbol namespace-name))
+      (apply (find-var operation-symbol) [data])))
   
   ;; Other resources
   (GET "/*" [& params]

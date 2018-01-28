@@ -51,6 +51,10 @@ define(function (require) {
       var url = "/session/" + key;
       return send("GET", url, null, null, "json");
     },
+    operate : function(operator_name, operation_name, data_type, data) {
+      var url = '/operation/' + operator_name + '/' + operation_name;
+      return send("POST", url, data, null, data_type);
+    },
     generate : function(generator_name, content_type, data) {
       var xhr = new XMLHttpRequest();
       xhr.open('POST', '/generate/' + generator_name);
