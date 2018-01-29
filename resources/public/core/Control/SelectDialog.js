@@ -64,6 +64,8 @@ define(function (require) {
       self._grid.select_column(true);
       self._grid.toolbar(true);
       self._grid.data(options.items);
+      if (!is_null_or_undefined(options.record_height))
+        self._grid.row_height(options.record_height);
       self._grid.sort();
       self._grid.refresh();
       dfd.resolve();

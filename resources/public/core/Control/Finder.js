@@ -27,7 +27,7 @@ define(function (require) {
       var width = self._columns.map(function(column) { return parseInt(column.size); }).reduce(function (prev, current, index, array) { return prev + current; }, 100);
       var dialog = new SelectDialog();
       console.log(self._columns);
-      dialog.init({ items : items, columns : self._columns, multi_selectable : self._multi_selectable, field_map : self._field_map })
+      dialog.init({ items : items, columns : self._columns, multi_selectable : self._multi_selectable, field_map : self._field_map, record_height : self._record_height })
       .done(function() {
         dialog.title("Select");
         dialog.ok(function (recids) {
@@ -59,7 +59,7 @@ define(function (require) {
     this._min_width = null;
   }
 
-  Finder.prototype.init = function(selector, columns, field_map, items, description, multi_selectable, min_width, converter, font_name) {
+  Finder.prototype.init = function(selector, columns, field_map, items, description, multi_selectable, min_width, converter, font_name, record_height) {
     var dfd = new $.Deferred;
     
     this._columns = columns;
@@ -68,6 +68,7 @@ define(function (require) {
     this._converter = converter;
     this._multi_selectable = multi_selectable;
     this._min_width = min_width;
+    this._record_height = record_height;
     
     // Set member fields
     var root = $(selector);
@@ -158,7 +159,7 @@ define(function (require) {
     var multi = self._multi_selectable;
     
     // null or undefined
-    if (!value) {
+    if (is_null_or_undefined(value)) {
       return multi ? [] : null;
     }
     

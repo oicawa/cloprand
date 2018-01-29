@@ -1,4 +1,6 @@
 (ns tames.generators.pdf
+  (:require [tames.operations.fonts :as fonts]
+            [clojure.pprint :as pprint])
   (:import (java.io File FileOutputStream IOException)
            (java.util ArrayList)
            (java.awt Color)
@@ -12,6 +14,11 @@
 
 (defn print-text!
   [context-byte font pdf-object]
+  (pprint/pprint pdf-object)
+  (let [font-path (fonts/get-file-path (pdf-object "font"))
+        ;base-font (BaseFont/createFont font-path "UniJIS-UCS2-H" BaseFont/EMBEDDED)
+        ]
+    (println font-path))
   (.. context-byte beginText)
   (doto context-byte
     (.setFontAndSize font (pdf-object "font_size"))
@@ -78,7 +85,7 @@
                         "phrase" #(print-phrase! document hkgh %1)
                         "line"   #(print-line! graphics-2d %1)}]
       (doseq [pdf-object (data "pdf_objects")]
-        (let [print-fn (print-fns (pdf-object "type"))]
+        (let [print-fn  (print-fns (pdf-object "type"))]
           (print-fn pdf-object)))
       (. graphics-2d dispose))
     (. document close)

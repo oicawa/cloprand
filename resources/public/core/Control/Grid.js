@@ -466,6 +466,9 @@ define(function (require) {
     var self = this;
     var compares = this._columns.map(function (column) {
       var name = column.field;
+      if (self._field_map === null) {
+        return null;
+      }
       var field = self._field_map[name].field;
       if (!field || !field.sort_direction) {
         return null;

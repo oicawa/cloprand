@@ -53,8 +53,12 @@ define(function (require) {
         label_cell.text(caption);
         var value_selector = create_cell_selector(table_id, value_layout.row.index, value_layout.column.index);
         control.init(value_selector, field)
-        .then(function() {
+        .done(function() {
           dfd.resolve();
+        })
+        .fail(function() {
+          console.assert(false, "<<fail>> control_path=[" + control_path + "]");
+          dfd.reject();
         });
       } catch (e) {
         console.assert(false, "[ERROR] field.name=" + field.name + ", control=" + control_path);

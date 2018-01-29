@@ -11,8 +11,7 @@
             [ring.util.response :as response]
             [hiccup.core :refer [html]]
             [clojure.data.json :as json]
-            [tames.systems :as systems]
-            [tames.pdf :as pdf])
+            [tames.systems :as systems])
   (:import (java.io File)
            (java.net URLDecoder URLEncoder)
            (java.text SimpleDateFormat)
