@@ -13,18 +13,19 @@
   "application/pdf")
 
 (defn print-text!
-  [context-byte font pdf-object]
+  [context-byte default-font pdf-object]
   (pprint/pprint pdf-object)
-  (let [font-path (fonts/get-file-path (pdf-object "font"))
-        ;base-font (BaseFont/createFont font-path "UniJIS-UCS2-H" BaseFont/EMBEDDED)
-        ]
-    (println font-path))
-  (.. context-byte beginText)
-  (doto context-byte
-    (.setFontAndSize font (pdf-object "font_size"))
-    (.setTextMatrix (pdf-object "x") (pdf-object "y"))
-    (.showText (pdf-object "text")))
-  (.. context-byte endText))
+  (let [font-name (pdf-object "font")
+        this-font (if (or (nil? font-name) (= font-name ""))
+                      nil
+                      (BaseFont/createFont "/usr/share/fonts/truetype/kouzan-mouhitsu/kouzan-mouhitsu-gyosho.ttf" BaseFont/IDENTITY_H BaseFont/EMBEDDED))
+        font      (if (nil? this-font) default-font this-font)]
+    (.. context-byte beginText)
+    (doto context-byte
+      (.setFontAndSize font (pdf-object "font_size"))
+      (.setTextMatrix (pdf-object "x") (pdf-object "y"))
+      (.showText (pdf-object "text")))
+    (.. context-byte endText)))
 
 (defn print-line!
   [graphics-2d pdf-object]
