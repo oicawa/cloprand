@@ -15,32 +15,15 @@ define(function (require) {
   var Dialog = require("core/Dialog");
   var Action = require("core/Action");
 
-  function convert_pdf_field(properties, data) {
-    return {
-      "type" : "text",
-      "text" : Locale.translate(data[properties.field.field_name]),
-      "font" : properties.font,
-      "font_size" : parseFloat(properties.font_size),
-      "x" : parseFloat(properties.x),
-      "y" : parseFloat(properties.y)
-    };
-  }
-  
-  function convert_pdf_line(properties) {
-    return {
-      "type" : "line",
-      "x1" : parseInt(properties.x1),
-      "y1" : parseInt(properties.y1),
-      "x2" : parseInt(properties.x2),
-      "y2" : parseInt(properties.y2)
-    };
-  }
-  
-  function convert_pdf_phrase(properties) {
-    return {
-      "type" : "phrase",
-      "text" : properties.text
-    };
+  function convert_pdf_params(type, properties, data) {
+    var pdf_params = Utils.clone(properties);
+    // Convert from field information to the real value.
+    if (!is_null_or_undefined(properties.field)) {
+      delete pdf_params["field"];
+      pdf_params.text = Locale.translate(data[properties.field.field_name]);
+    }
+    pdf_params.output_type = type.output_type;
+    return pdf_params;
   }
   
   var Pdf = {
@@ -51,29 +34,22 @@ define(function (require) {
       var view = item.context;
       var detail = view.detail();
       var data = detail.data();
+      var types = null;
       
-      var print_objects = entry.properties.pdf_objects.map(function (pdf_object) {
-        var type_id = pdf_object.type.id;
-        var properties = pdf_object.type.properties;
-        var print_object = null;
-        if (type_id == "fe5cd94a-93c6-41eb-a16f-6628a915f05a") {
-          print_object = Utils.clone(properties);
-          print_object.type = "text";
-          print_object.font_size = parseFloat(print_object.font_size);
-          print_object.x = parseFloat(print_object.x);
-          print_object.y = parseFloat(print_object.y);
-        } else if (type_id == "778cb434-c527-4350-911d-59902ee7aa45") {
-          print_object = convert_pdf_field(properties, data);
-        } else if (type_id == "9ca65e40-bd09-46c2-955a-e19e07be9a17") {
-          print_object = convert_pdf_line(properties);
-        } else if (type_id == "bff15667-03ad-40be-aa21-c556ae35ce7b") {
-          print_object = convert_pdf_phrase(properties);
-        }
-        return print_object;
+      Storage.read("77859951-f98d-4740-b151-91c57fe77533")
+      .then(function (response) {
+        types = response;
+      }).then(function () {
+        var print_objects = entry.properties.pdf_objects.map(function (pdf_object) {
+          var type_id = pdf_object.type.id;
+          var type = types[type_id];
+          var properties = pdf_object.type.properties;
+          return convert_pdf_params(type, properties, data);
+        });
+        var pdf_data = Utils.clone(entry.properties);
+        pdf_data.pdf_objects = print_objects;
+        Connector.pdf(pdf_data);
       });
-      var pdf_data = Utils.clone(entry.properties);
-      pdf_data.pdf_objects = print_objects;
-      Connector.pdf(pdf_data);
     }
   };
 

@@ -4,7 +4,7 @@
   (:import (java.io File FileOutputStream IOException)
            (java.util ArrayList)
            (java.awt Color)
-           (com.itextpdf.text Rectangle Document Paragraph PageSize Phrase Font FontFactory Element)
+           (com.itextpdf.text Rectangle Document Paragraph PageSize Phrase Paragraph Font FontFactory Element)
            (com.itextpdf.text.pdf PdfWriter BaseFont PdfContentByte PdfPTable)
            (com.itextpdf.awt PdfGraphics2D)))
 
@@ -16,9 +16,10 @@
   [context-byte default-font pdf-object]
   (pprint/pprint pdf-object)
   (let [font-name (pdf-object "font")
-        this-font (if (or (nil? font-name) (= font-name ""))
+        font-path (fonts/get-font-file-path font-name)
+        this-font (if (or (nil? font-path) (= font-path ""))
                       nil
-                      (BaseFont/createFont "/usr/share/fonts/truetype/kouzan-mouhitsu/kouzan-mouhitsu-gyosho.ttf" BaseFont/IDENTITY_H BaseFont/EMBEDDED))
+                      (BaseFont/createFont font-path BaseFont/IDENTITY_H BaseFont/EMBEDDED))
         font      (if (nil? this-font) default-font this-font)]
     (.. context-byte beginText)
     (doto context-byte
@@ -32,10 +33,29 @@
   (. graphics-2d drawLine (pdf-object "x1") (pdf-object "y1") (pdf-object "x2") (pdf-object "y2")))
 
 (defn print-phrase!
-  [document font pdf-object]
-  (println (pdf-object "text"))
+  [document default-font pdf-object]
+  (pprint/pprint pdf-object)
+  (let [font-name (pdf-object "font")
+        font-path (fonts/get-font-file-path font-name)
+        this-font (if (or (nil? font-path) (= font-path ""))
+                      nil
+                      (BaseFont/createFont font-path BaseFont/IDENTITY_H BaseFont/EMBEDDED))
+        font      (if (nil? this-font) default-font this-font)]
   (let [phrase (Phrase. (pdf-object "text") (Font. font (float 20.0)))]
-    (. document add phrase)))
+    (. document add phrase))))
+
+(defn print-paragraph!
+  [document default-font pdf-object]
+  (pprint/pprint pdf-object)
+  (let [font-name (pdf-object "font")
+        font-size (pdf-object "font_size")
+        font-path (fonts/get-font-file-path font-name)
+        this-font (if (or (nil? font-path) (= font-path ""))
+                      nil
+                      (BaseFont/createFont font-path BaseFont/IDENTITY_H BaseFont/EMBEDDED))
+        font      (if (nil? this-font) default-font this-font)]
+  (let [paragraph (Paragraph. (pdf-object "text") (Font. font (float font-size)))]
+    (. document add paragraph))))
 
 (defn print-table!
   [document font pdf-object]
@@ -82,11 +102,13 @@
     (. document open)
     (let [context-byte (.. writer getDirectContent)
           graphics-2d  (PdfGraphics2D. context-byte (. page-size getWidth) (. page-size getHeight))
-          print-fns    {"text"   #(print-text! context-byte hkgh %1)
-                        "phrase" #(print-phrase! document hkgh %1)
-                        "line"   #(print-line! graphics-2d %1)}]
+          print-fns    {"TextDraw"   #(print-text! context-byte hkgh %1)
+                        "Phrase"     #(print-phrase! document hkgh %1)
+                        "Paragraph"  #(print-paragraph! document hkgh %1)
+                        "Line"   #(print-line! graphics-2d %1)
+                        }]
       (doseq [pdf-object (data "pdf_objects")]
-        (let [print-fn  (print-fns (pdf-object "type"))]
+        (let [print-fn  (print-fns (pdf-object "output_type"))]
           (print-fn pdf-object)))
       (. graphics-2d dispose))
     (. document close)

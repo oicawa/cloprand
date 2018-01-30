@@ -4,45 +4,16 @@
             [clojure.string :as string]
             [ring.util.response :as response])
   (:import (java.io File)
-           (java.awt GraphicsEnvironment)
+           (java.awt Font GraphicsEnvironment)
            (sun.font FontManagerFactory)
            (java.util Locale)))
 
-(defn get-family-names
-  [data]
-  (let [ge    (GraphicsEnvironment/getLocalGraphicsEnvironment)
-        names (. ge getAvailableFontFamilyNames)]
-    (-> (response/response (json/write-str (vec names)))
-        (response/header "Contents-Type" "text/json; charset=utf-8"))))
-
-(defn get-list-old
-  [data]
-  (let [font-manager  (FontManagerFactory/getInstance)
-        font-path     (. font-manager getPlatformFontPath true)
-        ge            (GraphicsEnvironment/getLocalGraphicsEnvironment)
-        family-names  (. ge getAvailableFontFamilyNames)
-        fonts         (. ge getAllFonts)
-        all-font-list (map #(let [name   (. %1 getName)
-                                  family (. %1 getFamily (Locale/JAPANESE))
-                                  face   (. %1 getFontName (Locale/JAPANESE))
-                                  plain  (. %1 isPlain)
-                                  bold   (. %1 isBold)
-                                  italic (. %1 isItalic)
-                                  style  (. %1 getStyle)
-                                  file   (. font-manager getFileNameForFontName name)]
-                              { "name" name "family" family "face" face "plain" plain "bold" bold "italic" italic "style" style "file" file })
-                           fonts)
-        font-list     (filter #(not (nil? (%1 "file")))
-                              all-font-list)
-        ]
-    (println (format "font-path=[%s]" font-path))
-    (pprint/pprint all-font-list)
-    (-> (response/response (json/write-str font-list))
-        (response/header "Contents-Type" "text/json; charset=utf-8"))))
-
-(defn get-list
-  [data]
-  (let [font-manager    (FontManagerFactory/getInstance)
+(defn get-ttf-font-file-paths
+  []
+  (let [font-manager (FontManagerFactory/getInstance)
+        ;; Separator character
+        ;; - Linux   ... ':'
+        ;; - Windows ... ??? (It seems that the font path is only one. For now, we don't judge separator character for windows.)
         font-dir-paths  (string/split (. font-manager getPlatformFontPath true) #":")
         font-file-paths (map (fn [font-dir-path]
                                (let [directory (File. font-dir-path)
@@ -50,36 +21,43 @@
                                  (map (fn [file] (. file getAbsolutePath))
                                       (vec files))))
                              font-dir-paths)
-        ttf-font-paths  (filter #(. %1 endsWith ".ttf") (flatten font-file-paths))
-        ge            (GraphicsEnvironment/getLocalGraphicsEnvironment)
-        family-names  (. ge getAvailableFontFamilyNames)
-        fonts         (. ge getAllFonts)
-        all-font-list (map #(let [name   (. %1 getName)
-                                  family (. %1 getFamily (Locale/JAPANESE))
-                                  face   (. %1 getFontName (Locale/JAPANESE))
-                                  plain  (. %1 isPlain)
-                                  bold   (. %1 isBold)
-                                  italic (. %1 isItalic)
-                                  style  (. %1 getStyle)
-                                  file   (. font-manager getFileNameForFontName name)]
-                              { "name" name "family" family "face" face "plain" plain "bold" bold "italic" italic "style" style "file" file })
-                           fonts)
-        ;font-list     (filter #(not (nil? (%1 "file"))) all-font-list)
-        font-list     all-font-list
-        ]
-    (println (format "font-dir-paths=[%s]" font-dir-paths))
-    (pprint/pprint ttf-font-paths)
-    (-> (response/response (json/write-str font-list))
-        (response/header "Contents-Type" "text/json; charset=utf-8"))))
-
-(defn get-file-path
-  [font-name]
-  (let [font-manager   (FontManagerFactory/getInstance)
-        font-directory (. font-manager getPlatformFontPath true)
-        font-file      (. font-manager getFileNameForFontName font-name)
-        font-path      (format "%s/%s" font-directory font-file)]
-    font-path))
+        ttf-font-paths  (filter #(or (. %1 endsWith ".ttf")
+                                     (. %1 endsWith ".otf"))
+                                (flatten font-file-paths))]
+    ;(pprint/pprint ttf-font-paths)
+    (vec ttf-font-paths)))
+  
+(defn get-ttf-font-map
+  [ttf-font-paths]
+  (loop [font-map   {}
+         font-paths ttf-font-paths]
+    (if (= (count font-paths) 0)
+        font-map
+        (let [font-path  (font-paths 0)
+              rest-paths (subvec font-paths 1)
+              font       (Font/createFont Font/TRUETYPE_FONT (File. font-path))
+              font-name  (. font getName)
+                         font-value { "name"   font-name
+                                      "face"   (. font getFontName (Locale/JAPANESE))
+                                      "path"   font-path}]
+          (recur (assoc font-map font-name font-value) rest-paths)))))
   
 
+;(def ttf-font-map (get-ttf-font-map (get-ttf-font-file-paths)))
+(def ttf-font-map (ref nil))
+
+(defn get-list
+  [_]
+  (if (nil? (deref ttf-font-map))
+      (let [font-map (get-ttf-font-map (get-ttf-font-file-paths))]
+        ;(pprint/pprint font-map)
+        (dosync (ref-set ttf-font-map font-map))))
+  ;(pprint/pprint (keys (deref ttf-font-map)))
+  (-> (response/response (json/write-str (keys (deref ttf-font-map))))
+      (response/header "Contents-Type" "text/json; charset=utf-8")))
+
+(defn get-font-file-path
+  [font-name]
+  (get-in (deref ttf-font-map) [font-name "path"] nil))
 
 

@@ -51,8 +51,9 @@ define(function (require) {
 
   Numeric.prototype.data = function(value) {
     if (arguments.length == 0) {
-      var v = this._field.val().replace(/,/g, '');
-      return v == "" ? null : this._parse(v);
+      var v = this._field.val();
+      v = v.replace(/,/g, '');
+      return v === "" ? null : this._parse(v);
     }
     
     if (value == null) {

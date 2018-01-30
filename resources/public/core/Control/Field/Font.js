@@ -64,10 +64,8 @@ define(function (require) {
     
     //Connector.operate('fonts', 'get-family-names', 'json', null)
     Connector.operate('fonts', 'get-list', 'json', null)
-    .then(function(src_fonts) {
-      var dst_fonts = src_fonts.map(function (font, index) { font.id = index; return font; });
-      var sorted_fonts = dst_fonts.sort(function (font1, font2) { return font1.id - font2.id; });
-      self._fonts = dst_fonts;
+    .then(function(font_names) {
+      self._fonts = font_names.sort().map(function (font_name, index) { return { "id" : index, "name" : font_name}; });
       console.log(self._fonts);
     })
     .then(function () {

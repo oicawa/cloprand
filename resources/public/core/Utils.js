@@ -79,11 +79,14 @@ define(function (require) {
       return JSON.parse(JSON.stringify(json_object));
     },
     merge : function(base_object, default_object) {
+      if (is_null_or_undefined(base_object)) {
+        return JSON.parse(JSON.stringify(default_object));
+      }
       var main_object = JSON.parse(JSON.stringify(base_object));
       for (var key in default_object) {
         var main_value = main_object[key];
         var default_value = default_object[key];
-        if (!main_value) {
+        if (is_null_or_undefined(main_value)) {
           main_object[key] = JSON.parse(JSON.stringify(default_value));
           continue;
         }
