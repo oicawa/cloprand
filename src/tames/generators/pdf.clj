@@ -12,14 +12,18 @@
   []
   "application/pdf")
 
+(def directions { "horizontal" BaseFont/IDENTITY_H
+                   "vertical"  BaseFont/IDENTITY_V })
+
 (defn print-text!
   [context-byte default-font pdf-object]
   (pprint/pprint pdf-object)
   (let [font-name (pdf-object "font")
         font-path (fonts/get-font-file-path font-name)
+        direction (directions (pdf-object "direction"))
         this-font (if (or (nil? font-path) (= font-path ""))
                       nil
-                      (BaseFont/createFont font-path BaseFont/IDENTITY_H BaseFont/EMBEDDED))
+                      (BaseFont/createFont font-path direction BaseFont/EMBEDDED))
         font      (if (nil? this-font) default-font this-font)]
     (.. context-byte beginText)
     (doto context-byte

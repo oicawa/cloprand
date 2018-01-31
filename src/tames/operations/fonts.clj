@@ -39,6 +39,7 @@
               font-name  (. font getName)
                          font-value { "name"   font-name
                                       "face"   (. font getFontName (Locale/JAPANESE))
+                                      "family" (. font getFamily (Locale/JAPANESE))
                                       "path"   font-path}]
           (recur (assoc font-map font-name font-value) rest-paths)))))
   
@@ -50,7 +51,7 @@
   [_]
   (if (nil? (deref ttf-font-map))
       (let [font-map (get-ttf-font-map (get-ttf-font-file-paths))]
-        ;(pprint/pprint font-map)
+        (pprint/pprint font-map)
         (dosync (ref-set ttf-font-map font-map))))
   ;(pprint/pprint (keys (deref ttf-font-map)))
   (-> (response/response (json/write-str (keys (deref ttf-font-map))))

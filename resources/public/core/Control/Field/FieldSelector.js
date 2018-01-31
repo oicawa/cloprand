@@ -83,11 +83,11 @@ define(function (require) {
       self._class.finder.ok(function (recids) {
         var recid = recids[0];
         var fields = {};
-        self._classes[recid].object_fields.forEach(function (field) {
-          if (field.recid)
-            delete field.recid;
-          field.id = field.name;
-          fields[field.id] = field;
+        self._classes[recid].object_fields.forEach(function (object_field, index) {
+          var field = Utils.clone(object_field);
+          field.recid = field.name;
+          field.id = index;
+          fields[field.name] = field;
         });
         self._field.finder._objects = fields;
         self._field.finder.clear();
@@ -138,14 +138,14 @@ define(function (require) {
       self_class_id = tab.class_id == Class.CLASS_ID ? tab.object_id : tab.class_id;
     }
     
-    if (!value && !this._self_reference) {
+    if (is_null_or_undefined(value) && !this._self_reference) {
       this._field.finder._objects = {};
       this.refresh();
       return;
     }
 
-    var class_id = !self_class_id ? value.class_id : self_class_id;
-    var field_name = !value ? null : value.field_name;
+    var class_id = is_null_or_undefined(self_class_id) ? value.class_id : self_class_id;
+    var field_name = is_null_or_undefined(value) ? null : value.field_name;
     this._class.finder.data(class_id);
     this._field.finder.data(field_name);
     var objects = {};

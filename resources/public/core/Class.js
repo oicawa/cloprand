@@ -162,11 +162,39 @@ define(function (require) {
     });
     return dfd.promise();
   };
-  
+
+  Class.comparer = function(field_map) {
+    var compares = Object.values(field_map).filter(function (field) {
+      return is_null_or_undefined(field.compare) ? false : true;
+    }).sort(function (field0, field1) {
+      if (is_null_or_undefined(field0.field)) {
+        return -1;
+      }
+      if (is_null_or_undefined(field1.field)) {
+        return 1;
+      }
+      return field0.field.recid - field1.field.recid;
+    }).map(function (field) {
+      return field.compare;
+    }).reverse();
+
+    var comparer = function (item0, item1) {
+      for (var i = 0; i < compares.length; i++) {
+        var result = compares[i](item0, item1);
+        if (result != 0) {
+          return result;
+        }
+      }
+      return 0;
+    };
+    
+    return comparer;
+  };
+
   Class.prototype.detail_actions = function() {
     return get_actions(this, "detail_actions");
   };
-  
+
   Class.prototype.list_actions = function() {
     return get_actions(this, "list_actions");
   };

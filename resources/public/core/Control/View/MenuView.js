@@ -120,20 +120,15 @@ define(function (require) {
     });
   }
   
-  function create_items(selector, class_map) {
-    // clear
+  function create_items(selector, classes) {
     var menu_box = $(selector);
     menu_box.empty();
     
-    var classes = Object.keys(class_map).map(function(id) {
-      return class_map[id];
-    }).filter(function (class_) {
-      return class_.class_type.id == "949c12c1-48c5-450a-bb2c-222fdf0a0734" ? false : true;
-    }).sort(function (class0, class1) {
-      return 0;
-    });
     for (var i = 0; i < classes.length; i++) {
       var class_ = classes[i];
+      if (class_.class_type.id === "949c12c1-48c5-450a-bb2c-222fdf0a0734") {
+        continue;
+      }
       create_item(selector, menu_box, class_);
     }
   }
@@ -149,6 +144,7 @@ define(function (require) {
     var self = this;
     var items_selector = selector + "> div.menuview-panel > div.menu-list";
     var options = {};
+    var comparer = null;
     $.when(
       Utils.load_css("/core/Control/View/MenuView.css"),
       Storage.read(Class.CLASS_ID).done(function(data) { self._classes = data; })
@@ -161,8 +157,12 @@ define(function (require) {
       options.columns = Grid.columns(self._class, options.field_map);
     })
     .then(function() {
+      comparer = Class.comparer(options.field_map);
+    })
+    .then(function() {
       view.append(TEMPLATE);
-      return create_items(items_selector, self._classes);
+      var classes = Object.values(self._classes).sort(comparer);
+      return create_items(items_selector, classes);
     })
     .then(function () {
       self.refresh();

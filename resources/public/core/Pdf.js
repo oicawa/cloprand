@@ -15,17 +15,6 @@ define(function (require) {
   var Dialog = require("core/Dialog");
   var Action = require("core/Action");
 
-  function convert_pdf_params(type, properties, data) {
-    var pdf_params = Utils.clone(properties);
-    // Convert from field information to the real value.
-    if (!is_null_or_undefined(properties.field)) {
-      delete pdf_params["field"];
-      pdf_params.text = Locale.translate(data[properties.field.field_name]);
-    }
-    pdf_params.output_type = type.output_type;
-    return pdf_params;
-  }
-  
   var Pdf = {
     "create" : function (event) {
       var ids = event.target.split(":");
@@ -35,11 +24,28 @@ define(function (require) {
       var detail = view.detail();
       var data = detail.data();
       var types = null;
+      var directions = null;
       
-      Storage.read("77859951-f98d-4740-b151-91c57fe77533")
-      .then(function (response) {
-        types = response;
-      }).then(function () {
+      function convert_pdf_params(type, properties) {
+        var pdf_params = Utils.clone(properties);
+        // Convert from field information to the real value.
+        if (!is_null_or_undefined(properties.field)) {
+          delete pdf_params["field"];
+          pdf_params.text = Locale.translate(data[properties.field.field_name]);
+        }
+        if (!is_null_or_undefined(properties.direction)) {
+          var direction_id = properties.direction;
+          var direction = (direction_id === null || direction_id === "") ? "horizontal" : directions[direction_id].direction;
+          pdf_params.direction = direction;
+        }
+        pdf_params.output_type = type.output_type;
+        return pdf_params;
+      }
+      
+      $.when(
+        Storage.read("77859951-f98d-4740-b151-91c57fe77533").done(function (response) { types = response; }),
+        Storage.read("a16ad3e9-021a-49fe-b4be-9a368a0aa15f").done(function (response) { directions = response; })
+      ).then(function () {
         var print_objects = entry.properties.pdf_objects.map(function (pdf_object) {
           var type_id = pdf_object.type.id;
           var type = types[type_id];

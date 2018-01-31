@@ -66,7 +66,7 @@ define(function (require) {
     Connector.operate('fonts', 'get-list', 'json', null)
     .then(function(font_names) {
       self._fonts = font_names.sort().map(function (font_name, index) { return { "id" : index, "name" : font_name}; });
-      console.log(self._fonts);
+      //console.log(self._fonts);
     })
     .then(function () {
       function converter(fonts) {
@@ -80,7 +80,7 @@ define(function (require) {
       self._finder.ok(function (recids) {
         var recid = recids[0];
         self._finder._value = recid;
-        console.log(self._finder._value);
+        //console.log(self._finder._value);
         self.refresh();
       });
     })
@@ -138,7 +138,7 @@ define(function (require) {
   Font.renderer = function(field) {
     var dfd = new $.Deferred;
     var renderer = function(record, index, column_index) {
-      console.log(record);
+      //console.log(record);
       return record.name;
     };
     dfd.resolve(renderer);
