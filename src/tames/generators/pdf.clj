@@ -13,7 +13,7 @@
   "application/pdf")
 
 (def directions { "horizontal" BaseFont/IDENTITY_H
-                   "vertical"  BaseFont/IDENTITY_V })
+                  "vertical"   BaseFont/IDENTITY_V })
 
 (defn print-text!
   [context-byte default-font pdf-object]

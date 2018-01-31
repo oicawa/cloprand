@@ -25,13 +25,15 @@ define(function (require) {
       var data = detail.data();
       var types = null;
       var directions = null;
-      
+
       function convert_pdf_params(type, properties) {
         var pdf_params = Utils.clone(properties);
         // Convert from field information to the real value.
         if (!is_null_or_undefined(properties.field)) {
           delete pdf_params["field"];
-          pdf_params.text = Locale.translate(data[properties.field.field_name]);
+          var text = Locale.translate(data[properties.field.field_name]);
+          console.assert(!is_null_or_undefined(text), "field '" + properties.field.field_name + "' does not exist in the context dadta.");
+          pdf_params.text = text;
         }
         if (!is_null_or_undefined(properties.direction)) {
           var direction_id = properties.direction;
