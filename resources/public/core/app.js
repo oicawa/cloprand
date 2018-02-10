@@ -68,7 +68,7 @@ define(function (require) {
       name:layout_name,
       panels:[
         {type:'top', size:42, resizable:false, style:pstyle, content:TOP_TEMPLATE},
-        {type:'left',size:200,resizable:true,hidden:false,style:pstyle,content:LEFT_TEMPLATE},
+        {type:'left',size:200,resizable:true,hidden:true,style:pstyle,content:LEFT_TEMPLATE},
         {type:'main',style:pstyle,content:MAIN_TEMPLATE}
       ]
     });

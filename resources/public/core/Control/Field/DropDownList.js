@@ -38,7 +38,7 @@ define(function (require) {
         var value = item[caption_fields[j]];
         captions.push(Locale.translate(value));
       }
-      var value = !item.id ? item[caption_fields[0]] : item.id;
+      var value = item[self._field_name];
       var caption = captions.join(" ");
       items.push({value : value, caption : caption });
       self._items[value] = caption;
@@ -56,6 +56,7 @@ define(function (require) {
   function DropDownList() {
     Field.call(this, "core/Control/Field", "DropDownList");
     this._class_id = null;
+    this._field_name = null;
   	this._dropdown = null;
   	this._value = null;
     this._class = null;
@@ -74,19 +75,14 @@ define(function (require) {
     }
 
     // Create form tags
-    this._class_id = field.datatype.properties.class_id;
+    var data_source = field.datatype.properties.data_source;
+    this._class_id = data_source.class_id;
+    var tmp = data_source.field_name;
+    this._field_name = is_null_or_undefined(tmp) || tmp === "" ? "id" : tmp;
     var self = this;
-    console.assert(!(!this._class_id), field);
     $.when(
-      Storage.read(Class.CLASS_ID, this._class_id)
-             .done(function(data) {
-               self._class = data;
-             }),
-      Storage.read(this._class_id)
-             .done(function(data) {
-               self._objects = Object.keys(data)
-                                     .map(function(id) { return data[id]; });
-             })
+      Storage.read(Class.CLASS_ID, this._class_id).done(function(data) { self._class = data; }),
+      Storage.read(this._class_id).done(function(data) { self._objects = Object.keys(data).map(function(id) { return data[id]; }); })
     ).then(function() {
       create_control(self, root, field);
       dfd.resolve();

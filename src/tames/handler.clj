@@ -229,7 +229,7 @@
           encoded-file-name (. (URLEncoder/encode file-name "UTF-8") replace "+" "%20")
           disposition       (format "attachment;filename=\"%s\";filename*=UTF-8''%s" file-name encoded-file-name)
           ]
-      (print-s-exp data)
+      ;(print-s-exp data)
       (require (symbol namespace-name))
       (apply (find-var generate-symbol) [tmp-file data])
       (println (. tmp-file getAbsolutePath))

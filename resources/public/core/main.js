@@ -1,5 +1,5 @@
 function is_undefined (value) { return (typeof value === "undefined"); };
-function is_null_or_undefined (value) { return (value == null) || is_undefined(value); };
+function is_null_or_undefined (value) { return (value === null) || is_undefined(value); };
 function is_object (target) { return target instanceof Object && Object.getPrototypeOf(target) === Object.prototype; };
 function is_array (value) { return Array.isArray(value); }
 

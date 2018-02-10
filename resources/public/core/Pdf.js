@@ -28,6 +28,14 @@ define(function (require) {
 
       function convert_pdf_params(type, properties) {
         var pdf_params = Utils.clone(properties);
+        if (!is_null_or_undefined(properties.cells)) {
+          var cells = properties.cells.map(function(cell) {
+            var type_id = cell.type.id;
+            var _type = types[type_id];
+            return convert_pdf_params(_type, cell.type.properties);
+          });
+          pdf_params.cells = cells;
+        }
         // Convert from field information to the real value.
         if (!is_null_or_undefined(properties.field)) {
           delete pdf_params["field"];
