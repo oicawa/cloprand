@@ -1,3 +1,3 @@
 {
-  ?= tames.debug/print
+  ?= tames.debug/pprint
  }

@@ -11,7 +11,8 @@
             [ring.util.response :as response]
             [hiccup.core :refer [html]]
             [clojure.data.json :as json]
-            [tames.systems :as systems])
+            [tames.systems :as systems]
+            [tames.debug :as debug])
   (:import (java.io File)
            (java.net URLDecoder URLEncoder)
            (java.text SimpleDateFormat)
@@ -222,6 +223,7 @@
           generate-symbol   (symbol namespace-name "generate")
           get-content-type-symbol (symbol namespace-name "get-content-type")
           json-str          (URLDecoder/decode (params :value) "UTF-8")
+          ;data              (debug/pprint (json/read-str json-str))
           data              (json/read-str json-str)
           title             (data "title")
           tmp-file          (File/createTempFile title (format ".%s" generator-name))

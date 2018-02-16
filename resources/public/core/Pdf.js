@@ -24,7 +24,7 @@ define(function (require) {
       var detail = view.detail();
       var data = detail.data();
       var types = null;
-      var directions = null;
+      var report_layouts = null;
 
       function convert_pdf_params(type, properties) {
         var pdf_params = Utils.clone(properties);
@@ -39,31 +39,33 @@ define(function (require) {
         // Convert from field information to the real value.
         if (!is_null_or_undefined(properties.field)) {
           delete pdf_params["field"];
-          var text = Locale.translate(data[properties.field.field_name]);
-          console.assert(!is_null_or_undefined(text), "field '" + properties.field.field_name + "' does not exist in the context dadta.");
-          pdf_params.text = text;
+          pdf_params.text = data[properties.field.field_name];
         }
-        if (!is_null_or_undefined(properties.direction)) {
-          var direction_id = properties.direction;
-          var direction = (direction_id === null || direction_id === "") ? "horizontal" : directions[direction_id].direction;
-          pdf_params.direction = direction;
+        
+        // Text
+        if (!is_null_or_undefined(pdf_params.text)) {
+          pdf_params.text = Locale.translate(pdf_params.text);
         }
+        
         pdf_params.output_type = type.output_type;
         return pdf_params;
       }
-      
+
       $.when(
         Storage.read("77859951-f98d-4740-b151-91c57fe77533").done(function (response) { types = response; }),
-        Storage.read("a16ad3e9-021a-49fe-b4be-9a368a0aa15f").done(function (response) { directions = response; })
+        Storage.read("c20afefc-1b66-41ee-8827-62983918206c").done(function (response) { report_layouts = response; })
       ).then(function () {
-        var print_objects = entry.properties.pdf_objects.map(function (pdf_object) {
+        var report_layout = report_layouts[entry.properties.report_layout];
+        var print_objects = report_layout.pdf_objects.map(function (pdf_object) {
           var type_id = pdf_object.type.id;
           var type = types[type_id];
           var properties = pdf_object.type.properties;
           return convert_pdf_params(type, properties, data);
         });
-        var pdf_data = Utils.clone(entry.properties);
-        pdf_data.pdf_objects = print_objects;
+        var pdf_data = {
+          "title" : Locale.translate(report_layout.label),
+          "pdf_objects" : print_objects
+        };
         Connector.pdf(pdf_data);
       });
     }

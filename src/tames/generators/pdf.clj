@@ -72,14 +72,16 @@
   [parent pdf-object]
   ;(pprint/pprint pdf-object)
   (let [parent-object (parent :object)
-        font          (let [font-path (fonts/get-font-file-path (pdf-object "font"))]
+        base-font     (let [font-path (fonts/get-font-file-path (pdf-object "font"))]
                         (if (or (nil? font-path) (= font-path ""))
                             (parent :font)
                             (BaseFont/createFont font-path BaseFont/IDENTITY_H BaseFont/EMBEDDED)))
         font-size     (let [tmp-font-size    (pdf-object "font_size")
                             parent-font-size (parent :font-size)]
-                        (float (if (nil? tmp-font-size) parent-font-size tmp-font-size)))]
-    (let [phrase (Phrase. (pdf-object "text") (Font. font font-size))]
+                        (float (if (nil? tmp-font-size) parent-font-size tmp-font-size)))
+        font          (Font. base-font font-size)
+        text          (pdf-object "text")]
+    (let [phrase (Phrase. text font)]
       (add-element parent-object phrase))))
 
 (defn add-paragraph!
@@ -93,7 +95,7 @@
         font-size     (let [tmp-font-size    (pdf-object "font_size")
                             parent-font-size (parent :font-size)]
                         (float (if (nil? tmp-font-size) parent-font-size tmp-font-size)))]
-  (let [paragraph (Paragraph. (pdf-object "text") (Font. font font-size))]
+  (let [paragraph (Paragraph. #?=(pdf-object "text") #?=(Font. font font-size))]
     (add-element parent-object paragraph))))
 
 (defn add-table!
