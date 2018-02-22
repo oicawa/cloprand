@@ -135,6 +135,7 @@ define(function (require) {
         view._object_id = new_object_id;
         detail.data(object);
         detail.edit(false);
+        detail.commit();
         detail.refresh();
         (new Class(view._class)).renderer()
         .done(function (renderer) {

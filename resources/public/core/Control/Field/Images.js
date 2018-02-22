@@ -7,9 +7,9 @@ define(function (require) {
   var Files = require("core/Control/Field/Files");
   
   var ITEM_TEMPLATE = '' +
-'<div class="item" style="margin:2px 0px;">' +
-'  <img style="display:inline-block;border:solid 1px gray;border-radius:3px;background-color:#f0f0f0;padding:2px 2px 2px 2px;font-family:Verdana,Arial,sans-serif;font-size:12px;max-width:250px;max-height:250px;"></img>' +
-'  <i class="fa fa-remove" />' +
+'<div class="item" style="margin:2px 0px;position:relative;">' +
+'  <img style="display:inline-block;border:solid 1px gray;border-radius:3px;background-color:#f0f0f0;padding:2px 2px 2px 2px;font-family:Verdana,Arial,sans-serif;font-size:12px;max-width:{{WIDTH}}px;max-height:{{HEIGHT}}px;"></img>' +
+'  <i class="fa fa-remove" style="position:absolute;right:5px;top:5px;color:lightslategray;background-color:white;border-radius:3px;padding:2px;"/>' +
 '</div>';
   
   function Images() {
@@ -18,7 +18,7 @@ define(function (require) {
   Inherits(Images, Files);
   
   Images.prototype.get_item_template = function() {
-    return ITEM_TEMPLATE;
+    return ITEM_TEMPLATE.replace(/{{WIDTH}}/, this._properties.width).replace(/{{HEIGHT}}/, this._properties.height);
   };
   
   Images.prototype.get_item_tag_name = function() {
@@ -75,6 +75,8 @@ define(function (require) {
       var image = record.find(tag);
       image.text(file.name + " - (" + size + ")");
       record.find("i").attr("name", key);
+      console.log(`>>> key=${key}`);
+      console.log(file);
       this.draw_image(file, image);
     }
     

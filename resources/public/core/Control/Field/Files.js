@@ -11,7 +11,7 @@ define(function (require) {
 '  <div class="exist-list"></div>' +
 '  <div class="added-list"></div>' +
 '  <div class="attach-area">' +
-'    <div class="drop-area" style="display:table;width:300px;height:50px;border:dashed 2px gray;border-radius:3px;font-family:Verdana,Arial,sans-serif;font-size:12px;">' +
+'    <div class="drop-area" style="display:table;width:{{WIDTH}}px;height:{{HEIGHT}}px;border:dashed 2px gray;border-radius:3px;font-family:Verdana,Arial,sans-serif;font-size:12px;">' +
 '      <div style="display:table-cell;vertical-align:middle;text-align:center;"><span class="fa fa-plus"/> Click here or Drop files.</div>' +
 '    </div>' +
 '  </div>' +
@@ -66,11 +66,21 @@ define(function (require) {
     var root = $(selector);
     
     this._field_name = field.name;
+    this._properties = Utils.clone(field.datatype.properties);
     
     // Create form tags
     var self = this;
-   
-    root.append(TEMPLATE);
+    
+    var width = this._properties.width;
+    width = (is_null_or_undefined(width) || width < 150) ? 150 : width;
+    this._properties.width = width;
+    
+    var height = this._properties.height;
+    height = (is_null_or_undefined(height) || height < 50) ? 50 : height;
+    this._properties.height = height;
+    
+    var html = TEMPLATE.replace(/{{WIDTH}}/, width).replace(/{{HEIGHT}}/, height);
+    root.append(html);
    
     this._exist_list = root.find("div.exist-list");
     this._exist_list.on("click", this.get_item_tag_name(), function(event) {
@@ -138,8 +148,6 @@ define(function (require) {
   };
 
   Files.prototype.commit = function() {
-    console.log("Files.commit called.");
-    
     var current = [];
     for (var i = 0; i < this._values.current.length; i++) {
       var file = this._values.current[i];
@@ -202,13 +210,23 @@ define(function (require) {
     return size.toFixed(1) + " " + unit;
   };
   
+  function get_count(self) {
+    var current = self._values.current.length;
+    var added = Object.keys(self._added).length;
+    var removed = Object.keys(self._remove).length;
+    var count = current + added - removed;
+    return count;
+  }
+  
   Files.prototype.switch = function() {
     var tag = this.get_item_tag_name();
     if (this._editting) {
       this._exist_list.find(tag).css("text-decoration", "none");
       this._exist_list.find("i").css("display", "inline");
       this._added_list.find("i").css("display", "inline");
-      this._attach_area.css("display", "block");
+      var count = get_count(this);
+      var attribute = (this._properties.multiple === false && 0 < count) ? "none" : "block";
+      this._attach_area.css("display", attribute);
     } else {
       this._exist_list.find(tag).css("text-decoration", "underline");
       this._exist_list.find("i").css("display", "none");
@@ -218,13 +236,16 @@ define(function (require) {
   };
   
   Files.prototype.refresh = function() {
-    console.log("Files.refresh called.");
     this._exist_list.empty();
     this._added_list.empty();
     var tag = this.get_item_tag_name();
     
-    if (!this._values) this._values = {};
-    if (!this._values.current) this._values.current = [];
+    if (is_null_or_undefined(this._values)) {
+      this._values = {};
+    }
+    if (is_null_or_undefined(this._values.current)) {
+      this._values.current = [];
+    }
     for (var i = 0; i < this._values.current.length; i++) {
       var file = this._values.current[i];
       if (this._remove[file.name]) {

@@ -11,18 +11,6 @@ define(function (require) {
 
   var TEMPLATE = '<div class="grid"></div>';
 
-  function direction(direction_id) {
-  	var ASC = "607ce339-8517-4271-8ba6-f4dd35a2b940";
-    var DSC = "5d15314e-4952-4310-b410-4dd8a388177e";
-    if (direction_id == ASC) {
-      return "asc";
-    }
-    if (direction_id == DSC) {
-      return "desc";
-    }
-    return null;
-  }
-
   function create_control(self) {
     self._root.append(TEMPLATE);
     var grid = self._root.children("div.grid");
@@ -161,7 +149,7 @@ define(function (require) {
       column.render = value.render;
 
       // set direction
-      column.direction = direction(value.field.sort_direction);
+      column.direction = value.field.sort_direction;
      
       return column;
     });

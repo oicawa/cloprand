@@ -119,7 +119,35 @@ define(function (require) {
   DropDownList.prototype.update = function(keys) {
 
   
-  }
+  };
+  
+  DropDownList.renderer = function(field) {
+    var dfd = new $.Deferred;
+    var class_id = field.datatype.properties.data_source.class_id;
+    var field_name = field.datatype.properties.data_source.field_name;
+    var class_ = null;
+    var objects = null;
+    $.when(
+      Storage.read(Class.CLASS_ID, class_id).done(function(data) { class_ = data; }),
+      Storage.read(class_id).done(function(data) { objects = data; })
+    ).always(function() {
+      var renderer = function(record, index, column_index) {
+        var value = record[field.name];
+        if (is_null_or_undefined(value)) {
+          return "";
+        }
+        
+        var targets = Object.values(objects).filter(function(object) { return object[field_name] === value; });
+        if (targets.length === 0) {
+          return "";
+        }
+        var captions = (new Class(class_)).captions(targets);
+        return captions[0];
+      };
+      dfd.resolve(renderer);
+    });
+    return dfd.promise();
+  };
 
   return DropDownList;
 }); 

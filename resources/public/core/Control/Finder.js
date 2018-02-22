@@ -237,7 +237,7 @@ define(function (require) {
     ).always(function() {
       var renderer = function(record, index, column_index) {
         var value = record[field.name];
-        if (!value) {
+        if (is_null_or_undefined(value)) {
           return "";
         }
         var ids = is_array(value) ? value : [value];

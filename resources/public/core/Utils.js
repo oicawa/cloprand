@@ -109,17 +109,6 @@ define(function (require) {
       }
       return JSON.parse(JSON.stringify(main_object));
     },
-    is_asc : function(sort_direction_id) {
-      var ASC = "607ce339-8517-4271-8ba6-f4dd35a2b940";
-      var DESC = "5d15314e-4952-4310-b410-4dd8a388177e";
-      if (sort_direction_id == ASC) {
-        return true;
-      } else if (sort_direction_id == DESC) {
-        return false;
-      } else {
-        return null;
-      }
-    },
     find : function(tree, id_key, branchs_key, ids) {
       console.assert(!is_null_or_undefined(tree), "[tree] is null or undefined.");
       console.assert(!is_null_or_undefined(id_key), "[id_key] is null or undefined.")
