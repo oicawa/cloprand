@@ -49,11 +49,6 @@
 
 (defn get-list
   [_]
-  (if (nil? (deref ttf-font-map))
-      (let [font-map (get-ttf-font-map (get-ttf-font-file-paths))]
-        (pprint/pprint font-map)
-        (dosync (ref-set ttf-font-map font-map))))
-  ;(pprint/pprint (keys (deref ttf-font-map)))
   (-> (response/response (json/write-str (keys (deref ttf-font-map))))
       (response/header "Contents-Type" "text/json; charset=utf-8")))
 
@@ -61,4 +56,7 @@
   [font-name]
   (get-in (deref ttf-font-map) [font-name "path"] nil))
 
+(defn init
+  []
+  (dosync (ref-set ttf-font-map (get-ttf-font-map (get-ttf-font-file-paths)))))
 

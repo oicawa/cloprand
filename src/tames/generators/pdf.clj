@@ -13,8 +13,8 @@
   []
   "application/pdf")
 
-(def directions { "horizontal" BaseFont/IDENTITY_H
-                  "vertical"   BaseFont/IDENTITY_V })
+(def directions { "h" BaseFont/IDENTITY_H
+                  "v"   BaseFont/IDENTITY_V })
 
 (def default-fonts (ref {:hmv  (BaseFont/createFont "HeiseiMin-W3" "UniJIS-UCS2-V" BaseFont/EMBEDDED)
                          :hmh  (BaseFont/createFont "HeiseiMin-W3" "UniJIS-UCS2-H" BaseFont/EMBEDDED)
