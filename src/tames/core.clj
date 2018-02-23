@@ -9,11 +9,13 @@
             [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
             [buddy.auth.accessrules :refer [wrap-access-rules]]
             [tames.handler :as handler]
-            [tames.systems :as systems]))
+            [tames.systems :as systems]
+            [tames.operations.fonts :as fonts]))
 
 (defn init
   []
   (println "init method called.")
+  (fonts/init)
   (systems/init))
 
 ;;; NO AUTH
