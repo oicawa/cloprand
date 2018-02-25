@@ -21,28 +21,35 @@
                                  (map (fn [file] (. file getAbsolutePath))
                                       (vec files))))
                              font-dir-paths)
-        ttf-font-paths  (filter #(or (. %1 endsWith ".ttf")
-                                     (. %1 endsWith ".otf"))
+        ttf-font-paths  (filter #(let [lastIndex (. %1 lastIndexOf ".")
+                                       ext       (if (< lastIndex 0)
+                                                     nil
+                                                     (.. %1 (substring lastIndex) (toLowerCase)))]
+                                     (or (= ext ".otf")
+                                         (= ext ".ttf")))
                                 (flatten font-file-paths))]
-    ;(pprint/pprint ttf-font-paths)
     (vec ttf-font-paths)))
   
+(defn get-ttf-font-info
+  [font-path]
+  (let [font       (Font/createFont Font/TRUETYPE_FONT (File. font-path))
+        font-name  (. font getName)
+        font-value { "name"   font-name
+                     "face"   (. font getFontName (Locale/JAPANESE))
+                     "family" (. font getFamily (Locale/JAPANESE))
+                     "path"   font-path}]
+    font-value))
+
 (defn get-ttf-font-map
   [ttf-font-paths]
   (loop [font-map   {}
          font-paths ttf-font-paths]
     (if (= (count font-paths) 0)
         font-map
-        (let [font-path  (font-paths 0)
-              rest-paths (subvec font-paths 1)
-              font       (Font/createFont Font/TRUETYPE_FONT (File. font-path))
-              font-name  (. font getName)
-                         font-value { "name"   font-name
-                                      "face"   (. font getFontName (Locale/JAPANESE))
-                                      "family" (. font getFamily (Locale/JAPANESE))
-                                      "path"   font-path}]
-          (recur (assoc font-map font-name font-value) rest-paths)))))
-  
+        (let [rest-paths (subvec font-paths 1)
+              font-path  (font-paths 0)
+              font-value (get-ttf-font-info font-path)]
+          (recur (assoc font-map (font-value "name") font-value) rest-paths)))))
 
 ;(def ttf-font-map (get-ttf-font-map (get-ttf-font-file-paths)))
 (def ttf-font-map (ref nil))
