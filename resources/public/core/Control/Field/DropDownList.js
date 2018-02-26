@@ -142,7 +142,8 @@ define(function (require) {
           return "";
         }
         var captions = (new Class(class_)).captions(targets);
-        return captions[0];
+        var caption = captions[0];
+        return caption;
       };
       dfd.resolve(renderer);
     });
