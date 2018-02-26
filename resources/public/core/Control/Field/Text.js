@@ -16,7 +16,7 @@ define(function (require) {
   function save_as_draft(self, list) {
     var data = {};
     list.data().forEach(function (item) {
-      data[item.locale] = item.value;
+      data[item.language] = item.value;
     });
     self._draft = data;
     self.refresh();
@@ -26,7 +26,7 @@ define(function (require) {
     if (!self._draft) {
       self._draft = !self._value ? {} : self._value;
     }
-    var items = Object.keys(self._draft).map(function(locale_id) { return { "id" : locale_id, "locale": locale_id, "value" : self._draft[locale_id] }; });
+    var items = Object.keys(self._draft).map(function(language_code) { return { "id" : language_code, "language": language_code, "value" : self._draft[language_code] }; });
     var menu_items = null;
     var list = new List();
     var dialog = new Dialog();
