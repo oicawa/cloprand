@@ -26,7 +26,6 @@ define(function (require) {
       var items = Object.keys(self._objects).map(function(id) { return self._objects[id]; });
       var width = self._columns.map(function(column) { return parseInt(column.size); }).reduce(function (prev, current, index, array) { return prev + current; }, 100);
       var dialog = new SelectDialog();
-      console.log(self._columns);
       dialog.init({ items : items, columns : self._columns, multi_selectable : self._multi_selectable, field_map : self._field_map, record_height : self._record_height })
       .done(function() {
         dialog.title("Select");
