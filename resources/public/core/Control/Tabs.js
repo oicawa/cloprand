@@ -82,7 +82,7 @@ define(function (require) {
       // Tab
       var tab_id = create_tab_id(view_id, class_id, object_id);
       self._tabs.add({"id":tab_id, "caption":view.caption(), "closable": 4 <= count ? closable : true });
-      dfd.resolve();
+      dfd.resolve(tab_id);
     })
     return dfd.promise();
   };
@@ -93,7 +93,14 @@ define(function (require) {
     if (!tab) {
       return null;
     }
-    return { "view_id" : view_id, "class_id" : class_id, "object_id" : object_id, "caption" : tab.caption, "closable" : tab.closable };
+    return {
+      "view_id" : view_id,
+      "class_id" : class_id,
+      "object_id" : object_id,
+      "caption" : tab.caption,
+      "closable" : tab.closable,
+      "tab_id" : tab.id
+    };
   };
 
   Tabs.prototype.current = function () {
@@ -136,22 +143,24 @@ define(function (require) {
     }
   };
 
-  Tabs.prototype.show_tab = function (label, options, view_id, class_id, object_id) {
+  Tabs.prototype.show_tab = function (view_id, class_id, object_id) {
     var self = this;
     var dfd = new $.Deferred;
-    dfd.resolve();
-    return dfd.promise()
-    .then(function() {
-      var tab = self.get(view_id, class_id, object_id);
-      if (tab) {
-        return;
-      }
-      return self.add(view_id, class_id, object_id);
-    })
+    var tab = self.get(view_id, class_id, object_id);
+    if (tab) {
+      self.select(view_id, class_id, object_id);
+      self.refresh(view_id, class_id, object_id);
+      dfd.resolve(tab);
+      return dfd.promise();
+    }
+    self.add(view_id, class_id, object_id)
     .then(function() {
       self.select(view_id, class_id, object_id);
       self.refresh(view_id, class_id, object_id);
+      var tab = self.get(view_id, class_id, object_id);
+      dfd.resolve(tab);
     });
+    return dfd.promise();
   };
 
   Tabs.prototype.remove = function (view_id, class_id, object_id) {

@@ -28,7 +28,7 @@ define(function (require) {
   function open_list_view(class_) {
     var view_id = class_.class_type.properties.list_view.id;
     var caption = Locale.translate(class_.label);
-    app.contents().tabs().show_tab(caption, null, view_id, class_.id, null);
+    app.contents().tabs().show_tab(view_id, class_.id, null);
   }
   
   function open_detail_view(class_) {
@@ -36,12 +36,12 @@ define(function (require) {
     Storage.read(class_.id).done(function(object_maps) {
       var objects = Object.keys(object_maps).map(function(id) { return object_maps[id]; });
       if (objects.length == 0) {
-        app.contents().tabs().show_tab("New " + Locale.translate(class_.label), null, view_id, class_.id, Uuid.NULL);
+        app.contents().tabs().show_tab(view_id, class_.id, Uuid.NULL);
         return;
       }
       (new Class(class_)).renderer().done(function (renderer) {
         var caption = renderer(objects[0]);
-        app.contents().tabs().show_tab(caption, null, view_id, class_.id, objects[0].id);
+        app.contents().tabs().show_tab(view_id, class_.id, objects[0].id);
       });
     });
   }

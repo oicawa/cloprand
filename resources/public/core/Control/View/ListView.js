@@ -43,30 +43,14 @@ define(function (require) {
     var view = event.item.context;
     var class_ = view._class;
     console.log("[New Item Opend] view_id=" + class_.class_type.properties.detail_view.id);
-    app.contents().tabs().show_tab("New " + Locale.translate(class_.label), null, class_.class_type.properties.detail_view.id, class_.id, Uuid.NULL);
+    app.contents().tabs().show_tab(class_.class_type.properties.detail_view.id, class_.id, Uuid.NULL);
   };
   
   function open_details(class_, grid, recids) {
-    var fields = class_.object_fields;
-    var key_field_names = fields.filter(function (field, index) { return !(!field.key); })
-                                .map(function (field) { return field.name; });
-    
-    var objects = recids.map(function (recid) { return grid.get(recid); });
-    
-    key_field_names.push("id");
-    console.assert(0 < key_field_names.length, key_field_names);
-
-    var key_field_name = key_field_names[0];
-    
-    (new Class(class_)).renderer()
-    .done(function (renderer) {
-      var captions = objects.map(function (object) { return renderer(object); });
-      for (var i = 0; i < recids.length; i++) {
-        var caption = captions[i];
-        var object = objects[i];
-        var key = object[key_field_name];
-        app.contents().tabs().show_tab(caption, null, class_.class_type.properties.detail_view.id, class_.id, key);
-      }
+    recids.map(function (recid) {
+      return grid.get(recid);
+    }).forEach(function (object) {
+      app.contents().tabs().show_tab(class_.class_type.properties.detail_view.id, class_.id, object.id);
     });
   }
 
@@ -84,6 +68,18 @@ define(function (require) {
     var grid = self.list();
     var recids = grid.selection();
     open_details(class_, grid, recids);
+  };
+
+  function copy_details(class_, grid, recids) {
+    // Implement
+  }
+
+  ListView.copy = function (event) {
+    var view = event.item.context;
+    var class_ = view._class;
+    var grid = view.list();
+    var recids = [event.recid];
+    copy_details(class_, grid, recids);
   };
   
   ListView.prototype.update = function (keys) {
