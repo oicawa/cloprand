@@ -18,13 +18,16 @@ define(function (require) {
     var dfd = new $.Deferred;
     var root = $(selector);
 
+    var format = field.datatype.properties.format;
+    format = (is_null_or_undefined(format) || format === "") ? w2utils.settings.dateFormat : format;
+
     // Create form tags
     var self = this;
     
     root.append(TEMPLATE);
     self._input = root.find("input");
     self._input.attr("name", field.name);
-    self._input.w2field("date");
+    self._input.w2field("date", { "format" : format });
     
     dfd.resolve();
     return dfd.promise();
