@@ -47,10 +47,9 @@ define(function (require) {
   };
   
   function open_details(class_, grid, recids) {
-    recids.map(function (recid) {
-      return grid.get(recid);
-    }).forEach(function (object) {
-      app.contents().tabs().show_tab(class_.class_type.properties.detail_view.id, class_.id, object.id);
+    recids.forEach(function (recid) {
+      var object_id = recid;
+      app.contents().tabs().show_tab(class_.class_type.properties.detail_view.id, class_.id, object_id);
     });
   }
 
@@ -71,14 +70,20 @@ define(function (require) {
   };
 
   function copy_details(class_, grid, recids) {
-    // Implement
+    recids.map(function (recid) {
+      return grid.get(recid);
+    }).forEach(function (object) {
+      var options = { "suffix":object.id, "preset":object };
+      var view_id = class_.class_type.properties.detail_view.id;
+      app.contents().tabs().show_tab(view_id, class_.id, Uuid.NULL, options);
+    });
   }
 
   ListView.copy = function (event) {
     var view = event.item.context;
     var class_ = view._class;
     var grid = view.list();
-    var recids = [event.recid];
+    var recids = grid.selection();
     copy_details(class_, grid, recids);
   };
   

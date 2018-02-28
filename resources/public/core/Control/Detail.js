@@ -333,7 +333,7 @@ define(function (require) {
     }
   };
 
-  Detail.prototype.data = function(value) {
+  Detail.prototype.data = function(value, is_preset) {
     var data = {};
 
     var exist_object_fields = !this._fields ? false : true;
@@ -356,7 +356,7 @@ define(function (require) {
     if (arguments.length == 0) {
       return data;
     } else {
-      this._is_new = !value ? true : false;
+      this._is_new = (is_null_or_undefined(value) || is_preset === true) ? true : false;
     }
   };
   

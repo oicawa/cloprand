@@ -128,6 +128,7 @@ define(function (require) {
     var files = get_files(fields, data);
     
     if (detail.is_new()) {
+      var suffix = view._is_preset ? view._object.id : null;
       Storage.create(view._class.id, data, files)
       .done(function(object) {
         edit_toolbar(view.toolbar(), false);
@@ -136,11 +137,13 @@ define(function (require) {
         detail.data(object);
         detail.edit(false);
         detail.commit();
+        self._is_preset = false;
         detail.refresh();
         (new Class(view._class)).renderer()
         .done(function (renderer) {
           var label = renderer(object);
-          app.contents().tabs().change(view._class.class_type.properties.detail_view.id, view._class.id, Uuid.NULL, new_object_id, label);
+          var view_id = view._class.class_type.properties.detail_view.id;
+          app.contents().tabs().change(view_id, view._class.id, Uuid.NULL, suffix, new_object_id, label);
           app.contents().tabs().broadcast(view._class.id, new_object_id, object);
           var message = !entry_props ? "Created" : Locale.translate(entry_props.created_message);
           Dialog.show(message, item.text);
@@ -256,22 +259,27 @@ define(function (require) {
   };
 
   DetailView.prototype.caption = function () {
-    if (this.is_new()) {
-      return "New " + Locale.translate(this._class.label);
+    if (!this.is_new()) {
+      var caption = this._renderer(this._object);
+      return caption;
     }
-    var caption = this._renderer(this._object);
-    return caption;
+    if (this._is_preset) {
+      var caption = this._renderer(this._object);
+      return "[Copy] " + caption;
+    }
+    return "[New] " + Locale.translate(this._class.label);
   };
 
   DetailView.prototype.is_new = function () {
     return this._detail.is_new();
   };
 
-  DetailView.prototype.init = function (selector, class_id, object_id) {
+  DetailView.prototype.init = function (selector, class_id, object_id, preset) {
     var dfd = new $.Deferred;
 
     this._class_id = class_id;
     this._object_id = object_id;
+    this._is_preset = is_null_or_undefined(preset) ? false : true;
     this._toolbar = new Toolbar();
     this._detail = new Detail();
     var view = $(selector);
@@ -286,6 +294,9 @@ define(function (require) {
     function get_object_data(self, class_id_, object_id_) {
       if (object_id_ == Uuid.NULL) {
         console.log("Didn't call Storage.read method to get object data.");
+        if (self._is_preset) {
+          self._object = preset;
+        }
         var dfd = new $.Deferred;
         dfd.resolve();
         return dfd.promise();
@@ -320,6 +331,9 @@ define(function (require) {
       if (self._object_id == Uuid.NULL) {
         edit_toolbar(self._toolbar, true);
         self._detail.edit(true);
+        if (self._is_preset) {
+          self._detail.data(self._object, self._is_preset);
+        }
       } else {
         edit_toolbar(self._toolbar, false);
         self._detail.edit(false);

@@ -15,11 +15,15 @@ define(function (require) {
     '  </div>' +
     '</div>';
   
-  function create_tab_id(view_id, class_id, object_id) {
+  function create_tab_id(view_id, class_id, object_id, suffix) {
     var array = [view_id, class_id, object_id];
+    if (is_null_or_undefined(suffix) === false) {
+      array.push(suffix);
+    }
     var copied = array.concat();
-    while(!copied[copied.length - 1])
+    while(!copied[copied.length - 1]) {
       copied.pop();
+    }
     return copied.join("_").replace(/\//g, "-");
   }
 
@@ -28,14 +32,18 @@ define(function (require) {
     var view_id = 0 < ids.length ? ids[0] : null;
     var class_id = 1 < ids.length ? ids[1] : null;
     var object_id = 2 < ids.length ? ids[2] : null;
-    return { "view_id" : view_id, "class_id" : class_id, "object_id" : object_id };
+    var suffix = 3 < ids.length ? ids[3] : null;
+    return { "view_id" : view_id, "class_id" : class_id, "object_id" : object_id, "suffix" : suffix };
   }
 
-  function create_view(self, view_id, class_id, object_id) {
+  function create_view(self, view_id, class_id, object_id, options_) {
     var dfd = new $.Deferred;
 
+    var options = is_null_or_undefined(options_) ? {} : options_;
+    var suffix = is_null_or_undefined(options.suffix) ? null : options.suffix;
+
     // Append View Content Area
-    var tab_id = create_tab_id(view_id, class_id, object_id);
+    var tab_id = create_tab_id(view_id, class_id, object_id, suffix);
     self._body.append(BODY_TEMPLATE);
     var tab_panel = self._body.find(".tab-panel:last-child");
     tab_panel.attr("id", tab_id);
@@ -45,10 +53,9 @@ define(function (require) {
     .done(function (object) {
       require([object.require_path], function(View) {
         var selector = "#" + tab_id + " > div.tab-content-frame > div.tab-content-panel";
-        //console.log("object.require_path=" + object.require_path);
         var view = new View();
         self._contents[tab_id] = view;
-        view.init(selector, class_id, object_id)
+        view.init(selector, class_id, object_id, options.preset)
         .then(function(view_) {
           dfd.resolve(view_);
         });
@@ -71,24 +78,27 @@ define(function (require) {
     this._history = [];
   }
 
-  Tabs.prototype.add = function (view_id, class_id, object_id, closable) {
+  Tabs.prototype.add = function (view_id, class_id, object_id, options_) {
+    var options = is_null_or_undefined(options_) ? {} : options_;
+    var closable = is_null_or_undefined(options.closable) ? true : options.closable;
+    var suffix = is_null_or_undefined(options.suffix) ? null : options.suffix;
     var count = arguments.length;
     this._body.children(".tab-panel").hide();
     var dfd = new $.Deferred;
     var self = this;
     // Panel
-    create_view(this, view_id, class_id, object_id)
+    create_view(this, view_id, class_id, object_id, options)
     .then(function (view) {
       // Tab
-      var tab_id = create_tab_id(view_id, class_id, object_id);
-      self._tabs.add({"id":tab_id, "caption":view.caption(), "closable": 4 <= count ? closable : true });
+      var tab_id = create_tab_id(view_id, class_id, object_id, suffix);
+      self._tabs.add({"id":tab_id, "caption":view.caption(), "closable": closable });
       dfd.resolve(tab_id);
     })
     return dfd.promise();
   };
 
-  Tabs.prototype.get = function (view_id, class_id, object_id) {
-    var tab_id = create_tab_id(view_id, class_id, object_id);
+  Tabs.prototype.get = function (view_id, class_id, object_id, suffix) {
+    var tab_id = create_tab_id(view_id, class_id, object_id, suffix);
     var tab = this._tabs.get(tab_id);
     if (!tab) {
       return null;
@@ -97,6 +107,7 @@ define(function (require) {
       "view_id" : view_id,
       "class_id" : class_id,
       "object_id" : object_id,
+      "suffix" : suffix,
       "caption" : tab.caption,
       "closable" : tab.closable,
       "tab_id" : tab.id
@@ -116,8 +127,8 @@ define(function (require) {
     return { "view_id" : ids.view_id, "class_id" : ids.class_id, "object_id" : ids.object_id, "caption" : tab.caption, "closable" : tab.closable };
   };
 
-  Tabs.prototype.select = function (view_id, class_id, object_id) {
-    var tab_id = create_tab_id(view_id, class_id, object_id);
+  Tabs.prototype.select = function (view_id, class_id, object_id, suffix) {
+    var tab_id = create_tab_id(view_id, class_id, object_id, suffix);
     var tab = this._tabs.get(tab_id);
     this._body.children(".tab-panel").hide();
     this._tabs.select(tab_id);
@@ -143,21 +154,22 @@ define(function (require) {
     }
   };
 
-  Tabs.prototype.show_tab = function (view_id, class_id, object_id) {
+  Tabs.prototype.show_tab = function (view_id, class_id, object_id, options) {
     var self = this;
+    var suffix = is_null_or_undefined(options) ? null : options.suffix;
     var dfd = new $.Deferred;
-    var tab = self.get(view_id, class_id, object_id);
+    var tab = self.get(view_id, class_id, object_id, suffix);
     if (tab) {
-      self.select(view_id, class_id, object_id);
-      self.refresh(view_id, class_id, object_id);
+      self.select(view_id, class_id, object_id, suffix);
+      self.refresh(view_id, class_id, object_id, suffix);
       dfd.resolve(tab);
       return dfd.promise();
     }
-    self.add(view_id, class_id, object_id)
+    self.add(view_id, class_id, object_id, options)
     .then(function() {
-      self.select(view_id, class_id, object_id);
-      self.refresh(view_id, class_id, object_id);
-      var tab = self.get(view_id, class_id, object_id);
+      self.select(view_id, class_id, object_id, suffix);
+      self.refresh(view_id, class_id, object_id, suffix);
+      var tab = self.get(view_id, class_id, object_id, suffix);
       dfd.resolve(tab);
     });
     return dfd.promise();
@@ -196,8 +208,8 @@ define(function (require) {
     }
   };
 
-  Tabs.prototype.change = function (view_id, class_id, old_object_id, new_object_id, label) {
-    var old_tab_id = create_tab_id(view_id, class_id, old_object_id);
+  Tabs.prototype.change = function (view_id, class_id, old_object_id, suffix, new_object_id, label) {
+    var old_tab_id = create_tab_id(view_id, class_id, old_object_id, suffix);
     var new_tab_id = create_tab_id(view_id, class_id, new_object_id);
     var view = this._contents[old_tab_id];
     delete this._contents[old_tab_id];
