@@ -44,23 +44,55 @@
   (doseq [pdf-object pdf-objects]
     (add-object parent pdf-object)))
 
+(defn draw-text-horizontal!
+  [context-byte x y text]
+  (doto context-byte
+      (.setTextMatrix x y)
+      (.showText text)))
+
+(def rotations "()（）[]「」『』【】〔〕［］{}｛｝<>＜＞≪≫〈〉《》")
+(def flip-rot "-ー=＝|｜")
+(def right-top-1 "。、．，")
+(def right-top-2 "ぁぃぅぇぉっゃゅょァィゥェォッャュョ")
+(def specific "様")
+(defn draw-text-vertical!
+  [context-byte x y text font font-size]
+  (loop [chars    #?=(seq text)
+         y-cursor y]
+    (if (= (count chars) 0)
+        nil
+        (let [c     (first chars)
+              width (. font getWidthPoint (int c) (float font-size))
+              move1 (/ width 2)
+              move2 (/ width 8)]
+          ;;; PdfContentByte.setTextMatrix's arguments from 1st to 4th are Matrix element.
+          ;;; You can draw characters as you like by doing mathematical matrix operations. (Rotation, inversion, diagonal, etc.)
+          (cond (<= 0 (. rotations   indexOf (int c))) (. context-byte setTextMatrix 0 -1 1 0 (+ x move1) (- y-cursor move1))
+                (<= 0 (. right-top-1 indexOf (int c))) (. context-byte setTextMatrix (+ x move1) (+ y-cursor move1))
+                (<= 0 (. right-top-2 indexOf (int c))) (. context-byte setTextMatrix (+ x move2) (+ y-cursor move2))
+                (<= 0 (. flip-rot    indexOf (int c))) (. context-byte setTextMatrix 0 -1 -1 0 (- x move1) (- y-cursor move1))
+                :else                                  (. context-byte setTextMatrix x y-cursor))
+          (. context-byte showText (format "%c" c))
+          (recur (rest chars) (- y-cursor width))))))
+
 (defn draw-text!
   [parent pdf-object]
-  ;(pprint/pprint pdf-object)
   (let [context-byte (parent :context-byte)
-        direction    (directions (pdf-object "direction"))
+        direction    (pdf-object "direction")
+        identify     (directions direction)
         font         (let [font-path (fonts/get-font-file-path (pdf-object "font"))]
                        (if (or (nil? font-path) (= font-path ""))
                            (parent :font)
-                           (BaseFont/createFont font-path direction BaseFont/EMBEDDED)))
+                           (BaseFont/createFont font-path identify BaseFont/EMBEDDED)))
         font-size    (let [tmp-font-size (pdf-object "font_size")]
                        (float (if (nil? tmp-font-size) (parent :font-size) tmp-font-size)))
-        ]
-    (.. context-byte beginText)
-    (doto context-byte
-      (.setFontAndSize font font-size)
-      (.setTextMatrix (pdf-object "x") (pdf-object "y"))
-      (.showText (pdf-object "text")))
+        x            (pdf-object "x")
+        y            (pdf-object "y")
+        text         (pdf-object "text")]
+    (. context-byte beginText)
+    (. context-byte setFontAndSize font font-size)
+    (cond (= direction "h") (draw-text-horizontal! context-byte x y text)
+          (= direction "v") (draw-text-vertical! context-byte x y text font font-size))
     (.. context-byte endText)))
 
 (defn draw-line!
