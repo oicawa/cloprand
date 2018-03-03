@@ -11,6 +11,7 @@
             [ring.util.response :as response]
             [hiccup.core :refer [html]]
             [clojure.data.json :as json]
+            [tames.filesystem :as fs]
             [tames.systems :as systems]
             [tames.debug :as debug])
   (:import (java.io File)
@@ -202,7 +203,7 @@
   ;; Download
   (GET "/download/*" [& params]
     ;(println (format "[GET] /download/* = /download/%s" (params :*)))
-    (let [file        (File. (systems/get-absolute-path (format "data/%s" (params :*))))
+    (let [file        (File. (fs/get-absolute-path (format "data/%s" (params :*))))
           file-name   (. file getName)
           encoded-file-name (. (URLEncoder/encode file-name "UTF-8") replace "+" "%20")
           disposition (format "attachment;filename=\"%s\";filename*=UTF-8''%s" file-name encoded-file-name)
@@ -212,7 +213,7 @@
           (response/header "Content-Disposition" disposition))))
   (GET "/image/:class-id/:object-id/*" [class-id object-id & params]
     ;(println (format "[GET] /image/:class-id/:object-id/* = /image/%s/%s/%s" class-id object-id (params :*)))
-    (let [path (systems/get-absolute-path (format "data/%s/.%s/%s" class-id object-id (params :*)))
+    (let [path (fs/get-absolute-path (format "data/%s/.%s/%s" class-id object-id (params :*)))
           ext  (systems/get-file-extension path)
           mime (content-types ext)]
       (-> (response/file-response path)
@@ -252,7 +253,7 @@
   (GET "/*" [& params]
     ;(println (format "[GET] /* (path=%s)" (params :*)))
     (let [relative-path (params :*)
-          absolute-path (systems/get-absolute-path relative-path)
+          absolute-path (fs/get-absolute-path relative-path)
           offset        (. relative-path lastIndexOf ".")
           extension     (if (= offset -1) "" (. relative-path substring (+ offset 1)))
           content-type  (content-types (. extension toLowerCase))

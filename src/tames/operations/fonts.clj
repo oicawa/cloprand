@@ -65,5 +65,6 @@
 
 (defn init
   []
-  (dosync (ref-set ttf-font-map (get-ttf-font-map (get-ttf-font-file-paths)))))
+  (dosync (ref-set ttf-font-map (get-ttf-font-map (get-ttf-font-file-paths))))
+  true)
 

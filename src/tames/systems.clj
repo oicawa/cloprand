@@ -5,7 +5,8 @@
             [clojure.java.io :as io]
             [ring.util.response :as response]
             [clojure.data.json :as json]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [tames.filesystem :as fs])
   (:import (java.io File InputStream)
            (java.nio.file Paths Path Files StandardCopyOption)
            (java.util.jar JarFile JarEntry)
@@ -21,8 +22,6 @@
 (def FILES_ID "748189ad-ce16-43f6-ae2a-fa48e5ec4a39")
 (def IMAGES_ID "4ee20d87-b73d-40a7-a521-170593ac2512")
 
-(def config (atom nil))
-
 (declare remove-file)
 
 (defn empty-directory
@@ -36,10 +35,6 @@
   (empty-directory file)
   (. file delete))
   
-(defn get-absolute-path
-  [relative-path]
-  (. (File. relative-path) getAbsolutePath))
-
 (defn get-resource-path
   [relative-path]
   (. (File. relative-path) getPath))
@@ -95,7 +90,7 @@
 
 (defn get-absolute-children
   [relative-dir-path dir? file?]
-  (let [absolute-dir (File. (get-absolute-path relative-dir-path))
+  (let [absolute-dir (File. (fs/get-absolute-path relative-dir-path))
         children     (filter #(cond (and dir? file?) true
                                     (and dir? (not file?)) (. %1 isDirectory)
                                     (and (not dir?) file?) (not (. %1 isDirectory))
@@ -128,7 +123,7 @@
 
 (defn ensure-directory
   [relative-dir-path]
-  (let [systems-path (get-absolute-path relative-dir-path)
+  (let [systems-path (fs/get-absolute-path relative-dir-path)
         systems-dir  (File. systems-path)]
     (if (and (. systems-dir exists) (not (. systems-dir isDirectory)))
         (. systems-dir delete))
@@ -137,8 +132,8 @@
 
 (defn exists?
   [class-id object-id]
-  (let [dir  (File. (get-absolute-path (str "data/" class-id)))
-        file (File. (get-absolute-path (str "data/" class-id "/" object-id ".json")))]
+  (let [dir  (File. (fs/get-absolute-path (str "data/" class-id)))
+        file (File. (fs/get-absolute-path (str "data/" class-id "/" object-id ".json")))]
     (cond (not (. dir isDirectory)) false
           (nil? object-id)          true
           :else                     (. file isFile))))
@@ -157,11 +152,11 @@
 
 (defn get-class-directory
   [class-id]
-  (File. (get-absolute-path (str "data/" class-id))))
+  (File. (fs/get-absolute-path (str "data/" class-id))))
 
 (defn get-json-file
   [class-id object-id]
-  (let [object-path (get-absolute-path (format "data/%s/%s.json" class-id object-id))]
+  (let [object-path (fs/get-absolute-path (format "data/%s/%s.json" class-id object-id))]
     (File. object-path)))
 
 (defn get-json-files
@@ -228,7 +223,7 @@
 (defn remove-attached-files
   [class-id object-id value files_fields]
   (doseq [field files_fields]
-    (let [dst-dir-path (get-absolute-path (format "data/%s/.%s/%s" class-id, object-id (field "name")))
+    (let [dst-dir-path (fs/get-absolute-path (format "data/%s/.%s/%s" class-id, object-id (field "name")))
           file-names   (keys ((value (field "name")) "remove"))]
       (doseq [file-name file-names]
         (let [file (File. (format "%s/%s" dst-dir-path file-name))]
@@ -252,7 +247,7 @@
 
 (defn update-files-values
   [class-id object-id files_fields raw-value]
-  (let [base-dir   (get-absolute-path (format "data/%s/.%s" class-id object-id))
+  (let [base-dir   (fs/get-absolute-path (format "data/%s/.%s" class-id object-id))
         field_names (map #(%1 "name") files_fields)]
     (loop [names field_names
            value raw-value]
@@ -304,7 +299,7 @@
 (defn update-object
   [class-id object-id s-exp-data]
   (println "Called update-object function.")
-  (let [object-file (File. (get-absolute-path (str "data/" class-id "/" object-id ".json")))]
+  (let [object-file (File. (fs/get-absolute-path (str "data/" class-id "/" object-id ".json")))]
     ;; !! CAUTION !!
     ;; Implement 's-exp-data' check logic!!
     (with-open [w (io/writer object-file)]
@@ -313,7 +308,7 @@
 (defn delete-object
   [class-id object-id]
   (println "Called delete-object function.")
-  (let [file (File. (get-absolute-path (str "data/" class-id "/" object-id ".json")))]
+  (let [file (File. (fs/get-absolute-path (str "data/" class-id "/" object-id ".json")))]
     (remove-file file)
     (if (= CLASS_ID class-id)
         (remove-file (File. (format "data/%s" object-id))))))
@@ -350,7 +345,7 @@
 (defn delete-data
   [class-id object-id]
   (delete-object class-id object-id)
-  (remove-file (File. (get-absolute-path (format "data/%s/.%s" class-id, object-id))))
+  (remove-file (File. (fs/get-absolute-path (format "data/%s/.%s" class-id, object-id))))
   (println "Delete OK.")
   (-> (response/response (get-objects-as-json class-id))
       (response/header "Contents-Type" "text/json; charset=utf-8")))
@@ -385,7 +380,7 @@
             (let [src-path (str "public/" relative-path "/" file)
                   dst-path (str relative-path "/" file)]
               ;(println (format "[systems/ensure-init-files] %s" src-path))
-              (if (not (. (File. (get-absolute-path dst-path)) exists))
+              (if (not (. (File. (fs/get-absolute-path dst-path)) exists))
                   (copy-resource-file src-path dst-path))
                   ))))))
 
@@ -394,8 +389,7 @@
   (ensure-init-files "lib")
   (ensure-init-files "core")
   (ensure-init-files "data")
-  (ensure-directory "tmp")
-  (empty-directory (File. (get-absolute-path "tmp"))))
+  true)
 
 
 
