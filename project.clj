@@ -18,7 +18,6 @@
                  ]
   :plugins [[lein-ring "0.8.11"]]
   :ring {:handler tames.core/app
-         :main tames.core
          :init tames.core/init}
   :profiles {:uberjar {:aot :all}
              :dev {:dependencies [[javax.servlet/servlet-api "2.5"]

@@ -6,6 +6,8 @@
             [ring.util.response :as response]
             [clojure.data.json :as json]
             [clojure.string :as string]
+            [tames.log :as log]
+            [tames.config :as config]
             [tames.filesystem :as fs])
   (:import (java.io File InputStream)
            (java.nio.file Paths Path Files StandardCopyOption)
@@ -167,7 +169,9 @@
 
 (defn get-object
   [class-id object-id]
-  (let [file (get-json-file class-id object-id)]
+  (let [file (if (config/id? class-id)
+                 (File. @config/path)
+                 (get-json-file class-id object-id))]
     (if (not (. file exists))
         nil
         (with-open [rdr (io/reader (. file getAbsolutePath))]
@@ -298,8 +302,11 @@
 
 (defn update-object
   [class-id object-id s-exp-data]
-  (println "Called update-object function.")
-  (let [object-file (File. (fs/get-absolute-path (str "data/" class-id "/" object-id ".json")))]
+  (log/debug "Called update-object function.")
+  (let [path        (if (config/id? class-id)
+                        @config/path
+                        (str "data/" class-id "/" object-id ".json"))
+        object-file (File. (fs/get-absolute-path path))]
     ;; !! CAUTION !!
     ;; Implement 's-exp-data' check logic!!
     (with-open [w (io/writer object-file)]

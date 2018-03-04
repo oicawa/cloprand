@@ -1,1 +1,1 @@
-lein ring server-headless
+CONFIG_PATH=$1 lein ring server-headless

@@ -10,9 +10,10 @@
            (java.util UUID Calendar)))
 
 (defn- write
-  [label base-format & args]
+  [label base-format args]
   (let [ex-format (format "[%s] %s" label base-format)
-        message   (format ex-format args)]
+        new-args  (cons ex-format args)
+        message   (apply format new-args)]
     (println message)))
 
 (defn fatal
@@ -26,3 +27,7 @@
 (defn info
   [base-format & args]
   (write "I" base-format args))
+
+(defn debug
+  [base-format & args]
+  (write "D" base-format args))
