@@ -134,11 +134,13 @@
 
 (defn exists?
   [class-id object-id]
-  (let [dir  (File. (fs/get-absolute-path (str "data/" class-id)))
-        file (File. (fs/get-absolute-path (str "data/" class-id "/" object-id ".json")))]
-    (cond (not (. dir isDirectory)) false
-          (nil? object-id)          true
-          :else                     (. file isFile))))
+  (if (config/id? class-id)
+      true
+      (let [dir  (File. (fs/get-absolute-path (str "data/" class-id)))
+            file (File. (fs/get-absolute-path (str "data/" class-id "/" object-id ".json")))]
+        (cond (not (. dir isDirectory)) false
+              (nil? object-id)          true
+              :else                     (. file isFile)))))
 
 (defn get-file-extension
   [path]
@@ -283,12 +285,15 @@
 
 (defn get-last-modified
   [class-id object-id]
-  (if (nil? object-id)
-      (let [dir   (get-class-directory class-id)
-            files (sort #(- (. %2 lastModified) (. %1 lastModified))
-                        (cons dir (get-json-files class-id)))]
-        (. (first files) lastModified))
-      (. (get-json-file class-id object-id) lastModified)))
+  (cond (config/id? class-id)
+          (config/last-modified)
+        (nil? object-id)
+          (let [dir   (get-class-directory class-id)
+                files (sort #(- (. %2 lastModified) (. %1 lastModified))
+                            (cons dir (get-json-files class-id)))]
+            (. (first files) lastModified))
+        :else
+          (. (get-json-file class-id object-id) lastModified)))
 
 (defn create-object
   [class-id object-id s-exp-data]
@@ -302,7 +307,6 @@
 
 (defn update-object
   [class-id object-id s-exp-data]
-  (log/debug "Called update-object function.")
   (let [path        (if (config/id? class-id)
                         @config/path
                         (str "data/" class-id "/" object-id ".json"))

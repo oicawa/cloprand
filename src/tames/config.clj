@@ -21,6 +21,10 @@
   [class-id]
   (= class-id CLASS_ID))
 
+(defn last-modified
+  []
+  (. (File. @path) lastModified))
+
 (defn ensure-config-file
   []
   (let [default-path (format "data/%s/%s.json" CLASS_ID DEFAULT_ID)

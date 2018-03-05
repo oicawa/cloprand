@@ -11,6 +11,7 @@
             [ring.util.response :as response]
             [hiccup.core :refer [html]]
             [clojure.data.json :as json]
+            [tames.log :as log]
             [tames.filesystem :as fs]
             [tames.systems :as systems]
             [tames.debug :as debug])
@@ -31,12 +32,6 @@
                     "jpeg" "image/jpeg"
                     "pdf"  "application/pdf"
                     })
-
-(defn print-s-exp
-  [s-exp]
-  (println "--- < Display s-expression > ---")
-  (pprint/pprint s-exp)
-  (println "--------------------------------"))
 
 (defn login-get
   [req]
@@ -75,20 +70,16 @@
 
 (defn login-post
   [req]
-  ;(print-s-exp req)
   (let [login_id (get-in req [:form-params "login_id"])
-        password   (get-in req [:form-params "password"])
-        next_url   (get-in req [:query-params "next"] "/tames")
+        password (get-in req [:form-params "password"])
+        next_url (get-in req [:query-params "next"] "/tames")
         ;; Draft Implement...
-        account    (systems/get-account login_id)
-        is-ok      (cond (nil? account) false
-                         (= (account "password") password) true
-                         :else false)]
-    (println "[login_id] :" login_id)
-    (println "[next url] :" next_url)
-    ;(println "----------")
-    ;(pprint/pprint account)
-    ;(println "----------")
+        account  (systems/get-account login_id)
+        is-ok    (cond (nil? account) false
+                       (= (account "password") password) true
+                       :else false)]
+    (log/info "login_id=%s" login_id)
+    (log/info "next url=%s" next_url)
     (-> (response/redirect next_url)
         (assoc-in [:session :identity] (if is-ok login_id nil)))))
 
@@ -102,8 +93,7 @@
   (let [result  (authenticated? req)
         uri     (req :uri)
         referer ((req :headers) "referer")]
-    (println (format "*** Unauthenticated: [%s], URI: [%s], referer: [%s]" result uri referer))
-    ;(pprint/pprint req)
+    (log/info "*** Unauthenticated: [%s], URI: [%s], referer: [%s]" result uri referer)
     (cond result
             (response/redirect "/tames")
           (= uri "/tames")
@@ -129,6 +119,11 @@
   (with-open [src (io/input-stream src-path)]
     (io/copy src (File. dst-path))))
 
+(defn use-cache?
+  [class-id]
+  (let [class-object (systems/get-object systems/CLASS_ID class-id)]
+    (get-in class-object ["options" "cache"] false)))
+  
 (defroutes app-routes
   ;; Authentication
   (GET "/login" req
@@ -136,12 +131,11 @@
   (POST "/login" req
     (login-post req))
   (GET "/logout" req
-    (println "*** LOGOUT ***")
+    (log/info "*** LOGOUT ***")
     (logout req))
 
   ;; Portal Top
   (GET "/tames" []
-    ;(println "[GET] /tames")
     (-> (response/file-response "core/tames.html")
         (response/header "Content-Type" (content-types "html"))))
   
@@ -150,27 +144,36 @@
     (let [class-id          (get-in req [:route-params :class-id] nil)
           if-modified-since (get-in req [:headers "if-modified-since"] nil)
           exists?           (systems/exists? systems/CLASS_ID class-id)
+          cache?            (use-cache? class-id)
           last-modified     (time-to-RFC1123 (systems/get-last-modified class-id nil))
           not-modified?     (= if-modified-since last-modified)]
-      ;(println (format "[GET] /api/%s" class-id))
-      (cond (not exists?) (-> (response/response nil) (response/status 410))
-            not-modified? (-> (response/response nil) (response/status 304))
-            :else         (-> (systems/get-data class-id nil)
-                              (response/header "Last-Modified" last-modified)))))
+      (cond (not exists?)
+              (-> (response/response nil) (response/status 410))
+            (not cache?)
+              (systems/get-data class-id nil)
+            not-modified?
+              (-> (response/response nil) (response/status 304))
+            :else
+              (-> (systems/get-data class-id nil)
+                  (response/header "Last-Modified" last-modified)))))
   (GET "/api/:class-id/:object-id" req
     (let [class-id          (get-in req [:route-params :class-id] nil)
           object-id         (get-in req [:route-params :object-id] nil)
           if-modified-since (get-in req [:headers "if-modified-since"] nil)
           exists?           (systems/exists? class-id object-id)
+          cache?            (use-cache? class-id)
           last-modified     (time-to-RFC1123 (systems/get-last-modified class-id object-id))
           not-modified?     (= if-modified-since last-modified)]
-      ;(println (format "[GET] /api/%s/%s" class-id object-id))
-      (cond (not exists?) (-> (response/response nil) (response/status 410))
-            not-modified? (-> (response/response nil) (response/status 304))
-            :else         (-> (systems/get-data class-id object-id)
-                              (response/header "Last-Modified" last-modified)))))
+      (cond (not exists?)
+              (-> (response/response nil) (response/status 410))
+            (not cache?)
+              (systems/get-data class-id object-id)
+            not-modified?
+              (-> (response/response nil) (response/status 304))
+            :else
+              (-> (systems/get-data class-id object-id)
+                  (response/header "Last-Modified" last-modified)))))
   (POST "/api/:class-id" [class-id & params]	;;; https://github.com/weavejester/compojure/wiki/Destructuring-Syntax
-    ;(println (str "[POST] /api/:class-id = /api/" class-id))
     (if (not (systems/exists? systems/CLASS_ID class-id))
         (-> (response/response nil)
             (response/status 410))
@@ -179,7 +182,6 @@
               added-files (dissoc params :value)]
           (systems/post-data class-id data added-files))))
   (PUT "/api/:class-id/:object-id" [class-id object-id & params]
-    ;(println (str "[PUT] /api/:class-id/:object-id = /api/" class-id "/" object-id))
     (if (not (systems/exists? class-id object-id))
         (-> (response/response nil)
             (response/status 410))
@@ -188,7 +190,6 @@
               added-files  (dissoc params :value)]
           (systems/put-data class-id object-id data added-files))))
   (DELETE "/api/:class-id/:object-id" [class-id object-id]
-    ;(println (str "[DELETE] /api/:class-id/:object-id = /api/" class-id "/" object-id))
     (if (not (systems/exists? class-id object-id))
         (-> (response/response nil)
             (response/status 410))
@@ -197,12 +198,9 @@
   (GET "/session/:session-key" req
     (let [session-key (get-in req [:route-params :session-key] nil)
           user-name   (get-in req [:session :identity] nil)]
-      ;(println (format "[GET] /session/:session-key = /session/%s" session-key))
-      ;(print-s-exp req)
       (format "{ \"%s\" : \"%s\"}" session-key user-name)))
   ;; Download
   (GET "/download/*" [& params]
-    ;(println (format "[GET] /download/* = /download/%s" (params :*)))
     (let [file        (File. (fs/get-absolute-path (format "data/%s" (params :*))))
           file-name   (. file getName)
           encoded-file-name (. (URLEncoder/encode file-name "UTF-8") replace "+" "%20")
@@ -212,7 +210,6 @@
           (response/header "Content-Type" "application/octet-stream")
           (response/header "Content-Disposition" disposition))))
   (GET "/image/:class-id/:object-id/*" [class-id object-id & params]
-    ;(println (format "[GET] /image/:class-id/:object-id/* = /image/%s/%s/%s" class-id object-id (params :*)))
     (let [path (fs/get-absolute-path (format "data/%s/.%s/%s" class-id object-id (params :*)))
           ext  (systems/get-file-extension path)
           mime (content-types ext)]
@@ -224,7 +221,6 @@
           generate-symbol   (symbol namespace-name "generate")
           get-content-type-symbol (symbol namespace-name "get-content-type")
           json-str          (URLDecoder/decode (params :value) "UTF-8")
-          ;data              (debug/pprint (json/read-str json-str))
           data              (json/read-str json-str)
           title             (data "title")
           tmp-file          (File/createTempFile title (format ".%s" generator-name))
@@ -232,7 +228,6 @@
           encoded-file-name (. (URLEncoder/encode file-name "UTF-8") replace "+" "%20")
           disposition       (format "attachment;filename=\"%s\";filename*=UTF-8''%s" file-name encoded-file-name)
           ]
-      ;(print-s-exp data)
       (require (symbol namespace-name))
       (apply (find-var generate-symbol) [tmp-file data])
       (println (. tmp-file getAbsolutePath))
@@ -240,7 +235,6 @@
           (response/header "Content-Type" (apply (find-var get-content-type-symbol) []))
           (response/header "Content-Disposition" disposition))))
   (POST "/operation/:operator-name/:operation-name" [operator-name operation-name & params]
-    (println (format "[POST] /opearations/%s/%s" operator-name operation-name))
     (let [namespace-name          (format "tames.operations.%s" operator-name)
           operation-symbol        (symbol namespace-name operation-name)
           json-str                (URLDecoder/decode (params :value) "UTF-8")
@@ -251,7 +245,6 @@
   
   ;; Other resources
   (GET "/*" [& params]
-    ;(println (format "[GET] /* (path=%s)" (params :*)))
     (let [relative-path (params :*)
           absolute-path (fs/get-absolute-path relative-path)
           offset        (. relative-path lastIndexOf ".")
@@ -262,10 +255,6 @@
                             (-> (response/file-response absolute-path)
                                 (response/header "Content-Type" content-type))
                             (route/not-found "Not Found"))]
-      ;(println (format "  offset       = %d" offset))
-      ;(println (format "  extension    = %s" extension))
-      ;(println (format "  content-type = %s" content-type))
-      ;(pprint/pprint res)
       res))
   
   (route/resources "/")
