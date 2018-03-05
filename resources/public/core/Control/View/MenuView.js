@@ -26,13 +26,13 @@ define(function (require) {
   var CLASS_TYPE_ID_MULTI = "b72dc321-5278-42da-8738-3503ae64bcad";
   
   function open_list_view(class_) {
-    var view_id = class_.class_type.properties.list_view.id;
+    var view_id = class_.options.properties.list_view.id;
     var caption = Locale.translate(class_.label);
     app.contents().tabs().show_tab(view_id, class_.id, null);
   }
   
   function open_detail_view(class_) {
-    var view_id = class_.class_type.properties.detail_view.id;
+    var view_id = class_.options.properties.detail_view.id;
     Storage.read(class_.id).done(function(object_maps) {
       var objects = Object.keys(object_maps).map(function(id) { return object_maps[id]; });
       if (objects.length == 0) {
@@ -48,12 +48,12 @@ define(function (require) {
   
   MenuView.open = function (class_) {
     //console.log(class_);
-    if (class_.class_type.id == CLASS_TYPE_ID_MULTI) {
+    if (class_.options.id == CLASS_TYPE_ID_MULTI) {
       open_list_view(class_);
-    } else if (class_.class_type.id == CLASS_TYPE_ID_SINGLE) {
+    } else if (class_.options.id == CLASS_TYPE_ID_SINGLE) {
       open_detail_view(class_);
     } else {
-      console.assert(false, "Unsupported View ID = [" + class_.class_type.id + "]");
+      console.assert(false, "Unsupported View ID = [" + class_.options.id + "]");
     }
   };
   
@@ -68,10 +68,10 @@ define(function (require) {
   };
 
   function menu_filter(class_) {
-    if (!class_.class_type) {
+    if (!class_.options) {
       return false;
     }
-    if (class_.class_type.id == "949c12c1-48c5-450a-bb2c-222fdf0a0734") {
+    if (class_.options.id == "949c12c1-48c5-450a-bb2c-222fdf0a0734") {
       return false;
     }
     return true;
@@ -126,7 +126,10 @@ define(function (require) {
     
     for (var i = 0; i < classes.length; i++) {
       var class_ = classes[i];
-      if (class_.class_type.id === "949c12c1-48c5-450a-bb2c-222fdf0a0734") {
+      if (is_null_or_undefined(class_.options)) {
+        continue;
+      }
+      if (class_.options.id === "949c12c1-48c5-450a-bb2c-222fdf0a0734") {
         continue;
       }
       create_item(selector, menu_box, class_);

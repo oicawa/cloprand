@@ -42,14 +42,14 @@ define(function (require) {
   ListView.create = function (event) {
     var view = event.item.context;
     var class_ = view._class;
-    console.log("[New Item Opend] view_id=" + class_.class_type.properties.detail_view.id);
-    app.contents().tabs().show_tab(class_.class_type.properties.detail_view.id, class_.id, Uuid.NULL);
+    console.log("[New Item Opend] view_id=" + class_.options.properties.detail_view.id);
+    app.contents().tabs().show_tab(class_.options.properties.detail_view.id, class_.id, Uuid.NULL);
   };
   
   function open_details(class_, grid, recids) {
     recids.forEach(function (recid) {
       var object_id = recid;
-      app.contents().tabs().show_tab(class_.class_type.properties.detail_view.id, class_.id, object_id);
+      app.contents().tabs().show_tab(class_.options.properties.detail_view.id, class_.id, object_id);
     });
   }
 
@@ -74,7 +74,7 @@ define(function (require) {
       return grid.get(recid);
     }).forEach(function (object) {
       var options = { "suffix":object.id, "preset":object };
-      var view_id = class_.class_type.properties.detail_view.id;
+      var view_id = class_.options.properties.detail_view.id;
       app.contents().tabs().show_tab(view_id, class_.id, Uuid.NULL, options);
     });
   }
@@ -150,13 +150,13 @@ define(function (require) {
     //})
     .then(function() {
       //return Grid.queries(self._class.object_fields, self._class.list_view.properties.queries).done(function(queries_) { queries = queries_; });
-      if (!self._class.class_type) {
+      if (!self._class.options) {
         return;
       }
-      if (self._class.class_type.id != "b72dc321-5278-42da-8738-3503ae64bcad") {
+      if (self._class.options.id != "b72dc321-5278-42da-8738-3503ae64bcad") {
         return;
       }
-      var src_queries = self._class.class_type.properties.list_view.properties.queries;
+      var src_queries = self._class.options.properties.list_view.properties.queries;
       return Grid.queries(self._class.object_fields, src_queries).done(function(queries_) { queries = queries_; });
     })
     .then(function() {
@@ -167,19 +167,19 @@ define(function (require) {
     })
     .then(function() {
       //var src_items = Utils.get_as_json(null, function() { return self._class.list_view.properties.toolbar_items; });
-      if (!self._class.class_type) {
+      if (!self._class.options) {
         return;
       }
-      if (self._class.class_type.id != "b72dc321-5278-42da-8738-3503ae64bcad") {
+      if (self._class.options.id != "b72dc321-5278-42da-8738-3503ae64bcad") {
         return;
       }
-      var src_items = Utils.get_as_json(null, function() { return self._class.class_type.properties.list_view.properties.toolbar_items; });
+      var src_items = Utils.get_as_json(null, function() { return self._class.options.properties.list_view.properties.toolbar_items; });
       if (!src_items)
         return;
       return Menu.convert(src_items, self).done(function(dst_items) { self._grid.items(dst_items); });
     })
     .then(function() {
-      var items = self._class.class_type.properties.list_view.properties.context_items;
+      var items = self._class.options.properties.list_view.properties.context_items;
       self._grid.context_menu(items, self);
     })
     .then(function() {
