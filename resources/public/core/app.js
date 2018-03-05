@@ -87,7 +87,7 @@ define(function (require) {
     self._contents = new Contents();
     self._contents.init("#contents-panel");
 
-    self.title(self._config.system_name);
+    self.title(self._config.system_label);
     self.favicon(favicon_path);
     self._login_id.text(self.session.identity);
 
