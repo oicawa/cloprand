@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [clojure.data.json :as json]
             [clojure.string :as string]
+            [tames.debug :as debug]
             [tames.filesystem :as fs]
             [tames.log :as log])
   (:import (java.io File InputStream)
@@ -26,9 +27,8 @@
   (. (File. @path) lastModified))
 
 (defn ensure-config-file
-  []
+  [path]
   (let [default-path (format "data/%s/%s.json" CLASS_ID DEFAULT_ID)
-        path         (get (System/getenv) "CONFIG_PATH" nil)
         file         (File. (fs/get-absolute-path (if (empty? path) default-path path)))
         dir          (. file getParentFile)]
     (cond (not (. dir exists))
@@ -44,8 +44,8 @@
               file))))
 
 (defn init
-  []
-  (let [file   (ensure-config-file)
+  [config-path]
+  (let [file   (ensure-config-file config-path)
         result (not (nil? file))]
     (when result
       (reset! path (. file getAbsolutePath))
