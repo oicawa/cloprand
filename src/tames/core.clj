@@ -1,6 +1,7 @@
 (ns tames.core
   (:gen-class)
-  (:require [compojure.core :refer :all]
+  (:require [clojure.tools.cli :refer [parse-opts]]
+            [compojure.core :refer :all]
             [compojure.handler]
             [ring.adapter.jetty :as server]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
@@ -14,27 +15,21 @@
             [tames.systems :as systems]
             [tames.operations.fonts :as fonts]))
 
-(defonce server (atom nil))
-
 (defn init
-  []
-  (log/info "Initializing...")
-  (let [result (and (fonts/init)
-                    (systems/init)
-                    (config/init))]
-    (when (not result)
-          (log/fatal "Initialization was failed. System shutdown...")
-          (. (Runtime/getRuntime) exit 1))))
-
-;;; NO AUTH
-;(def app
-;  (compojure.handler/site handler/app-routes))
+  ([]
+   (init (get (System/getenv) "TAMES_CONFIG_PATH" nil)))
+  ([config-path]
+   (log/info "Initializing...")
+   (let [result (and (fonts/init)
+                     (systems/init)
+                     (config/init config-path))]
+     (when (not result)
+           (log/fatal "Initialization was failed. System shutdown...")
+           (. (Runtime/getRuntime) exit 1)))))
 
 ;; WITH [Authentication] -> [Authorization]
 (def app
-  ;(let [rules   [{:pattern #"^(?!/login).*$" :handler authenticated?}]
   (let [rules   [{:pattern #"^(?!/login).*$" :handler authenticated?}]
-  ;(let [rules   [{:pattern #"^/index.*$" :handler authenticated?}] 
         backend (session-backend {:unauthorized-handler handler/unauthorized})]
     (-> handler/app-routes
         (wrap-access-rules {:rules rules :policy :allow})
@@ -44,3 +39,18 @@
         (wrap-defaults (assoc-in site-defaults [:security :anti-forgery] false))
         )))
 
+(def cli-options
+  [["-c" "--config CONFIG_PATH" "Configuration file path."
+    :default nil]
+   ["-p" "--port PORT" "Port number."
+    :default 3000
+    :parse-fn #(Integer/parseInt %)
+    :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]])
+
+(defn -main
+  [& args]
+  (let [options     (parse-opts args cli-options)
+        config-path (get-in options [:options :config])
+        port        (get-in options [:options :port])]
+    (init config-path)
+    (server/run-jetty app {:port port})))
