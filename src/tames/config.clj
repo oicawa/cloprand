@@ -26,6 +26,10 @@
   []
   (. (File. @path) lastModified))
 
+(defn storages
+  []
+  (map #(%1 "path") (@data "storages")))
+
 (defn ensure-config-file
   [path]
   (let [default-path (format "data/%s/%s.json" CLASS_ID DEFAULT_ID)

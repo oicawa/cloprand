@@ -27,6 +27,15 @@
           (= value-type Path) value
           :else nil)))
 
+(defn make-path
+  [base & more]
+  (loop [path        (to-path base)
+         descendants more]
+    (if (empty? descendants)
+        (. path toString)
+        (recur (. path resolve (first descendants))
+               (rest descendants)))))
+  
 (defn copy
   [src dst]
   (let [src-path (to-path src)

@@ -114,11 +114,6 @@
               (.setTimeZone (TimeZone/getTimeZone "GMT")))]
     (. sdf format time)))
 
-(defn copy-file
-  [src-path dst-path]
-  (with-open [src (io/input-stream src-path)]
-    (io/copy src (File. dst-path))))
-
 (defn use-cache?
   [class-id]
   (let [class-object (systems/get-object systems/CLASS_ID class-id)]

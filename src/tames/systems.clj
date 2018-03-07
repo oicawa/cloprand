@@ -158,16 +158,40 @@
   [class-id]
   (File. (fs/get-absolute-path (str "data/" class-id))))
 
+(defn get-class-directories
+  [class-id]
+  (map #(File. (fs/get-absolute-path (fs/make-path %1 class-id)))
+       (config/storages)))
+
 (defn get-json-file
   [class-id object-id]
-  (let [object-path (fs/get-absolute-path (format "data/%s/%s.json" class-id object-id))]
-    (File. object-path)))
+  (let [files   (map #(File. (fs/make-path %1 (format "%s.json" object-id)))
+                     (get-class-directories class-id))
+        targets (filter #(and (. %1 exists) (. %1 isFile))
+                        files)]
+    (if (empty? targets)
+        (first files)
+        (first targets))))
 
+(defn assoc-files
+  [dic files]
+  (if (empty? files)
+      dic
+      (let [file (first files)]
+        (recur (assoc dic (. file getName) file) (rest files)))))
+  
 (defn get-json-files
   [class-id]
-  (let [class-dir (get-class-directory class-id)
-        files     (filter #(. %1 isFile) (. class-dir listFiles))]
-    files))
+  (loop [files      {}
+         class-dirs (get-class-directories class-id)]
+    (if (empty? class-dirs)
+        (vals files)
+        (let [class-dir (first class-dirs)
+              rest-dirs (rest class-dirs)
+              tmp-files (filter #(and (. %1 isFile)
+                                      (nil? (files (. %1 getName))))
+                                (. class-dir listFiles))]
+          (recur (assoc-files files tmp-files) rest-dirs)))))
 
 (defn get-object
   [class-id object-id]
@@ -295,9 +319,8 @@
         :else
           (. (get-json-file class-id object-id) lastModified)))
 
-(defn create-object
+(defn create-object-org
   [class-id object-id s-exp-data]
-  (println "Called create-object function.")
   (let [relative-path (Paths/get (str "data/" class-id) (into-array String [(str object-id ".json")]))
         base-name     (. relative-path getFileName)
         dir-path      (. relative-path getParent)]
@@ -305,24 +328,31 @@
     (with-open [w (io/writer (. relative-path toString))]
       (json/write s-exp-data w))))
 
+(defn create-object
+  [class-id object-id s-exp-data]
+  (let [file (get-json-file class-id object-id)
+        dir  (. file getParentFile)]
+    (ensure-directory (. dir toString))
+    (with-open [w (io/writer (. file toString))]
+      (json/write s-exp-data w))))
+
 (defn update-object
   [class-id object-id s-exp-data]
-  (let [path        (if (config/id? class-id)
-                        @config/path
-                        (str "data/" class-id "/" object-id ".json"))
-        object-file (File. (fs/get-absolute-path path))]
+  (let [file (if (config/id? class-id)
+                 (File. @config/path)
+                 (get-json-file class-id object-id))]
     ;; !! CAUTION !!
     ;; Implement 's-exp-data' check logic!!
-    (with-open [w (io/writer object-file)]
+    (with-open [w (io/writer file)]
       (json/write s-exp-data w))))
 
 (defn delete-object
   [class-id object-id]
-  (println "Called delete-object function.")
-  (let [file (File. (fs/get-absolute-path (str "data/" class-id "/" object-id ".json")))]
+  (let [file (get-json-file class-id object-id)
+        dir  (. file getParentFile)]
     (remove-file file)
     (if (= CLASS_ID class-id)
-        (remove-file (File. (format "data/%s" object-id))))))
+        (remove-file dir))))
 
 (defn get-data
   [class-id object-id]
