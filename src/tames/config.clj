@@ -26,9 +26,10 @@
   []
   (. (File. @path) lastModified))
 
-(defn storages
+(defn storage-paths
   []
-  (map #(%1 "path") (@data "storages")))
+  (map #(fs/get-absolute-path (%1 "path"))
+       (@data "storages")))
 
 (defn ensure-config-file
   [path]

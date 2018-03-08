@@ -24,19 +24,41 @@
 (def FILES_ID "748189ad-ce16-43f6-ae2a-fa48e5ec4a39")
 (def IMAGES_ID "4ee20d87-b73d-40a7-a521-170593ac2512")
 
-(declare remove-file)
+;;; ------------------------------------------------------------
+;;; Target paths
+;;; ------------------------------------------------------------
+(defn get-target-paths
+  [path-type & descendants]
+  (let [files   (map #(let [args (cons %1 descendants)]
+                       (File. (apply fs/make-path args)))
+                     (config/storage-paths))
+        targets (filter #(and (. %1 exists)
+                              (cond (= path-type :file) (. %1 isFile)
+                                    (= path-type :dir)  (. %1 isDirectory)
+                                    :else               false))
+                        files)]
+    (if (empty? targets) files targets)))
 
-(defn empty-directory
-  [file]
-  (if (. file isDirectory)
-      (doseq [child (. file listFiles)]
-        (remove-file child))))
+(defn get-target-files
+  [& descendants]
+  (apply get-target-paths (cons :file descendants)))
 
-(defn remove-file
-  [file]
-  (empty-directory file)
-  (. file delete))
-  
+(defn get-target-file
+  [& descendants]
+  (first (apply get-target-files descendants)))
+
+(defn get-target-dirs
+  [& descendants]
+  (apply get-target-paths (cons :dir descendants)))
+
+(defn get-target-dir
+  [& descendants]
+  (first (apply get-target-dirs descendants)))
+
+
+;;; ------------------------------------------------------------
+;;; Jar & Resources
+;;; ------------------------------------------------------------
 (defn get-resource-path
   [relative-path]
   (. (File. relative-path) getPath))
@@ -123,55 +145,29 @@
                            (get-jar-resource-children jar-path relative-dir-path dir? file?))
           :else          nil)))
 
-(defn ensure-directory
-  [relative-dir-path]
-  (let [systems-path (fs/get-absolute-path relative-dir-path)
-        systems-dir  (File. systems-path)]
-    (if (and (. systems-dir exists) (not (. systems-dir isDirectory)))
-        (. systems-dir delete))
-    (if (not (. systems-dir exists))
-        (. systems-dir mkdirs))))
+(defn copy-resource-file
+  [resource-path dst-path]
+  (let [src-url       (io/resource resource-path)
+        type          (get-resource-type src-url)
+        last-modified (cond (= :file type) (let [file (File. (. src-url toURI))]
+                                             (. file lastModified))
+                            (= :jar  type) (let [entry    (get-jar-resource-entry src-url)
+                                                 filetime (. entry getLastModifiedTime)]
+                                             (. filetime toMillis)))
+        dst-file      (File. dst-path)
+        ]
+    (with-open [stream (io/input-stream src-url)]
+      (io/copy stream dst-file))
+    (. dst-file setLastModified last-modified)
+    ))
 
-(defn exists?
-  [class-id object-id]
-  (if (config/id? class-id)
-      true
-      (let [dir  (File. (fs/get-absolute-path (str "data/" class-id)))
-            file (File. (fs/get-absolute-path (str "data/" class-id "/" object-id ".json")))]
-        (cond (not (. dir isDirectory)) false
-              (nil? object-id)          true
-              :else                     (. file isFile)))))
 
-(defn get-file-extension
-  [path]
-  (let [start (. path lastIndexOf ".")
-        ext   (if (= start -1)
-                  ""
-                  (. path substring (+ start 1)))]
-    ext))
-
-(defn get-file-contents
-  [path]
-  { "file_path" path "file_contents" (slurp path) })
-
-(defn get-class-directory
-  [class-id]
-  (File. (fs/get-absolute-path (str "data/" class-id))))
-
-(defn get-class-directories
-  [class-id]
-  (map #(File. (fs/get-absolute-path (fs/make-path %1 class-id)))
-       (config/storages)))
-
+;;; ------------------------------------------------------------
+;;; JSON files
+;;; ------------------------------------------------------------
 (defn get-json-file
   [class-id object-id]
-  (let [files   (map #(File. (fs/make-path %1 (format "%s.json" object-id)))
-                     (get-class-directories class-id))
-        targets (filter #(and (. %1 exists) (. %1 isFile))
-                        files)]
-    (if (empty? targets)
-        (first files)
-        (first targets))))
+  (get-target-file class-id (format "%s.json" object-id)))
 
 (defn assoc-files
   [dic files]
@@ -183,7 +179,7 @@
 (defn get-json-files
   [class-id]
   (loop [files      {}
-         class-dirs (get-class-directories class-id)]
+         class-dirs (get-target-dirs class-id)]
     (if (empty? class-dirs)
         (vals files)
         (let [class-dir (first class-dirs)
@@ -193,6 +189,36 @@
                                 (. class-dir listFiles))]
           (recur (assoc-files files tmp-files) rest-dirs)))))
 
+
+;;; ------------------------------------------------------------
+;;; File & Directory
+;;; ------------------------------------------------------------
+(defn ensure-directory
+  [target]
+  (let [dir (fs/to-file target)]
+    (if (and (. dir exists) (not (. dir isDirectory)))
+        (. dir delete))
+    (if (not (. dir exists))
+        (. dir mkdirs))))
+
+(defn exists?
+  [class-id object-id]
+  (if (config/id? class-id)
+      true
+      (let [dir  (get-target-dir class-id)
+            file (get-json-file class-id object-id)]
+        (cond (not (. dir isDirectory)) false
+              (nil? object-id)          true
+              :else                     (. file isFile)))))
+
+(defn get-file-contents
+  [path]
+  { "file_path" path "file_contents" (slurp path) })
+
+
+;;; ------------------------------------------------------------
+;;; Object
+;;; ------------------------------------------------------------
 (defn get-object
   [class-id object-id]
   (let [file (if (config/id? class-id)
@@ -203,10 +229,6 @@
         (with-open [rdr (io/reader (. file getAbsolutePath))]
           (json/read rdr)))))
 
-(defn get-object-as-json
-  [class-id object-id]
-  (json/write-str (get-object class-id object-id)))
-
 (defn get-objects
   [class-id]
   (let [files   (get-json-files class-id)
@@ -215,118 +237,6 @@
                      files)
         ids     (map #(%1 "id") objects)]
     (zipmap ids objects)))
-
-(defn get-objects-as-json
-  [class-id]
-  (let [objects (get-objects class-id)]
-    (json/write-str objects)))
-
-(defn get-resource-classes
-  []
-  (let [classes-path    (get-resource-path "tames/classes")
-        class-dir-names (get-resource-children classes-path true false)
-        class-jsons     (map #(let [relative-path (format "%s/%s/class.json" classes-path %1)
-                                    resource      (io/resource relative-path)]
-                               (with-open [stream (io/input-stream resource)]
-                                 (json/read-str (slurp stream))))
-                             class-dir-names)]
-    class-jsons))
-
-(defn get-resources-list
-  []
-  (json/write-str (get-resource-children "tames/defaults" true false)))
-
-(defn create-authorized-result
-  [authorized? url]
-  (-> (response/response (json/write-str { "url" url }))
-      (response/status (if authorized? 200 401))
-      (response/header "Contents-Type" "text/json; charset=utf-8")))
-
-(defn get-files-fields
-  [class-id]
-  (let [class_ (get-object CLASS_ID class-id)]
-    (filter #(let [id ((%1 "datatype") "id")]
-               (or (= id FILES_ID)
-                   (= id IMAGES_ID)))
-            (class_ "object_fields"))))
-
-(defn remove-attached-files
-  [class-id object-id value files_fields]
-  (doseq [field files_fields]
-    (let [dst-dir-path (fs/get-absolute-path (format "data/%s/.%s/%s" class-id, object-id (field "name")))
-          file-names   (keys ((value (field "name")) "remove"))]
-      (doseq [file-name file-names]
-        (let [file (File. (format "%s/%s" dst-dir-path file-name))]
-          (println "[** Remove File **]" (. file getAbsolutePath))
-          (if (. file exists)
-              (. file delete)))))))
-
-(defn save-attached-files
-  [class-id object-id value files_fields added-files]
-  (doseq [field files_fields]
-    (let [dst-dir-path (format "data/%s/.%s/%s" class-id, object-id (field "name"))
-          file-keys    (keys ((value (field "name")) "added"))]
-      (ensure-directory dst-dir-path)
-      (pprint/pprint file-keys)
-      (doseq [file-key file-keys]
-        (let [file      (added-files (keyword file-key))
-              tmp-file  (file :tempfile)
-              file-name (. (File. (file :filename)) getName)
-              dst-file  (format "%s/%s" dst-dir-path file-name)]
-          (io/copy tmp-file (File. dst-file)))))))
-
-(defn update-files-values
-  [class-id object-id files_fields raw-value]
-  (let [base-dir   (fs/get-absolute-path (format "data/%s/.%s" class-id object-id))
-        field_names (map #(%1 "name") files_fields)]
-    (loop [names field_names
-           value raw-value]
-      (if (empty? names)
-          value
-          (let [name    (first names)
-                path    (format "%s/%s" base-dir name)
-                current (map (fn [file] { "name" (. file getName) "size" (. file length) })
-                             (vec (. (File. path) listFiles)))
-                value1  (dissoc value name)
-                value2  (assoc value name {"class_id" class-id "object_id" object-id "current" current})]
-            (recur (rest names) value2))))))
-
-(defn get-account
-  [login_id]
-  (let [accounts (filter #(= (%1 "login_id") login_id) (vals (get-objects ACCOUNT_ID)))
-        account  (if (= (count accounts) 0) nil (first accounts))]
-    (pprint/pprint accounts)
-    account))
-
-(defn is-user-in-group
-  [account-id group-id]
-  (let [group    (get-object GROUP_ID group-id)
-        accounts (group "acounts")]
-    (loop [rest-accounts accounts]
-      (cond (empty? rest-accounts) false
-            (= account-id (first rest-accounts)) true
-            :else (recur (rest rest-accounts))))))
-
-(defn get-last-modified
-  [class-id object-id]
-  (cond (config/id? class-id)
-          (config/last-modified)
-        (nil? object-id)
-          (let [dir   (get-class-directory class-id)
-                files (sort #(- (. %2 lastModified) (. %1 lastModified))
-                            (cons dir (get-json-files class-id)))]
-            (. (first files) lastModified))
-        :else
-          (. (get-json-file class-id object-id) lastModified)))
-
-(defn create-object-org
-  [class-id object-id s-exp-data]
-  (let [relative-path (Paths/get (str "data/" class-id) (into-array String [(str object-id ".json")]))
-        base-name     (. relative-path getFileName)
-        dir-path      (. relative-path getParent)]
-    (ensure-directory (. dir-path toString))
-    (with-open [w (io/writer (. relative-path toString))]
-      (json/write s-exp-data w))))
 
 (defn create-object
   [class-id object-id s-exp-data]
@@ -350,10 +260,128 @@
   [class-id object-id]
   (let [file (get-json-file class-id object-id)
         dir  (. file getParentFile)]
-    (remove-file file)
+    (fs/delete file)
     (if (= CLASS_ID class-id)
-        (remove-file dir))))
+        (fs/delete dir))))
 
+(defn get-object-as-json
+  [class-id object-id]
+  (json/write-str (get-object class-id object-id)))
+
+(defn get-objects-as-json
+  [class-id]
+  (let [objects (get-objects class-id)]
+    (json/write-str objects)))
+
+
+;;; ------------------------------------------------------------
+;;; Attachment
+;;; ------------------------------------------------------------
+(defn get-attachment-base-dirs
+  [class-id object-id]
+  (get-target-dirs class-id (format ".%s" object-id)))
+
+(defn get-attachment-base-dir
+  [class-id object-id]
+  (first (get-target-dirs class-id (format ".%s" object-id))))
+
+(defn get-attachment-dirs
+  [class-id object-id field_name]
+  (get-target-dirs class-id (format ".%s" object-id) field_name))
+
+(defn get-attachment-dir
+  [class-id object-id field_name]
+  (first (get-attachment-dirs class-id object-id field_name)))
+
+(defn get-attachment-file
+  [class-id object-id field_and_file_name]
+  (get-target-file class-id (format ".%s" object-id) field_and_file_name))
+  
+(defn get-files-fields
+  [class-id]
+  (let [class_ (get-object CLASS_ID class-id)]
+    (filter #(let [id ((%1 "datatype") "id")]
+               (or (= id FILES_ID)
+                   (= id IMAGES_ID)))
+            (class_ "object_fields"))))
+
+(defn remove-attached-files
+  [class-id object-id value files_fields]
+  (doseq [field files_fields]
+    (let [dst-dir    (get-attachment-dir class-id object-id (field "name"))
+          file-names (keys ((value (field "name")) "remove"))]
+      (doseq [file-name file-names]
+        (let [file (File. dst-dir file-name)]
+          (if (. file exists)
+              (. file delete)))))))
+
+(defn save-attached-files
+  [class-id object-id value files_fields added-files]
+  (doseq [field files_fields]
+    (let [dst-dir   (get-attachment-dir class-id object-id (field "name"))
+          file-keys (keys ((value (field "name")) "added"))]
+      (ensure-directory dst-dir)
+      (doseq [file-key file-keys]
+        (let [file      (added-files (keyword file-key))
+              tmp-file  (file :tempfile)
+              file-name (. (File. (file :filename)) getName)
+              dst-file  (.. (fs/to-path dst-dir) (resolve file-name) (toFile))]
+          (io/copy tmp-file dst-file))))))
+
+(defn update-files-values
+  [class-id object-id files_fields raw-value]
+  (let [base-dir-path (get-attachment-base-dir class-id object-id)
+        field_names   (map #(%1 "name") files_fields)]
+    (loop [names field_names
+           value raw-value]
+      (if (empty? names)
+          value
+          (let [name     (first names)
+                dir      (fs/to-file (fs/make-path base-dir-path name))
+                current  (map (fn [file] { "name" (. file getName) "size" (. file length) })
+                              (vec (if (and (not (nil? dir)) (. dir exists) (. dir isDirectory))
+                                       (. dir listFiles)
+                                       [])))
+                value1  (dissoc value name)
+                value2  (assoc value name {"class_id" class-id "object_id" object-id "current" current})]
+            (recur (rest names) value2))))))
+
+
+;;; ------------------------------------------------------------
+;;; Access
+;;; ------------------------------------------------------------
+(defn get-account
+  [login_id]
+  (let [accounts (filter #(= (%1 "login_id") login_id) (vals (get-objects ACCOUNT_ID)))
+        account  (if (= (count accounts) 0) nil (first accounts))]
+    account))
+
+(defn is-user-in-group
+  [account-id group-id]
+  (let [group    (get-object GROUP_ID group-id)
+        accounts (group "acounts")]
+    (loop [rest-accounts accounts]
+      (cond (empty? rest-accounts) false
+            (= account-id (first rest-accounts)) true
+            :else (recur (rest rest-accounts))))))
+
+(defn get-last-modified
+  [class-id object-id]
+  (cond (config/id? class-id)
+          (config/last-modified)
+        (nil? object-id)
+          (let [dirs      (get-target-dirs class-id)
+                files     (get-json-files class-id)
+                all-items (sort #(- (. %2 lastModified) (. %1 lastModified))
+                                (concat dirs files))]
+            (. (first all-items) lastModified))
+        :else
+          (. (get-json-file class-id object-id) lastModified)))
+
+
+;;; ------------------------------------------------------------
+;;; Called from handler
+;;; ------------------------------------------------------------
 (defn get-data
   [class-id object-id]
   (-> (response/response (if (nil? object-id)
@@ -386,26 +414,9 @@
 (defn delete-data
   [class-id object-id]
   (delete-object class-id object-id)
-  (remove-file (File. (fs/get-absolute-path (format "data/%s/.%s" class-id, object-id))))
-  (println "Delete OK.")
+  (fs/delete (get-attachment-base-dir class-id object-id))
   (-> (response/response (get-objects-as-json class-id))
       (response/header "Contents-Type" "text/json; charset=utf-8")))
-
-(defn copy-resource-file
-  [resource-path dst-path]
-  (let [src-url       (io/resource resource-path)
-        type          (get-resource-type src-url)
-        last-modified (cond (= :file type) (let [file (File. (. src-url toURI))]
-                                             (. file lastModified))
-                            (= :jar  type) (let [entry    (get-jar-resource-entry src-url)
-                                                 filetime (. entry getLastModifiedTime)]
-                                             (. filetime toMillis)))
-        dst-file      (File. dst-path)
-        ]
-    (with-open [stream (io/input-stream src-url)]
-      (io/copy stream dst-file))
-    (. dst-file setLastModified last-modified)
-    ))
 
 (defn ensure-init-files
   [relative-path]

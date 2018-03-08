@@ -9,23 +9,31 @@
            (java.util.jar JarFile JarEntry)
            (java.util UUID Calendar)))
 
+(defn to-path
+  [target]
+  (let [target-type (type target)]
+    (cond (= target-type String) (. (File. target) toPath)
+          (= target-type File) (. target toPath)
+          (= target-type Path) target
+          :else nil)))
+
+(defn to-file
+  [target]
+  (let [target-type (type target)]
+    (cond (= target-type String) (File. target)
+          (= target-type Path) (. target toFile)
+          (= target-type File) target
+          :else nil)))
+
 (defn get-absolute-path
-  [relative-path]
-  (let [file (File. relative-path)]
+  [target]
+  (let [file (to-file target)]
     (if (not (. file exists))
         (. file getCanonicalPath)
         (let [path      (. file toPath)
               options   (into-array LinkOption [LinkOption/NOFOLLOW_LINKS])
               real-path (. path toRealPath options)]
           (. real-path toString)))))
-
-(defn to-path
-  [value]
-  (let [value-type (type value)]
-    (cond (= value-type String) (. (File. value) toPath)
-          (= value-type File) (. value toPath)
-          (= value-type Path) value
-          :else nil)))
 
 (defn make-path
   [base & more]
@@ -36,6 +44,22 @@
         (recur (. path resolve (first descendants))
                (rest descendants)))))
   
+(defn ext
+  [target]
+  (let [name  (. (to-file target) getName)
+        start (. name lastIndexOf ".")]
+    (if (= start -1)
+        ""
+        (. name substring (+ start 1)))))
+
+(defn delete
+  [target]
+  (let [file (to-file target)]
+    (if (. file isDirectory)
+        (doseq [child (. file listFiles)]
+          (delete child)))
+    (. file delete)))
+
 (defn copy
   [src dst]
   (let [src-path (to-path src)

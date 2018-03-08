@@ -88,6 +88,12 @@
   (-> (response/redirect "/login?next=/tames&mode=logout")
       (assoc :session {})))
 
+(defn create-authorized-result
+  [authorized? url]
+  (-> (response/response (json/write-str { "url" url }))
+      (response/status (if authorized? 200 401))
+      (response/header "Contents-Type" "text/json; charset=utf-8")))
+
 (defn unauthorized
   [req meta]
   (let [result  (authenticated? req)
@@ -103,9 +109,9 @@
           (= uri "/logout")
             (response/redirect "/login?next=/tames&mode=logout")
           (= uri "/session/identity")
-            (systems/create-authorized-result false "/login?next=/tames")
+            (create-authorized-result false "/login?next=/tames")
           :else
-            (systems/create-authorized-result false "/login?next=/tames&mode=timeout"))))
+            (create-authorized-result false "/login?next=/tames&mode=timeout"))))
 
 (defn time-to-RFC1123
   [time]
@@ -205,8 +211,8 @@
           (response/header "Content-Type" "application/octet-stream")
           (response/header "Content-Disposition" disposition))))
   (GET "/image/:class-id/:object-id/*" [class-id object-id & params]
-    (let [path (fs/get-absolute-path (format "data/%s/.%s/%s" class-id object-id (params :*)))
-          ext  (systems/get-file-extension path)
+    (let [path (. (systems/get-attachment-file class-id object-id (params :*)) toString)
+          ext  (fs/ext path)
           mime (content-types ext)]
       (-> (response/file-response path)
           (response/header "Content-Type" mime))))
