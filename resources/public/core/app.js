@@ -10,6 +10,7 @@ define(function (require) {
   var Storage = require("core/Storage");
   var Contents = require("core/Contents");
   var Tree = require("core/Control/Tree");
+  var Css = require("core/Css");
 
   var LAYOUT_TEMPLATE = '<div id="layout"></div>';
   var TOP_TEMPLATE = '' +
@@ -136,7 +137,7 @@ define(function (require) {
     .done(function(data){
       self.session = data;
       $.when(
-        Utils.load_css("core/app.css"),
+        Css.load("core/app.css"),
         Storage.read(Class.SYSTEM_ID, CONFIG_OBJECT_ID).done(function(data){ self._config = data; }),
         Storage.read(Primitive.ID).done(function(data){ self._primitives = data; })
       ).then(function() {

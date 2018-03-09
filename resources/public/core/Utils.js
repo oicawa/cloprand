@@ -18,7 +18,9 @@ define(function (require) {
       var dfd = new $.Deferred;
       var head = $("head");
       var url = path + '?ver=' + (new Date()).getTime();
+      //console.log("css URL=[" + url + "]");
       var css = head.children("link[href='" + url + "']");
+      //console.log("css.length=" + css.length);
       if (0 < css.length) {
         dfd.resolve();
         return dfd.promise();
@@ -27,7 +29,7 @@ define(function (require) {
       var link = document.createElement('link');
       link.rel = 'stylesheet';
       link.type = 'text/css';
-      link.href = path;
+      link.href = url;
       link.onload = function() {
         dfd.resolve();
       };

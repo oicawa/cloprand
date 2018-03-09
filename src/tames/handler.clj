@@ -245,19 +245,35 @@
       (apply (find-var operation-symbol) [data])))
   
   ;; Other resources
-  (GET "/*" [& params]
-    (let [relative-path (params :*)
-          absolute-path (fs/get-absolute-path relative-path)
-          offset        (. relative-path lastIndexOf ".")
-          extension     (if (= offset -1) "" (. relative-path substring (+ offset 1)))
-          content-type  (content-types (. extension toLowerCase))
-          exist?        (. (File. absolute-path) exists)
-          res           (if exist?
-                            (-> (response/file-response absolute-path)
-                                (response/header "Content-Type" content-type))
-                            (route/not-found "Not Found"))]
-      res))
-  
+  ;(GET "/*" [& params]
+  ;  (let [relative-path (params :*)
+  ;        ;if-modified-since (get-in req [:headers "if-modified-since"] nil)
+  ;        absolute-path (fs/get-absolute-path relative-path)
+  ;        offset        (. relative-path lastIndexOf ".")
+  ;        extension     (if (= offset -1) "" (. relative-path substring (+ offset 1)))
+  ;        content-type  (content-types (. extension toLowerCase))
+  ;        exist?        (. (File. absolute-path) exists)
+  ;        res           (if exist?
+  ;                          (-> (response/file-response absolute-path)
+  ;                              (response/header "Content-Type" content-type))
+  ;                          (route/not-found "Not Found"))]
+  ;    res))
+  (GET "/resources/*" req
+    ;(println "--- GET /resources/* ---")
+    ;(pprint/pprint req);
+    (let [relative-path     (get-in req [:route-params :*] nil)
+          if-modified-since (get-in req [:headers "if-modified-since"] nil)
+          file              (systems/get-target-file relative-path)
+          ext               (fs/ext file)
+          content-type      (content-types (. ext toLowerCase))
+          last-modified     (time-to-RFC1123 (. file lastModified))
+          not-modified?     (= if-modified-since last-modified)]
+      (cond (not (. file exists)) (route/not-found "Not Found")
+            not-modified?         (-> (response/response nil)
+                                      (response/status 304))
+            :else                 (-> (response/file-response (. file getAbsolutePath))
+                                      (response/header "Content-Type" content-type)
+                                      (response/header "Last-Modified" last-modified)))))
   (route/resources "/")
   (route/not-found "Not Found"))
 

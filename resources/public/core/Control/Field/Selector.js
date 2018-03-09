@@ -9,6 +9,7 @@ define(function (require) {
   var Grid = require("core/Control/Grid");
   var Finder = require("core/Control/Finder");
   var Field = require("core/Control/Field/Field");
+  var Css = require("core/Css");
   
   var TEMPLATE = '<div></div>';
 
@@ -43,7 +44,7 @@ define(function (require) {
     var columns = null;
     var items = null;
     console.assert(!(!class_id), field);
-    Utils.load_css("/core/Control/Field/Selector.css")
+    Css.load("core/Control/Field/Selector.css")
     .then(function () {
       return Storage.read(Class.CLASS_ID, class_id).then(function(data) { class_ = data; });
     })

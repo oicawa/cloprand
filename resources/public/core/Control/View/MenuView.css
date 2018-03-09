@@ -17,6 +17,7 @@ div.menuview-item {
   display:inline-block;
   width:120px;
   height:120px;
+  padding:10px;
 }
 div.menuview-item > div > i {
   width:100px;

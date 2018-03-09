@@ -5,6 +5,7 @@ define(function (require) {
   var Class = require("core/Class");
   var Storage = require("core/Storage");
   var Locale = require("core/Locale");
+  var Css = require("core/Css");
   
   var TEMPLATE = '<div></div>';
   
@@ -29,7 +30,7 @@ define(function (require) {
     
     var self = this;
     
-    Utils.load_css("/core/Control/Toolbar.css")
+    Css.load("core/Control/Toolbar.css")
     .then(function() {
       self._root.append(TEMPLATE);
       var name = Uuid.version4();

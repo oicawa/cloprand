@@ -8,6 +8,7 @@ define(function (require) {
   var Grid = require("core/Control/Grid");
   var DivButton = require("core/Control/DivButton");
   var Uuid = require("core/Uuid");
+  var Css = require("core/Css");
   
   var TEMPLATE = '' +
 '<div class="finder">' +
@@ -117,7 +118,7 @@ define(function (require) {
     });
 
     var self = this;
-    Utils.load_css("/core/Control/Finder.css")
+    Css.load("core/Control/Finder.css")
     .then(function() {
       return create_search(selector + " > div > div[name='button']", self);
     })

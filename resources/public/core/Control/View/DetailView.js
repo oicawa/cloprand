@@ -14,6 +14,7 @@ define(function (require) {
   var Menu = require("core/Control/Menu");
   var Dialog = require("core/Dialog");
   var Action = require("core/Action");
+  var Css = require("core/Css");
 
   var TEMPLATE = '' +
 '<div class="detailview-panel">' +
@@ -305,7 +306,7 @@ define(function (require) {
     }
     
     $.when(
-      Utils.load_css("/core/Control/View/DetailView.css"),
+      Css.load("core/Control/View/DetailView.css"),
       Storage.read(Class.CLASS_ID, class_id).done(function (data) { self._class = data; }),
       get_object_data(self, class_id, object_id)
     )

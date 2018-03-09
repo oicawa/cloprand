@@ -4,6 +4,7 @@ define(function (require) {
   var Inherits = require("core/Inherits");
   var Locale = require("core/Locale");
   var Uuid = require("core/Uuid");
+  var Css = require("core/Css");
   var app = require("app");
 
   var TEMPLATE_FIELD = '<div class="w2ui-field"></div>';
@@ -249,7 +250,7 @@ define(function (require) {
     this._custom_assist = !custom_assist ? null : custom_assist;
 
     var self = this;
-    Utils.load_css("/core/Control/Detail.css")
+    Css.load("core/Control/Detail.css")
     .then(function () {
       return create_frame(self, selector);
     })

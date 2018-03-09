@@ -5,6 +5,7 @@ define(function (require) {
   var Class = require("core/Class");
   var Grid = require("core/Control/Grid");
   var Field = require("core/Control/Field/Field");
+  var Css = require("core/Css");
   
   function create_search(self, root, field) {
     self._search.on("click", function(event) {
@@ -32,7 +33,7 @@ define(function (require) {
     var self = this;
     var selector = null;
     
-    Utils.load_css("/core/Control/SelectDialog.css")
+    Css.load("core/Control/SelectDialog.css")
     .then(function() {
       return self._dialog.init(function(panel_id) {
         var inner_dfd = new $.Deferred;

@@ -31,7 +31,7 @@
   [path-type & descendants]
   (let [files   (map #(let [args (cons %1 descendants)]
                        (File. (apply fs/make-path args)))
-                     (config/storage-paths))
+                     (config/package-paths))
         targets (filter #(and (. %1 exists)
                               (cond (= path-type :file) (. %1 isFile)
                                     (= path-type :dir)  (. %1 isDirectory)
@@ -167,7 +167,11 @@
 ;;; ------------------------------------------------------------
 (defn get-json-file
   [class-id object-id]
-  (get-target-file class-id (format "%s.json" object-id)))
+  (get-target-file "data" class-id (format "%s.json" object-id)))
+
+(defn get-json-dir
+  [class-id]
+  (get-target-dir "data" class-id))
 
 (defn assoc-files
   [dic files]
@@ -179,7 +183,7 @@
 (defn get-json-files
   [class-id]
   (loop [files      {}
-         class-dirs (get-target-dirs class-id)]
+         class-dirs (get-target-dirs "data" class-id)]
     (if (empty? class-dirs)
         (vals files)
         (let [class-dir (first class-dirs)
@@ -205,7 +209,7 @@
   [class-id object-id]
   (if (config/id? class-id)
       true
-      (let [dir  (get-target-dir class-id)
+      (let [dir  (get-target-dir "data" class-id)
             file (get-json-file class-id object-id)]
         (cond (not (. dir isDirectory)) false
               (nil? object-id)          true
@@ -258,11 +262,11 @@
 
 (defn delete-object
   [class-id object-id]
-  (let [file (get-json-file class-id object-id)
-        dir  (. file getParentFile)]
+  (let [file (get-json-file class-id object-id)]
     (fs/delete file)
     (if (= CLASS_ID class-id)
-        (fs/delete dir))))
+        (let [data-dir (get-json-dir object-id)]
+          (fs/delete data-dir)))))
 
 (defn get-object-as-json
   [class-id object-id]
@@ -279,15 +283,15 @@
 ;;; ------------------------------------------------------------
 (defn get-attachment-base-dirs
   [class-id object-id]
-  (get-target-dirs class-id (format ".%s" object-id)))
+  (get-target-dirs "data" class-id (format ".%s" object-id)))
 
 (defn get-attachment-base-dir
   [class-id object-id]
-  (first (get-target-dirs class-id (format ".%s" object-id))))
+  (first (get-target-dirs "data" class-id (format ".%s" object-id))))
 
 (defn get-attachment-dirs
   [class-id object-id field_name]
-  (get-target-dirs class-id (format ".%s" object-id) field_name))
+  (get-target-dirs "data" class-id (format ".%s" object-id) field_name))
 
 (defn get-attachment-dir
   [class-id object-id field_name]
@@ -295,7 +299,7 @@
 
 (defn get-attachment-file
   [class-id object-id field_and_file_name]
-  (get-target-file class-id (format ".%s" object-id) field_and_file_name))
+  (get-target-file "data" class-id (format ".%s" object-id) field_and_file_name))
   
 (defn get-files-fields
   [class-id]
@@ -370,7 +374,7 @@
   (cond (config/id? class-id)
           (config/last-modified)
         (nil? object-id)
-          (let [dirs      (get-target-dirs class-id)
+          (let [dirs      (get-target-dirs "data" class-id)
                 files     (get-json-files class-id)
                 all-items (sort #(- (. %2 lastModified) (. %1 lastModified))
                                 (concat dirs files))]

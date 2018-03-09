@@ -11,6 +11,7 @@ define(function (require) {
   var Grid = require("core/Control/Grid");
   var Menu = require("core/Control/Menu");
   var Action = require("core/Action");
+  var Css = require("core/Css");
 
   var TEMPLATE = '' +
 '<div class="listview-panel">' +
@@ -134,7 +135,7 @@ define(function (require) {
     var options = {};
     var queries = null;
     $.when(
-      Utils.load_css("/core/Control/View/ListView.css"),
+      Css.load("core/Control/View/ListView.css"),
       Storage.read(class_id).done(function (data) { objects = data; }),
       Storage.read(Class.CLASS_ID, class_id).done(function (data) { self._class = data; }),
       Storage.read(Class.CLASS_ID, Class.CLASS_ID).done(function (data) { self._base_class = data; })

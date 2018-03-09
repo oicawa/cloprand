@@ -8,6 +8,7 @@ define(function (require) {
   var Class = require("core/Class");
   var Primitive = require("core/Primitive");
   var Menu = require("core/Control/Menu");
+  var Css = require("core/Css");
 
   var TEMPLATE = '<div class="grid"></div>';
 
@@ -291,7 +292,7 @@ define(function (require) {
     var self = this;
 
     // CSS
-    Utils.load_css("/core/Control/Grid.css")
+    Css.load("core/Control/Grid.css")
     .then(function() {
       // Create form tags
       create_control(self);

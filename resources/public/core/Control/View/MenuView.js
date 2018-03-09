@@ -10,6 +10,7 @@ define(function (require) {
   var ListView = require("core/Control/View/ListView");
   var DivButton = require("core/Control/DivButton");
   var Locale = require("core/Locale");
+  var Css = require("core/Css");
   
   var TEMPLATE = '<div class="menuview-panel"><div class="menu-list"></div></div>';
   var TEMPLATE_ITEM = '<div class="menuview-item"><div>';
@@ -149,7 +150,7 @@ define(function (require) {
     var options = {};
     var comparer = null;
     $.when(
-      Utils.load_css("/core/Control/View/MenuView.css"),
+      Css.load("core/Control/View/MenuView.css"),
       Storage.read(Class.CLASS_ID).done(function(data) { self._classes = data; })
     )
     .then(function() {

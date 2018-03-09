@@ -5,6 +5,7 @@ define(function (require) {
   var Storage = require("core/Storage");
   var Class = require("core/Class");
   var Tabs = require("core/Control/Tabs");
+  var Css = require("core/Css");
 
   var TEMPLATE = '' +
 '<div id="contents-frame">' +
@@ -45,7 +46,7 @@ define(function (require) {
     var assist = null;
     var self = this;
     $.when(
-      Utils.load_css("/core/Contents.css"),
+      Css.load("core/Contents.css"),
       Connector.get("core/Contents.json", "json").done(function (data) { assist = data; })
     ).always(function() {
       contents.append(TEMPLATE);
