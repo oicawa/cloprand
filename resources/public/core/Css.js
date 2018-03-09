@@ -2,14 +2,17 @@ define(function (require) {
   require("jquery");
   require('json2');
   var Connector = require('core/Connector');
+
+  var css_path_2_last_modified = {};
   
   function append(path, time) {
+    css_path_2_last_modified[path] = time;
     var date = new Date(time);
     var dfd = new $.Deferred;
     var link = document.createElement('link');
     link.rel = 'stylesheet';
     link.type = 'text/css';
-    link.href = "resources/" + path + "?" + time;
+    link.href = path + "?" + time;
     link.onload = function() {
       dfd.resolve();
     };
@@ -21,18 +24,8 @@ define(function (require) {
   }
   
   function exists (path) {
-    var head = $("head");
-    var all_css_list = head.children("link[type='text/css']");
-    
-    var css_list = [];
-    for (var i = 0; i < all_css_list.length; i++) {
-      var css = all_css_list[i];
-      if (css.href.startsWith("resources/" + path)) {
-        css_list.push[css];
-      }
-    }
-    
-    return css_list.length == 0 ? false : true;
+    var last_modified = css_path_2_last_modified[path];
+    return is_null_or_undefined(last_modified) ? false : true;
   }
   
   function get_last_modified (path) {
