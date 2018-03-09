@@ -14,7 +14,7 @@
 
 (defn properties
   [path]
-  (let [file              #?=(systems/get-target-file path)
+  (let [file              (systems/get-target-file path)
         last-modified     (. file lastModified)
         last-modified-str (time-to-ISO8601 last-modified)
         ]
