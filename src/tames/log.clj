@@ -30,4 +30,5 @@
 
 (defn debug
   [base-format & args]
-  (write "D" base-format args))
+  ;(write "D" base-format args)
+  )

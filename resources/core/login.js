@@ -10,9 +10,9 @@ require.config({
   },
   
   paths : {
-    jquery : '/lib/jquery-2.1.3',
-    jquery_ui : '/lib/jquery-ui-1.12.1',
-    json2 : '/lib/json2'
+    jquery : 'login/lib/jquery-2.1.3',
+    jquery_ui : 'login/lib/jquery-ui-1.12.1',
+    json2 : 'login/lib/json2'
     //w2ui : '/lib/w2ui/w2ui-1.5.rc1'
   }
 });
