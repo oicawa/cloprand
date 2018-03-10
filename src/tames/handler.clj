@@ -124,24 +124,41 @@
   [class-id]
   (let [class-object (systems/get-object systems/CLASS_ID class-id)]
     (get-in class-object ["options" "cache"] false)))
-  
+
+(defn other-resources
+  [ext params]
+  (let [relative-path     (format "%s.%s" (params :*) ext)
+        file              (systems/get-target-file relative-path)
+        ext               (fs/ext file)
+        content-type      (content-types (. ext toLowerCase))
+        last-modified     (time-to-RFC1123 (. file lastModified))]
+    (log/debug "Route [/*.%s] -> [%s]" ext (. file getAbsolutePath))
+    (cond (not (. file exists)) (route/not-found "Not Found")
+          :else                 (-> (response/file-response (. file getAbsolutePath))
+                                    (response/header "Content-Type" content-type)
+                                    (response/header "Last-Modified" last-modified)))))
+
 (defroutes app-routes
   ;; Authentication
   (GET "/login" req
+    (log/info "GET [/login]")
     (login-get req))
   (POST "/login" req
+    (log/info "POST [/login]")
     (login-post req))
   (GET "/logout" req
-    (log/info "*** LOGOUT ***")
+    (log/info "GET [/logout]")
     (logout req))
 
   ;; Portal Top
   (GET "/tames" []
+    (log/info "GET [/tames]")
     (-> (response/file-response "core/tames.html")
         (response/header "Content-Type" (content-types "html"))))
   
   ;; REST API for CRUD
   (GET "/api/:class-id" req
+    (log/info "GET [/api/:class-id]")
     (let [class-id          (get-in req [:route-params :class-id] nil)
           if-modified-since (get-in req [:headers "if-modified-since"] nil)
           exists?           (systems/exists? systems/CLASS_ID class-id)
@@ -158,6 +175,7 @@
               (-> (systems/get-data class-id nil)
                   (response/header "Last-Modified" last-modified)))))
   (GET "/api/:class-id/:object-id" req
+    (log/info "GET [/api/:class-id/:object-id]")
     (let [class-id          (get-in req [:route-params :class-id] nil)
           object-id         (get-in req [:route-params :object-id] nil)
           if-modified-since (get-in req [:headers "if-modified-since"] nil)
@@ -175,6 +193,7 @@
               (-> (systems/get-data class-id object-id)
                   (response/header "Last-Modified" last-modified)))))
   (POST "/api/:class-id" [class-id & params]	;;; https://github.com/weavejester/compojure/wiki/Destructuring-Syntax
+    (log/info "POST [/api/:class-id]")
     (if (not (systems/exists? systems/CLASS_ID class-id))
         (-> (response/response nil)
             (response/status 410))
@@ -183,6 +202,7 @@
               added-files (dissoc params :value)]
           (systems/post-data class-id data added-files))))
   (PUT "/api/:class-id/:object-id" [class-id object-id & params]
+    (log/info "PUT [/api/:class-id/:object-id]")
     (if (not (systems/exists? class-id object-id))
         (-> (response/response nil)
             (response/status 410))
@@ -191,17 +211,20 @@
               added-files  (dissoc params :value)]
           (systems/put-data class-id object-id data added-files))))
   (DELETE "/api/:class-id/:object-id" [class-id object-id]
+    (log/info "DELETE [/api/:class-id/:object-id]")
     (if (not (systems/exists? class-id object-id))
         (-> (response/response nil)
             (response/status 410))
         (systems/delete-data class-id object-id)))
   ;; Session
   (GET "/session/:session-key" req
+    (log/info "GET [/session/:session-key]")
     (let [session-key (get-in req [:route-params :session-key] nil)
           user-name   (get-in req [:session :identity] nil)]
       (format "{ \"%s\" : \"%s\"}" session-key user-name)))
   ;; Download
   (GET "/download/*" [& params]
+    (log/info "GET [/download/*]")
     (let [file        (File. (fs/get-absolute-path (format "data/%s" (params :*))))
           file-name   (. file getName)
           encoded-file-name (. (URLEncoder/encode file-name "UTF-8") replace "+" "%20")
@@ -211,12 +234,14 @@
           (response/header "Content-Type" "application/octet-stream")
           (response/header "Content-Disposition" disposition))))
   (GET "/image/:class-id/:object-id/*" [class-id object-id & params]
+    (log/info "GET [/image/:class-id/:object-id/*]")
     (let [path (. (systems/get-attachment-file class-id object-id (params :*)) toString)
           ext  (fs/ext path)
           mime (content-types ext)]
       (-> (response/file-response path)
           (response/header "Content-Type" mime))))
   (POST "/generate/:generator-name" [generator-name & params]
+    (log/info "POST [/generate/:generator-name]")
     (println (format "[POST] /generate/%s" generator-name))
     (let [namespace-name    (format "tames.generators.%s" generator-name)
           generate-symbol   (symbol namespace-name "generate")
@@ -236,6 +261,7 @@
           (response/header "Content-Type" (apply (find-var get-content-type-symbol) []))
           (response/header "Content-Disposition" disposition))))
   (POST "/operation/:operator-name/:operation-name" [operator-name operation-name & params]
+    (log/info "POST [/operation/:operator-name/:operation-name]")
     (let [namespace-name          (format "tames.operations.%s" operator-name)
           operation-symbol        (symbol namespace-name operation-name)
           json-str                (URLDecoder/decode (params :value) "UTF-8")
@@ -245,35 +271,51 @@
       (apply (find-var operation-symbol) [data])))
   
   ;; Other resources
-  ;(GET "/*" [& params]
-  ;  (let [relative-path (params :*)
-  ;        ;if-modified-since (get-in req [:headers "if-modified-since"] nil)
-  ;        absolute-path (fs/get-absolute-path relative-path)
-  ;        offset        (. relative-path lastIndexOf ".")
-  ;        extension     (if (= offset -1) "" (. relative-path substring (+ offset 1)))
-  ;        content-type  (content-types (. extension toLowerCase))
-  ;        exist?        (. (File. absolute-path) exists)
-  ;        res           (if exist?
-  ;                          (-> (response/file-response absolute-path)
-  ;                              (response/header "Content-Type" content-type))
-  ;                          (route/not-found "Not Found"))]
-  ;    res))
-  (GET "/resources/*" req
-    ;(println "--- GET /resources/* ---")
-    ;(pprint/pprint req);
-    (let [relative-path     (get-in req [:route-params :*] nil)
-          if-modified-since (get-in req [:headers "if-modified-since"] nil)
+  (GET "/*.css" [& params]
+    (log/info "GET [/*.css]")
+    (other-resources "css" params))
+  ;(GET "/*.js" [& params]
+  ;  (log/info "GET [/*.js]")
+  ;  (other-resources "js" params))
+  (GET "/*" req
+    ;(log/info "GET /* [%s]" (params :*))
+    ;(other-resources params))
+    (log/info "GET [/*] (%s)" (get-in req [:route-params :*] nil))
+    (let [;relative-path     (let [base (get-in req [:route-params :*] nil)]
+          ;                    (if (nil? base) nil (format "%s.%s" base ext)))
+          relative-path     (get-in req [:route-params :*] nil)
+          ;relative-path     (format "%s.%s" (params :*) ext)
+          ;relative-path     #?=(params :*)
+          ;if-modified-since (get-in req [:headers "if-modified-since"] nil)
           file              (systems/get-target-file relative-path)
           ext               (fs/ext file)
           content-type      (content-types (. ext toLowerCase))
           last-modified     (time-to-RFC1123 (. file lastModified))
-          not-modified?     (= if-modified-since last-modified)]
+          ;not-modified?     (= if-modified-since last-modified)
+          ]
+      (log/info "Route [/*.%s] -> [%s]" ext relative-path)
       (cond (not (. file exists)) (route/not-found "Not Found")
-            not-modified?         (-> (response/response nil)
-                                      (response/status 304))
+            ;not-modified?         (-> (response/response nil)
+            ;                          (response/status 304))
             :else                 (-> (response/file-response (. file getAbsolutePath))
                                       (response/header "Content-Type" content-type)
                                       (response/header "Last-Modified" last-modified)))))
-  (route/resources "/")
+  ;(GET "/resources/*" req
+  ;  (println "GET /resources/*")
+  ;  ;(pprint/pprint req);
+  ;  (let [relative-path     (get-in req [:route-params :*] nil)
+  ;        if-modified-since (get-in req [:headers "if-modified-since"] nil)
+  ;        file              (systems/get-target-file relative-path)
+  ;        ext               (fs/ext file)
+  ;        content-type      (content-types (. ext toLowerCase))
+  ;        last-modified     (time-to-RFC1123 (. file lastModified))
+  ;        not-modified?     (= if-modified-since last-modified)]
+  ;    (cond (not (. file exists)) (route/not-found "Not Found")
+  ;          not-modified?         (-> (response/response nil)
+  ;                                    (response/status 304))
+  ;          :else                 (-> (response/file-response (. file getAbsolutePath))
+  ;                                    (response/header "Content-Type" content-type)
+  ;                                    (response/header "Last-Modified" last-modified)))))
+  ;(route/resources "/")
   (route/not-found "Not Found"))
 

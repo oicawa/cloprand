@@ -424,8 +424,8 @@
 
 (defn ensure-init-files
   [relative-path]
-  (let [dirs  (get-resource-children (str "public/" relative-path) true false)
-        files (get-resource-children (str "public/" relative-path) false true)]
+  (let [dirs  (get-resource-children relative-path true false)
+        files (get-resource-children relative-path false true)]
     (if (or (nil? dirs) (nil? files))
         nil
         (do
@@ -433,7 +433,7 @@
           (doseq [dir dirs]
             (ensure-init-files (str relative-path "/" dir)))
           (doseq [file files]
-            (let [src-path (str "public/" relative-path "/" file)
+            (let [src-path (str relative-path "/" file)
                   dst-path (str relative-path "/" file)]
               ;(println (format "[systems/ensure-init-files] %s" src-path))
               (if (not (. (File. (fs/get-absolute-path dst-path)) exists))
