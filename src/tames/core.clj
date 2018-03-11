@@ -29,7 +29,7 @@
 
 ;; WITH [Authentication] -> [Authorization]
 (def app
-  (let [rules   [{:pattern #"^(?!/login).*$" :handler authenticated?}]
+  (let [rules   [{:pattern #"^/api/.*$" :handler authenticated?}]
         backend (session-backend {:unauthorized-handler handler/unauthorized})]
     (-> handler/app-routes
         (wrap-access-rules {:rules rules :policy :allow})

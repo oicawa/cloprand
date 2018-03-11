@@ -1,6 +1,6 @@
 define(function (require) {
-  require("jquery");
-  require("json2");
+  //require("jquery");
+  //require("json2");
   require("w2ui");
   var Utils = require("core/Utils");
   var Uuid = require("core/Uuid");
@@ -28,6 +28,33 @@ define(function (require) {
 '</div>';
   var LEFT_TEMPLATE = '<div id="left-panel"></div>';
   var MAIN_TEMPLATE = '<div id="contents-panel"></div>';
+
+  var LOGIN_FORM = '' +
+'<div>' +
+'<div style="width:100%; text-align:center;height:50px;"/>' +
+'<div style="width:100px; height:100px; background-image:url(core/logo.svg); background-size:100%;margin:auto;"/>' +
+'<h1 style="text-align:center;height:50px;">{{TITLE}}</h1>' +
+'<div style="width:100%; text-align:center;height:50px;"/>' +
+'<form method="post" name="login">' +
+'  <div style="width:100%; text-align:center;">' +
+'    <span style="display:inline-block;width:100px;">Login ID</span>' +
+'    <input id="login-id" type="text" name="login_id" style="width:200px;" class="w2field" tabindex="1"/>' +
+'    <br/>' +
+'    <div style="width:100%;height:10px;"/>' +
+'    <span style="display:inline-block;width:100px;">Password</span>' +
+'    <input id="login-password" type="password" name="password" style="width:200px;" class="w2field" tabindex="2" />' +
+'    <br/>' +
+'    <div style="width:100%;height:50px;"/>' +
+'    <input type="hidden" name="__anti-forgery-token" value="{{ANTI_FORGERY_TOKEN}}" />' +
+'    <input type="submit" style="display:none;" />' +
+'    <div id="login-button" class="div-button" style="width:70px;height:70px;margin: auto;" tabindex="3">' +
+'      <i class="fa fa-sign-in" style="font-size:35pt;" />' +
+'      <div style="font-size:10pt;">Login</div>' +
+'    </div>' +
+'  </div>' +
+'</form>' +
+'</div>';
+
   
   function App() {
     this._layout = null;
@@ -59,6 +86,36 @@ define(function (require) {
   App.prototype.config = function() {
     return this._config;
   };
+  
+  function show_login_form(self, anti_forgery_token) {
+    var html = LOGIN_FORM.replace(/{{TITLE}}/, "tames").replace(/{{ANTI_FORGERY_TOKEN}}/, anti_forgery_token);
+    $("body").append(html);
+  	
+    $("#login-password").on("keyup", function (event) {
+      var KEYCODE_ENTER = 13;
+      if (event.keyCode != KEYCODE_ENTER) {
+        return;
+      }
+      document.login.submit();
+    });
+
+    $("#login-button")
+    .on("keyup", function (event) {
+      var KEYCODE_ENTER = 13;
+      var KEYCODE_SPACE = 32;
+      if (event.keyCode != KEYCODE_ENTER && event.keyCode != KEYCODE_SPACE) {
+        return;
+      }
+      console.log("Submit login by keyup");
+      document.login.submit();
+    })
+    .on("click", function (event) {
+      console.log("Submit login by click");
+      document.login.submit();
+    });
+    console.log("location.href=" + location.href);
+    $("#login-id").focus();
+  }
 
   function create_frame(self) {
     $("body").append(LAYOUT_TEMPLATE);
@@ -144,8 +201,10 @@ define(function (require) {
         create_frame(self);
       });
     })
-    .fail(function () {
+    .fail(function (jqXHR) {
       console.log("Failed to get session identity");
+      var anti_forgery_token = jqXHR.responseJSON.anti_forgery_token;
+      show_login_form(self, anti_forgery_token);
     });
   };
 

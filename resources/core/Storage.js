@@ -65,10 +65,11 @@ define(function (require) {
     delete objects[object_id];
     set_all(class_id, objects);
   }
-  
+
+  var base_url = 'api/rest/';
   var Storage = {
     create: function(class_id, object, files) {
-      var url = 'api/' + class_id;
+      var url = base_url + class_id;
       var dfd = new $.Deferred;
       Connector.post(url, object, files, "json")
       .done(function (response, text_status, jqXHR) {
@@ -83,7 +84,7 @@ define(function (require) {
       return dfd.promise();
     },
     read: function(class_id, object_id) {
-      var url = 'api/' + class_id + (!object_id ? '' : '/' + object_id);
+      var url = base_url + class_id + (!object_id ? '' : '/' + object_id);
       var dfd = new $.Deferred;
       Connector.get(url, "json")
       .done(function (response, text_status, jqXHR) {
@@ -112,7 +113,7 @@ define(function (require) {
       return dfd.promise();
     },
     update: function(class_id, object_id, object, files) {
-      var url = 'api/' + class_id + '/' + object_id;
+      var url = base_url + class_id + '/' + object_id;
       var dfd = new $.Deferred;
       Connector.update(url, object, files, "json")
       .done(function (response, text_status, jqXHR) {
@@ -127,7 +128,7 @@ define(function (require) {
       return dfd.promise();
     },
     delete: function(class_id, object_id) {
-      var url = 'api/' + class_id + '/' + object_id;
+      var url = base_url + class_id + '/' + object_id;
       var dfd = new $.Deferred;
       Connector.delete(url, "json")
       .done(function (response, text_status, jqXHR) {
