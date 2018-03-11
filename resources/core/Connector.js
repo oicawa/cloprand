@@ -25,6 +25,7 @@ define(function (require) {
     }).fail(function (jqXHR, text_status, error_thrown) {
       if (jqXHR.status != 401) {
         console.log("jqXHR.status != 401");
+        console.log(jqXHR);
         dfd.reject(jqXHR, text_status, error_thrown);
         return;
       }

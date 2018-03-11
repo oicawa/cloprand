@@ -33,18 +33,24 @@
                     "pdf"  "application/pdf"
                     })
 
-(defn login-post
+(defn login
   [req]
-  (let [login_id (get-in req [:form-params "login_id"])
-        password (get-in req [:form-params "password"])
+  (let [login_id        (get-in req [:form-params "login_id"])
+        password        (get-in req [:form-params "password"])
+        login-try-count (get-in req [:session :login-try-count] 0)
         ;; Draft Implement...
-        account  (systems/get-account login_id)
-        is-ok    (cond (nil? account) false
-                       (= (account "password") password) true
-                       :else false)]
+        account         (systems/get-account login_id)
+        is-ok           (cond (nil? account) false
+                              (= (account "password") password) true
+                              :else false)]
     (log/info "login_id=%s" login_id)
-    (-> (response/redirect "/tames")
-        (assoc-in [:session :identity] (if is-ok login_id nil)))))
+    (if is-ok
+        (-> (response/redirect "/tames")
+            (assoc-in [:session :identity] login_id)
+            (assoc-in [:session :login-try-count] login-try-count))
+        (-> (response/redirect "/tames")
+            (assoc-in [:session :identity] nil)
+            (assoc-in [:session :login-try-count] (+ login-try-count 1))))))
 
 (defn logout
   [req]
@@ -52,31 +58,27 @@
       (assoc :session {})))
 
 (defn response-authorized
-  [authorized?]
+  [authorized? login-try-count]
   (-> (response/response (if authorized?
                              nil
-                             (json/write-str { "anti_forgery_token" (str *anti-forgery-token*) })))
+                             (json/write-str { "anti_forgery_token" (str *anti-forgery-token*)
+                                               "login_try_count" login-try-count })))
       (response/status (if authorized? 200 401))
       (response/header "Contents-Type" "text/json; charset=utf-8")))
 
 (defn unauthorized
   [req meta]
-  (let [result  (authenticated? req)
-        uri     (req :uri)
-        referer ((req :headers) "referer")]
-    (log/info "*** Unauthenticated: [%s], URI: [%s], referer: [%s]" result uri referer)
+  (let [result          (authenticated? req)
+        uri             (req :uri)
+        referer         ((req :headers) "referer")
+        login-try-count (get-in req [:session :login-try-count] 0)]
+    (log/info "*** Unauthenticated: [%s], URI: [%s], referer: [%s], login-try-count=[%d]" result uri referer login-try-count)
     (cond result
             (response/redirect "/tames")
-          ;(= uri "/tames")
-          ;  (if (nil? referer)
-          ;      (response/redirect "/login?next=/tames")
-          ;      (response/redirect "/login?next=/tames&mode=failed"))
-          ;(= uri "/logout")
-          ;  (response/redirect "/login?next=/tames&mode=logout")
           (= uri "/api/session/identity")
-            (response-authorized false)
+            (response-authorized false login-try-count)
           :else
-            (response-authorized false))))
+            (response-authorized false login-try-count))))
 
 (defn time-to-RFC1123
   [time]
@@ -112,15 +114,12 @@
 
 (defroutes app-routes
   ;; Authentication
-  ;(POST "/login" req
-  ;  (log/info "[POST] /login")
-  ;  (login-post req))
+  (POST "/login" req
+    (log/info "[POST] /login")
+    (login req))
   (GET "/logout" req
     (log/info "[GET] /logout")
     (logout req))
-  (POST "/tames" req
-    (log/info "[POST] /tames")
-    (login-post req))
 
   ;; Portal Top
   (GET "/tames" []

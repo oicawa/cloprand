@@ -19,43 +19,16 @@ define(function (require) {
 '  <span id="title" style="font-size:20px; vertical-align: top;"></span>' +
 '  <span style="display:inline-block; width:30px;"></span>' +
 '  <span id="sub-title"></span>' +
-'  <form method="get" name="signout" action="/logout" style="display:inline-block;position:absolute; right:5px; font-size:11pt;">' +
+'  <form method="get" name="logout" action="/logout" style="display:inline-block;position:absolute; right:5px; font-size:11pt;">' +
 '    <span id="login_id"></span>' +
 '    <div class="div-button" style="display:inline-block;">' +
-'      <i class="fa fa-sign-out" onclick="document.signout.submit();"></i>' +
+'      <i class="fa fa-sign-out" onclick="document.logout.submit();"></i>' +
 '    </div>' +
 '  </form>' +
 '</div>';
   var LEFT_TEMPLATE = '<div id="left-panel"></div>';
   var MAIN_TEMPLATE = '<div id="contents-panel"></div>';
 
-  var LOGIN_FORM = '' +
-'<div>' +
-'<div style="width:100%; text-align:center;height:50px;"/>' +
-'<div style="width:100px; height:100px; background-image:url(core/logo.svg); background-size:100%;margin:auto;"/>' +
-'<h1 style="text-align:center;height:50px;">{{TITLE}}</h1>' +
-'<div style="width:100%; text-align:center;height:50px;"/>' +
-'<form method="post" name="login">' +
-'  <div style="width:100%; text-align:center;">' +
-'    <span style="display:inline-block;width:100px;">Login ID</span>' +
-'    <input id="login-id" type="text" name="login_id" style="width:200px;" class="w2field" tabindex="1"/>' +
-'    <br/>' +
-'    <div style="width:100%;height:10px;"/>' +
-'    <span style="display:inline-block;width:100px;">Password</span>' +
-'    <input id="login-password" type="password" name="password" style="width:200px;" class="w2field" tabindex="2" />' +
-'    <br/>' +
-'    <div style="width:100%;height:50px;"/>' +
-'    <input type="hidden" name="__anti-forgery-token" value="{{ANTI_FORGERY_TOKEN}}" />' +
-'    <input type="submit" style="display:none;" />' +
-'    <div id="login-button" class="div-button" style="width:70px;height:70px;margin: auto;" tabindex="3">' +
-'      <i class="fa fa-sign-in" style="font-size:35pt;" />' +
-'      <div style="font-size:10pt;">Login</div>' +
-'    </div>' +
-'  </div>' +
-'</form>' +
-'</div>';
-
-  
   function App() {
     this._layout = null;
     this._title = null;
@@ -87,34 +60,39 @@ define(function (require) {
     return this._config;
   };
   
-  function show_login_form(self, anti_forgery_token) {
-    var html = LOGIN_FORM.replace(/{{TITLE}}/, "tames").replace(/{{ANTI_FORGERY_TOKEN}}/, anti_forgery_token);
-    $("body").append(html);
-  	
-    $("#login-password").on("keyup", function (event) {
-      var KEYCODE_ENTER = 13;
-      if (event.keyCode != KEYCODE_ENTER) {
-        return;
-      }
-      document.login.submit();
-    });
+  function show_login_form(self, anti_forgery_token, login_try_count) {
+    Connector.get("core/login.html", "html")
+    .then(function (template) {
+      var html = template.replace(/{{TITLE}}/, "tames").replace(/{{ANTI_FORGERY_TOKEN}}/, anti_forgery_token);
+      $("body").append(html);
 
-    $("#login-button")
-    .on("keyup", function (event) {
-      var KEYCODE_ENTER = 13;
-      var KEYCODE_SPACE = 32;
-      if (event.keyCode != KEYCODE_ENTER && event.keyCode != KEYCODE_SPACE) {
-        return;
-      }
-      console.log("Submit login by keyup");
-      document.login.submit();
-    })
-    .on("click", function (event) {
-      console.log("Submit login by click");
-      document.login.submit();
+      $("#login-failed-message").text(login_try_count <= 0 ? "" : "Input correct LoginID & Password.");
+
+      $("#login-password").on("keyup", function (event) {
+        var KEYCODE_ENTER = 13;
+        if (event.keyCode != KEYCODE_ENTER) {
+          return;
+        }
+        document.login.submit();
+      });
+
+      $("#login-button")
+      .on("keyup", function (event) {
+        var KEYCODE_ENTER = 13;
+        var KEYCODE_SPACE = 32;
+        if (event.keyCode != KEYCODE_ENTER && event.keyCode != KEYCODE_SPACE) {
+          return;
+        }
+        console.log("Submit login by keyup");
+        document.login.submit();
+      })
+      .on("click", function (event) {
+        console.log("Submit login by click");
+        document.login.submit();
+      });
+      console.log("location.href=" + location.href);
+      $("#login-id").focus();
     });
-    console.log("location.href=" + location.href);
-    $("#login-id").focus();
   }
 
   function create_frame(self) {
@@ -204,7 +182,9 @@ define(function (require) {
     .fail(function (jqXHR) {
       console.log("Failed to get session identity");
       var anti_forgery_token = jqXHR.responseJSON.anti_forgery_token;
-      show_login_form(self, anti_forgery_token);
+      var login_try_count = jqXHR.responseJSON.login_try_count;
+      console.log("Login try count = " + login_try_count);
+      show_login_form(self, anti_forgery_token, login_try_count);
     });
   };
 

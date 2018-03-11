@@ -1,0 +1,24 @@
+<div>
+  <div style="width:100%; text-align:center;height:50px;"/>
+  <div style="width:100px; height:100px; background-image:url(core/logo.svg); background-size:100%;margin:auto;"/>
+  <h1 style="text-align:center;height:50px;">{{TITLE}}</h1>
+  <div id="login-failed-message" style="width:100%; text-align:center;height:50px; color: red"/>
+  <form method="post" name="login" action="login">
+    <div style="width:100%; text-align:center;">
+      <span style="display:inline-block;width:100px;">Login ID</span>
+      <input id="login-id" type="text" name="login_id" style="width:200px;" class="w2field" tabindex="1"/>
+      <br/>
+      <div style="width:100%;height:10px;"/>
+      <span style="display:inline-block;width:100px;">Password</span>
+      <input id="login-password" type="password" name="password" style="width:200px;" class="w2field" tabindex="2" />
+      <br/>
+      <div style="width:100%;height:50px;"/>
+      <input type="hidden" name="__anti-forgery-token" value="{{ANTI_FORGERY_TOKEN}}" />
+      <input type="submit" style="display:none;" />
+      <div id="login-button" class="div-button" style="width:70px;height:70px;margin: auto;" tabindex="3">
+        <i class="fa fa-sign-in" style="font-size:35pt;" />
+        <div style="font-size:10pt;">Login</div>
+      </div>
+    </div>
+  </form>
+</div>
