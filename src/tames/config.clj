@@ -26,6 +26,20 @@
   []
   (. (File. @path) lastModified))
 
+(defn get-attachment-dir
+  [& field_name]
+  (let [file       (File. @path)
+        base-dir   (. file getParentFile)
+        dir-name   (format ".%s" (fs/file-name-without-ext (. file getName)))
+        target-dir (fs/to-file (apply fs/make-path (concat [base-dir dir-name] field_name)))]
+    target-dir))
+
+(defn get-attachment-file
+  [field_and_file_name]
+  (let [dir  (get-attachment-dir)
+        path (fs/make-path dir field_and_file_name)]
+    (fs/to-file path)))
+
 (defn package-paths
   []
   (map #(fs/get-absolute-path (%1 "path"))

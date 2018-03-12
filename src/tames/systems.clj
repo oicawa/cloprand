@@ -283,15 +283,19 @@
 ;;; ------------------------------------------------------------
 (defn get-attachment-base-dirs
   [class-id object-id]
-  (get-target-dirs "data" class-id (format ".%s" object-id)))
+  (if (config/id? class-id)
+      [(config/get-attachment-dir)]
+      (get-target-dirs "data" class-id (format ".%s" object-id))))
 
 (defn get-attachment-base-dir
   [class-id object-id]
-  (first (get-target-dirs "data" class-id (format ".%s" object-id))))
+  (first (get-attachment-base-dirs class-id object-id)))
 
 (defn get-attachment-dirs
   [class-id object-id field_name]
-  (get-target-dirs "data" class-id (format ".%s" object-id) field_name))
+  (if (config/id? class-id)
+      [(config/get-attachment-dir field_name)]
+      (get-target-dirs "data" class-id (format ".%s" object-id) field_name)))
 
 (defn get-attachment-dir
   [class-id object-id field_name]
@@ -299,8 +303,10 @@
 
 (defn get-attachment-file
   [class-id object-id field_and_file_name]
-  (get-target-file "data" class-id (format ".%s" object-id) field_and_file_name))
-  
+  (if (config/id? class-id)
+      (config/get-attachment-file field_and_file_name)
+      (get-target-file "data" class-id (format ".%s" object-id) field_and_file_name)))
+
 (defn get-files-fields
   [class-id]
   (let [class_ (get-object CLASS_ID class-id)]
@@ -321,6 +327,7 @@
 
 (defn save-attached-files
   [class-id object-id value files_fields added-files]
+  (pprint/pprint files_fields)
   (doseq [field files_fields]
     (let [dst-dir   (get-attachment-dir class-id object-id (field "name"))
           file-keys (keys ((value (field "name")) "added"))]

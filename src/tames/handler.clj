@@ -190,9 +190,10 @@
           user-name   (get-in req [:session :identity] nil)]
       (format "{ \"%s\" : \"%s\"}" session-key user-name)))
   ;; Download
-  (GET "/api/download/*" [& params]
-    (log/debug "[GET] /api/download/*")
-    (let [file        (File. (fs/get-absolute-path (format "data/%s" (params :*))))
+  (GET "/api/download/:class-id/:object-id/*" [class-id object-id & params]
+    (log/debug "[GET] /api/download/:class-id/:object-id/*")
+    (let [;file        (File. (fs/get-absolute-path (format "data/%s" #?=(params :*))))
+          file        #?=(systems/get-attachment-file class-id object-id (params :*))
           file-name   (. file getName)
           encoded-file-name (. (URLEncoder/encode file-name "UTF-8") replace "+" "%20")
           disposition (format "attachment;filename=\"%s\";filename*=UTF-8''%s" file-name encoded-file-name)

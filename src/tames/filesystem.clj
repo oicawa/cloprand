@@ -52,6 +52,14 @@
         ""
         (. name substring (+ start 1)))))
 
+(defn file-name-without-ext
+  [target]
+  (let [name (. (to-file target) getName)
+        end  (. name lastIndexOf ".")]
+    (if (= end -1)
+        ""
+        (. name substring 0 end))))
+
 (defn delete
   [target]
   (let [file (to-file target)]
