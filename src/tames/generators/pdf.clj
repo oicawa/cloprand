@@ -57,7 +57,7 @@
 (def specific "様")
 (defn draw-text-vertical!
   [context-byte x y text font font-size]
-  (loop [chars    #?=(seq text)
+  (loop [chars    (seq text)
          y-cursor y]
     (if (= (count chars) 0)
         nil
@@ -127,7 +127,7 @@
         font-size     (let [tmp-font-size    (pdf-object "font_size")
                             parent-font-size (parent :font-size)]
                         (float (if (nil? tmp-font-size) parent-font-size tmp-font-size)))]
-  (let [paragraph (Paragraph. #?=(pdf-object "text") #?=(Font. font font-size))]
+  (let [paragraph (Paragraph. (pdf-object "text") (Font. font font-size))]
     (add-element parent-object paragraph))))
 
 (defn add-table!

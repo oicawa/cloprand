@@ -1,6 +1,4 @@
 define(function (require) {
-  //require("jquery");
-  //require("json2");
   require("w2ui");
   var Utils = require("core/Utils");
   var Uuid = require("core/Uuid");
@@ -168,11 +166,19 @@ define(function (require) {
   App.prototype.init = function() {
     var self = this;
     var CONFIG_OBJECT_ID = "e71de065-9b6a-42c7-9987-ddc8e75672ca";
-    Connector.session("identity")
-    .done(function(data){
+    
+    Css.load(
+      "lib/jquery-ui-1.12.1.css",
+      "lib/w2ui/w2ui-1.5.rc1.css",
+      "lib/font-awesome-4.6.1/css/font-awesome.css",
+      "core/reset-w2ui.css",
+      "core/main.css",
+      "core/app.css"
+    ).then (function () {
+      return Connector.session("identity")
+    }).done(function(data){
       self.session = data;
       $.when(
-        Css.load("core/app.css"),
         Storage.read(Class.SYSTEM_ID, CONFIG_OBJECT_ID).done(function(data){ self._config = data; }),
         Storage.read(Primitive.ID).done(function(data){ self._primitives = data; })
       ).then(function() {

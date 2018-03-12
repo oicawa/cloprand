@@ -1,7 +1,4 @@
 define(function (require) {
-  //require('jquery');
-  //require('json2');
-  
   function send(method, url, data, files, data_type) {
     var dfd = new $.Deferred;
     var formData = new FormData();
@@ -24,17 +21,13 @@ define(function (require) {
       dfd.resolve(data, text_status, jqXHR);
     }).fail(function (jqXHR, text_status, error_thrown) {
       if (jqXHR.status != 401) {
-        console.log("jqXHR.status != 401");
-        console.log(jqXHR);
         dfd.reject(jqXHR, text_status, error_thrown);
         return;
       }
       var redirect = !url.startsWith("/api/session/identity");
       if (redirect) {
-        console.log("location.href = '/tames'");
         location.href = "/tames";
       } else {
-        console.log("Show Login Page.");
         dfd.reject(jqXHR, text_status, error_thrown);
       }
     });
@@ -63,6 +56,10 @@ define(function (require) {
       var url = '/api/operation/' + operator_name + '/' + operation_name;
       return send("POST", url, data, null, data_type);
     },
+    public_operate : function(operator_name, operation_name, data_type, data) {
+      var url = '/public_api/operation/' + operator_name + '/' + operation_name;
+      return send("POST", url, data, null, data_type);
+    },
     generate : function(generator_name, content_type, data) {
       var xhr = new XMLHttpRequest();
       xhr.open('POST', '/api/generate/' + generator_name);
@@ -70,7 +67,12 @@ define(function (require) {
       xhr.onload = function() {
         var blob = new Blob([this.response], {type: content_type});
         var pdfURL = window.URL.createObjectURL(blob);
-        window.open(pdfURL, '_blank');
+        try {
+          window.open(pdfURL, '_blank');
+        } catch (e) {
+          var name = pdfURL.split(/:/)[1];
+          window.navigator.msSaveOrOpenBlob(blob, name);
+        }
       };
       var formData = new FormData();
       formData.append("value", encodeURIComponent(JSON.stringify(data)));

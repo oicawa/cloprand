@@ -1,8 +1,10 @@
 (ns tames.operations.resource
-  (:require [clojure.data.json :as json]
+  (:require [clojure.pprint :as pprint]
+            [clojure.data.json :as json]
             [clojure.string :as string]
             [ring.util.response :as response]
-            [tames.systems :as systems])
+            [tames.systems :as systems]
+            [tames.log :as log])
   (:import (java.io File)
            (java.text SimpleDateFormat)))
 
@@ -12,14 +14,13 @@
         sdf (SimpleDateFormat. f)]
     (. sdf format time)))
 
-(defn properties
-  [path]
-  (let [file              (systems/get-target-file path)
-        last-modified     (. file lastModified)
-        last-modified-str (time-to-ISO8601 last-modified)
-        ]
-    ;(println (format "[%s] %s" last-modified-str (. file getAbsolutePath)))
-    (-> (response/response (json/write-str { "last-modified" last-modified-str }))
+(defn properties-list
+  [paths]
+  (let [properties-list (map #(let [file (systems/get-target-file %1)]
+                               {"path"          %1
+                                "last-modified" (time-to-ISO8601 (. file lastModified))})
+                             paths)]
+    (-> (response/response (json/write-str properties-list))
         (response/header "Contents-Type" "text/json; charset=utf-8"))))
 
 

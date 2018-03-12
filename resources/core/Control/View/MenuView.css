@@ -22,6 +22,7 @@ div.menuview-item {
 div.menuview-item > div > i {
   width:100px;
   height:70px;
+  padding:10px;
 }
 span.menuview-item-caption {
   text-align:center;

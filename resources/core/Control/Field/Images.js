@@ -75,8 +75,6 @@ define(function (require) {
       var image = record.find(tag);
       image.text(file.name + " - (" + size + ")");
       record.find("i").attr("name", key);
-      console.log(`>>> key=${key}`);
-      console.log(file);
       this.draw_image(file, image);
     }
     

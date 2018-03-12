@@ -44,13 +44,9 @@
                               (= (account "password") password) true
                               :else false)]
     (log/info "login_id=%s" login_id)
-    (if is-ok
-        (-> (response/redirect "/tames")
-            (assoc-in [:session :identity] login_id)
-            (assoc-in [:session :login-try-count] login-try-count))
-        (-> (response/redirect "/tames")
-            (assoc-in [:session :identity] nil)
-            (assoc-in [:session :login-try-count] (+ login-try-count 1))))))
+    (-> (response/redirect "/tames")
+        (assoc-in [:session :identity] (if is-ok login_id nil))
+        (assoc-in [:session :login-try-count] (if is-ok login-try-count (+ login-try-count 1))))))
 
 (defn logout
   [req]
@@ -72,7 +68,7 @@
         uri             (req :uri)
         referer         ((req :headers) "referer")
         login-try-count (get-in req [:session :login-try-count] 0)]
-    (log/info "*** Unauthenticated: [%s], URI: [%s], referer: [%s], login-try-count=[%d]" result uri referer login-try-count)
+    (log/debug "*** Unauthenticated: [%s], URI: [%s], referer: [%s], login-try-count=[%d]" result uri referer login-try-count)
     (cond result
             (response/redirect "/tames")
           (= uri "/api/session/identity")
@@ -115,10 +111,10 @@
 (defroutes app-routes
   ;; Authentication
   (POST "/login" req
-    (log/info "[POST] /login")
+    (log/debug "[POST] /login")
     (login req))
   (GET "/logout" req
-    (log/info "[GET] /logout")
+    (log/debug "[GET] /logout")
     (logout req))
 
   ;; Portal Top
@@ -238,10 +234,18 @@
       (require (symbol namespace-name))
       (apply (find-var operation-symbol) [data])))
   
-  ;; Other resources
+  ;; Others (Resources & Public API)
   (GET "/*" req
     (log/debug "[GET] /* (%s)" (get-in req [:route-params :*] nil))
     (other-resources req))
+  (POST "/public_api/operation/:operator-name/:operation-name" [operator-name operation-name & params]
+    (log/debug "[POST] /public_api/operation/:operator-name/:operation-name")
+    (let [namespace-name   (format "tames.operations.%s" operator-name)
+          operation-symbol (symbol namespace-name operation-name)
+          json-str         (URLDecoder/decode (params :value) "UTF-8")
+          data             (json/read-str json-str)]
+      (require (symbol namespace-name))
+      (apply (find-var operation-symbol) [data])))
   
   ;; Not Found
   (route/not-found "Not Found"))

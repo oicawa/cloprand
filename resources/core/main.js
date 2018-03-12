@@ -3,6 +3,19 @@ function is_null_or_undefined (value) { return (value === null) || is_undefined(
 function is_object (target) { return target instanceof Object && Object.getPrototypeOf(target) === Object.prototype; };
 function is_array (value) { return Array.isArray(value); }
 
+if (!String.prototype.startsWith) {
+    String.prototype.startsWith = function(searchString, position){
+      position = position || 0;
+      return this.substr(position, searchString.length) === searchString;
+  };
+}
+
+if (!Object.values) {
+  Object.values = function values(O) {
+    return Object.keys(O).map(function (key) { return O[key]; });
+  };
+}
+
 require.config({
   urlArgs: "version=" + (new Date()).getTime(),
   baseUrl : '/',
