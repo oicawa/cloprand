@@ -41,7 +41,7 @@
          descendants more]
     (if (empty? descendants)
         (. path toString)
-        (recur (. path resolve (first descendants))
+        (recur (. path resolve (. (first descendants) toString))
                (rest descendants)))))
   
 (defn ext
@@ -74,3 +74,45 @@
         dst-path (to-path dst)
         options (into-array CopyOption [StandardCopyOption/COPY_ATTRIBUTES])]
     (Files/copy src-path dst-path options)))
+
+(defn get-children
+  [dir-path dir? file?]
+  (let [file     (to-file dir-path)
+        children (filter #(cond (and dir? file?) true
+                                (and dir? (not file?)) (. %1 isDirectory)
+                                (and (not dir?) file?) (not (. %1 isDirectory))
+                                :else                  false)
+                         (. file listFiles))]
+    (map #(. %1 getName) children)))
+
+(defn get-all-files
+  ([list-files filter-fn results]
+   (let [files (filter #(and (. %1 isFile) (filter-fn %1)) list-files)]
+     (loop [dirs     (filter #(. %1 isDirectory) list-files)
+            _results (concat files results)]
+       (if (empty? dirs)
+           _results
+           (recur (rest dirs)
+                  (get-all-files (vec (. (first dirs) listFiles))
+                                 filter-fn
+                                 _results))))))
+  ([path filter-fn]
+   (let [file (to-file path)]
+     (cond (. file isDirectory) (get-all-files (vec (. file listFiles)) filter-fn [])
+           (filter-fn file)     [file]
+           :else                []))))
+
+(defn ensure-directory
+  [target]
+  (let [dir (to-file target)]
+    (if (and (. dir exists) (not (. dir isDirectory)))
+        (. dir delete))
+    (if (not (. dir exists))
+        (. dir mkdirs))))
+
+
+
+
+
+
+

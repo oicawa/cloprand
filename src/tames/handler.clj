@@ -13,6 +13,7 @@
             [clojure.data.json :as json]
             [tames.log :as log]
             [tames.filesystem :as fs]
+            [tames.operations.resource :as resource]
             [tames.systems :as systems]
             [tames.debug :as debug])
   (:import (java.io File)
@@ -32,6 +33,50 @@
                     "jpeg" "image/jpeg"
                     "pdf"  "application/pdf"
                     })
+
+(defn link-tag
+  [path last-modified-ISO8601]
+  (let [href (format "%s?last-modified=%s" path last-modified-ISO8601)]
+    [:link {:rel "stylesheet" :type "text/css" :href href } ]))
+  
+(defn link-tag-list
+  [paths]
+  (map #(link-tag (%1 "path") (%1 "last-modified"))
+       (resource/get-properties-list paths)))
+
+(defn login-get
+  [req]
+  (let [title "tames"]
+    (html
+      [:head
+        [:title title ]
+        [:link {:rel "shortcut icon" :href "login/core/favicon.ico"} ]
+        [:link {:rel "stylesheet" :type "text/css" :href "login/lib/font-awesome-4.6.1/css/font-awesome.css" } ]
+        [:link {:rel "stylesheet" :type "text/css" :href "login/lib/w2ui/w2ui-1.5.rc1.css" } ]
+        [:link {:rel "stylesheet" :type "text/css" :href "login/core/reset-w2ui.css" } ]
+        [:link {:rel "stylesheet" :type "text/css" :href "login/core/main.css" } ]
+        [:script {:data-main "login/core/login.js?version=0.0.15" :src "login/lib/require.js"} ]
+        ]
+      [:body
+        [:div {:style "width:100%; text-align:center;height:50px;"}]
+        [:div {:style "width:100px; height:100px; background-image:url(login/core/logo.svg); background-size:100%;margin:auto;"} ]
+        [:h1 {:style "text-align:center;height:50px;"} title]
+        [:div {:style "width:100%; text-align:center;height:50px;"}]
+        [:form {:method "post" :name "login"}
+          [:div {:style "width:100%; text-align:center;"}
+            [:span {:style "display:inline-block;width:100px;"} "Login ID "]
+            [:input {:id "login-id" :type "text" :name "login_id" :style "width:200px;" :class "w2field" :tabindex "1"}]
+            [:br]
+            [:div {:style "width:100%;height:10px;"}]
+            [:span {:style "display:inline-block;width:100px;"} "Password"]
+            [:input {:id "login-password":type "password" :name "password" :style "width:200px;" :class "w2field" :tabindex "2"}]
+            [:br]
+            [:div {:style "width:100%;height:50px;"}]
+            [:input {:type "hidden" :name "__anti-forgery-token" :value *anti-forgery-token*}]
+            [:input {:type "submit" :style "display:none;"}]
+            [:div {:id "login-button" :class "div-button" :style "width:70px;height:70px;margin: auto;" :tabindex "3"}
+              [:i {:class "fa fa-sign-in" :style "font-size:35pt;"} ]
+              [:div {:style "font-size:10pt;"} "Login" ]]]]])))
 
 (defn login
   [req]
@@ -239,8 +284,10 @@
   (GET "/*" req
     (log/debug "[GET] /* (%s)" (get-in req [:route-params :*] nil))
     (other-resources req))
+  ; TODO Use package name.
+  ;(POST "/:package-name/operation/:operator-name/:operation-name" [package-name operator-name operation-name & params]
   (POST "/public_api/operation/:operator-name/:operation-name" [operator-name operation-name & params]
-    (log/debug "[POST] /public_api/operation/:operator-name/:operation-name")
+    (log/debug "[POST] /:package-name/operation/:operator-name/:operation-name")
     (let [namespace-name   (format "tames.operations.%s" operator-name)
           operation-symbol (symbol namespace-name operation-name)
           json-str         (URLDecoder/decode (params :value) "UTF-8")

@@ -88,7 +88,6 @@ define(function (require) {
         console.log("Submit login by click");
         document.login.submit();
       });
-      console.log("location.href=" + location.href);
       $("#login-id").focus();
     });
   }
@@ -172,9 +171,12 @@ define(function (require) {
       "lib/w2ui/w2ui-1.5.rc1.css",
       "lib/font-awesome-4.6.1/css/font-awesome.css",
       "core/reset-w2ui.css",
-      "core/main.css",
-      "core/app.css"
+      "core/main.css"
+      ,"core/app.css"
     ).then (function () {
+      //return Css.load("core/app.css");
+      return Connector.public_operate("resource", "all-css-properties-list", "json", "").done(function (data) { console.log(data); });
+    }).then (function () {
       return Connector.session("identity")
     }).done(function(data){
       self.session = data;

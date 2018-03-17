@@ -11,7 +11,6 @@
             [tames.filesystem :as fs])
   (:import (java.io File InputStream)
            (java.nio.file Paths Path Files StandardCopyOption)
-           (java.util.jar JarFile JarEntry)
            (java.util UUID Calendar)))
 
 (def REGEXP_UUID #"[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12}")
@@ -56,110 +55,6 @@
   (first (apply get-target-dirs descendants)))
 
 
-;;; ------------------------------------------------------------
-;;; Jar & Resources
-;;; ------------------------------------------------------------
-(defn get-resource-path
-  [relative-path]
-  (. (File. relative-path) getPath))
-
-(defn get-jar-path
-  [resource]
-  (assert (not (nil? resource)))
-  (assert (= "jar" (. resource getProtocol)))
-  (let [path     (. resource getPath)
-        start    (. "file:" length)
-        end      (. path indexOf "!")
-        jar-path (. path substring start end)]
-    jar-path))
-
-(defn extract-resource-path
-  [resource-url]
-  (assert (not (nil? resource-url)))
-  (assert (= "jar" (. resource-url getProtocol)))
-  (let [path          (. resource-url getPath)
-        start         (+ (. path indexOf "!") 2)
-        resource-path (. path substring start)]
-    resource-path))
-
-(defn get-jar-resource-entry
-  [jar-url]
-  (let [jar-path   (get-jar-path jar-url)
-        jar-file   (JarFile. (File. jar-path))
-        path       (extract-resource-path jar-url)
-        jar-entry  (. jar-file getJarEntry path)]
-    jar-entry))
-
-(defn get-jar-resource-children
-  [jar-path relative-path dir? file?]
-  (let [jar-file   (JarFile. (File. jar-path))
-        entries    (. jar-file entries)
-        base-path  (. (File. relative-path) toPath)
-        base-count (. base-path getNameCount)]
-    (loop [paths '()]
-      (if (. entries hasMoreElements)
-          (let [entry          (. entries nextElement)
-                path           (. entry getName)
-                entry-path     (. (File. path) toPath)
-                entry-path-cnt (. entry-path getNameCount)
-                entry-dir?     (. entry isDirectory)]
-            (recur (if (and (. entry-path startsWith base-path)
-                            (= (+ base-count 1) entry-path-cnt)
-                            (or (and dir? entry-dir?) (and file? (not entry-dir?))))
-                       (cons (. (File. path) getName) paths)
-                       paths)))
-          (do
-            (. jar-file close)
-            (vec paths))))))
-
-(defn get-absolute-children
-  [relative-dir-path dir? file?]
-  (let [absolute-dir (File. (fs/get-absolute-path relative-dir-path))
-        children     (filter #(cond (and dir? file?) true
-                                    (and dir? (not file?)) (. %1 isDirectory)
-                                    (and (not dir?) file?) (not (. %1 isDirectory))
-                                    :else                  false)
-                             (. absolute-dir listFiles))]
-    (map #(. %1 getName) children)))
-
-
-(defn get-resource-type
-  [resource-url]
-  (let [protocol (if (nil? resource-url) nil (. resource-url getProtocol))]
-    (cond (= "file" protocol) :file
-          (= "jar" protocol)  :jar
-          :else               :none)))
-
-(defn get-resource-children
-  [relative-dir-path dir? file?]
-  (let [resource-url (io/resource relative-dir-path)
-        type         (get-resource-type resource-url)]
-    (cond (= :file type) (let [file     (io/as-file resource-url)
-                               children (filter #(cond (and dir? file?) true
-                                                       (and dir? (not file?)) (. %1 isDirectory)
-                                                       (and (not dir?) file?) (not (. %1 isDirectory))
-                                                       :else                  false)
-                                                (. file listFiles))]
-                           (map #(. %1 getName) children))
-          (= :jar type)  (let [jar-path (get-jar-path resource-url)]
-                           (get-jar-resource-children jar-path relative-dir-path dir? file?))
-          :else          nil)))
-
-(defn copy-resource-file
-  [resource-path dst-path]
-  (let [src-url       (io/resource resource-path)
-        type          (get-resource-type src-url)
-        last-modified (cond (= :file type) (let [file (File. (. src-url toURI))]
-                                             (. file lastModified))
-                            (= :jar  type) (let [entry    (get-jar-resource-entry src-url)
-                                                 filetime (. entry getLastModifiedTime)]
-                                             (. filetime toMillis)))
-        dst-file      (File. dst-path)
-        ]
-    (with-open [stream (io/input-stream src-url)]
-      (io/copy stream dst-file))
-    (. dst-file setLastModified last-modified)
-    ))
 
 
 ;;; ------------------------------------------------------------
@@ -197,14 +92,6 @@
 ;;; ------------------------------------------------------------
 ;;; File & Directory
 ;;; ------------------------------------------------------------
-(defn ensure-directory
-  [target]
-  (let [dir (fs/to-file target)]
-    (if (and (. dir exists) (not (. dir isDirectory)))
-        (. dir delete))
-    (if (not (. dir exists))
-        (. dir mkdirs))))
-
 (defn exists?
   [class-id object-id]
   (if (config/id? class-id)
@@ -246,7 +133,7 @@
   [class-id object-id s-exp-data]
   (let [file (get-json-file class-id object-id)
         dir  (. file getParentFile)]
-    (ensure-directory (. dir toString))
+    (fs/ensure-directory (. dir toString))
     (with-open [w (io/writer (. file toString))]
       (json/write s-exp-data w))))
 
@@ -331,7 +218,7 @@
   (doseq [field files_fields]
     (let [dst-dir   (get-attachment-dir class-id object-id (field "name"))
           file-keys (keys ((value (field "name")) "added"))]
-      (ensure-directory dst-dir)
+      (fs/ensure-directory dst-dir)
       (doseq [file-key file-keys]
         (let [file      (added-files (keyword file-key))
               tmp-file  (file :tempfile)
@@ -429,30 +316,6 @@
   (-> (response/response (get-objects-as-json class-id))
       (response/header "Contents-Type" "text/json; charset=utf-8")))
 
-(defn ensure-init-files
-  [relative-path]
-  (let [dirs  (get-resource-children relative-path true false)
-        files (get-resource-children relative-path false true)]
-    (if (or (nil? dirs) (nil? files))
-        nil
-        (do
-          (ensure-directory relative-path)
-          (doseq [dir dirs]
-            (ensure-init-files (str relative-path "/" dir)))
-          (doseq [file files]
-            (let [src-path (str relative-path "/" file)
-                  dst-path (str relative-path "/" file)]
-              ;(println (format "[systems/ensure-init-files] %s" src-path))
-              (if (not (. (File. (fs/get-absolute-path dst-path)) exists))
-                  (copy-resource-file src-path dst-path))
-                  ))))))
-
-(defn init
-  []
-  (ensure-init-files "lib")
-  (ensure-init-files "core")
-  (ensure-init-files "data")
-  true)
 
 
 

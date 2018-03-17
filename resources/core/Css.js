@@ -19,10 +19,14 @@ define(function (require) {
     css_path_2_last_modified[path] = time;
     
     var link = document.createElement('link');
+    //link.rel = 'preload';
+    //link.as = 'style';
     link.rel = 'stylesheet';
     link.type = 'text/css';
     link.href = path + "?" + time;
     link.onload = function() {
+      console.log("[CSS] Load completed   ... (" + link.href + ")");
+      //link.rel = 'stylesheet';
       append(properties_list)
       .then(function () {
         dfd.resolve();
@@ -31,6 +35,7 @@ define(function (require) {
     
     var head = $("head");
     head.append(link);
+    console.log("[CSS] Append completed ... (" + link.href + ")");
     
     return dfd.promise();
   }

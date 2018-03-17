@@ -13,6 +13,7 @@
             [tames.config :as config]
             [tames.handler :as handler]
             [tames.systems :as systems]
+            [tames.operations.resource :as resource]
             [tames.operations.fonts :as fonts]))
 
 (defn init
@@ -21,7 +22,7 @@
   ([config-path]
    (log/info "Initializing...")
    (let [result (and (fonts/init)
-                     (systems/init)
+                     (resource/init)
                      (config/init config-path))]
      (when (not result)
            (log/fatal "Initialization was failed. System shutdown...")
