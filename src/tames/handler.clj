@@ -44,39 +44,26 @@
   (map #(link-tag (%1 "path") (%1 "last-modified"))
        (resource/get-properties-list paths)))
 
-(defn login-get
-  [req]
-  (let [title "tames"]
+(defn top-page
+  []
+  (let [title                 "tames"
+        modified-times        (vec (resource/get-properties-list ["core/main.js" "lib/require.js"]))
+        main-last-modified    ((modified-times 0) "last-modified")
+        require-last-modified ((modified-times 1) "last-modified")]
     (html
       [:head
+        [:meta {:charset "utf-8"}]
+        [:meta {:http-equiv "content-style-type" :content "text/css"}]
+        [:meta {:http-equiv "content-script-type" :content "text/javascript"}]
+        [:meta {:name "viewport" :content "width=device-width, initial-scale=1.0"}]
         [:title title ]
         [:link {:rel "shortcut icon" :href "login/core/favicon.ico"} ]
-        [:link {:rel "stylesheet" :type "text/css" :href "login/lib/font-awesome-4.6.1/css/font-awesome.css" } ]
-        [:link {:rel "stylesheet" :type "text/css" :href "login/lib/w2ui/w2ui-1.5.rc1.css" } ]
-        [:link {:rel "stylesheet" :type "text/css" :href "login/core/reset-w2ui.css" } ]
-        [:link {:rel "stylesheet" :type "text/css" :href "login/core/main.css" } ]
-        [:script {:data-main "login/core/login.js?version=0.0.15" :src "login/lib/require.js"} ]
-        ]
-      [:body
-        [:div {:style "width:100%; text-align:center;height:50px;"}]
-        [:div {:style "width:100px; height:100px; background-image:url(login/core/logo.svg); background-size:100%;margin:auto;"} ]
-        [:h1 {:style "text-align:center;height:50px;"} title]
-        [:div {:style "width:100%; text-align:center;height:50px;"}]
-        [:form {:method "post" :name "login"}
-          [:div {:style "width:100%; text-align:center;"}
-            [:span {:style "display:inline-block;width:100px;"} "Login ID "]
-            [:input {:id "login-id" :type "text" :name "login_id" :style "width:200px;" :class "w2field" :tabindex "1"}]
-            [:br]
-            [:div {:style "width:100%;height:10px;"}]
-            [:span {:style "display:inline-block;width:100px;"} "Password"]
-            [:input {:id "login-password":type "password" :name "password" :style "width:200px;" :class "w2field" :tabindex "2"}]
-            [:br]
-            [:div {:style "width:100%;height:50px;"}]
-            [:input {:type "hidden" :name "__anti-forgery-token" :value *anti-forgery-token*}]
-            [:input {:type "submit" :style "display:none;"}]
-            [:div {:id "login-button" :class "div-button" :style "width:70px;height:70px;margin: auto;" :tabindex "3"}
-              [:i {:class "fa fa-sign-in" :style "font-size:35pt;"} ]
-              [:div {:style "font-size:10pt;"} "Login" ]]]]])))
+        ;[:link {:rel "stylesheet" :type "text/css" :href "login/lib/font-awesome-4.6.1/css/font-awesome.css" } ]
+        ;[:link {:rel "stylesheet" :type "text/css" :href "login/lib/w2ui/w2ui-1.5.rc1.css" } ]
+        ;[:link {:rel "stylesheet" :type "text/css" :href "login/core/reset-w2ui.css" } ]
+        ;[:link {:rel "stylesheet" :type "text/css" :href "login/core/main.css" } ]
+        [:script {:data-main (format "core/main.js?last-modified=%s" main-last-modified) :src (format "lib/require.js?last-modified=%s" require-last-modified)}]]
+      [:body])))
 
 (defn login
   [req]
@@ -163,10 +150,13 @@
     (logout req))
 
   ;; Portal Top
-  (GET "/tames" []
+  ;(GET "/tames" []
+  ;  (log/debug "[GET] /tames")
+  ;  (-> (response/file-response "core/tames.html")
+  ;      (response/header "Content-Type" (content-types "html"))))
+  (GET "/tames" req
     (log/debug "[GET] /tames")
-    (-> (response/file-response "core/tames.html")
-        (response/header "Content-Type" (content-types "html"))))
+    (top-page))
   
   ;; REST API for CRUD
   (GET "/api/rest/:class-id" req

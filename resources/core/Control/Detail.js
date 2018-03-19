@@ -5,7 +5,7 @@ define(function (require) {
   var Locale = require("core/Locale");
   var Uuid = require("core/Uuid");
   var Css = require("core/Css");
-  var app = require("app");
+  var app = require("core/app");
 
   var TEMPLATE_FIELD = '<div class="w2ui-field"></div>';
   

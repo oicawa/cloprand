@@ -1,6 +1,5 @@
 define(function (require) {
   require('jquery');
-  require('json2');
   var Class = require('core/Class');
   var Locale = require('core/Locale');
   var Storage = require('core/Storage');

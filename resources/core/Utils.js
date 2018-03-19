@@ -1,6 +1,5 @@
 define(function (require) {
   require('jquery');
-  require('json2');
   
   function create_path() {
     var args = Array.prototype.slice.call(arguments);

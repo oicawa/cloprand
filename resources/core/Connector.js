@@ -1,6 +1,8 @@
-define(function (require) {
+define(function () {
   function send(method, url, data, files, data_type) {
     var dfd = new $.Deferred;
+    
+    // Form data
     var formData = new FormData();
     formData.append("value", encodeURIComponent(JSON.stringify(data)));
     if (files) {
@@ -8,29 +10,27 @@ define(function (require) {
         formData.append(key, files[key]);
       }
     }
-    $.ajax({
-      type: method,
-      ifModified: true,
-      url: url,
-      contentType: false,
-      processData: false,
-      dataType: data_type,
-      cache: false,
-      data: method == "GET" ? null : formData
-    }).done(function (data, text_status, jqXHR) {
-      dfd.resolve(data, text_status, jqXHR);
-    }).fail(function (jqXHR, text_status, error_thrown) {
-      if (jqXHR.status != 401) {
-        dfd.reject(jqXHR, text_status, error_thrown);
+    
+    // XMLHttpRequest
+    var xhr = new XMLHttpRequest();
+    xhr.open(method, url);
+    xhr.responseType = data_type;
+    xhr.onload = function () {
+      dfd.resolve(this.response, this.statusText, xhr);
+    };
+    xhr.onerror = function () {
+      if (xhr.status != 401) {
+        dfd.reject(xhr, this.statusText);
         return;
       }
       var redirect = !url.startsWith("/api/session/identity");
       if (redirect) {
         location.href = "/tames";
       } else {
-        dfd.reject(jqXHR, text_status, error_thrown);
+        dfd.reject(xhr, this.statusText);
       }
-    });
+    };
+    xhr.send(method === "GET" ? null : formData);
     return dfd.promise();
   }
   
@@ -61,22 +61,17 @@ define(function (require) {
       return send("POST", url, data, null, data_type);
     },
     generate : function(generator_name, content_type, data) {
-      var xhr = new XMLHttpRequest();
-      xhr.open('POST', '/api/generate/' + generator_name);
-      xhr.responseType = 'arraybuffer';
-      xhr.onload = function() {
-        var blob = new Blob([this.response], {type: content_type});
-        var pdfURL = window.URL.createObjectURL(blob);
+      send('POST', '/api/generate/' + generator_name, data, null, 'arraybuffer')
+      .done(function (response) {
+        var blob = new Blob([response], {type: content_type});
+        var file_url = window.URL.createObjectURL(blob);
         try {
-          window.open(pdfURL, '_blank');
+          window.open(file_url, '_blank');
         } catch (e) {
-          var name = pdfURL.split(/:/)[1];
-          window.navigator.msSaveOrOpenBlob(blob, name);
+          var file_name = fileURL.split(/:/)[1];
+          window.navigator.msSaveOrOpenBlob(blob, file_name);
         }
-      };
-      var formData = new FormData();
-      formData.append("value", encodeURIComponent(JSON.stringify(data)));
-      xhr.send(formData);
+      });
     },
     pdf : function(data) {
       Connector.generate("pdf", "application/pdf", data);

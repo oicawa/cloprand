@@ -1,13 +1,9 @@
 define(function (require) {
   require("jquery");
-  //var app = require("app");
-  //var Utils = require("core/Utils");
   var Locale = require("core/Locale");
-  //var Class = require("core/Class");
   var Connector = require("core/Connector");
   var Inherits = require("core/Inherits");
   var Field = require("core/Control/Field/Field");
-  //var Grid = require("core/Control/Grid");
   var Finder = require("core/Control/Finder");
   
   var TEMPLATE = '<div><div name="font-name"></div></div>';

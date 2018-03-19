@@ -11,8 +11,8 @@ if (!String.prototype.startsWith) {
 }
 
 if (!Object.values) {
-  Object.values = function values(O) {
-    return Object.keys(O).map(function (key) { return O[key]; });
+  Object.values = function values(obj) {
+    return Object.keys(obj).map(function (key) { return obj[key]; });
   };
 }
 
@@ -23,20 +23,16 @@ require.config({
   shim: {
     'jquery': { exports: '$' },
     'jquery_ui': { deps: ['jquery'] },
-    'json2': { deps: ['jquery'] },
-    'w2ui': { deps: ['jquery'] },
-    'app': { deps: ['jquery'] }
+    'w2ui': { deps: ['jquery'] }
   },
   
   paths : {
     jquery : 'lib/jquery-2.1.3',
     jquery_ui : 'lib/jquery-ui-1.12.1',
-    json2 : 'lib/json2',
-    w2ui : 'lib/w2ui/w2ui-1.5.rc1',
-    app : 'core/app'
+    w2ui : 'lib/w2ui/w2ui-1.5.rc1'
   }
 });
 
-define(['app'], function (app) {
+define(['core/app'], function (app) {
   app.init();
 });

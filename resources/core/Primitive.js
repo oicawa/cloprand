@@ -1,6 +1,5 @@
 define(function (require) {
   require('jquery');
-  require('json2');
   var Utils = require('core/Utils');
   var Storage = require('core/Storage');
 

@@ -1,6 +1,6 @@
 define(function (require) {
   require("jquery");
-  var app = require("app");
+  var app = require("core/app");
   var Utils = require("core/Utils");
   var Locale = require("core/Locale");
   var Uuid = require("core/Uuid");

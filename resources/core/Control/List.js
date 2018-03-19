@@ -15,7 +15,7 @@ define(function (require) {
   var Field = require("core/Control/Field/Field");
   var Dialog = require("core/Dialog");
   var SelectDialog = require("core/Control/SelectDialog");
-  var app = require("app");
+  var app = require("core/app");
   
   var TEMPLATE = '' +
 '<div>' +

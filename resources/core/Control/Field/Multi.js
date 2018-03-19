@@ -10,7 +10,7 @@ define(function (require) {
   var Inherits = require("core/Inherits");
   var List = require("core/Control/List");
   var Field = require("core/Control/Field/Field");
-  var app = require("app");
+  var app = require("core/app");
 
   var TEMPLATE = '<div></div>';
 
