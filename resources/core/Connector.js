@@ -15,12 +15,10 @@ define(function () {
     var xhr = new XMLHttpRequest();
     xhr.open(method, url);
     xhr.responseType = data_type;
+    //xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onload = function () {
-      dfd.resolve(this.response, this.statusText, xhr);
-    };
-    xhr.onerror = function () {
       if (xhr.status != 401) {
-        dfd.reject(xhr, this.statusText);
+        dfd.resolve(this.response, this.statusText, xhr);
         return;
       }
       var redirect = !url.startsWith("/api/session/identity");
@@ -29,6 +27,9 @@ define(function () {
       } else {
         dfd.reject(xhr, this.statusText);
       }
+    };
+    xhr.onerror = function () {
+        dfd.reject(xhr, this.statusText);
     };
     xhr.send(method === "GET" ? null : formData);
     return dfd.promise();

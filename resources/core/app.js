@@ -185,10 +185,10 @@ define(function (require) {
         create_frame(self);
       });
     })
-    .fail(function (jqXHR) {
+    .fail(function (xhr) {
       console.log("Failed to get session identity");
-      var anti_forgery_token = jqXHR.responseJSON.anti_forgery_token;
-      var login_try_count = jqXHR.responseJSON.login_try_count;
+      var anti_forgery_token = xhr.response.anti_forgery_token;
+      var login_try_count = xhr.response.login_try_count;
       console.log("Login try count = " + login_try_count);
       show_login_form(self, anti_forgery_token, login_try_count);
     });

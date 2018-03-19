@@ -8,6 +8,7 @@
             [tames.filesystem :as fs]
             [tames.log :as log])
   (:import (java.io File)
+           (java.net URLDecoder URLEncoder)
            (java.util.jar JarFile JarEntry)
            (java.text SimpleDateFormat)))
 
@@ -95,7 +96,7 @@
   [relative-dir-path dir? file?]
   (let [resource-url (io/resource relative-dir-path)
         type         (get-resource-type resource-url)]
-    (cond (= :file type) (fs/get-children relative-dir-path dir? file?)
+    (cond (= :file type) (fs/get-children (. resource-url getPath) dir? file?)
           (= :jar type)  (let [jar-path (get-jar-path resource-url)]
                            (get-jar-resource-children jar-path relative-dir-path dir? file?))
           :else          nil)))
@@ -138,10 +139,11 @@
 
 (defn properties-list
   [paths]
-  (let [properties-list (get-properties-list paths)]
-    (-> (response/response (json/write-str properties-list))
+  (let [properties-list (get-properties-list paths)
+        json            (json/write-str properties-list)
+        encoded         (URLEncoder/encode json "UTF-8")]
+    (-> (response/response json)
         (response/header "Contents-Type" "text/json; charset=utf-8"))))
-
 
 (defn ensure-init-files
   [relative-path]

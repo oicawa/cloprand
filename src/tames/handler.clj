@@ -222,8 +222,11 @@
   (GET "/api/session/:session-key" req
     (log/debug "[GET] /session/:session-key")
     (let [session-key (get-in req [:route-params :session-key] nil)
-          user-name   (get-in req [:session :identity] nil)]
-      (format "{ \"%s\" : \"%s\"}" session-key user-name)))
+          user-name   (get-in req [:session :identity] nil)
+          json        (json/write-str (assoc {} session-key user-name))]
+          ;encoded     (URLEncoder/encode json "UTF-8")]
+      (-> (response/response json)
+          (response/header "Contents-Type" "text/json; charset=utf-8"))))
   ;; Download
   (GET "/api/download/:class-id/:object-id/*" [class-id object-id & params]
     (log/debug "[GET] /api/download/:class-id/:object-id/*")
