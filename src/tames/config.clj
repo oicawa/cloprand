@@ -18,6 +18,10 @@
 (def CLASS_ID "15ab1b06-3756-48df-b045-728499aa9a6c")
 (def DEFAULT_ID "e71de065-9b6a-42c7-9987-ddc8e75672ca")
 
+(defn site-name
+  []
+  (@data "site_name"))
+
 (defn id?
   [class-id]
   (= class-id CLASS_ID))

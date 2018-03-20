@@ -58,10 +58,10 @@ define(function (require) {
     return this._config;
   };
   
-  function show_login_form(self, anti_forgery_token, login_try_count) {
+  function show_login_form(self, anti_forgery_token, login_try_count, system_label) {
     Connector.get("core/login.html", "html")
     .then(function (template) {
-      var html = template.replace(/{{TITLE}}/, "tames").replace(/{{ANTI_FORGERY_TOKEN}}/, anti_forgery_token);
+      var html = template.replace(/{{TITLE}}/, system_label).replace(/{{ANTI_FORGERY_TOKEN}}/, anti_forgery_token);
       $("body").append(html);
 
       $("#login-failed-message").text(login_try_count <= 0 ? "" : "Input correct LoginID & Password.");
@@ -167,14 +167,8 @@ define(function (require) {
     var self = this;
     var CONFIG_OBJECT_ID = "e71de065-9b6a-42c7-9987-ddc8e75672ca";
     
-    Css.load(
-      "lib/jquery-ui-1.12.1.css",
-      "lib/w2ui/w2ui-1.5.rc1.css",
-      "lib/font-awesome-4.6.1/css/font-awesome.css",
-      "core/reset-w2ui.css",
-      "core/main.css",
-      "core/app.css"
-    ).then (function () {
+    Css.load("core/app.css")
+    .then (function () {
       return Connector.session("identity")
     }).done(function(data){
       self.session = data;
@@ -185,12 +179,13 @@ define(function (require) {
         create_frame(self);
       });
     })
-    .fail(function (xhr) {
+    .fail(function (response) {
       console.log("Failed to get session identity");
-      var anti_forgery_token = xhr.response.anti_forgery_token;
-      var login_try_count = xhr.response.login_try_count;
+      var anti_forgery_token = response.anti_forgery_token;
+      var login_try_count = response.login_try_count;
+      var system_label = response.system_label;
       console.log("Login try count = " + login_try_count);
-      show_login_form(self, anti_forgery_token, login_try_count);
+      show_login_form(self, anti_forgery_token, login_try_count, system_label);
     });
   };
 

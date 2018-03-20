@@ -14,6 +14,7 @@
             [tames.log :as log]
             [tames.filesystem :as fs]
             [tames.operations.resource :as resource]
+            [tames.config :as config]
             [tames.systems :as systems]
             [tames.debug :as debug])
   (:import (java.io File)
@@ -46,7 +47,7 @@
 
 (defn top-page
   []
-  (let [title                 "tames"
+  (let [title                 (@config/data "system_lable")
         modified-times        (vec (resource/get-properties-list ["core/main.js" "lib/require.js"]))
         main-last-modified    ((modified-times 0) "last-modified")
         require-last-modified ((modified-times 1) "last-modified")]
@@ -57,13 +58,20 @@
         [:meta {:http-equiv "content-script-type" :content "text/javascript"}]
         [:meta {:name "viewport" :content "width=device-width, initial-scale=1.0"}]
         [:title title ]
-        [:link {:rel "shortcut icon" :href "login/core/favicon.ico"} ]
-        ;[:link {:rel "stylesheet" :type "text/css" :href "login/lib/font-awesome-4.6.1/css/font-awesome.css" } ]
-        ;[:link {:rel "stylesheet" :type "text/css" :href "login/lib/w2ui/w2ui-1.5.rc1.css" } ]
-        ;[:link {:rel "stylesheet" :type "text/css" :href "login/core/reset-w2ui.css" } ]
-        ;[:link {:rel "stylesheet" :type "text/css" :href "login/core/main.css" } ]
-        [:script {:data-main (format "core/main.js?last-modified=%s" main-last-modified) :src (format "lib/require.js?last-modified=%s" require-last-modified)}]]
+        [:link {:rel "shortcut icon" :href "core/favicon.ico"} ]
+        (link-tag-list [
+          "lib/jquery-ui-1.12.1.css"
+          "lib/w2ui/w2ui-1.5.rc1.css"
+          "lib/font-awesome-4.6.1/css/font-awesome.css"
+          "core/reset-w2ui.css"
+          "core/main.css"])
+        [:script {:data-main (format "core/main.js?last-modified=%s" main-last-modified)
+                  :src       (format "lib/require.js?last-modified=%s" require-last-modified)}]]
       [:body])))
+
+(defn site-url
+  []
+  (format "/%s" (config/site-name)))
 
 (defn login
   [req]
@@ -76,13 +84,13 @@
                               (= (account "password") password) true
                               :else false)]
     (log/info "login_id=%s" login_id)
-    (-> (response/redirect "/tames")
+    (-> (response/redirect (site-url))
         (assoc-in [:session :identity] (if is-ok login_id nil))
         (assoc-in [:session :login-try-count] (if is-ok login-try-count (+ login-try-count 1))))))
 
 (defn logout
   [req]
-  (-> (response/redirect "/tames")
+  (-> (response/redirect (site-url))
       (assoc :session {})))
 
 (defn response-authorized
@@ -90,7 +98,9 @@
   (-> (response/response (if authorized?
                              nil
                              (json/write-str { "anti_forgery_token" (str *anti-forgery-token*)
-                                               "login_try_count" login-try-count })))
+                                               "login_try_count" login-try-count
+                                               "redirect_url"    (site-url)
+                                               "system_label"    (@config/data "system_label")})))
       (response/status (if authorized? 200 401))
       (response/header "Contents-Type" "text/json; charset=utf-8")))
 
@@ -102,7 +112,7 @@
         login-try-count (get-in req [:session :login-try-count] 0)]
     (log/debug "*** Unauthenticated: [%s], URI: [%s], referer: [%s], login-try-count=[%d]" result uri referer login-try-count)
     (cond result
-            (response/redirect "/tames")
+            (response/redirect (site-url))
           (= uri "/api/session/identity")
             (response-authorized false login-try-count)
           :else
@@ -150,13 +160,12 @@
     (logout req))
 
   ;; Portal Top
-  ;(GET "/tames" []
-  ;  (log/debug "[GET] /tames")
-  ;  (-> (response/file-response "core/tames.html")
-  ;      (response/header "Content-Type" (content-types "html"))))
-  (GET "/tames" req
-    (log/debug "[GET] /tames")
-    (top-page))
+  (GET ["/:site-name" :site-name #"[a-zA-Z][-_a-zA-Z0-9]*"] req
+    (let [site-name (get-in req [:route-params :site-name] nil)]
+      (log/debug "[GET] /%s" site-name)
+      (if (= site-name (config/site-name))
+          (top-page)
+          (route/not-found "Not Found"))))
   
   ;; REST API for CRUD
   (GET "/api/rest/:class-id" req
@@ -230,8 +239,7 @@
   ;; Download
   (GET "/api/download/:class-id/:object-id/*" [class-id object-id & params]
     (log/debug "[GET] /api/download/:class-id/:object-id/*")
-    (let [;file        (File. (fs/get-absolute-path (format "data/%s" #?=(params :*))))
-          file        #?=(systems/get-attachment-file class-id object-id (params :*))
+    (let [file        (systems/get-attachment-file class-id object-id (params :*))
           file-name   (. file getName)
           encoded-file-name (. (URLEncoder/encode file-name "UTF-8") replace "+" "%20")
           disposition (format "attachment;filename=\"%s\";filename*=UTF-8''%s" file-name encoded-file-name)

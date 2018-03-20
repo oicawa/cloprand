@@ -1,4 +1,13 @@
 define(function () {
+  function clean_response(response, data_type) {
+    if (data_type !== "json") {
+      return response;
+    }
+    if (navigator.userAgent.indexOf('Trident') < 0) {
+      return response;
+    }
+    return JSON.parse(response);
+  }
   function send(method, url, data, files, data_type) {
     var dfd = new $.Deferred;
     
@@ -17,24 +26,26 @@ define(function () {
     xhr.responseType = data_type;
     //xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onload = function () {
+      var response = clean_response(this.response, data_type);
       if (xhr.status != 401) {
-        dfd.resolve(this.response, this.statusText, xhr);
+        dfd.resolve(response, this.statusText, xhr);
         return;
       }
       var redirect = !url.startsWith("/api/session/identity");
       if (redirect) {
-        location.href = "/tames";
+        location.href = response.redirect_url;
       } else {
-        dfd.reject(xhr, this.statusText);
+        dfd.reject(response, xhr, this.statusText);
       }
     };
     xhr.onerror = function () {
-        dfd.reject(xhr, this.statusText);
+      var response = clean_response(this.response, data_type);
+      dfd.reject(response, this.statusText, xhr);
     };
     xhr.send(method === "GET" ? null : formData);
     return dfd.promise();
   }
-  
+
   var Connector = {
     send : send,
     post : function(url, data, files, data_type) { 

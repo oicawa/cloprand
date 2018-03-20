@@ -126,7 +126,7 @@
 
 (defn all-css-properties-list
   [data]
-  (let [properties-list #?=(get-all-css-properties-list)]
+  (let [properties-list (get-all-css-properties-list)]
     (-> (response/response (json/write-str properties-list))
         (response/header "Contents-Type" "text/json; charset=utf-8"))))
 
