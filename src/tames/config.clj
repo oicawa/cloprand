@@ -49,22 +49,31 @@
   (map #(fs/get-absolute-path (%1 "path"))
        (@data "packages")))
 
+(defn attachment-dir
+  [config-path]
+  (let [config-file    (fs/to-file config-path)
+        parent-dir     (fs/to-path (. config-file getParentFile))
+        base-name      (fs/file-name-without-ext config-file)
+        attachment-dir (. parent-dir resolve (format ".%s" base-name))]
+    (. attachment-dir toFile)))
+        
 (defn ensure-config-file
   [path]
-  (let [default-path (format "data/%s/%s.json" CLASS_ID DEFAULT_ID)
-        file         (File. (fs/get-absolute-path (if (empty? path) default-path path)))
-        dir          (. file getParentFile)]
-    (cond (not (. dir exists))
-            (do (log/fatal "Target directory does not exist. [%s]" (. dir getAbsolutePath)) nil)
-          (and (. file exists) (. file isDirectory))
-            (do (log/fatal "Target file is directory. [%s]" (. file getAbsolutePath)) nil)
+  (let [src-file (File. (format "data/%s/%s.json" CLASS_ID DEFAULT_ID))
+        dst-file (File. (if (empty? path) "./config.json" path))
+        dst-dir  (. src-file getParentFile)]
+    (cond (not (. dst-dir exists))
+            (do (log/fatal "Target directory does not exist. [%s]" (fs/get-absolute-path dst-dir)) nil)
+          (and (. dst-file exists) (. dst-file isDirectory))
+            (do (log/fatal "Target file is directory. [%s]" (fs/get-absolute-path dst-file)) nil)
           :else
             (do
-              (when (not (. file exists))
-                    (fs/copy default-path file)
+              (when (not (. dst-file exists))
+                    (fs/copy src-file dst-file)
+                    (fs/copy (attachment-dir src-file) (attachment-dir dst-file))
                     (log/info "Default config file is copied."))
-              (log/info "Config file [%s]" (. file getAbsolutePath))
-              file))))
+              (log/info "Config file [%s]" (. dst-file getAbsolutePath))
+              dst-file))))
 
 (defn init
   [config-path]
