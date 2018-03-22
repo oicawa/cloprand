@@ -30,6 +30,10 @@
   []
   (. (File. @path) lastModified))
 
+(defn base-name
+  []
+  (fs/file-name-without-ext (. (File. @path) getName)))
+  
 (defn get-attachment-dir
   [& field_name]
   (let [file       (File. @path)
@@ -43,6 +47,22 @@
   (let [dir  (get-attachment-dir)
         path (fs/make-path dir field_and_file_name)]
     (fs/to-file path)))
+
+(defn image-path
+  [field-name default-path]
+  (let [dir    (get-attachment-dir field-name)
+        files  (vec (. dir listFiles))]
+    (if (empty? files)
+        default-path
+        (format ".%s/%s/%s" (base-name) field-name (. (files 0) getName)))))
+  
+(defn favicon-path
+  []
+  (image-path "favicon" "core/favicon.ico"))
+
+(defn logo-path
+  []
+  (image-path "logo" "core/logo.svg"))
 
 (defn package-paths
   []

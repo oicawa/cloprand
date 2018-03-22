@@ -48,6 +48,7 @@
 (defn top-page
   []
   (let [title                 (@config/data "system_lable")
+        favicon-path          (. (config/get-attachment-file "favicon") getPath)
         modified-times        (vec (resource/get-properties-list ["core/main.js" "lib/require.js"]))
         main-last-modified    ((modified-times 0) "last-modified")
         require-last-modified ((modified-times 1) "last-modified")]
@@ -58,7 +59,7 @@
         [:meta {:http-equiv "content-script-type" :content "text/javascript"}]
         [:meta {:name "viewport" :content "width=device-width, initial-scale=1.0"}]
         [:title title ]
-        [:link {:rel "shortcut icon" :href "core/favicon.ico"} ]
+        [:link {:rel "shortcut icon" :href favicon-path} ]
         (link-tag-list [
           "lib/jquery-ui-1.12.1.css"
           "lib/w2ui/w2ui-1.5.rc1.css"
@@ -100,7 +101,9 @@
                              (json/write-str { "anti_forgery_token" (str *anti-forgery-token*)
                                                "login_try_count" login-try-count
                                                "redirect_url"    (site-url)
-                                               "system_label"    (@config/data "system_label")})))
+                                               "system_label"    (@config/data "system_label")
+                                               "logo"            (config/logo-path)
+                                               "login"           (@config/data "login")})))
       (response/status (if authorized? 200 401))
       (response/header "Contents-Type" "text/json; charset=utf-8")))
 

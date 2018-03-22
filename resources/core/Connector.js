@@ -87,6 +87,31 @@ define(function () {
     },
     pdf : function(data) {
       Connector.generate("pdf", "application/pdf", data);
+    },
+    properties_list : function(paths) {
+      var dfd = new $.Deferred;
+      Connector.public_operate("resource", "properties-list", "json", paths)
+      .done(function (properties_list) {
+        dfd.resolve(properties_list);
+      })
+      .fail(function (jqXHR, text_status, error_thrown) {
+        if (jqXHR.status == 410) {
+          console.log("CSS file does not exist. (" + path + ")");
+        }
+        dfd.reject(null);
+      });
+      return dfd.promise();
+    },
+    resource : function(path, data_type) {
+      var dfd = new $.Deferred;
+      Connector.properties_list([path])
+      .done(function (properties_list) {
+        var properties = (properties_list.length === 0) ? null : properties_list[0];
+        var time = (properties === null) ? Date.now() : properties["last-modified"];
+        var url = path + "?" + time;
+        return Connector.get(url, data_type).done(function (data) { return dfd.resolve(data); });
+      });
+      return dfd.promise();
     }
   };
   return Connector;

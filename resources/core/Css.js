@@ -2,7 +2,7 @@ define(function (require) {
   require("jquery");
   var Connector = require('core/Connector');
 
-  var css_path_2_last_modified = {};
+  var path_2_last_modified = {};
   
   function append(properties_list) {
     var dfd = new $.Deferred;
@@ -15,7 +15,7 @@ define(function (require) {
     
     var path = properties["path"];
     var time = properties["last-modified"];
-    css_path_2_last_modified[path] = time;
+    path_2_last_modified[path] = time;
     
     var link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -35,25 +35,10 @@ define(function (require) {
   }
   
   function exists (path) {
-    var last_modified = css_path_2_last_modified[path];
+    var last_modified = path_2_last_modified[path];
     return is_null_or_undefined(last_modified) ? false : true;
   }
   
-  function get_properties_list (paths) {
-    var dfd = new $.Deferred;
-    Connector.public_operate("resource", "properties-list", "json", paths)
-    .done(function (properties_list) {
-      dfd.resolve(properties_list);
-    })
-    .fail(function (jqXHR, text_status, error_thrown) {
-      if (jqXHR.status == 410) {
-        console.log("CSS file does not exist. (" + path + ")");
-      }
-      dfd.reject(null);
-    });
-    return dfd.promise();
-  }
-
   var Css = {
     load: function(/* paths */) {
       var paths = Array.prototype.slice.call(arguments, 0);
@@ -63,7 +48,7 @@ define(function (require) {
         dfd.resolve();
         return dfd.promise();
       }
-      get_properties_list(paths)
+      Connector.properties_list(paths)
       .then(function (properties_list) {
         return append(properties_list);
       })

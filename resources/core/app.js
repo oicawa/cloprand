@@ -9,6 +9,7 @@ define(function (require) {
   var Contents = require("core/Contents");
   var Tree = require("core/Control/Tree");
   var Css = require("core/Css");
+  var Locale = require("core/Locale");
 
   var LAYOUT_TEMPLATE = '<div id="layout"></div>';
   var TOP_TEMPLATE = '' +
@@ -58,13 +59,28 @@ define(function (require) {
     return this._config;
   };
   
-  function show_login_form(self, anti_forgery_token, login_try_count, system_label) {
-    Connector.get("core/login.html", "html")
-    .then(function (template) {
-      var html = template.replace(/{{TITLE}}/, system_label).replace(/{{ANTI_FORGERY_TOKEN}}/, anti_forgery_token);
+  function show_login_form(self, response) {
+    console.log(response);
+    var login = (response.login !== null) ? response.login : {
+      "logo_height" : null,
+      "login_id_caption" : "Login ID",
+      "password_caption" : "Password",
+      "button_caption" : "Login",
+      "error_message" : "Input correct Login ID & Password."
+    };
+    Connector.resource("core/login.html", "html")
+    .done(function (template) {
+      var html = template.replace(/{{LOGO_HEIGHT}}/, login.logo_height == null ? "" : "height:" + login.logo_height + "px;")
+                         .replace(/{{LOGO}}/, response.logo)
+                         .replace(/{{TITLE}}/, response.system_label)
+                         .replace(/{{ANTI_FORGERY_TOKEN}}/, response.anti_forgery_token)
+                         .replace(/{{LOGIN_ID_CAPTION}}/, Locale.translate(login.login_id_caption))
+                         .replace(/{{PASSWORD_CAPTION}}/, Locale.translate(login.password_caption))
+                         .replace(/{{BUTTON_CAPTION}}/, Locale.translate(login.button_caption))
+                         ;
       $("body").append(html);
 
-      $("#login-failed-message").text(login_try_count <= 0 ? "" : "Input correct LoginID & Password.");
+      $("#login-failed-message").text(response.login_try_count <= 0 ? "" : Locale.translate(login.error_message));
 
       $("#login-password").on("keyup", function (event) {
         var KEYCODE_ENTER = 13;
@@ -180,12 +196,8 @@ define(function (require) {
       });
     })
     .fail(function (response) {
-      console.log("Failed to get session identity");
-      var anti_forgery_token = response.anti_forgery_token;
-      var login_try_count = response.login_try_count;
-      var system_label = response.system_label;
-      console.log("Login try count = " + login_try_count);
-      show_login_form(self, anti_forgery_token, login_try_count, system_label);
+      console.log("Failed to get session identity. (Login try count = " + response.login_try_count + ")");
+      show_login_form(self, response);
     });
   };
 
