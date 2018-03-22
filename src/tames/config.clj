@@ -92,8 +92,15 @@
                     (fs/copy src-file dst-file)
                     (fs/copy (attachment-dir src-file) (attachment-dir dst-file))
                     (log/info "Default config file is copied."))
-              (log/info "Config file [%s]" (. dst-file getAbsolutePath))
+              (log/info "Config file [%s]" (fs/get-absolute-path dst-file))
               dst-file))))
+
+(defn update
+  []
+  (let [p   @path
+        tmp (with-open [rdr (io/reader p)]
+              #?=(json/read rdr))]
+    (dosync (ref-set data tmp))))
 
 (defn init
   [config-path]
@@ -101,6 +108,7 @@
         result (not (nil? file))]
     (when result
       (reset! path (. file getAbsolutePath))
-      (dosync (ref-set data (with-open [rdr (io/reader (. file getAbsolutePath))]
-                              (json/read rdr)))))
+      ;(dosync (ref-set data (with-open [rdr (io/reader (. file getAbsolutePath))]
+      ;                        (json/read rdr))))
+      (update))
     result))

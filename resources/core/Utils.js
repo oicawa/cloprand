@@ -37,16 +37,6 @@ define(function (require) {
       
       return dfd.promise();
     },
-    property_value : function(instance, property, method_name, value) {
-      if (value.length == 0) {
-        return property[method_name]();
-      } else if (value.length == 1) {
-        property[method_name](value[0]);
-        return instance;
-      } else {
-        console.assert(false, arguments);
-      }
-    },
     get_as_json : function(default_json, assign_func) {
       var new_json = JSON.parse(JSON.stringify(default_json));
       try {

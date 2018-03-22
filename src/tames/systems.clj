@@ -145,7 +145,8 @@
     ;; !! CAUTION !!
     ;; Implement 's-exp-data' check logic!!
     (with-open [w (io/writer file)]
-      (json/write s-exp-data w))))
+      (json/write s-exp-data w)
+      (if (config/id? class-id) (config/update)))))
 
 (defn delete-object
   [class-id object-id]

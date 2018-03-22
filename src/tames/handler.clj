@@ -48,7 +48,7 @@
 (defn top-page
   []
   (let [title                 (@config/data "system_lable")
-        favicon-path          (. (config/get-attachment-file "favicon") getPath)
+        favicon-path          (config/favicon-path)
         modified-times        (vec (resource/get-properties-list ["core/main.js" "lib/require.js"]))
         main-last-modified    ((modified-times 0) "last-modified")
         require-last-modified ((modified-times 1) "last-modified")]
@@ -103,6 +103,7 @@
                                                "redirect_url"    (site-url)
                                                "system_label"    (@config/data "system_label")
                                                "logo"            (config/logo-path)
+                                               "favicon"         (config/favicon-path)
                                                "login"           (@config/data "login")})))
       (response/status (if authorized? 200 401))
       (response/header "Contents-Type" "text/json; charset=utf-8")))

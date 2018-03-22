@@ -38,12 +38,10 @@ define(function (require) {
   }
   
   App.prototype.title = function() {
-    if (arguments.length == 0) {
+    if (arguments.length === 0) {
       return document.title;
-    } else if (arguments.length == 1) {
-      document.title = arguments[0];
     }
-    return Utils.property_value(this, this._title, "text", arguments);
+    document.title = arguments[0];
   };
   
   App.prototype.favicon = function(path) {
@@ -68,11 +66,15 @@ define(function (require) {
       "button_caption" : "Login",
       "error_message" : "Input correct Login ID & Password."
     };
+
+    self.title(response.system_label);
+    self.favicon(response.favicon);
+
     Connector.resource("core/login.html", "html")
     .done(function (template) {
       var html = template.replace(/{{LOGO_HEIGHT}}/, login.logo_height == null ? "" : "height:" + login.logo_height + "px;")
                          .replace(/{{LOGO}}/, response.logo)
-                         .replace(/{{TITLE}}/, response.system_label)
+                         .replace(/{{TITLE}}/, Locale.translate(response.system_label))
                          .replace(/{{ANTI_FORGERY_TOKEN}}/, response.anti_forgery_token)
                          .replace(/{{LOGIN_ID_CAPTION}}/, Locale.translate(login.login_id_caption))
                          .replace(/{{PASSWORD_CAPTION}}/, Locale.translate(login.password_caption))
@@ -137,7 +139,7 @@ define(function (require) {
     self._contents = new Contents();
     self._contents.init("#contents-panel");
 
-    self.title(self._config.system_label);
+    self.title(Locale.translate(self._config.system_label));
     self.favicon(favicon_path);
     self._login_id.text(self.session.identity);
 
