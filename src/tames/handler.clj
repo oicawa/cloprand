@@ -136,8 +136,8 @@
 
 (defn other-resources
   [req]
-  (let [relative-path     (get-in req [:route-params :*] nil)
-        not-resource?     (. relative-path startsWith "data/")
+  (let [relative-path     #?=(get-in req [:route-params :*] nil)
+        not-resource?     #?=(. relative-path startsWith "data/")
         if-modified-since (get-in req [:headers "if-modified-since"] nil)
         file              (systems/get-target-file relative-path)
         ext               (fs/ext file)

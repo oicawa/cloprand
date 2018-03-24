@@ -1,10 +1,10 @@
 (ns tames.config
   (:gen-class)
+  (:use [tames.debug])
   (:require [clojure.pprint :as pprint]
             [clojure.java.io :as io]
             [clojure.data.json :as json]
             [clojure.string :as string]
-            [tames.debug :as debug]
             [tames.filesystem :as fs]
             [tames.log :as log])
   (:import (java.io File InputStream)
@@ -99,8 +99,9 @@
   []
   (let [p   @path
         tmp (with-open [rdr (io/reader p)]
-              #?=(json/read rdr))]
-    (dosync (ref-set data tmp))))
+              (json/read rdr))]
+    (dosync (ref-set data tmp))
+    @data))
 
 (defn init
   [config-path]
