@@ -1,6 +1,7 @@
 (ns tames.handler
   (:gen-class)
-  (:use ring.adapter.jetty)
+  (:use [ring.adapter.jetty]
+        [tames.debug])
   (:require [clojure.pprint :as pprint]
             [clojure.java.io :as io]
             [compojure.core :refer :all]
@@ -44,6 +45,31 @@
   [paths]
   (map #(link-tag (%1 "path") (%1 "last-modified"))
        (resource/get-properties-list paths)))
+
+(defn login-body
+  []
+  (let [title                 (@config/data "system_lable")
+        favicon-path          (config/favicon-path)
+        modified-times        (vec (resource/get-properties-list ["core/main.js" "lib/require.js"]))
+        main-last-modified    ((modified-times 0) "last-modified")
+        require-last-modified ((modified-times 1) "last-modified")]
+    (html
+      [:head
+        [:meta {:charset "utf-8"}]
+        [:meta {:http-equiv "content-style-type" :content "text/css"}]
+        [:meta {:http-equiv "content-script-type" :content "text/javascript"}]
+        [:meta {:name "viewport" :content "width=device-width, initial-scale=1.0"}]
+        [:title title ]
+        [:link {:rel "shortcut icon" :href favicon-path} ]
+        (link-tag-list [
+          "lib/jquery-ui-1.12.1.css"
+          "lib/w2ui/w2ui-1.5.rc1.css"
+          "lib/font-awesome-4.6.1/css/font-awesome.css"
+          "core/reset-w2ui.css"
+          "core/main.css"])
+        [:script {:data-main (format "core/main.js?last-modified=%s" main-last-modified)
+                  :src       (format "lib/require.js?last-modified=%s" require-last-modified)}]]
+      [:body])))
 
 (defn top-page
   []
@@ -136,8 +162,8 @@
 
 (defn other-resources
   [req]
-  (let [relative-path     #?=(get-in req [:route-params :*] nil)
-        not-resource?     #?=(. relative-path startsWith "data/")
+  (let [relative-path     (get-in req [:route-params :*] nil)
+        not-resource?     (. relative-path startsWith "data/")
         if-modified-since (get-in req [:headers "if-modified-since"] nil)
         file              (systems/get-target-file relative-path)
         ext               (fs/ext file)
