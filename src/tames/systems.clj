@@ -113,7 +113,7 @@
 (defn get-object
   [class-id object-id]
   (let [file (if (config/id? class-id)
-                 (File. @config/path)
+                 (File. (config/path))
                  (get-json-file class-id object-id))]
     (if (not (. file exists))
         nil
@@ -140,7 +140,7 @@
 (defn update-object
   [class-id object-id s-exp-data]
   (let [file (if (config/id? class-id)
-                 (File. @config/path)
+                 (File. (config/path))
                  (get-json-file class-id object-id))]
     ;; !! CAUTION !!
     ;; Implement 's-exp-data' check logic!!
