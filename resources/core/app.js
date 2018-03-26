@@ -42,6 +42,7 @@ define(function (require) {
       return document.title;
     }
     document.title = arguments[0];
+    document.title = arguments[0];
   };
   
   App.prototype.favicon = function(path) {
@@ -127,8 +128,8 @@ define(function (require) {
     self._layout= w2ui[layout_name];
     self._layout.refresh();
 
-    var logo_path = "/core/logo.svg";
-    var favicon_path = "/core/favicon.ico";
+    var logo_path = "core/logo.svg";		// TODO Implement to get "tames/logo/xxx"
+    var favicon_path = "core/favicon.ico";	// TODO Implement to get "tames/favicon/xxx"
 
     self._system_icon = $("img#system-icon");
     self._system_icon.attr("src", logo_path);
@@ -139,7 +140,10 @@ define(function (require) {
     self._contents = new Contents();
     self._contents.init("#contents-panel");
 
-    self.title(Locale.translate(self._config.system_label));
+    var title = Locale.translate(self._config.system_label);
+    self.title(title);
+    self._title.text(title);
+
     self.favicon(favicon_path);
     self._login_id.text(self.session.identity);
 
