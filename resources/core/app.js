@@ -128,61 +128,33 @@ define(function (require) {
     self._layout= w2ui[layout_name];
     self._layout.refresh();
 
-    var logo_path = "core/logo.svg";		// TODO Implement to get "tames/logo/xxx"
-    var favicon_path = "core/favicon.ico";	// TODO Implement to get "tames/favicon/xxx"
+    function image_path(field_name, default_path) {
+      var images = self._config[field_name];
+      if (images.length == 0) {
+        return default_path;
+      }
+      return sef._config.site_name + "/" + field_name + "/" + images[0].name;
+    }
 
+    var favicon_path = image_path("favicon", "core/logo.svg");
+    self.favicon(favicon_path);
+
+    var logo_path = image_path("logo", "core/logo.svg");
     self._system_icon = $("img#system-icon");
     self._system_icon.attr("src", logo_path);
 
+    var title = Locale.translate(self._config.system_label);
+    self.title(title);
     self._title = $("span#title");
+    self._title.text(title);
+    
     self._login_id = $("span#login_id");
+    self._login_id.text(self.session.identity);
 
     self._contents = new Contents();
     self._contents.init("#contents-panel");
 
-    var title = Locale.translate(self._config.system_label);
-    self.title(title);
-    self._title.text(title);
-
-    self.favicon(favicon_path);
-    self._login_id.text(self.session.identity);
-
-    var tree = new Tree();
-    tree.init("#left-panel");
-    tree.add(null, [
-      //{ id: 'id-1', text: 'Item 1', img: 'icon-folder', expanded: false, group: true, nodes: [] },
-      //{ id: 'id-2', text: 'Item 2', img: 'icon-folder', expanded: false, group: true, nodes: [] }
-      { id: 'id-1', text: 'Item 1', img: 'icon-folder' },
-      { id: 'id-2', text: 'Item 2', img: 'icon-folder' }
-    ]);
-    tree.insert('id-1', null, [
-      { id: 'id-1-1', text: 'Item 1-1', icon: 'fa-star-empty' },
-      { id: 'id-1-2', text: 'Item 1-2', icon: 'fa fa-question-circle-o' }
-    ]);
-    tree.insert('id-2', null, [
-      { id: 'id-2-1', text: 'Item 2-1', icon: 'fa-star-empty' },
-      { id: 'id-2-2', text: 'Item 2-2', icon: 'w2ui-icon-check' }
-    ]);
-    tree.refresh();
-
-    var timer = false;
-    $(window).on("resize", function () {
-      if (timer !== false) {
-        clearTimeout(timer);
-      }
-      timer = setTimeout(function() {
-        console.log('window resized');
-        var body = $("body");
-        var divs = body.find("div[role='dialog'] > div.dialog");
-        for (var i = 0; i < divs.length; i++) {
-          var dialog = $("#" + divs[i].id);
-          dialog.dialog({
-            maxHeight : body.height() - 20,
-            maxWidth : body.width() - 20
-          });
-        }
-      }, 200);
-    });
+    Test.sample("#left-panel");
   }
   
   App.prototype.init = function() {

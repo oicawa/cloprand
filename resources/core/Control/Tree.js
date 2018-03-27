@@ -153,5 +153,25 @@ define(function (require) {
   Tree.prototype.update = function(keys) {
   };
 
+  Tree.sample = function(id) {
+    var tree = new Tree();
+    tree.init(id);
+    tree.add(null, [
+      //{ id: 'id-1', text: 'Item 1', img: 'icon-folder', expanded: false, group: true, nodes: [] },
+      //{ id: 'id-2', text: 'Item 2', img: 'icon-folder', expanded: false, group: true, nodes: [] }
+      { id: 'id-1', text: 'Item 1', img: 'icon-folder' },
+      { id: 'id-2', text: 'Item 2', img: 'icon-folder' }
+    ]);
+    tree.insert('id-1', null, [
+      { id: 'id-1-1', text: 'Item 1-1', icon: 'fa-star-empty' },
+      { id: 'id-1-2', text: 'Item 1-2', icon: 'fa fa-question-circle-o' }
+    ]);
+    tree.insert('id-2', null, [
+      { id: 'id-2-1', text: 'Item 2-1', icon: 'fa-star-empty' },
+      { id: 'id-2-2', text: 'Item 2-2', icon: 'w2ui-icon-check' }
+    ]);
+    tree.refresh();
+  }
+
   return Tree;
 });
