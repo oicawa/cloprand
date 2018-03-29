@@ -129,11 +129,12 @@ define(function (require) {
     self._layout.refresh();
 
     function image_path(field_name, default_path) {
-      var images = self._config[field_name];
+      var images = self._config[field_name].current;
+      console.log(images);
       if (images.length == 0) {
         return default_path;
       }
-      return sef._config.site_name + "/" + field_name + "/" + images[0].name;
+      return self._config.site_name + "/" + field_name + "/" + images[0].name;
     }
 
     var favicon_path = image_path("favicon", "core/logo.svg");
@@ -154,7 +155,7 @@ define(function (require) {
     self._contents = new Contents();
     self._contents.init("#contents-panel");
 
-    Test.sample("#left-panel");
+    Tree.sample("#left-panel");
   }
   
   App.prototype.init = function() {

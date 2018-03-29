@@ -1,6 +1,7 @@
 define(function (require) {
   require("jquery");
   var Utils = require("core/Utils");
+  var Css = require("core/Css");
   var Locale = require("core/Locale");
   var Uuid = require("core/Uuid");
   var Inherits = require("core/Inherits");
@@ -18,8 +19,8 @@ define(function (require) {
 '</div>';
   var INPUT_TEMPLATE = '<input type="file" multiple="true" style="display:none;"></input>';
   var ITEM_TEMPLATE = '' +
-'<div class="item" style="display:inline-block;border:solid 1px gray;border-radius:3px;background-color:#f0f0f0;padding:2px 5px 2px 5px;margin:2px 0px;">' +
-'  <a style="display:inline-block;font-family:Verdana,Arial,sans-serif;font-size:12px;min-width:300px;"></a>' +
+'<div class="file-field-item">' +
+'  <a></a>' +
 '  <i class="fa fa-remove" />' +
 '</div>';
 
@@ -60,73 +61,86 @@ define(function (require) {
   Files.prototype.get_item_tag_name = function() {
     return "a";
   };
-  
-  Files.prototype.init = function(selector, field) {
-    var dfd = new $.Deferred;
+
+  function create_field(self, selector, field) {
     var root = $(selector);
     
-    this._field_name = field.name;
-    this._properties = Utils.clone(field.datatype.properties);
+    self._field_name = field.name;
+    self._properties = Utils.clone(field.datatype.properties);
     
     // Create form tags
-    var self = this;
-    
-    var width = this._properties.width;
+    var width = self._properties.width;
     width = (is_null_or_undefined(width) || width < 150) ? 150 : width;
-    this._properties.width = width;
+    self._properties.width = width;
     
-    var height = this._properties.height;
+    var height = self._properties.height;
     height = (is_null_or_undefined(height) || height < 50) ? 50 : height;
-    this._properties.height = height;
+    self._properties.height = height;
     
     var html = TEMPLATE.replace(/{{WIDTH}}/, width).replace(/{{HEIGHT}}/, height);
     root.append(html);
-   
-    this._exist_list = root.find("div.exist-list");
-    this._exist_list.on("click", this.get_item_tag_name(), function(event) {
+    
+    var tag_name = self.get_item_tag_name();
+    self._exist_list = root.find("div.exist-list");
+    self._exist_list.on("click", tag_name, function(event) {
       if (self._editting)
         return false;
       return true;
     });
-    this._exist_list.on("click", "i", function(event) {
+    self._exist_list.on("click", "i", function(event) {
       var i = $(event.originalEvent.target);
       self._remove[i.attr("name")] = true;
       self.refresh();
     });
-    this._added_list = root.find("div.added-list");
-    this._added_list.on("click", "i", function(event) {
+    self._added_list = root.find("div.added-list");
+    self._added_list.on("click", "i", function(event) {
       var key = $(event.originalEvent.target).attr("name");
       delete self._added[key];
       self.refresh();
     });
-    this._attach_area = root.find("div.attach-area");
-    this._attach_area.append(INPUT_TEMPLATE);
-    this._attach_area.on("change", "input", function(event) {
+    self._attach_area = root.find("div.attach-area");
+    self._attach_area.append(INPUT_TEMPLATE);
+    self._attach_area.on("change", "input", function(event) {
       self.append_files(event.originalEvent.target.files);
       self._attach_area.find("input").remove();
       self._attach_area.append(INPUT_TEMPLATE);
       self.refresh();
     });
-    this._drop_area = root.find("div.drop-area");
-    this._drop_area.on("click", function(event) {
+    self._drop_area = root.find("div.drop-area");
+    self._drop_area.on("click", function(event) {
       self._attach_area.find("input").click();
     });
-    this._drop_area.on("drop", function(event) {
+    self._drop_area.on("drop", function(event) {
       event.preventDefault();
       event.stopPropagation();
       self.append_files(event.originalEvent.dataTransfer.files);
       self.refresh();
     });
-    this._drop_area.on("dragover", function(event) {
+    self._drop_area.on("dragover", function(event) {
       event.stopPropagation();
       event.preventDefault();
       return false;
     });
-    this._drop_area.on("mouseover", function(event) {
+    self._drop_area.on("mouseover", function(event) {
       self._drop_area.css("cursor", "pointer");
     });
-    this._drop_area.on("mouseout", function(event) {
+    self._drop_area.on("mouseout", function(event) {
       self._drop_area.css("cursor", "auto");
+    });
+    root.on("mouseover", self.item_selector(), function(event) {
+      if (!self._editting) {
+        return;
+      }
+      console.log("mouseover on [" + self.item_selector() + "]");
+      var i = $(event.currentTarget).find("i");
+      console.log(i);
+      i.css("display", "inline");
+    });
+    root.on("mouseout", self.item_selector(), function(event) {
+      console.log("mouseout on [" + self.item_selector() + "]");
+      var i = $(event.currentTarget).find("i");
+      console.log(i);
+      i.css("display", "none");
     });
     root.on("mouseover", "i", function(event) {
       var i = $(event.originalEvent.target);
@@ -137,9 +151,25 @@ define(function (require) {
       i.css("cursor", "auto");
     });
     
-    this.edit(false);
-    
-    dfd.resolve();
+    self.edit(false);
+  }
+
+  Files.prototype.item_selector = function () {
+    return "div.file-field-item";
+  }
+
+  Files.prototype.css_path = function() {
+    return "core/Control/Field/Files.css";
+  }
+  
+  Files.prototype.init = function(selector, field) {
+    var dfd = new $.Deferred;
+    var self = this;
+    Css.load(this.css_path())
+    .then(function () {
+      create_field(self, selector, field);
+      dfd.resolve();
+    });
     return dfd.promise();
   };
  
@@ -222,15 +252,15 @@ define(function (require) {
     var tag = this.get_item_tag_name();
     if (this._editting) {
       this._exist_list.find(tag).css("text-decoration", "none");
-      this._exist_list.find("i").css("display", "inline");
-      this._added_list.find("i").css("display", "inline");
+      //this._exist_list.find("i").css("display", "inline");
+      //this._added_list.find("i").css("display", "inline");
       var count = get_count(this);
       var attribute = (this._properties.multiple === false && 0 < count) ? "none" : "block";
       this._attach_area.css("display", attribute);
     } else {
       this._exist_list.find(tag).css("text-decoration", "underline");
-      this._exist_list.find("i").css("display", "none");
-      this._added_list.find("i").css("display", "none");
+      //this._exist_list.find("i").css("display", "none");
+      //this._added_list.find("i").css("display", "none");
       this._attach_area.css("display", "none");
     }
   };
@@ -252,7 +282,7 @@ define(function (require) {
         continue;
       }
       this._exist_list.append(this.get_item_template());
-      var record = this._exist_list.find("div.item:last-child");
+      var record = this._exist_list.find(this.item_selector() + ":last-child");
       var size = this.get_display_size(file.size);
       record.find(tag).text(file.name + " - (" + size + ")");
       record.find(tag).attr("download", file.name);
@@ -265,7 +295,7 @@ define(function (require) {
     for (var key in this._added) {
       var file = this._added[key];
       this._added_list.append(this.get_item_template());
-      var record = this._added_list.find("div.item:last-child");
+      var record = this._added_list.find(this.item_selector() + ":last-child");
       var size = this.get_display_size(file.size);
       record.find(tag).text(file.name + " - (" + size + ")");
       record.find("i").attr("name", key);

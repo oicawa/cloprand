@@ -1,0 +1,26 @@
+div.file-field-item {
+  position:relative;
+  display:inline-block;
+  border:solid 1px gray;
+  border-radius:3px;
+  background-color:#f0f0f0;
+  padding:2px 5px 2px 5px;
+  margin:2px 0px;
+}
+div.file-field-item > a {
+  display:inline-block;
+  /*font-family:Verdana,Arial,sans-serif;*/
+  font-size:12px;
+  min-width:300px;
+  min-height:20px;
+}
+div.file-field-item > i {
+  position:absolute;
+  right:2px;
+  top:2px;
+  color:lightslategray;
+  background-color:white;
+  border-radius:3px;
+  padding:2px;
+  display: none;
+}

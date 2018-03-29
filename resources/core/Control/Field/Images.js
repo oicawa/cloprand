@@ -7,15 +7,23 @@ define(function (require) {
   var Files = require("core/Control/Field/Files");
   
   var ITEM_TEMPLATE = '' +
-'<div class="item" style="margin:2px 0px;position:relative;">' +
-'  <img style="display:inline-block;border:solid 1px gray;border-radius:3px;background-color:#f0f0f0;padding:2px 2px 2px 2px;font-family:Verdana,Arial,sans-serif;font-size:12px;max-width:{{WIDTH}}px;max-height:{{HEIGHT}}px;"></img>' +
-'  <i class="fa fa-remove" style="position:absolute;right:5px;top:5px;color:lightslategray;background-color:white;border-radius:3px;padding:2px;"/>' +
+'<div class="image-field-item">' +
+'  <img style="max-width:{{WIDTH}}px;max-height:{{HEIGHT}}px;"></img>' +
+'  <i class="fa fa-remove"/>' +
 '</div>';
   
   function Images() {
     Files.call(this, "core/Control/Files", "Images");
   };
   Inherits(Images, Files);
+
+  Images.prototype.item_selector = function () {
+    return "div.image-field-item";
+  }
+
+  Images.prototype.css_path = function () {
+    return "core/Control/Field/Images.css";
+  }
   
   Images.prototype.get_item_template = function() {
     return ITEM_TEMPLATE.replace(/{{WIDTH}}/, this._properties.width).replace(/{{HEIGHT}}/, this._properties.height);
@@ -60,7 +68,7 @@ define(function (require) {
         continue;
       }
       this._exist_list.append(this.get_item_template());
-      var record = this._exist_list.find("div.item:last-child");
+      var record = this._exist_list.find("div.image-field-item:last-child");
       var size = this.get_display_size(file.size);
       record.find(tag).text(file.name + " - (" + size + ")");
       record.find(tag).attr("src", "api/image/" + this._values.class_id + "/" + this._values.object_id + "/" + this._field_name + "/" + file.name);
@@ -70,7 +78,7 @@ define(function (require) {
     for (var key in this._added) {
       var file = this._added[key];
       this._added_list.append(this.get_item_template());
-      var record = this._added_list.find("div.item:last-child");
+      var record = this._added_list.find("div.image-field-item:last-child");
       var size = this.get_display_size(file.size);
       var image = record.find(tag);
       image.text(file.name + " - (" + size + ")");
