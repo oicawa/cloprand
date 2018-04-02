@@ -2,12 +2,12 @@ define(function (require) {
   require("jquery");
   var Utils = require('core/Utils');
   var Connector = require('core/Connector');
-  
-  var storage = window.sessionStorage;
-  storage.clear();
+
+  var session = window.sessionStorage;
+  session.clear();
   
   function get_all(class_id) {
-    var objects_string = storage.getItem(class_id);
+    var objects_string = session.getItem(class_id);
     if (!objects_string) {
       return null;
     }
@@ -34,7 +34,7 @@ define(function (require) {
       console.dir(objects);
       return;
     }
-    storage.setItem(class_id, JSON.stringify(objects));
+    session.setItem(class_id, JSON.stringify(objects));
   }
   
   function set_one(class_id, object_id, object) {
@@ -53,7 +53,7 @@ define(function (require) {
   }
   
   function remove_all(class_id) {
-    storage.removeItem(class_id);
+    session.removeItem(class_id);
   }
   
   function remove_one(class_id, object_id) {
@@ -141,6 +141,13 @@ define(function (require) {
         dfd.reject(jqXHR, text_status, error_thrown);
       });
       return dfd.promise();
+    },
+    local : function (key, data) {
+      if (arguments.length === 1) {
+        var target = window.localStorage[key]
+        return is_null_or_undefined(target) ? target : JSON.parse(target);
+      }
+      window.localStorage[key] = JSON.stringify(data);
     }
   };
   

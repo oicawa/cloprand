@@ -68,6 +68,94 @@ define(function (require) {
     // Activate the created new tab
     self._tabs.tabs({ active : index});
   }
+
+  var tabs = Storage.local("tabs");
+  function init_tabs() {
+    if (is_null_or_undefined(tabs)) {
+      tabs = { "entries" : {}, "positions" : [], "history" : [] };
+    }
+    if (is_null_or_undefined(tabs["entries"])) {
+      tabs["entries"] = {};
+    }
+    if (is_null_or_undefined(tabs["positions"])) {
+      tabs["positions"] = [];
+    }
+    if (is_null_or_undefined(tabs["history"])) {
+      tabs["history"] = [];
+    }
+    Storage.local("tabs", tabs);
+    //"entries": {
+    //  "MenuView" : {
+    //    "view_id" : "676138ed-aee1-4d6d-a8d8-c114042b1833",
+    //    "class_id" : "a7b6a9e1-c95c-4e75-8f3d-f5558a264b35",
+    //    "object_id" : null,
+    //    "closable"  : false
+    //  }
+    //]
+  }
+
+  function reorder_history(tab_id, remove) {
+    var history = tabs.history.filter(function (tmp_tab_id) {
+      return tmp_tab_id !== tab_id;
+    });
+    if (remove === false) {
+      history.push(tab_id);
+    }
+    tabs.history = history;
+  }
+
+  function open_tab(tab_id, view_id, class_id, object_id, options) {
+    reorder_history(tab_id, false);
+    var entry = tabs.entries[tab_id];
+    if (is_null_or_undefined(entry)) {
+      tabs.entries[tab_id] = {
+        "tab_id" : tab_id,
+        "view_id" : view_id,
+        "class_id" : class_id,
+        "object_id" : object_id,
+        "options" : options
+      };
+      tabs.history.push(tab_id);
+      tabs.positions.push(tab_id);
+    }
+    Storage.local("tabs", tabs);
+  }
+
+  function change_tab(old_tab_id, new_tab_id, view_id, class_id, object_id, options) {
+    reorder_history(old_tab_id, false);
+    delete tabs.entries[old_tab_id];
+    tabs.entries[new_tab_id] = {
+      "tab_id" : new_tab_id,
+      "view_id" : view_id,
+      "class_id" : class_id,
+      "object_id" : object_id,
+      "options" : options
+    };
+    tabs.history.push(new_tab_id);
+    var positions = tabs.positions.map(function (tmp_tab_id) {
+      return (tmp_tab_id === old_tab_id) ? new_tab_id : tmp_tab_id;
+    });
+    tabs.positions = positions;
+    Storage.local("tabs", tabs);
+  }
+
+  function select_tab(tab_id) {
+    reorder_history(tab_id, false);
+    Storage.local("tabs", tabs);
+  }
+
+  function remove_tab(tab_id) {
+    reorder_history(tab_id, true);
+    var entry = tabs.entries[tab_id];
+    if (!is_null_or_undefined(entry)) {
+      delete tabs.entries[tab_id];
+    }
+    var positions = tabs.positions.filter(function (tmp_tab_id) {
+      return tmp_tab_id !== tab_id;
+    });
+    tabs.positions = positions;
+    Storage.local("tabs", tabs);
+  }
   
   function Tabs () {
     this._root = null;
@@ -92,6 +180,7 @@ define(function (require) {
       // Tab
       var tab_id = create_tab_id(view_id, class_id, object_id, suffix);
       self._tabs.add({"id":tab_id, "caption":view.caption(), "closable": closable });
+      open_tab(tab_id, view_id, class_id, object_id, options);
       dfd.resolve(tab_id);
     })
     return dfd.promise();
@@ -132,6 +221,7 @@ define(function (require) {
     var tab = this._tabs.get(tab_id);
     this._body.children(".tab-panel").hide();
     this._tabs.select(tab_id);
+    select_tab(tab_id);
     this._body.find("#" + tab_id).show();
     var view = this._contents[tab_id];
     if (view) {
@@ -179,6 +269,7 @@ define(function (require) {
     var tab_id = create_tab_id(view_id, class_id, object_id);
     this._body.find("#" + tab_id).remove();
     this._tabs.remove(tab_id);
+    remove_tab(tab_id);
     
     var history = this._history.filter(function(id) {
       if (tab_id == id) {
@@ -218,6 +309,7 @@ define(function (require) {
     this._tabs.insert(old_tab_id, {id:new_tab_id, caption:label, text:label, closable:true});
     this._tabs.remove(old_tab_id);
     this._tabs.select(new_tab_id);
+    change_tab(old_tab_id, new_tab_id, view_id, class_id, new_object_id, {});
     // Must replace old_tab_id to new_tab_id in this._history.
     this._history.forEach(function (tab_id, index, array) {
       if (tab_id == old_tab_id) {
@@ -229,6 +321,7 @@ define(function (require) {
   };
   
   Tabs.prototype.init = function (selector) {
+    init_tabs();
     this._root = $(selector);
     this._root.append(FRAME_TEMPLATE);
     
