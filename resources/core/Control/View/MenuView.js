@@ -7,7 +7,6 @@ define(function (require) {
   var Connector = require("core/Connector");
   var Storage = require("core/Storage");
   var Grid = require("core/Control/Grid");
-  var ListView = require("core/Control/View/ListView");
   var DivButton = require("core/Control/DivButton");
   var Locale = require("core/Locale");
   var Css = require("core/Css");

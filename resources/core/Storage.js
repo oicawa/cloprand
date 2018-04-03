@@ -142,7 +142,7 @@ define(function (require) {
       });
       return dfd.promise();
     },
-    local : function (key, data) {
+    personal : function (key, data) {
       if (arguments.length === 1) {
         var target = window.localStorage[key]
         return is_null_or_undefined(target) ? target : JSON.parse(target);

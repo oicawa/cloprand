@@ -112,6 +112,11 @@ define(function () {
         return Connector.get(url, data_type).done(function (data) { return dfd.resolve(data); });
       });
       return dfd.promise();
+    },
+    base_url : function() {
+      var url = location.href;
+      var separator = url.indexOf('?');
+      return (separator < 0) ? url : url.substring(0, separator);
     }
   };
   return Connector;
