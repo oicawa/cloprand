@@ -113,10 +113,13 @@ define(function () {
       });
       return dfd.promise();
     },
-    base_url : function() {
+    base_url : function () {
       var url = location.href;
-      var separator = url.indexOf('?');
-      return (separator < 0) ? url : url.substring(0, separator);
+      var index = url.indexOf("?");
+      if (index < 0) {
+        return url;
+      }
+      return url.substring(0, index);
     }
   };
   return Connector;

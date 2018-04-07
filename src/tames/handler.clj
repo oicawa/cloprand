@@ -104,6 +104,7 @@
   [req]
   (let [login_id        (get-in req [:form-params "login_id"])
         password        (get-in req [:form-params "password"])
+        redirect-url    (get-in req [:headers "referer"])
         login-try-count (get-in req [:session :login-try-count] 0)
         ;; Draft Implement...
         account         (systems/get-account login_id)
@@ -111,7 +112,7 @@
                               (= (account "password") password) true
                               :else false)]
     (log/info "login_id=%s" login_id)
-    (-> (response/redirect (site-url))
+    (-> (response/redirect redirect-url)
         (assoc-in [:session :identity] (if is-ok login_id nil))
         (assoc-in [:session :login-try-count] (if is-ok login-try-count (+ login-try-count 1))))))
 
@@ -316,7 +317,7 @@
   
   ;; Others (Resources & Public API)
   (GET "/*" req
-    (log/info "[GET] /* (%s)" (get-in req [:route-params :*] nil))
+    (log/debug "[GET] /* (%s)" (get-in req [:route-params :*] nil))
     (other-resources req))
   ; TODO Use package name.
   ;(POST "/:package-name/operation/:operator-name/:operation-name" [package-name operator-name operation-name & params]

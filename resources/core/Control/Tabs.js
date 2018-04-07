@@ -69,92 +69,98 @@ define(function (require) {
     self._tabs.tabs({ active : index});
   }
 
-  var tabs = Storage.personal("tabs");
-  function init_tabs() {
-    var MENU_VIEW_ID = "676138ed-aee1-4d6d-a8d8-c114042b1833";	
-    var MENU_TAB_ID = MENU_VIEW_ID + "_" + Class.CLASS_ID;
-    var MENU_ENTRY = {
-      "view_id" : MENU_VIEW_ID,
-      "class_id" : Class.CLASS_ID,
-       "object_id" : null,
-      "options"  : { "closable" : false }
-    };
-    if (is_null_or_undefined(tabs)) {
-      tabs = { "entries" : { MENU_TAB_ID : MENU_ENTRY }, "positions" : [MENU_TAB_ID], "history" : [MENU_TAB_ID] };
-    }
-    if (is_null_or_undefined(tabs["entries"])) {
-      tabs["entries"] = { MENU_TAB_ID : MENU_ENTRY };
-    }
-    if (is_null_or_undefined(tabs["positions"])) {
-      tabs["positions"] = [MENU_TAB_ID];
-    }
-    if (is_null_or_undefined(tabs["history"])) {
-      tabs["history"] = [MENU_TAB_ID];
-    }
-    Storage.personal("tabs", tabs);
+  function save_cache(cache) {
+    return Storage.personal("tabs", cache);
   }
 
-  function reorder_history(tab_id, remove) {
-    var history = tabs.history.filter(function (tmp_tab_id) {
+  function init_tabs(self) {
+    var MENU_VIEW_ID = "676138ed-aee1-4d6d-a8d8-c114042b1833";
+    var TAB_ID = MENU_VIEW_ID + "_" + Class.CLASS_ID;
+    var MENU_ENTRY = {
+      "tab_id" : TAB_ID,
+      "view_id" : MENU_VIEW_ID,
+      "class_id" : Class.CLASS_ID,
+      "object_id" : null,
+      "options" : {"closable"  : false}
+    };
+    if (is_null_or_undefined(self._cache)) {
+      self._cache = { "entries" : {}, "positions" : [TAB_ID], "history" : [TAB_ID] };
+      self._cache.entries[TAB_ID] = MENU_ENTRY;
+    }
+    if (is_null_or_undefined(self._cache["entries"])) {
+      self._cache["entries"] = {};
+      self._cache.entries[TAB_ID] = MENU_ENTRY;
+    }
+    if (is_null_or_undefined(self._cache["positions"])) {
+      self._cache["positions"] = [TAB_ID];
+    }
+    if (is_null_or_undefined(self._cache["history"])) {
+      self._cache["history"] = [TAB_ID];
+    }
+    return save_cache(self._cache);
+  }
+
+  function reorder_history(cache, tab_id, remove) {
+    var history = cache.history.filter(function (tmp_tab_id) {
       return tmp_tab_id !== tab_id;
     });
     if (remove === false) {
       history.push(tab_id);
     }
-    tabs.history = history;
+    cache.history = history;
   }
 
-  function open_tab(tab_id, view_id, class_id, object_id, options) {
-    reorder_history(tab_id, false);
-    var entry = tabs.entries[tab_id];
+  function open_tab(cache, tab_id, view_id, class_id, object_id, options) {
+    reorder_history(cache, tab_id, false);
+    var entry = cache.entries[tab_id];
     if (is_null_or_undefined(entry)) {
-      tabs.entries[tab_id] = {
+      cache.entries[tab_id] = {
         "tab_id" : tab_id,
         "view_id" : view_id,
         "class_id" : class_id,
         "object_id" : object_id,
         "options" : options
       };
-      tabs.history.push(tab_id);
-      tabs.positions.push(tab_id);
+      cache.history.push(tab_id);
+      cache.positions.push(tab_id);
     }
-    Storage.personal("tabs", tabs);
+    return save_cache(cache);
   }
 
-  function change_tab(old_tab_id, new_tab_id, view_id, class_id, object_id, options) {
-    reorder_history(old_tab_id, false);
-    delete tabs.entries[old_tab_id];
-    tabs.entries[new_tab_id] = {
+  function change_tab(cache, old_tab_id, new_tab_id, view_id, class_id, object_id, options) {
+    reorder_history(cache, old_tab_id, false);
+    delete cache.entries[old_tab_id];
+    cache.entries[new_tab_id] = {
       "tab_id" : new_tab_id,
       "view_id" : view_id,
       "class_id" : class_id,
       "object_id" : object_id,
       "options" : options
     };
-    tabs.history.push(new_tab_id);
-    var positions = tabs.positions.map(function (tmp_tab_id) {
+    cache.history.push(new_tab_id);
+    var positions = cache.positions.map(function (tmp_tab_id) {
       return (tmp_tab_id === old_tab_id) ? new_tab_id : tmp_tab_id;
     });
-    tabs.positions = positions;
-    Storage.personal("tabs", tabs);
+    cache.positions = positions;
+    return save_cache(cache);
   }
 
-  function select_tab(tab_id) {
-    reorder_history(tab_id, false);
-    Storage.personal("tabs", tabs);
+  function select_tab(cache, tab_id) {
+    reorder_history(cache, tab_id, false);
+    return save_cache(cache);
   }
 
-  function remove_tab(tab_id) {
-    reorder_history(tab_id, true);
-    var entry = tabs.entries[tab_id];
+  function remove_tab(cache, tab_id) {
+    reorder_history(cache, tab_id, true);
+    var entry = cache.entries[tab_id];
     if (!is_null_or_undefined(entry)) {
-      delete tabs.entries[tab_id];
+      delete cache.entries[tab_id];
     }
-    var positions = tabs.positions.filter(function (tmp_tab_id) {
+    var positions = cache.positions.filter(function (tmp_tab_id) {
       return tmp_tab_id !== tab_id;
     });
-    tabs.positions = positions;
-    Storage.personal("tabs", tabs);
+    cache.positions = positions;
+    return save_cache(cache);
   }
   
   function Tabs () {
@@ -163,6 +169,7 @@ define(function (require) {
     this._idmap = {};
     this._body = null;
     this._contents = {};
+    this._cache = null;
   }
 
   Tabs.prototype.add = function (view_id, class_id, object_id, options_) {
@@ -173,15 +180,14 @@ define(function (require) {
     this._body.children(".tab-panel").hide();
     var dfd = new $.Deferred;
     var self = this;
-    // Panel
+    var tab_id = create_tab_id(view_id, class_id, object_id, suffix);
     create_view(this, view_id, class_id, object_id, options)
     .then(function (view) {
-      // Tab
-      var tab_id = create_tab_id(view_id, class_id, object_id, suffix);
       self._tabs.add({"id":tab_id, "caption":view.caption(), "closable": closable });
-      open_tab(tab_id, view_id, class_id, object_id, options);
+      return open_tab(self._cache, tab_id, view_id, class_id, object_id, options);
+    }).then(function () {
       dfd.resolve(tab_id);
-    })
+    });
     return dfd.promise();
   };
 
@@ -203,12 +209,10 @@ define(function (require) {
   };
 
   Tabs.prototype.current = function () {
-    var tabs = Storage.personal("tabs");
-    var count = tabs.history.length;
-    if (count == 0) {
+    if (this._cache.history.length == 0) {
       return null;
     }
-    var tab_id = tabs.history[count - 1];
+    var tab_id = this._cache.history[this._cache.history.length - 1];
     var ids = parse_tab_id(tab_id);
     var tab = this._tabs.get(tab_id);
     if (!tab) {
@@ -222,12 +226,12 @@ define(function (require) {
     var tab = this._tabs.get(tab_id);
     this._body.children(".tab-panel").hide();
     this._tabs.select(tab_id);
-    select_tab(tab_id);
     this._body.find("#" + tab_id).show();
     var view = this._contents[tab_id];
     if (view) {
       view.refresh();
     }
+    return select_tab(this._cache, tab_id);
   };
 
   Tabs.prototype.show_tab = function (view_id, class_id, object_id, options) {
@@ -255,11 +259,9 @@ define(function (require) {
     var tab_id = create_tab_id(view_id, class_id, object_id);
     this._body.find("#" + tab_id).remove();
     this._tabs.remove(tab_id);
-    remove_tab(tab_id);
-
-    var tabs = Storage.personal("tabs");
-    var count = tabs.history.length;
-    var last_tab_id = tabs.history[count - 1];
+    remove_tab(this._cache, tab_id);
+    var length = this._cache.history.length; 
+    var last_tab_id = this._cache.history[length - 1];
     this.select(last_tab_id);
   };
 
@@ -288,37 +290,83 @@ define(function (require) {
     this._tabs.insert(old_tab_id, {id:new_tab_id, caption:label, text:label, closable:true});
     this._tabs.remove(old_tab_id);
     this._tabs.select(new_tab_id);
-    change_tab(old_tab_id, new_tab_id, view_id, class_id, new_object_id, {});
-    var panel = this._body.find("#" + old_tab_id);
-    panel.attr("id", new_tab_id);
+    var self = this;
+    change_tab(this._cache, old_tab_id, new_tab_id, view_id, class_id, new_object_id, {})
+    .done(function() {
+      var panel = self._body.find("#" + old_tab_id);
+      panel.attr("id", new_tab_id);
+    });
+  };
+
+  function restore_tabs(self, positions, cache) {
+    var dfd = new $.Deferred;
+    if (positions.length === 0) {
+      dfd.resolve();
+      return dfd.promise();
+    }
+    var tab_id = positions.shift();
+    var tab = cache.entries[tab_id];
+    self.add(tab.view_id, tab.class_id, tab.object_id, tab.options)
+    .then(function() {
+      self.refresh(tab.view_id, tab.class_id, tab.object_id);
+      return restore_tabs(self, positions, cache);
+    }).then(function() {
+      dfd.resolve();
+    });
+    return dfd.promise();
+  }
+
+  Tabs.prototype.restore = function () {
+    var self = this;
+    var dfd = new $.Deferred;
+    var original = null;
+    Storage.personal("tabs")
+    .done(function (cache) {
+      original = Utils.clone(cache);
+      return restore_tabs(self, cache.positions, cache);
+    }).then(function () {
+      return save_cache(original); // Restore tabs cache
+    }).then(function () {
+      var length = self._cache.history.length;
+      var last_tab_id = self._cache.history[length - 1];
+      var last_tab = self._cache.entries[last_tab_id];
+      self.select(last_tab.view_id, last_tab.class_id, last_tab.object_id);
+    }).then(function () {
+      dfd.resolve();
+    });
+    return dfd.promise();
   };
   
   Tabs.prototype.init = function (selector) {
-    init_tabs();
-    this._root = $(selector);
-    this._root.append(FRAME_TEMPLATE);
-    
-    var header_id = Uuid.version4();
-    var header = this._root.find('.tabs-header');
-    header.attr("id", header_id);
-    
     var self = this;
-    
-    var tabs_name = Uuid.version4();
-    var tabs = header.w2tabs({
-      name: tabs_name,
-      onClick: function(event) {
-        self.select(event.tab.id);
-      },
-      onClose: function (event) {
-        event.onComplete = function(completeEvent) {
-          self.remove(event.object.id);
+    Storage.personal("tabs")
+    .then(function (cache) {
+      self._cache = cache;
+      return init_tabs(self);
+    }).then(function () {
+      self._root = $(selector);
+      self._root.append(FRAME_TEMPLATE);
+
+      var header_id = Uuid.version4();
+      var header = self._root.find('.tabs-header');
+      header.attr("id", header_id);
+
+      var tabs_name = Uuid.version4();
+      var tabs = header.w2tabs({
+        name: tabs_name,
+        onClick: function(event) {
+          self.select(event.tab.id);
+        },
+        onClose: function (event) {
+          event.onComplete = function(completeEvent) {
+            self.remove(event.object.id);
+          }
         }
-      }
+      });
+      self._tabs = w2ui[tabs_name];
+
+      self._body = self._root.find('.tabs-body');
     });
-    this._tabs = w2ui[tabs_name];
-    
-    this._body = this._root.find('.tabs-body');
   };
   
   Tabs.prototype.refresh = function (view_id, class_id, object_id) {
@@ -331,10 +379,10 @@ define(function (require) {
     this._tabs.refresh(tab_id);
   };
 
-  Tabs.regist = function (view_id, class_id, object_id, options) {
+  Tabs.regist_tab = function (cache, view_id, class_id, object_id, options) {
     var tab_id = create_tab_id(view_id, class_id, object_id);
-    open_tab(tab_id, view_id, class_id, object_id, options);
-  }
+    return open_tab(cache, tab_id, view_id, class_id, object_id, options);
+  };
   
   return Tabs;
 });

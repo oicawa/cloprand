@@ -143,11 +143,16 @@ define(function (require) {
       return dfd.promise();
     },
     personal : function (key, data) {
+      var dfd = new $.Deferred;
       if (arguments.length === 1) {
         var target = window.localStorage[key]
-        return is_null_or_undefined(target) ? target : JSON.parse(target);
+        var data = is_null_or_undefined(target) ? target : JSON.parse(target);
+        dfd.resolve(data);
+        return dfd.promise();
       }
       window.localStorage[key] = JSON.stringify(data);
+      dfd.resolve();
+      return dfd.promise();
     }
   };
   

@@ -130,7 +130,6 @@ define(function (require) {
 
     function image_path(field_name, default_path) {
       var images = self._config[field_name].current;
-      console.log(images);
       if (images.length == 0) {
         return default_path;
       }

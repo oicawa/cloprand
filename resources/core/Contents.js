@@ -39,109 +39,82 @@ define(function (require) {
     return this._tabs;
   };
 
-  function init_tabs(self, tabs) {
-    var dfd = new $.Deferred;
-    var count = tabs.positions.length;
-    if (count === 0) {
-      dfd.resolve();
-      return dfd.promise();
-    }
-
-    var tab_id = tabs.positions.shift();
-    var tab = tabs.entries[tab_id];
-    delete tabs.entries[tab_id];
-    self._tabs.add(tab.view_id, tab.class_id, tab.object_id, tab.options)
-    .then(function () {
-      return init_tabs(self, tabs);
-    }).then(function () {
-      dfd.resolve();
-    });
-    return dfd.promise();
-  }
-
-  function get_url_parameters() {
+  function get_parameters() {
     var url = location.href;
-    var separator = url.indexOf('?');
-    if (separator < 0) {
+    var index = url.indexOf("?");
+    if (index < 0) {
       return null;
     }
-    var query = url.substring(separator + 1);
-    console.log(query);
-    var expressions = query.split('&');
-    console.log(expressions);
-    
+    var query = url.substring(index + 1);
+    var pairs = query.split(/&/g);
     var parameters = {};
-    expressions.forEach(function(expression, i) {
-      var pair = expression.split('=');
-      parameters[pair[0]] = pair[1];
+    pairs.forEach(function (pair) {
+      var fields = pair.split(/=/);
+      parameters[fields[0]] = fields[1];
     });
-    console.log(parameters);
     return parameters;
   }
-
-  function register_tab(self, parameters) {
+  
+  function regist_tab(self, parameters) {
     var dfd = new $.Deferred;
-
-    Storage.read(Class.CLASS_ID, parameters.class_id)
-    .done(function(class_){
-      console.log(class_);
-      var type_id = class_.options.id;
-      var view_id = null;
-      if (type_id === "ac9d589b-c421-40b8-9497-b0caaf24d017") {	// Single Item
-        view_id = class_.options.properties.detail_view.id;
-      } else if (type_id === "b72dc321-5278-42da-8738-3503ae64bcad") {
-        var detail_view_id = class_.options.properties.detail_view.id;
-        var list_view_id = class_.options.properties.list_view.id;
-        view_id = is_null_or_undefined(parameters.object_id) ? list_view_id : detail_view_id;
+    var view_id = null;
+    var class_id = parameters["class_id"];
+    var object_id = parameters["object_id"];
+    Storage.read(Class.CLASS_ID, class_id)
+    .then(function (class_) {
+      var options = class_.options;
+      var SINGLE_TYPE = "ac9d589b-c421-40b8-9497-b0caaf24d017";
+      var MULTI_TYPE = "b72dc321-5278-42da-8738-3503ae64bcad"
+      if (options.id === SINGLE_TYPE) {
+        // single
+        view_id = options.properties.detail_view.id;
+      } else if (options.id === MULTI_TYPE) {
+        // multi
+        var list_view_id = options.properties.list_view.id;
+        var detail_view_id = options.properties.detail_view.id;
+        view_id = is_null_or_undefined(object_id) ? list_view_id : detail_view_id;
       } else {
-        // Not target
         return;
       }
-      if (is_null_or_undefined(view_id)) {
-        return;
-      }
-   	  return Tabs.regist(view_id, parameters.class_id, parameters.object_id, { "closable" : true });
+      return Storage.personal("tabs");
+    }).then(function (cache) {
+      Tabs.regist_tab(cache, view_id, class_id, object_id, { "closable" : true });
     }).then(function () {
       dfd.resolve();
     });
     return dfd.promise();
   }
-  
+ 
   Contents.prototype.init = function (selector) {
-    var dfd = new $.Deferred;
-    // With url parameters -> Regist tab & Redirect
-    var params = get_url_parameters();
-    if (params !== null) {
-      register_tab(this, params)
-      .then(function () {
-        // Redirect
-        location.href = Connector.base_url();
-        dfd.resolved();
-      });
-      return dfd.promise();
-    }
-    
     var contents = $(selector);
     var classes = null;
     var template = null;
+    var assist = null;
     var self = this;
-    var tabs = Storage.personal("tabs");
+
+    var dfd = new $.Deferred;
+
+    // Require Redirect
+    var parameters = get_parameters();
+    if (parameters !== null)
+    {
+      regist_tab(self, parameters)
+      .done(function() {
+        location.href = Connector.base_url();
+        dfd.resolve();
+      });
+      return dfd.promise();
+    }
+
     Css.load("core/Contents.css")
-    .then(function () {
+    .then(function() {
       contents.append(TEMPLATE);
       self._tabs = new Tabs();
-      self._tabs.init("#contents-tabs");
-      var clone = Utils.clone(tabs);
-      return init_tabs(self, clone);
-    }).then(function () {
-      var length = tabs.history.length;
-      var last_tab_id = tabs.history[length - 1];
-      var last_tab = tabs.entries[last_tab_id];
-      self._tabs.select(last_tab.view_id, last_tab.class_id, last_tab.object_id);
-      self._tabs.refresh(last_tab.view_id, last_tab.class_id, last_tab.object_id);
-      Storage.personal("tabs", tabs);	// Restore.
-    }).then(function () {
-      dfd.resolved();
+      return self._tabs.init("#contents-tabs");
+    }).then(function(cache) {
+      return self._tabs.restore();
+    }).then(function() {
+      dfd.resolve();
     });
     return dfd.promise();
   };
