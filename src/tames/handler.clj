@@ -170,7 +170,7 @@
         ext               (fs/ext relative-path)
         content-type      (content-types (. ext toLowerCase))
         file              (if config-resource?
-                              (?= (config/resource-file relative-path))
+                              (config/resource-file relative-path)
                               (systems/get-target-file relative-path))
         last-modified     (time-to-RFC1123 (. file lastModified))
         not-modified?     (= if-modified-since last-modified)]
