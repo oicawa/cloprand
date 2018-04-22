@@ -13,10 +13,10 @@
             [hiccup.core :refer [html]]
             [clojure.data.json :as json]
             [tames.log :as log]
-            [tames.filesystem :as fs]
+            [tames.fsutils :as fs]
             [tames.operations.resource :as resource]
             [tames.config :as config]
-            [tames.systems :as systems]
+            [tames.system :as system]
             [tames.debug :as debug])
   (:import (java.io File)
            (java.net URLDecoder URLEncoder)
@@ -107,7 +107,7 @@
         redirect-url    (get-in req [:headers "referer"])
         login-try-count (get-in req [:session :login-try-count] 0)
         ;; Draft Implement...
-        account         (systems/get-account login_id)
+        account         (system/get-account login_id)
         is-ok           (cond (nil? account) false
                               (= (account "password") password) true
                               :else false)]
@@ -158,7 +158,7 @@
 
 (defn use-cache?
   [class-id]
-  (let [class-object (systems/get-object systems/CLASS_ID class-id)]
+  (let [class-object (system/get-object system/CLASS_ID class-id)]
     (get-in class-object ["options" "cache"] false)))
 
 (defn other-resources
@@ -171,7 +171,7 @@
         content-type      (content-types (. ext toLowerCase))
         file              (if config-resource?
                               (config/resource-file relative-path)
-                              (systems/get-target-file relative-path))
+                              (system/get-target-file relative-path))
         last-modified     (time-to-RFC1123 (. file lastModified))
         not-modified?     (= if-modified-since last-modified)]
     (log/debug "Route [/*.%s] -> [%s]" ext (. file getAbsolutePath))
@@ -206,61 +206,61 @@
     (log/debug "[GET] /api/rest/:class-id")
     (let [class-id          (get-in req [:route-params :class-id] nil)
           if-modified-since (get-in req [:headers "if-modified-since"] nil)
-          exists?           (systems/exists? systems/CLASS_ID class-id)
+          exists?           (system/exists? system/CLASS_ID class-id)
           cache?            (use-cache? class-id)
-          last-modified     (time-to-RFC1123 (systems/get-last-modified class-id nil))
+          last-modified     (time-to-RFC1123 (system/get-last-modified class-id nil))
           not-modified?     (= if-modified-since last-modified)]
       (cond (not exists?)
               (-> (response/response nil) (response/status 410))
             (not cache?)
-              (systems/get-data class-id nil)
+              (system/get-data class-id nil)
             not-modified?
               (-> (response/response nil) (response/status 304))
             :else
-              (-> (systems/get-data class-id nil)
+              (-> (system/get-data class-id nil)
                   (response/header "Last-Modified" last-modified)))))
   (GET "/api/rest/:class-id/:object-id" req
     (log/debug "[GET] /api/rest/:class-id/:object-id")
     (let [class-id          (get-in req [:route-params :class-id] nil)
           object-id         (get-in req [:route-params :object-id] nil)
           if-modified-since (get-in req [:headers "if-modified-since"] nil)
-          exists?           (systems/exists? class-id object-id)
+          exists?           (system/exists? class-id object-id)
           cache?            (use-cache? class-id)
-          last-modified     (time-to-RFC1123 (systems/get-last-modified class-id object-id))
+          last-modified     (time-to-RFC1123 (system/get-last-modified class-id object-id))
           not-modified?     (= if-modified-since last-modified)]
       (cond (not exists?)
               (-> (response/response nil) (response/status 410))
             (not cache?)
-              (systems/get-data class-id object-id)
+              (system/get-data class-id object-id)
             not-modified?
               (-> (response/response nil) (response/status 304))
             :else
-              (-> (systems/get-data class-id object-id)
+              (-> (system/get-data class-id object-id)
                   (response/header "Last-Modified" last-modified)))))
   (POST "/api/rest/:class-id" [class-id & params]	;;; https://github.com/weavejester/compojure/wiki/Destructuring-Syntax
     (log/debug "[POST] /api/rest/:class-id")
-    (if (not (systems/exists? systems/CLASS_ID class-id))
+    (if (not (system/exists? system/CLASS_ID class-id))
         (-> (response/response nil)
             (response/status 410))
         (let [json-str    (URLDecoder/decode (params :value) "UTF-8")
               data        (json/read-str json-str)
               added-files (dissoc params :value)]
-          (systems/post-data class-id data added-files))))
+          (system/post-data class-id data added-files))))
   (PUT "/api/rest/:class-id/:object-id" [class-id object-id & params]
     (log/debug "[PUT] /api/rest/:class-id/:object-id")
-    (if (not (systems/exists? class-id object-id))
+    (if (not (system/exists? class-id object-id))
         (-> (response/response nil)
             (response/status 410))
         (let [json-str     (URLDecoder/decode (params :value) "UTF-8")
               data         (json/read-str json-str)
               added-files  (dissoc params :value)]
-          (systems/put-data class-id object-id data added-files))))
+          (system/put-data class-id object-id data added-files))))
   (DELETE "/api/rest/:class-id/:object-id" [class-id object-id]
     (log/debug "[DELETE] /api/rest/:class-id/:object-id")
-    (if (not (systems/exists? class-id object-id))
+    (if (not (system/exists? class-id object-id))
         (-> (response/response nil)
             (response/status 410))
-        (systems/delete-data class-id object-id)))
+        (system/delete-data class-id object-id)))
   ;; Session
   (GET "/api/session/:session-key" req
     (log/debug "[GET] /session/:session-key")
@@ -273,7 +273,7 @@
   ;; Download
   (GET "/api/download/:class-id/:object-id/*" [class-id object-id & params]
     (log/debug "[GET] /api/download/:class-id/:object-id/*")
-    (let [file        (systems/get-attachment-file class-id object-id (params :*))
+    (let [file        (system/get-attachment-file class-id object-id (params :*))
           file-name   (. file getName)
           encoded-file-name (. (URLEncoder/encode file-name "UTF-8") replace "+" "%20")
           disposition (format "attachment;filename=\"%s\";filename*=UTF-8''%s" file-name encoded-file-name)
@@ -283,7 +283,7 @@
           (response/header "Content-Disposition" disposition))))
   (GET "/api/image/:class-id/:object-id/*" [class-id object-id & params]
     (log/debug "[GET] /api/image/:class-id/:object-id/*")
-    (let [path (. (systems/get-attachment-file class-id object-id (params :*)) toString)
+    (let [path (. (system/get-attachment-file class-id object-id (params :*)) toString)
           ext  (fs/ext path)
           mime (content-types ext)]
       (-> (response/file-response path)

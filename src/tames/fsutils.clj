@@ -1,4 +1,4 @@
-(ns tames.filesystem
+(ns tames.fsutils
   (:gen-class)
   (:require [clojure.pprint :as pprint]
             [clojure.java.io :as io]

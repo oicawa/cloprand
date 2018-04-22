@@ -1,4 +1,4 @@
-(ns tames.systems
+(ns tames.system
   (:gen-class)
   (:use ring.adapter.jetty)
   (:require [clojure.pprint :as pprint]
@@ -8,7 +8,7 @@
             [clojure.string :as string]
             [tames.log :as log]
             [tames.config :as config]
-            [tames.filesystem :as fs])
+            [tames.fsutils :as fs])
   (:import (java.io File InputStream)
            (java.nio.file Paths Path Files StandardCopyOption)
            (java.util UUID Calendar)))

@@ -12,7 +12,6 @@
             [tames.log :as log]
             [tames.config :as config]
             [tames.handler :as handler]
-            [tames.systems :as systems]
             [tames.operations.resource :as resource]
             [tames.operations.fonts :as fonts]))
 

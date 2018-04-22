@@ -5,7 +5,7 @@
             [clojure.java.io :as io]
             [clojure.data.json :as json]
             [clojure.string :as string]
-            [tames.filesystem :as fs]
+            [tames.fsutils :as fs]
             [tames.log :as log])
   (:import (java.io File InputStream)
            (java.nio.file Paths Path Files StandardCopyOption CopyOption)

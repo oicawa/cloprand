@@ -4,8 +4,8 @@
             [clojure.java.io :as io]
             [clojure.string :as string]
             [ring.util.response :as response]
-            [tames.systems :as systems]
-            [tames.filesystem :as fs]
+            [tames.system :as system]
+            [tames.fsutils :as fs]
             [tames.log :as log])
   (:import (java.io File)
            (java.net URLDecoder URLEncoder)
@@ -119,7 +119,7 @@
 
 (defn get-all-css-properties-list
   []
-  (map #(let [file (systems/get-target-file %1)]
+  (map #(let [file (system/get-target-file %1)]
          {"path"          (. %1 getPath)
           "last-modified" (time-to-ISO8601 (. file lastModified))})
        (fs/get-all-files "core" (fn [file] (= (fs/ext file) "css")))))
@@ -132,7 +132,7 @@
 
 (defn get-properties-list
   [paths]
-  (map #(let [file (systems/get-target-file %1)]
+  (map #(let [file (system/get-target-file %1)]
          {"path"          %1
           "last-modified" (time-to-ISO8601 (. file lastModified))})
        paths))
