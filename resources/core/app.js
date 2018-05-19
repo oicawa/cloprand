@@ -15,13 +15,11 @@ define(function (require) {
   var TOP_TEMPLATE = '' +
 '<table id="header-panel" style="height:30px;width:100%;margin:-5px;">' +
 '  <tr>' +
-'    <td><img id="system-icon" /></td>' +
+'    <td><img id="system-icon" style="height:28px;"/></td>' +
 '    <td><span id="title" style="font-size:20px; vertical-align: top;"></span></td>' +
 '    <td style="width:30px;"></td>' +
 '    <td style="width:100%"><span id="sub-title"></span></td>' +
-'    <td>' +
-'      <span id="login_id"></span>' +
-'    </td>' +
+'    <td><span id="login_id"></span></td>' +
 '    <td>' +
 '      <div class="div-button" style="display:inline-block;">' +
 '        <i class="fa fa-sign-out" onclick="location.href=\'/logout\';"></i>' +
