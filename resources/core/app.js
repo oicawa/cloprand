@@ -13,18 +13,22 @@ define(function (require) {
 
   var LAYOUT_TEMPLATE = '<div id="layout"></div>';
   var TOP_TEMPLATE = '' +
-'<div id="header-panel" style="height: 30px;">' +
-'  <img id="system-icon" />' +
-'  <span id="title" style="font-size:20px; vertical-align: top;"></span>' +
-'  <span style="display:inline-block; width:30px;"></span>' +
-'  <span id="sub-title"></span>' +
-'  <form method="get" name="logout" action="/logout" style="display:inline-block;position:absolute; right:5px; font-size:11pt;">' +
-'    <span id="login_id"></span>' +
-'    <div class="div-button" style="display:inline-block;">' +
-'      <i class="fa fa-sign-out" onclick="document.logout.submit();"></i>' +
-'    </div>' +
-'  </form>' +
-'</div>';
+'<table id="header-panel" style="height:30px;width:100%;margin:-5px;">' +
+'  <tr>' +
+'    <td><img id="system-icon" /></td>' +
+'    <td><span id="title" style="font-size:20px; vertical-align: top;"></span></td>' +
+'    <td style="width:30px;"></td>' +
+'    <td style="width:100%"><span id="sub-title"></span></td>' +
+'    <td>' +
+'      <span id="login_id"></span>' +
+'    </td>' +
+'    <td>' +
+'      <div class="div-button" style="display:inline-block;">' +
+'        <i class="fa fa-sign-out" onclick="location.href=\'/logout\';"></i>' +
+'      </div>' +
+'    </td>' +
+'  </tr>' +
+'</table>';
   var LEFT_TEMPLATE = '<div id="left-panel"></div>';
   var MAIN_TEMPLATE = '<div id="contents-panel"></div>';
 
@@ -121,7 +125,7 @@ define(function (require) {
       name:layout_name,
       panels:[
         {type:'top', size:42, resizable:false, style:pstyle, content:TOP_TEMPLATE},
-        {type:'left',size:200,resizable:true,hidden:true,style:pstyle,content:LEFT_TEMPLATE},
+        {type:'left',size:200,resizable:true,hidden:false,style:pstyle,content:LEFT_TEMPLATE},
         {type:'main',style:pstyle,content:MAIN_TEMPLATE}
       ]
     });
