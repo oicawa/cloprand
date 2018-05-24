@@ -13,31 +13,16 @@ define(function (require) {
 
   var LAYOUT_TEMPLATE = '<div id="layout"></div>';
   var TOP_TEMPLATE = '' +
-//'<table id="header-panel" style="height:30px;width:100%;margin:-5px;">' +
-//'  <tr>' +
-//'    <td><img id="system-icon" style="height:28px;"/></td>' +
-//'    <td><span id="title" style="font-size:20px; vertical-align: top;"></span></td>' +
-//'    <td style="width:30px;"></td>' +
-//'    <td style="width:100%"><span id="sub-title"></span></td>' +
-//'    <td><span id="login_id"></span></td>' +
-//'    <td>' +
-//'      <div class="div-button" style="display:inline-block;">' +
-//'        <i class="fa fa-sign-out" onclick="location.href=\'/logout\';"></i>' +
-//'      </div>' +
-//'    </td>' +
-//'  </tr>' +
-//'</table>';
-'<div id="header-panel" style="margin:-5px;">' +
-'  <img id="system-icon" style="height:28px;"/>' +
-'  <span id="title" style="font-size:20px;"></span>' +
-'  <span</span>' +
-'  <span id="sub-title"></span>' +
-'  <span style="float:right;">' +
+'<div id="header-panel">' +
+'  <div class="header-item""><img id="system-icon" style="height:30px;"/></div>' +
+'  <div class="header-item" id="title" style="font-size:20px;"></div>' +
+'  <div class="header-item" style="width:100%;"></div>' +
+'  <div class="header-item">' +
 '    <span id="login_id"></span>' +
 '    <div class="div-button" style="display:inline-block;">' +
 '      <i class="fa fa-sign-out" onclick="location.href=\'/logout\';"></i>' +
 '    </div>' +
-'  </span>' +
+'  </div>' +
 '</div>';
   var LEFT_TEMPLATE = '<div id="left-panel"></div>';
   var MAIN_TEMPLATE = '<div id="contents-panel"></div>';
@@ -159,7 +144,7 @@ define(function (require) {
 
     var title = Locale.translate(self._config.system_label);
     self.title(title);
-    self._title = $("span#title");
+    self._title = $("div#title");
     self._title.text(title);
     
     self._login_id = $("span#login_id");

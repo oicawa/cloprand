@@ -5,3 +5,14 @@
   bottom:0px;
   right:0px;
 }
+
+div#header-panel {
+  display:table;
+  margin:-2px 0px -5px 0px;
+}
+div.header-item {
+  display:table-cell;
+  vertical-align:middle;
+  white-space:nowrap;
+  padding: 0px 5px 0px 0px;
+}
