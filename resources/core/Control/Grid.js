@@ -63,7 +63,6 @@ define(function (require) {
         event.item = event.menuItem;
         event.item.action(event);
       },
-      //onColumnClick : function (event) {
       onSort : function (event) {
         event.preventDefault();
 
@@ -105,6 +104,41 @@ define(function (require) {
 
         this.records.sort(compare_with_direction);
         this.refresh();
+      },
+      onSearch : function (event) {
+        event.preventDefault();
+        var search_text = event.searchValue;
+        function contains(record) {
+          if (is_null_or_undefined(self._field_map)) {
+            return false;
+          }
+          var field_names = Object.keys(record);
+          for (var i = 0; i < field_names.length; i++) {
+            var field_name = field_names[i];
+            var field = self._field_map[field_name];
+            if (is_null_or_undefined(field)) {
+              continue;
+            }
+            
+            if (is_null_or_undefined(field.contains)) {
+              continue;
+            }
+            if (field.contains(search_text)) {
+              return true;
+            }
+          }
+            
+          return false;
+        }
+        console.log(event.searchValue);
+        var indexes = [];
+        for (var i = 0; i < self._grid.records.length; i++) {
+          var record = self._grid.records[i];
+          if (contains(record)) {
+            indexes.push(i);
+          }
+        }
+        self._grid.last.searchIds = indexes;
       }
     });
     
