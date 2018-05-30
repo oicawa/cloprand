@@ -119,7 +119,7 @@ define(function (require) {
             if (is_null_or_undefined(field)) {
               continue;
             }
-            
+            console.log(field);
             if (is_null_or_undefined(field.contains)) {
               continue;
             }

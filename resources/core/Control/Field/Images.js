@@ -11,6 +11,9 @@ define(function (require) {
 '  <img style="max-width:{{WIDTH}}px;max-height:{{HEIGHT}}px;"></img>' +
 '  <i class="fa fa-remove"/>' +
 '</div>';
+  var EMPTY_TEMPLATE = '' +
+'<div class="empty-image-field-item" style="width:{{WIDTH}}px;height:{{HEIGHT}}px;">' +
+'</div>';
   
   function Images() {
     Files.call(this, "core/Control/Files", "Images");
@@ -22,7 +25,7 @@ define(function (require) {
   }
 
   Images.prototype.css_path = function () {
-    return "core/Control/Field/Images.css";
+    return [Files.CSS, "core/Control/Field/Images.css"];
   }
   
   Images.prototype.get_item_template = function() {
@@ -32,6 +35,14 @@ define(function (require) {
   Images.prototype.get_item_tag_name = function() {
     return "img";
   };
+
+  Images.prototype.get_default_height = function () {
+    return 150;
+  }
+
+  Images.prototype.get_default_width = function () {
+    return 150;
+  }
   
   Images.prototype.draw_image = function (file, image) {
     var reader = new FileReader();
@@ -84,6 +95,14 @@ define(function (require) {
       image.text(file.name + " - (" + size + ")");
       record.find("i").attr("name", key);
       this.draw_image(file, image);
+    }
+
+    var count = Files.get_count(this);
+    if (count === 0 && this._properties.multiple === false && this._editting === false) {
+      var html = EMPTY_TEMPLATE.replace(/{{WIDTH}}/, this._properties.width).replace(/{{HEIGHT}}/, this._properties.height);
+      this._exist_list.append(html);
+      var empty = this._exist_list.find("div.empty-image-field-item:last-child");
+      empty.text("No Printing");
     }
     
     this.switch();

@@ -255,5 +255,17 @@ define(function (require) {
     dfd.resolve(compare);
     return dfd.promise();
   };
+
+  Text.generate_filters = function(field) {
+    var filters = {
+      "contains" : function (record, filter_string) {
+        var value = Locale.translate(record[field.name]);
+        return (0 <= filter_string.indexOf(value)) ? true : false;
+      }
+    };
+    var dfd = new $.Deferred;
+    dfd.resolve(filters);
+    return dfd.promise();
+  };
   return Text;
 });

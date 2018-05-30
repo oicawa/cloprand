@@ -22,3 +22,16 @@ div.image-field-item > i {
   padding:2px;
   display: none;
 }
+div.empty-image-field-item {
+  position:relative;
+  display:table-cell;
+  margin:2px 0px;
+  border:solid 1px gray;
+  border-radius:3px;
+  background-color:#f0f0f0;
+  padding:2px 2px 2px 2px;
+  font-family:Verdana,Arial,sans-serif;
+  font-size:12px;
+  vertical-align:middle;
+  text-align:center;
+}

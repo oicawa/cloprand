@@ -41,7 +41,8 @@ define(function (require) {
   
   var Css = {
     load: function(/* paths */) {
-      var paths = Array.prototype.slice.call(arguments, 0);
+      var array = (arguments.length == 1 && is_array(arguments[0])) ? true : false;
+      var paths = array ? arguments[0] : Array.prototype.slice.call(arguments, 0);
       var targets = paths.filter(function (path) { return !exists(path); });
       var dfd = new $.Deferred;
       if (targets.length == 0) {
