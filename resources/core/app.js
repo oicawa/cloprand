@@ -67,7 +67,7 @@ define(function (require) {
       "error_message" : "Input correct Login ID & Password."
     };
 
-    self.title(response.system_label);
+    self.title(Locale.translate(response.system_label));
     self.favicon(response.favicon);
 
     Connector.resource("core/login.html", "html")
