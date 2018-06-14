@@ -153,7 +153,19 @@ define(function (require) {
     self._contents = new Contents();
     self._contents.init("#contents-panel");
 
-    Tree.sample("#left-panel");
+    var class_ = null;
+    Storage.read(Class.CLASS_ID, Class.CLASS_ID).done(function(data){ class_ = data; })
+    .then(function () {
+      function converter(object_field) {
+        console.log(object_field);
+        var item = {
+          id: class_.id + ":" + object_field.name,
+          text: Locale.translate(object_field.label)
+        };
+        return item;
+      };
+      Tree.sample("#left-panel", class_, converter);
+    });
   }
   
   App.prototype.init = function() {

@@ -49,23 +49,23 @@ define(function (require) {
     tab_panel.attr("id", tab_id);
 
     // Generate View
-    //console.log("create_view(...) step 1");
+    console.log("create_view(...) step 1");
     Storage.read(Class.VIEW_ID, view_id)
     .done(function (object) {
-      //console.log("create_view(...) step 2");
+      console.log("create_view(...) step 2");
       require([object.require_path], function(View) {
         var selector = "#" + tab_id + " > div.tab-content-frame > div.tab-content-panel";
         var view = new View();
         self._contents[tab_id] = view;
-        //console.log("create_view(...) step 3");
+        console.log("create_view(...) step 3");
         view.init(selector, class_id, object_id, options.preset)
         .then(function(view_) {
-          //console.log("create_view(...) step 4");
+          console.log("create_view(...) step 4");
           dfd.resolve(view_);
         });
       });
     })
-    //console.log("create_view(...) return");
+    console.log("create_view(...) return");
     return dfd.promise();
   }
   
@@ -186,14 +186,14 @@ define(function (require) {
     var dfd = new $.Deferred;
     var self = this;
     var tab_id = create_tab_id(view_id, class_id, object_id, suffix);
-    //console.log("Tabs.prototype.add, step 1");
+    console.log("Tabs.prototype.add, step 1");
     create_view(this, view_id, class_id, object_id, options)
     .then(function (view) {
-      //console.log("Tabs.prototype.add, step 2");
+      console.log("Tabs.prototype.add, step 2");
       self._tabs.add({"id":tab_id, "caption":view.caption(), "closable": closable });
       return open_tab(self._cache, tab_id, view_id, class_id, object_id, options);
     }).then(function () {
-      //console.log("Tabs.prototype.add, step 3");
+      console.log("Tabs.prototype.add, step 3");
       dfd.resolve(tab_id);
     });
     return dfd.promise();
@@ -318,25 +318,25 @@ define(function (require) {
 
   function restore_tabs(self, positions, cache) {
     var dfd = new $.Deferred;
-    //console.log("restore_tabs(...) positions.length=" + positions.length);
+    console.log("restore_tabs(...) positions.length=" + positions.length);
     if (positions.length === 0) {
       dfd.resolve();
       return dfd.promise();
     }
     var tab_id = positions.shift();
     var tab = cache.entries[tab_id];
-    //console.log("restore_tabs(...) step 1");
+    console.log("restore_tabs(...) step 1");
     self.add(tab.view_id, tab.class_id, tab.object_id, tab.options)
     .then(function() {
-      //console.log("restore_tabs(...) step 2");
+      console.log("restore_tabs(...) step 2");
       self.refresh(tab.view_id, tab.class_id, tab.object_id);
       restore_tabs(self, positions, cache)
       .then(function () {
-        //console.log("restore_tabs(...) step 3");
+        console.log("restore_tabs(...) step 3");
         dfd.resolve();
       });
     });
-    //console.log("restore_tabs(...) return");
+    console.log("restore_tabs(...) return");
     return dfd.promise();
   }
 
@@ -348,14 +348,14 @@ define(function (require) {
     Storage.personal("tabs")
     .done(function (cache) {
       original = Utils.clone(cache);
-      //console.log("Tabs.prototype.restore(), step 1");
+      console.log("Tabs.prototype.restore(), step 1");
       //restore_tabs(_dfd, self, cache.positions, cache);
       restore_tabs(self, cache.positions, cache)
       .then(function () {
-        //console.log("Tabs.prototype.restore(), step 2");
+        console.log("Tabs.prototype.restore(), step 2");
         return save_cache(original); // Restore tabs cache
       }).then(function () {
-        //console.log("Tabs.prototype.restore(), step 3");
+        console.log("Tabs.prototype.restore(), step 3");
         //var length = self._cache.history.length;
         //var last_tab_id = self._cache.history[length - 1];
         //last_tab = self._cache.entries[last_tab_id];
@@ -364,8 +364,8 @@ define(function (require) {
         last_tab = original.entries[last_tab_id];
         self.select(last_tab.view_id, last_tab.class_id, last_tab.object_id)
         .then(function () {
-          //console.log("Tabs.prototype.restore(), step 4");
-          //console.log(last_tab);
+          console.log("Tabs.prototype.restore(), step 4");
+          console.log(last_tab);
           self.refresh(last_tab.view_id, last_tab.class_id, last_tab.object_id);
           dfd.resolve();
         });

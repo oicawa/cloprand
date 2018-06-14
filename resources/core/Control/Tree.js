@@ -10,6 +10,7 @@ define(function (require) {
     this._tree = null;
     this._renderers = {};
     this._data = null;
+    this._converter = null;
     //this._data = {
     //  ""     : { "data" : null,   "order" : ["id-1", "id-2", "id-3"] },
     //  "id-1" : { "data" : data_1, "order" : ["id-10", "id-11", "id-11"] },
@@ -53,9 +54,10 @@ define(function (require) {
     console.log("Tree.remove() id:" + id);
   };
 
-  Tree.prototype.init = function(selector) {
+  Tree.prototype.init = function(selector, converter) {
     var dfd = new $.Deferred;
     this._uuid = Uuid.version4();
+    this._converter = converter;
     var html = TEMPLATE.replace(/{{TREE_ID}}/, this._uuid);
     
     this._root = $(selector);
@@ -113,9 +115,9 @@ define(function (require) {
 
   Tree.prototype.add = function(parent_id, items) {
     //var nodes = this.convert(items);
-    var nodes = items;
+    var nodes = items.map(this._converter);
     //debugger;
-    if (!parent_id) {
+    if (is_null_or_undefined(parent_id)) {
       w2ui[this._uuid].add(nodes);
     } else {
       w2ui[this._uuid].add(parent_id, nodes);
@@ -153,7 +155,7 @@ define(function (require) {
   Tree.prototype.update = function(keys) {
   };
 
-  Tree.sample = function(id) {
+  Tree.sample_backup = function(id) {
     var tree = new Tree();
     tree.init(id);
     tree.add(null, [
@@ -170,6 +172,13 @@ define(function (require) {
       { id: 'id-2-1', text: 'Item 2-1', icon: 'fa-star-empty' },
       { id: 'id-2-2', text: 'Item 2-2', icon: 'w2ui-icon-check' }
     ]);
+    tree.refresh();
+  }
+
+  Tree.sample = function(id, class_, converter) {
+    var tree = new Tree();
+    tree.init(id, converter);
+    tree.add(null, class_.object_fields);
     tree.refresh();
   }
 

@@ -12,7 +12,7 @@ define(function (require) {
 '  <div class="exist-list"></div>' +
 '  <div class="added-list"></div>' +
 '  <div class="attach-area">' +
-'    <div class="drop-area" style="width:{{WIDTH}}px;height:{{HEIGHT}}px;">' +
+'    <div class="drop-area" style="display:table;width:{{WIDTH}}px;height:{{HEIGHT}}px;border:dashed 2px gray;border-radius:3px;font-family:Verdana,Arial,sans-serif;font-size:12px;">' +
 '      <div style="display:table-cell;vertical-align:middle;text-align:center;"><span class="fa fa-plus"/> Click here or Drop files.</div>' +
 '    </div>' +
 '  </div>' +
@@ -62,14 +62,6 @@ define(function (require) {
     return "a";
   };
 
-  Files.prototype.get_default_height = function () {
-    return 50;
-  }
-
-  Files.prototype.get_default_width = function () {
-    return 150;
-  }
-
   function create_field(self, selector, field) {
     var root = $(selector);
     
@@ -78,13 +70,11 @@ define(function (require) {
     
     // Create form tags
     var width = self._properties.width;
-    var default_width = self.get_default_width();
-    width = (is_null_or_undefined(width) || width < default_width) ? default_width : width;
+    width = (is_null_or_undefined(width) || width < 150) ? 150 : width;
     self._properties.width = width;
     
     var height = self._properties.height;
-    var default_height = self.get_default_height();
-    height = (is_null_or_undefined(height) || height < default_height) ? default_height : height;
+    height = (is_null_or_undefined(height) || height < 50) ? 50 : height;
     self._properties.height = height;
     
     var html = TEMPLATE.replace(/{{WIDTH}}/, width).replace(/{{HEIGHT}}/, height);
@@ -167,10 +157,9 @@ define(function (require) {
   Files.prototype.item_selector = function () {
     return "div.file-field-item";
   }
-  
-  Files.CSS = "core/Control/Field/Files.css";
+
   Files.prototype.css_path = function() {
-    return Files.CSS;
+    return "core/Control/Field/Files.css";
   }
   
   Files.prototype.init = function(selector, field) {
@@ -251,7 +240,7 @@ define(function (require) {
     return size.toFixed(1) + " " + unit;
   };
   
-  Files.get_count = function (self) {
+  function get_count(self) {
     var current = self._values.current.length;
     var added = Object.keys(self._added).length;
     var removed = Object.keys(self._remove).length;
@@ -265,7 +254,7 @@ define(function (require) {
       this._exist_list.find(tag).css("text-decoration", "none");
       //this._exist_list.find("i").css("display", "inline");
       //this._added_list.find("i").css("display", "inline");
-      var count = Files.get_count(this);
+      var count = get_count(this);
       var attribute = (this._properties.multiple === false && 0 < count) ? "none" : "block";
       this._attach_area.css("display", attribute);
     } else {

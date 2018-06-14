@@ -21,10 +21,9 @@ div.menuview-item {
 }
 div.menuview-item > div {
   transition: background-color 200ms;
-  background-color:#ffffff;
 }
 div.menuview-item > div:hover {
-  background-color:#eeffee;
+  background-color:#ffffff;
 }
 div.menuview-item > div > i {
   width:100px;

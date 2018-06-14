@@ -24,10 +24,3 @@ div.file-field-item > i {
   padding:2px;
   display: none;
 }
-div.drop-area {
-  display:table;
-  border:dashed 2px gray;
-  border-radius:3px;
-  font-family:Verdana,Arial,sans-serif;
-  font-size:12px;
-}
