@@ -159,11 +159,16 @@
         (. table addCell cell)))
     (add-element parent-object table)))
 
+(defn draw-custom-layout!
+  [parent pdf-object]
+  (println "Called draw-custom-layout!"))
+
 (def add-fns {"TextDraw"   draw-text!
               "Phrase"     add-phrase!
               "Paragraph"  add-paragraph!
               "Line"       draw-line!
-              "Table"      add-table!})
+              "Table"      add-table!
+              "Custom"     draw-custom-layout!})
 
 (defn print-font-families
   []
@@ -183,13 +188,23 @@
 (defn generate
   "Generate a PDF file"
   [file data]
-  (let [document     (Document. (. PageSize A4) 20 20 20 20)
-        page-size    (. document getPageSize)
-        writer       (PdfWriter/getInstance document (FileOutputStream. file))
+  (let [page         (if (nil? (data "page"))
+                         { "size" { "width" 210 "height" 295 }}
+                         (data "page"))
+        page-rect    (let [size (page "size")]
+                       (if (nil? size)
+                         (. PageSize A4)
+                         (Rectangle. (size "width") (size "height"))))
+        page-margins (let [margins (page "margins")]
+                       (if (nil? margins)
+                           { "left" 20 "right" 20 "top" 20 "bottom" 20 }
+                           margins))
+        document  (Document. page-rect (page-margins "left") (page-margins "right") (page-margins "top") (page-margins "bottom"))
+        writer    (PdfWriter/getInstance document (FileOutputStream. file))
         ]
     (. document open)
     (let [context-byte (.. writer getDirectContent)
-          graphics-2d  (PdfGraphics2D. context-byte (. page-size getWidth) (. page-size getHeight))
+          graphics-2d  (PdfGraphics2D. context-byte (. page-rect getWidth) (. page-rect getHeight))
           parent       {:object       document
                         :context-byte context-byte
                         :graphics-2d  graphics-2d

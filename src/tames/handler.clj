@@ -165,7 +165,9 @@
   [req]
   (let [relative-path     (get-in req [:route-params :*] nil)
         not-resource?     (. relative-path startsWith "data/")
-        config-resource?  (. relative-path startsWith (format "%s/" (config/site-name)))
+        config-resource?  (and (not (. relative-path endsWith ".js"))
+                               (not (. relative-path endsWith ".css"))
+                               (. relative-path startsWith (format "%s/" (config/site-name))))
         if-modified-since (get-in req [:headers "if-modified-since"] nil)
         ext               (fs/ext relative-path)
         content-type      (content-types (. ext toLowerCase))
@@ -317,7 +319,8 @@
   
   ;; Others (Resources & Public API)
   (GET "/*" req
-    (log/debug "[GET] /* (%s)" (get-in req [:route-params :*] nil))
+    ;(log/debug "[GET] /* (%s)" (get-in req [:route-params :*] nil))
+    (log/info "[GET] /* (%s)" (get-in req [:route-params :*] nil))
     (other-resources req))
   ; TODO Use package name.
   ;(POST "/:package-name/operation/:operator-name/:operation-name" [package-name operator-name operation-name & params]
