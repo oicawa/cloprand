@@ -319,8 +319,7 @@
   
   ;; Others (Resources & Public API)
   (GET "/*" req
-    ;(log/debug "[GET] /* (%s)" (get-in req [:route-params :*] nil))
-    (log/info "[GET] /* (%s)" (get-in req [:route-params :*] nil))
+    (log/debug "[GET] /* (%s)" (get-in req [:route-params :*] nil))
     (other-resources req))
   ; TODO Use package name.
   ;(POST "/:package-name/operation/:operator-name/:operation-name" [package-name operator-name operation-name & params]

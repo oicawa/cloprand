@@ -1,7 +1,8 @@
 (ns tames.generators.pdf
   (:require [tames.operations.fonts :as fonts]
             [clojure.pprint :as pprint]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [tames.log :as log])
   (:import (java.io File FileOutputStream IOException)
            (java.util ArrayList)
            (java.awt Color)
@@ -188,13 +189,14 @@
 (defn generate
   "Generate a PDF file"
   [file data]
+  (log/info "A4 width=%f, height=%f" (.. PageSize A4 getWidth) (.. PageSize A4 getHeight))
   (let [page         (if (nil? (data "page"))
                          { "size" { "width" 210 "height" 295 }}
                          (data "page"))
         page-rect    (let [size (page "size")]
                        (if (nil? size)
                          (. PageSize A4)
-                         (Rectangle. (size "width") (size "height"))))
+                         (Rectangle. (* 2.83 (size "width")) (* 2.83 (size "height")))))
         page-margins (let [margins (page "margins")]
                        (if (nil? margins)
                            { "left" 20 "right" 20 "top" 20 "bottom" 20 }

@@ -2,7 +2,8 @@
   (:require [clojure.data.json :as json]
             [clojure.pprint :as pprint]
             [clojure.string :as string]
-            [ring.util.response :as response])
+            [ring.util.response :as response]
+            [tames.log :as log])
   (:import (java.io File)
            (java.awt Font GraphicsEnvironment)
            (sun.font FontManagerFactory)
@@ -49,6 +50,7 @@
         (let [rest-paths (subvec font-paths 1)
               font-path  (font-paths 0)
               font-value (get-ttf-font-info font-path)]
+          ;(log/info font-path)
           (recur (assoc font-map (font-value "name") font-value) rest-paths)))))
 
 ;(def ttf-font-map (get-ttf-font-map (get-ttf-font-file-paths)))
