@@ -15,7 +15,7 @@
   "application/pdf")
 
 (def directions { "h" BaseFont/IDENTITY_H
-                  "v"   BaseFont/IDENTITY_V })
+                  "v" BaseFont/IDENTITY_V })
 
 (def default-fonts (ref {:hmv  (BaseFont/createFont "HeiseiMin-W3" "UniJIS-UCS2-V" BaseFont/EMBEDDED)
                          :hmh  (BaseFont/createFont "HeiseiMin-W3" "UniJIS-UCS2-H" BaseFont/EMBEDDED)
@@ -98,12 +98,14 @@
 
 (defn draw-line!
   [parent pdf-object]
-  (let [graphics-2d (parent :graphics-2d)]
-    (. graphics-2d drawLine (pdf-object "x1") (pdf-object "y1") (pdf-object "x2") (pdf-object "y2"))))
+  (let [document     (parent :object)
+        context-byte (parent :context-byte)
+        graphics-2d  (PdfGraphics2D. context-byte (. document getWidth) (. document getHeight))]
+    (. graphics-2d drawLine (pdf-object "x1") (pdf-object "y1") (pdf-object "x2") (pdf-object "y2"))
+    (. graphics-2d dispose)))
 
 (defn add-phrase!
   [parent pdf-object]
-  ;(pprint/pprint pdf-object)
   (let [parent-object (parent :object)
         base-font     (let [font-path (fonts/get-font-file-path (pdf-object "font"))]
                         (if (or (nil? font-path) (= font-path ""))
@@ -164,12 +166,19 @@
   [parent pdf-object]
   (println "Called draw-custom-layout!"))
 
+(defn insert-new-page!
+  [parent pdf-object]
+  (let [document (parent :object)
+        cb       (parent :context-byte)]
+    (. document newPage)))
+
 (def add-fns {"TextDraw"   draw-text!
               "Phrase"     add-phrase!
               "Paragraph"  add-paragraph!
               "Line"       draw-line!
               "Table"      add-table!
-              "Custom"     draw-custom-layout!})
+              "Custom"     draw-custom-layout!
+              "NewPage"    insert-new-page!})
 
 (defn print-font-families
   []
@@ -189,14 +198,13 @@
 (defn generate
   "Generate a PDF file"
   [file data]
-  (log/info "A4 width=%f, height=%f" (.. PageSize A4 getWidth) (.. PageSize A4 getHeight))
   (let [page         (if (nil? (data "page"))
-                         { "size" { "width" 210 "height" 295 }}
+                         { "size" { "width" 210 "height" 297 }}
                          (data "page"))
         page-rect    (let [size (page "size")]
                        (if (nil? size)
-                         (. PageSize A4)
-                         (Rectangle. (* 2.83 (size "width")) (* 2.83 (size "height")))))
+                           (. PageSize A4)
+                           (Rectangle. (* 2.83 (size "width")) (* 2.83 (size "height")))))
         page-margins (let [margins (page "margins")]
                        (if (nil? margins)
                            { "left" 20 "right" 20 "top" 20 "bottom" 20 }
@@ -206,14 +214,11 @@
         ]
     (. document open)
     (let [context-byte (.. writer getDirectContent)
-          graphics-2d  (PdfGraphics2D. context-byte (. page-rect getWidth) (. page-rect getHeight))
           parent       {:object       document
                         :context-byte context-byte
-                        :graphics-2d  graphics-2d
                         :font         (@default-fonts :hkgh)
                         :font-size    (float 10.0)}]
-      (add-objects parent (data "pdf_objects"))
-      (. graphics-2d dispose))
+      (add-objects parent (data "pdf_objects")))
     (. document close)
     (. writer close)))
 
