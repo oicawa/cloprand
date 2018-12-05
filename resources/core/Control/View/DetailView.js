@@ -247,6 +247,7 @@ define(function (require) {
     .done(function (data) {
       self._object = data;
       self._detail.data(self._object);
+      self.refresh();
     });
   }
   
